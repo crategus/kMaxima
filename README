@@ -1,0 +1,17 @@
+Maxima ist ein mächtiges Computeralgebrasystem, das in Lisp programmiert und
+unter der GNU General Public License (GPL) veröffentlicht ist. Das Projekt hat
+die Webseite http://sourceforge.net/projects/maxima/. Dort kann der Quelltext
+eingesehen werden.
+
+Maxima wird seit den 60er Jahren entwickelt. Dieses Projekt will schrittweise
+den Aufbau und die Algorithmen von Maxima zeigen. Dazu werden die Algorithmen
+zunächst stark vereinfacht und vieles wird fortgelassen, um die wesentlichen
+Elemente von Maxima zu erkennen. Im Unterschied zum Original erhalten die
+Funktionen und Variablen oft eine andere Bezeichnung, um eine konsistentere
+Nomenklatur zu erhalten.
+
+Das Projekt ist im Entstehen und wird schrittweise ergänzt. Meine Email-Adresse
+bei Sourceforge.net ist crategus at users.sourceforge.net.
+
+Dr. Dieter Kaiser, 29.04.2011
+
