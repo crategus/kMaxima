@@ -6,7 +6,7 @@
 @c Date     : 05.03.2011
 @c Revision : 16.04.2011
 @c 
-@c Copyright 2011 by Dr. Dieter Kaiser
+@c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @menu
