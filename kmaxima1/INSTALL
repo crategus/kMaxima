@@ -1,0 +1,31 @@
+Die Datei kmaxima1.lisp enthält den vollständigen Programmcode
+des Kapitels "Grundgerüst" der Dokumentation "Aufbau und Programmierung
+des Computeralgebrasystems Maxima".  Die Dokumentation ist im Verzeichnis 
+/kmaxima/doc enthalten.
+
+Die Datei kann in einer Lisp-Sitzung von der Kommandozeile geladen werden.
+Das folgende Beispiel zeigt, wie das Programm in eine Lisp-Sitzung geladen
+wird.  Dann wird zum Package :kmaxima gewechselt und kmaxima mit dem
+Kommando (run) gestartet.  Zuletzt wird die kmaxima-Sitzung mit dem Kommando
+(bye) beendet.
+
+   This is SBCL 1.0.45, an implementation of ANSI Common Lisp.
+   More information about SBCL is available at <http://www.sbcl.org/>.
+
+   SBCL is free software, provided as is, with absolutely no warranty.
+   It is mostly in the public domain; some portions are provided under
+   BSD-style licenses.  See the CREDITS and COPYING files in the
+   distribution for more information.
+   * (load "kmaxima1.lisp")
+   T
+   
+   * (in-package :kmaxima)
+   #<PACKAGE "KMAXIMA">
+
+   * (run)
+   kMaxima 0.1
+   using Lisp SBCL 1.0.45
+   Distributed under the GNU Public License. See the file COPYING.
+   Dedicated to the memory of William Schelter.
+
+   KMAXIMA> (bye)

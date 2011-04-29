@@ -1,0 +1,17 @@
+Nach dem Wechsel in das Verzeichnis, das die Dokumentation enthält,
+kann mit dem Kommando
+
+   perl texi2html --split_chapter --lang=de kmaxima.texi
+   
+eine Html-Version der Dokumentation erzeugt werden.  In dem Verzeichnis 
+wird eine Unterverzeichnis /kmaxima erstellt, das die Html-Dateien
+aufnimmt.
+
+Mit dem Kommando 
+
+  texi2pdf kmaxima.texi
+  
+kann eine Pdf-Version der Dokumentation erstellt werden.
+
+Vorausgesetzt wird, dass die notwendige Software auf dem Rechner
+installiert ist.

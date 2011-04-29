@@ -1,0 +1,18 @@
+Der Code wird mit dem Lisp-Compiler SBCL entwickelt.  Diese Installation
+ist mit SBCL getestet.  Für ein anderes Lisp muss die Installation
+möglicherweise entsprechend angepasst werden. 
+
+Mit dem Kommando
+
+   (load "kmaxima")
+   
+auf der Lisp-Kommandozeile von SBCL wird der Quellcode geladen und kompiliert.
+kmaxima kann dann mit dem Kommando
+
+   (run)
+   
+von der Lisp-Kommandozeile gestartet werden.  Mit dem kMaxima-Kommando
+
+   quit();
+   
+wird kMaxima beendet und zu der Lisp-Sitzung zurückgekehrt.
