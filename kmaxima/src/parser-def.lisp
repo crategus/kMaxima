@@ -1,0 +1,130 @@
+;;;; Created on 2011-01-29 00:51:57
+
+(in-package :kmaxima)
+
+;;; ----------------------------------------------------------------------------
+
+(defun inherit-propl (op-to op-from getl)
+  (let ((propl (getpropl op-from getl)))
+    (if propl
+        (progn
+          (remprop op-to (car propl))
+          (putprop op-to (cadr propl) (car propl)))
+        (merror "has no ~a properties. ~a ~a" getl op-from 'wrng-type-arg))))
+
+(defun make-parser-fun-def (op p bvl body)
+  (if (not (consp op))
+      `(,(symbolconc 'def- p '-fun) ,op ,bvl ,(car bvl) . ,body)
+      `(progn
+         ,(make-parser-fun-def (car op) p bvl body)
+         ,@(mapcar #'(lambda (x)
+                       `(inherit-propl ',x
+                                       ',(car op)
+                                       (,(symbolconc p '-propl))))
+                   (cdr op)))))
+
+;;; ----------------------------------------------------------------------------
+
+(defvar *symbols-defined* nil)
+(defvar *maxima-operators* nil)
+
+(defmacro define-initial-symbols (&rest l)
+  (let ((*symbols-defined* nil)
+        (*maxima-operators* nil))
+    (define-initial-symbols* l)
+    `(progn
+      (setq *symbols-defined* (copy-list ',*symbols-defined*))
+      (setq *maxima-operators* (subst () () ',*maxima-operators*)))))
+
+(defun define-initial-symbols* (l)
+  (setq *symbols-defined*
+        (sort (copy-list l)
+              #'(lambda (x y)
+                  (< (length (exploden x)) (length (exploden y))))))
+  (setq *maxima-operators* (cstrsetup *symbols-defined*)))
+
+(defun define-symbol (x)
+  (define-initial-symbols* (cons x *symbols-defined*))
+  (symbolconc '$ (maybe-invert-string x)))
+
+(defun undefine-symbol (opr)
+  (define-initial-symbols* (delete opr *symbols-defined* :test #'equal)))
+
+(defun cstrsetup (arg)
+  (labels ((add2cstr (x tree ans)
+             (add2cstr1 (nconc (exploden x) (cons (list 'ans ans) nil)) tree))
+           (add2cstr1 (x tree)
+             (cond ((null tree) x)
+                   ((atom (car tree))
+                    (cond ((equal (car tree) (car x))
+                           (rplacd tree (add2cstr1 (cdr x) (cdr tree))))
+                          (t
+                           (list tree (cond ((atom (car x)) x)
+                                            ((equal (caar x) 'ans) (car x))
+                                            (t x))))))
+                   ((equal (caar tree) (car x))
+                    (rplacd (car tree) (add2cstr1 (cdr x) (cdar tree)))
+                    tree)
+                   ((null (cdr tree))
+                    (rplacd tree (list x))
+                    tree)
+                   (t
+                    (rplacd tree (add2cstr1 x (cdr tree)))
+                    tree))))
+    (do ((arg arg (cdr arg))
+         (tree nil))
+        ((null arg) (list* () '(ans ()) tree))
+      (if (atom (car arg))
+          (setq tree 
+                (add2cstr (car arg)
+                          tree
+                          (symbolconc '$
+                                      (if (stringp (car arg))
+                                          (maybe-invert-string (car arg))
+                                          (car arg)))))
+          (setq tree (add2cstr (caar arg) tree (cadar arg)))))))
+
+;;; ----------------------------------------------------------------------------
+
+;; op and opr properties
+
+(defvar *opr-table* (make-hash-table :test #'equal))
+
+(defun getopr0 (x)
+  (or (getprop x 'opr)
+      (and (stringp x)
+           (gethash x *opr-table*))))
+
+(defun getopr (x)
+  (or (getopr0 x)
+      x))
+
+(defun putopr (x y)
+  (or (and (symbolp x) (setf (get x 'opr) y))
+      (and (stringp x) (setf (gethash x *opr-table*) y))))
+
+(defun remopr (x)
+  (or (and (symbolp x) (remprop x 'opr))
+      (and (stringp x) (remhash x *opr-table*))))
+
+(defun getop (x)
+  (or (getprop x 'op) x))
+
+(mapc #'(lambda (x)
+          (putprop (car x) (cadr x) 'op)
+          (putopr (cadr x) (car x)))
+      '((mplus "+")      (mminus "-")    (mtimes "*")
+        (mexpt "**")     (mexpt "^")     (mnctimes ".")
+        (rat "/")        (mquotient "/") (mncexpt "^^")
+        (mequal "=")     (mgreaterp ">") (mlessp "<")
+        (mleqp "<=")     (mgeqp ">=")    (mnotequal "#")
+        (mand "and")     (mor "or")      (mnot "not")
+        (msetq ":")      (mdefine ":=")  (mdefmacro "::=")
+        (mquote "'")     (mlist "[")     (mset "::")
+        (mfactorial "!") (marrow "-->")  (mprogn "(")
+        (mcond "if")))
+
+(mapc #'(lambda (x) (putprop (car x) (cadr x) 'op))
+      '((mqapply $subvar) (bigfloat $bfloat)))
+
+;;; ----------------------------------------------------------------------------
