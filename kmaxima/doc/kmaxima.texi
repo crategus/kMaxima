@@ -1,0 +1,110 @@
+\input texinfo
+@c -----------------------------------------------------------------------------
+@c File     : kmaxima.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 05.03.2011
+@c Revision : 16.04.2011
+@c 
+@c Copyright 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@ifnottex
+@documentencoding ISO-8859-1
+@end ifnottex
+
+@include macros.texi
+
+@setfilename maxima.info
+@synindex vr fn
+
+@settitle Maxima intern
+
+@setchapternewpage odd
+@ifinfo
+Das ist ein Texinfo Maxima Manual
+
+Copyright 2011 by Dr. Dieter Kaiser
+
+@format
+START-INFO-DIR-ENTRY
+* Maxima: (maxima).     Ein Computer Algebra System.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@titlepage
+@sp 10
+@center @titlefont{Aufbau und Programmierung}
+@sp 1
+@center @titlefont{des Computeralgebrasystem}
+@sp 1
+@center @titlefont{Maxima}
+@sp 1
+@center Version 1.0
+@page
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@summarycontents
+@contents
+
+@ifnottex
+@node Top, Grundger@"ust, (dir), (dir)
+@top
+@end ifnottex
+
+@menu
+* Einf@"uhrung::
+* Grundger@"ust::
+* Hilfsfunktionen::
+* Parser::
+* Lineare Anzeige::
+* Hauptschleife::
+* kmaxima.lisp::
+* Quelltext::
+* Index der Funktionen und Variablen::
+@end menu
+
+@node Einf@"uhrung, Grundger@"ust, Top, Top
+@chapter Einf@"uhrung
+@include Einfuehrung.texi
+
+@node Grundger@"ust, Hilfsfunktionen, Einf@"uhrung, Top
+@chapter Grundger@"ust
+@include Grundgeruest.texi
+
+@node Hilfsfunktionen, Parser, Grundger@"ust, Top
+@chapter Hilfsfunktionen
+@include Hilfsfunktionen.texi
+
+@node Parser, Lineare Anzeige, Hilfsfunktionen, Top
+@chapter Parser
+@include Parser.texi
+
+@node Lineare Anzeige, Hauptschleife, Parser, Top
+@chapter Lineare Anzeige
+@include LDisplay.texi
+
+@node Hauptschleife, kmaxima.lisp, Lineare Anzeige, Top
+@chapter Hauptschleife
+@include Hauptschleife.texi
+
+@node kmaxima.lisp, Quelltext, Hauptschleife, Top
+@appendix kmaxima.lisp
+@include Quelltext1.texi
+
+@node Quelltext, Index der Funktionen und Variablen, kmaxima.lisp, Top
+@appendix Quelltext
+@include Quelltext2.texi
+
+@node Index der Funktionen und Variablen, , Quelltext, Top
+@appendix Index der Funktionen und Variablen
+@printindex fn
+
+@bye
+
+@c --- End of file kmaxima.texi ------------------------------------------------
+

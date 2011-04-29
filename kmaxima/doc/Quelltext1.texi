@@ -1,0 +1,27 @@
+@c -----------------------------------------------------------------------------
+@c File     : Quelltext1.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 28.03.2011
+@c Revision : 17.04.2011
+@c 
+@c Copyright 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+Der folgende Quelltext enth@"alt die Makros, Funktionen und Variablen, die in
+@ref{Grundger@"ust} beschrieben werden.  Der Code ist mit dem Lisp SBCL
+getestet.  Nur die Funktion @code{bye} ist abh@"angig von dem verwendeten Lisp.
+Hier ist eine Implementation eingef@"ugt, die f@"ur verschiedene Lisp-Dialekte
+verallgemeinert ist.
+
+@iftex
+@smallformat
+@end iftex
+@verbatiminclude ../kmaxima.lisp
+@iftex
+@end smallformat
+@end iftex
+
+@c --- End of File Quelltext1.texi ---------------------------------------------
+

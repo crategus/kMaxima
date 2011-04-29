@@ -1,0 +1,31 @@
+@c -----------------------------------------------------------------------------
+@c File     : Einfuehrung.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 05.03.2011
+@c Revision : 05.03.2011
+@c 
+@c Copyright 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+Maxima ist ein m@"achtiges Computeralgebrasystem, das in Lisp programmiert
+und unter der GNU General Public License (GPL) ver@"offentlicht ist.  Das
+Projekt hat die Webseite @url{http://sourceforge.net/projects/maxima/}.  Dort
+kann der Quelltext eingesehen werden.
+
+Maxima wird seit den 60er Jahren entwickelt.  Dieses Dokument will schrittweise
+den Aufbau und die Algorithmen von Maxima zeigen.  Dazu werden die Algorithmen
+zun@"achst stark vereinfacht und vieles wird fortgelassen, um die wesentlichen
+Elemente von Maxima zu erkennen.  Im Unterschied zum Original erhalten die
+Funktionen und Variablen oft eine andere Bezeichnung, um eine konsistentere
+Nomenklatur zu erhalten.
+
+Die Dokumentation ist im Entstehen und wird schrittweise erg@"anzt.  Meine
+Email-Adresse bei Sourceforge.net ist 
+@url{mailto:crategus@@users.sourceforge.net,,crategus at users.sourceforge.net}.
+
+Dr. Dieter Kaiser, 05.03.2011
+
+@c --- End of file Einfuehrung.texi
+

@@ -1,0 +1,746 @@
+@c -----------------------------------------------------------------------------
+@c File     : Hilfsfunktionen.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 16.04.2011
+@c Revision : 16.04.2011
+@c 
+@c Copyright 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@menu
+* Konvertierung zwischen Gross- und Kleinschreibung::
+* Zerlegung von Symbolen und Zeichenketten in Listen::
+* Alias und Reversealias::
+* Verb- und Substantivform::
+* Vergleiche Ausdr@"ucke::
+* Weitere Hilfsfunktionen::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Hilfsfunktionen, Hilfsfunktionen
+@section Konvertierung zwischen Gro@ss{}- und Kleinschreibung
+@c -----------------------------------------------------------------------------
+
+Im Gegensatz zu Lisp unterscheidet kMaxima Gro@ss{}- und Kleinschreibung.  Dabei
+besteht die Konvention, dass einem kMaxima-Bezeichner der klein geschrieben ist,
+einem gro@ss{} geschriebenen Lisp-Bezeichner entspricht.  Umgekehrt entspricht
+einem gro@ss{} geschriebenen kMaxima-Bezeichner ein klein geschriebener
+Lisp-Bezeichner.  Bezeichner in gemischter Gro@ss{}- und Kleinschreibung werden
+nicht konvertiert.  Diese Konventionen werden von den Funktionen
+@code{print-invert-case}, @code{maybe-invert-string} und
+@code{intern-invert-case} implementiert.
+
+@findex print-invert-case
+
+Die folgende Implementierung der Funktion @code{print-invert-case} h@"angt vom
+verwendeten Lisp ab.  Hier wird die Implementierung f@"ur SBCL gezeigt.  Das
+Argument @code{sym} muss ein Symbol sein.  Die R@"uckgabe der Funktion ist 
+eine Zeichenkette.
+
+@verbatim
+(let ((local-table (copy-readtable nil)))
+  (setf (readtable-case local-table) :invert)
+  (defun print-invert-case (sym)
+    (let ((*readtable* local-table)
+          (*print-case* :upcase))
+      (princ-to-string sym))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Die Beispiele zeigen die Konvertierung f@"ur klein- und
+gro@ss{}geschriebene Symbole sowie Symbole in gemischer Schreibweise.
+
+@example
+* (print-invert-case '|abc|)
+"ABC"
+* (print-invert-case '|ABC|)
+"abc"
+* (print-invert-case '|aBc|)
+"aBc"
+@end example
+
+@findex maybe-invert-string
+
+@noindent
+Die Funktion @code{maybe-invert-string} hat dieselbe Aufgabe wie die Funktion
+@code{print-invert-case}.  Die Funktion @code{maybe-invert-string} erwartet
+jedoch eine Zeichenkette @code{str} als Argument.  Die R@"uckgabe ist wieder
+eine Zeichenkette.
+
+@verbatim
+(defun maybe-invert-string (str)
+  (let ((all-upper t)
+        (all-lower t)
+        (len (length str)))
+    (dotimes (i len)
+      (let ((ch (char str i)))
+        (when (both-case-p ch)
+          (if (upper-case-p ch)
+              (setq all-lower nil)
+              (setq all-upper nil)))))
+    (cond (all-upper
+            (string-downcase str))
+          (all-lower
+           (string-upcase str))
+          (t
+           str))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Das sind dieselben Beispiele wie oben f@"ur eine Zeichenkette als
+Argument.
+
+@example
+* (maybe-invert-string "abc")
+"ABC"
+* (maybe-invert-string "ABC")
+"abc"
+* (maybe-invert-string "aBc")
+"aBc"
+@end example
+
+@findex intern-invert-case
+
+@noindent
+Zuletzt wird die Funktion @code{intern-invert-case} eingef@"uhrt.  Diese
+erwartet wieder eine Zeichenkette @code{str} als Argument.  Die Funktion ruft
+die Funktion @code{maybe-invert-case} auf.  Im Unterschied zur Funktion
+@code{maybe-invert-case} ist die R@"uckgabe ein Symbol, das in das aktuelle
+Package geschrieben wird.
+
+@verbatim
+(defun intern-invert-case (str)
+  (intern (maybe-invert-string str) :kmaxima))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Zeichenketten werden in ein Symbol umgewandelt und in das
+Package geschrieben.
+
+@example
+* (intern-invert-case "abc")
+ABC
+:INTERNAL
+* (intern-invert-case "aBc")
+|aBc|
+:INTERNAL
+@end example
+
+@c -----------------------------------------------------------------------------
+@node Zerlegung von Symbolen und Zeichenketten in Listen, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Hilfsfunktionen
+@section Zerlegung von Symbolen und Zeichenketten in Listen
+@c -----------------------------------------------------------------------------
+
+@findex exploden
+
+H@"aufig werden Zahlen, Symbole oder Zeichenketten als eine Liste ihrer
+Zeichen dargestellt.  Dies wird von der Funktion @code{exploden} geleistet.
+Die Funktion enth@"alt Algorithmen f@"ur die Zerlegung von Symbolen, 
+Gleitkommazahlen und ganzen Zahlen.  Alle anderen Argumente der Funktion
+@code{exploden} werden mit der Funktion @code{format} in eine Zeichenkette
+umgewandelt und dann in eine Liste zerlegt.
+
+@vindex $fpprintprec
+@vindex *maxfpprintprec*
+
+Der Nutzer legt mit der Optionsvariablen @code{$fpprintprec} die Anzahl der
+auszugebenen Stellen einer Gleitkommazahl fest.  Die globale Variable
+@code{*maxfpprintprec*} enth@"alt die maximale Anzahlen der Stellen einer
+Gleitkommazahl, die angezeigt werden k@"onnen.  Hat die Optionsvariable den Wert
+@code{0} oder ist der Wert gr@"o@ss{}er als die maximal m@"ogliche Anzahl an
+Stellen, wird f@"ur die Umwandlung in eine Zeichenkette die Anzahl der Stellen
+in @code{*maxfpprintprec*} verwendet.
+
+@verbatim
+(defmvar $fpprintprec 0)
+(defvar *maxfpprintprec* (ceiling (log (expt 2 (float-digits 1.0d0)) 10.0)))
+@end verbatim
+
+@verbatim
+(defun exploden (sym)
+  (declare (special *maxfpprintprec* $fpprintprec))
+  (let (str)
+    (cond ((symbolp sym)
+           (setq str (print-invert-case sym)))
+          ((floatp sym)
+           (let ((a (abs sym))
+                 (printprec (if (or (= $fpprintprec 0)
+                                    (> $fpprintprec *maxfpprintprec*))
+                                *maxfpprintprec*
+                                $fpprintprec)))
+             (multiple-value-bind (form width)
+               (cond ((or (zerop a) (<= 1 a 1e7))
+                      (values "~vf" (+ 1 printprec)))
+                     ((<= 0.001 a 1)
+                      (values "~vf" (+ printprec
+                                       (cond ((< a 0.01) 3)
+                                             ((< a 0.1) 2)
+                                             (t 1)))))
+                     (t
+                      (values "~ve" (+ 5 printprec))))
+               (setq str (format nil form width sym)))
+             (setq str (string-trim " " str))))
+          ((integerp sym)
+           (let ((leading-digit (if (> *print-base* 10) #\0 )))
+             (setq str (format nil "~A" sym))
+             (setq str (coerce str 'list))
+             (if (and leading-digit
+                      (not (digit-char-p (car str) 10)))
+                 (setq str (cons leading-digit str)))
+             (return-from exploden str)))
+          (t (setq str (format nil "~A" sym))))
+    (coerce str 'list)))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Umwandlung von ganzen Zahlen, Gleitkommazahlen, Symbolen und
+Zeichenketten in eine Liste von Zeichen.
+
+@example
+* (exploden 123)
+(#\1 #\2 #\3)
+* (exploden 123.45)
+(#\1 #\2 #\3 #\. #\4 #\5)
+* (exploden 'symbol)
+(#\s #\y #\m #\b #\o #\l)
+* (exploden "String")
+(#\S #\t #\r #\i #\n #\g)
+@end example
+
+@findex implode
+
+@noindent
+Die Funktion @code{implode} leistet die zu der Funktion @code{exploden}
+umgekehrte Aufgabe.  Eine Liste mit Zeichen wird zu einem Symbol
+zusammengesetzt, das in das aktuelle Package geschrieben wird.
+
+@verbatim
+(let ((string-for-implode
+       (make-array 20 :fill-pointer 0 
+                      :adjustable t 
+                      :element-type '#.(array-element-type "a"))))
+  (defun implode (lis)
+    (let ((ar string-for-implode)
+          (len (length lis)))
+      (unless (> (array-total-size ar) len)
+        (setq ar (adjust-array ar (+ len 20))))
+      (setf (fill-pointer ar) len)
+      (loop
+        for v in lis
+        for i below len
+        do
+        (setf (aref ar i)
+              (cond ((characterp v) v)
+                    ((symbolp v) (char (symbol-name v) 0))
+                    ((numberp v) (code-char v)))))
+      (intern-invert-case ar))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Listen aus Zeichen werden in ein Symbol umgewandelt und in das
+aktuelle Package geschrieben.
+
+@example
+* (implode '(#\1 #\2 #\3))
+|123|
+NIL
+* (implode '(#\1 #\2 #\3 #\. #\4 #\5))
+|123.45|
+NIL
+* (implode '(#\s #\y #\m #\b #\o #\l))
+SYMBOL
+:INHERITED
+* (implode '(#\S #\t #\r #\i #\n #\g))
+|String|
+NIL
+@end example
+
+@findex symbolconc
+
+@noindent
+Zuletzt eine Funktion, die Zahlen, Symbole, Zeichenkette und sonstige
+Argumente in ein Symbol umwandelt.  Die Funktion akzeptiert eine
+beliebige Anzahl an Argumenten.  Das Symbol wird dem aktuellen Package
+hinzugef@"ugt.
+
+@verbatim
+(defun symbolconc (&rest syms)
+  (intern (apply #'concatenate 'string
+                 (mapcar #'(lambda (sym)
+                             (cond ((floatp sym)
+                                    (format nil "~S" sym))
+                                   ((integerp sym)
+                                    (format nil "~D" sym))
+                                   ((symbolp sym)
+                                    (symbol-name sym))
+                                   (t sym)))
+                         syms))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Zahlen, Symbole und Zeichenketten werden zu einem Symbol
+zusammengesetzt.
+
+@example
+* (symbolconc 1 'a "string" '+ 10.0)
+|1Astring+10.0|
+NIL
+@end example
+
+@c -----------------------------------------------------------------------------
+@node Alias und Reversealias, Verb- und Substantivform, Zerlegung von Symbolen und Zeichenketten in Listen, Hilfsfunktionen
+@section Alias und Reversealias
+@c -----------------------------------------------------------------------------
+
+@findex getalias
+
+Der Parser liest Symbole von der Eingabe.  Einem Symbole kann ein
+Alias-Name zugeordnet werden.  Der Alias-Name wird zum Indikator @code{alias}
+auf der Eigenschaftsliste zum Symbol abgelegt.  Die Funktion @code{getalias}
+pr@"uft, ob ein Alias-Name vorliegt und gibt diesen gegebenenfalls zur@"uck.
+Ansonsten wird das Argument der Funktion zur@"uckgegeben.  Der Fall des
+Symbols @code{$false} muss separat gepr@"uft werden.  Es ist nicht m@"oglich
+den Alias @code{nil} f@"ur das Symbol @code{$false} zu nutzen, da die
+Funkion @code{getprop} in diesem Fall den R@"uckgabewert @code{nil} hat, was
+ein signalisieren w@"urde, dass kein Alias gefunden wurde.
+
+@verbatim
+(defun getalias (x)
+  (cond ((getprop x 'alias))
+        ((eq x '$false) nil)
+        (t x)))
+@end verbatim
+
+F@"ur das Symbol @code{$true} legen wir @code{T} zum Indikator @code{alias} auf
+der Eigenschaftsliste ab.
+
+@verbatim
+(defprop $true T alias)
+@end verbatim
+
+@noindent
+@b{Beispiel:}
+Wenn kMaxima die Zeichenfolge @code{sin} von der Eingabe liest, wird diese
+zun@"achst als ein Maxima-Token interpretiert und in die interne Darstellung
+@code{$sin} umgewandelt.  @code{$sin} steht nun f@"ur die Sinusfunktion, die
+nicht als Verbfunktion sondern als Substantivfunktion implementiert ist.  Zum
+Symbol @code{$sin} ist daher die Substantivform @code{%sin} als Alias abgelegt.
+Die Funktion @code{getalias} gibt diese Substantivform zur@"uck.
+
+@example
+* (defprop $sin %sin alias)
+%SIN
+* (getalias '$sin)
+%SIN
+@end example
+
+@noindent
+Die Aliase der Symbole @code{$true} und @code{$false} sind @code{T} und
+@code{NIL}.
+
+@example
+* (getalias '$true)
+T
+* (getalias '$false)
+NIL
+@end example
+
+@findex amperchk
+
+@noindent
+Die Funktion @code{amperchk} akzeptiert Symbole und Zeichenketten als Argument.
+Ein Symbol wird sofort zur@"uckgegeben.  Ist das Argument eine Zeichenkette wird
+mit der Funktion @code{getopr} gepr@"uft, ob zu dieser Zeichenkette ein Symbol
+vorhanden ist, dass einen Operator bezeichnet.  Ist dies nicht der Fall, wird
+die Zeichenkette zu einem Maxima-Symbol umgewandelt.  Das ist ein Lisp-Symbol
+dem ein Dollarzeichen vorangestellt wird.  Die Funktion @code{getopr} und
+verwandte Funktionen werden sp@"ater erl@"autert.
+
+@verbatim
+(defun amperchk (name)
+  (cond ((symbolp name) name)
+        ((stringp name)
+         (getalias (or (getopr0 name)
+                       (implode (cons #\$ (coerce name 'list))))))))
+@end verbatim
+
+@noindent
+@b{Beispiel:}
+Die Zeichenkette "+" ist der Name des Operators f@"ur die Addition.  Das Symbol
+das die Addition bezeichnet ist @code{mplus}.  Die Zeichenkette "f" wird in
+ein Maxima-Symbol @code{$f} umgewandelt.
+
+@example
+* (amperchk "+")
+MPLUS
+* (amperchk "f")
+$F
+@end example
+
+@vindex $aliases
+@findex $alias
+@findex alias
+@findex remalias
+
+@verbatim
+(defmvar $aliases '((mlist simp)))
+
+(defmspec $alias (form)
+  (if (oddp (length (setq form (cdr form))))
+      (merror "alias: takes an even number of arguments."))
+  (do ((l nil (cons (alias (pop form) (pop form)) l)))
+      ((null form)
+       `((mlist simp),@(nreverse l)))))
+
+(defun alias (x y)
+  (unless (and (symbolp x) (symbolp y))
+    (merror "alias: the arguments must be symbolic names: found ~M and ~M"
+            x y))
+  (cond ((eq x y) y)
+        ((get x 'reversealias)
+         (if (not (eq x y))
+             (merror "alias: ~M already is aliased." x)))
+        (t
+         (putprop x y'alias)
+         (putprop y x 'reversealias)
+         (add2lnc y $aliases)
+         y)))
+
+(defun remalias (x &optional remp)
+  (let ((y (and (or remp
+                    (member x (cdr $aliases) :test #'equal))
+                (getprop x 'reversealias))))
+    (cond ((and y (eq x '%derivative))
+           (remprop x 'reversealias)
+           (setf $aliases (delete x $aliases :count 1 :test #'eq))
+           (remprop '$diff 'alias) '$diff)
+          (y
+           (remprop x 'reversealias)
+           (remprop x 'noun)
+           (setf $aliases (delete x $aliases :count 1 :test #'eq))
+           (remprop (setq x y) 'alias) (remprop x 'verb) x))))
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Verb- und Substantivform, Vergleiche Ausdr@"ucke, Alias und Reversealias, Hilfsfunktionen
+@section Verb- und Substantivform
+@c -----------------------------------------------------------------------------
+
+@findex $nounify
+@findex $verbify
+
+@noindent
+Die Funktionen @code{$nounify} und @code{$verbify} implementieren den
+Mechanismus der Verb- und Substantivformen von Symbolen.  Die Verbform eines
+Symbols ist ein Symbol dem ein Dollarzeichen vorangestellt ist.  Die 
+Substantivform ist ein Symbol dem ein Prozentzeichen vorangestellt ist.  Zum
+Beispiel hat die Sinusfunktion die Verbform @code{$sin} und die Substantivform
+@code{%sin}.
+
+Die Funktion @code{$nounify} ist als eine Maxima-Nutzerfunktion implementiert,
+die als Argument ein Symbol oder eine Zeichenkette akzeptiert.  Die R@"uckgabe
+ist das Symbol in der Substantivform.  Zun@"achst wird mit der Funktion 
+@code{amperchk} ein String in ein Maxima-Symbol umgewandelt.  Das ist ein
+Symbol mit einem vorangestelltem Dollarzeichen.  Ausnahme sind Zeichenketten,
+die der Name eines Operators sind.  Zum Beispiel ist die Zeichenkette @code{"+"}
+der Name des Additionsoperators @code{+}.  In diesem Fall wird die Zeichenkette
+durch das Symbol f@"ur den Operator ersetzt, was f@"ur die Addition das Symbol
+@code{mplus} ist.
+
+Nun pr@"uft die Routine mit @code{getprop x 'verb}, ob das Symbol bereits eine
+Substantivform hat, die auf der Eigenschaftsliste der Verform des Symbols
+abgelegt ist.  Als n@"achstes wird mit @code{getprop 'x 'noun} gepr@"uft, ob
+das Symbol als eine Substantivform deklariert ist.  Treffen die beiden
+vorhergehenden Tests nicht zu, wird das zur Verbform geh@"orende Symbol in der
+Substantivform erzeugt und die Verb- und Substantivformen werden auf der
+Eigenschaftsliste abgelegt.  Ist das Argument bereits ein Symbol in der
+Substantivform, wird dieses zur@"uckgegeben.
+
+@verbatim
+(defun $nounify (x)
+  (if (not (or (symbolp x) (stringp x)))
+      (merror "nounify: argument must be a symbol or a string."))
+  (setq x (amperchk x))
+  (cond ((getprop x 'verb))
+        ((getprop x 'noun) x)
+        (t
+         (let* ((y (exploden x))
+                (u (eql (car y) #\$)))
+           (cond ((or u (not (eql (car y) #\%)))
+                  (setq y (implode (cons #\% (if u (cdr y) y))))
+                  (putprop y x 'noun)
+                  (putprop x y 'verb))
+                 (t x))))))
+@end verbatim
+
+@noindent
+@b{Beispiele:}
+@code{$nounify} wird mit der Zeichenkette @code{"sin"} aufgerufen.  Die
+R@"uckgabe ist das Symbol @code{%sin}, das die Substantivform bezeichnet.  Auf
+der Eigenschaftsliste wird zum Symbol @code{$sin} in der Verbform zum
+Indikator @code{verb} das Symbol in der Substantivform @code{%sin} abgelegt.
+Umgekehrt wird zum Symbol @code{%sin} die Verbform @code{$sin} zum Indikator
+@code{noun} auf der Eigenschaftliste eingetragen.
+
+@example
+* ($nounify "sin")
+%SIN
+* (symbol-plist '$sin)
+(VERB %SIN)
+* (symbol-plist '%sin)
+(NOUN $SIN)
+@end example
+
+@noindent
+In diesem Beispiel wird @code{$nounify} mit dem Symbol @code{$cos} als
+Argument aufgerufen.  Wie im obigen Beispiel wird die Substantivform
+zur@"uckgegeben
+
+@example
+* ($nounify '$cos)
+%COS
+* (symbol-plist '$cos)
+(VERB %COS)
+* (symbol-plist '%cos)
+(NOUN $COS)
+@end example
+
+Die Funktion @code{$verbify} gibt das zu einem Symbol oder einer Zeichenkette
+geh@"orende Symbol in der Verbform zur@"uck.  F@"ur den Fall, dass das Argument 
+ein Symbol in der Substantivform ist, wird die Funktion @code{$nounify}
+mit der Verform des Argumentes aufgefrufen, um die Verb- und
+Substantivformen in die Eigenschaftsliste einzutragen.
+
+@verbatim
+(defun $verbify (x)
+  (if (not (or (symbolp x) (stringp x)))
+      (merror "verbify: argument must be a symbol or a string."))
+  (setq x (amperchk x))
+  (cond ((getprop x 'noun))
+        ((eq x '||) x)
+        ((and (char= (char (symbol-name x) 0) #\%)
+              (prog2
+                ($nounify (implode (cons #\$ (cdr (exploden x)))))
+                (getprop x 'noun))))
+        (t x)))
+@end verbatim
+
+@noindent
+@b{Beispiele:}
+Wird die @code{$verbify} mit einer Zeichenkette aufgerufen, wird das
+entsprechende Maxima-Symbol mit einem voransgestelltem Dollarzeichen 
+zur@"uckgegeben.  Es werden keine Eintragungen in die Eigenschaftsliste
+der Symbole vorgenommen.  Im zweiten Beispiel wird @code{$verbify} mit dem
+Symbol @code{%tan} aufgerufen.  Jetzt werden die Verb- und Substantivformen
+in die Eigenschaftsliste eingetragen.
+
+@example
+* ($verbify "tan")
+$TAN
+* (symbol-plist '$tan)
+NIL
+* (symbol-plist '%tan)
+NIL
+* ($verbify '%tan)
+$TAN
+* (symbol-plist '%tan)
+(NOUN $TAN)
+* (symbol-plist '$tan)
+(VERB %TAN)
+@end example
+
+@findex maxima-symbol-p
+@findex stripdollar
+
+Zuletzt werden die beiden Funktionen @code{maxima-symbol-p} und
+@code{stripdollar} definiert.  Die Funktion @code{maxima-symbol-p} testet, ob
+ein Symbol oder eine Zeichenkette einen kMaxima-Bezeichner repr@"asentiert, also
+ob das Symbol oder die Zeichenkette als erstes Zeichen @code{%} oder @code{$}
+hat.  Die Funktion @code{stripdollar} entfernt das Zeichen @code{%} oder
+@code{$} von einem kMaxima-Bezeichner.
+
+@verbatim
+(defun maxima-symbol-p (sym)
+  (if (or (symbolp sym)
+          (stringp sym))
+      (car (member (char (string sym) 0) '(#\$ #\%)))))
+
+(defun stripdollar (x)
+  (cond ((numberp x) x)
+        ((null x) 'false)
+        ((eq x t) 'true) 
+        ((maxima-symbol-p x)
+         (intern (subseq (string x) 1)))
+        (t x)))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Zahlen sind keine kMaxima-Bezeichner.  Die Symbole
+@code{'$float}, @code{'%sin} und die Zeichenkette @code{"$sin"} sind 
+kMaxima-Bezeichner.
+
+@example
+* (maxima-symbol-p 100)
+NIL
+* (maxima-symbol-p '$float)
+#\$
+* (stripdollar '$float)
+FLOAT
+:INHERITED
+* (stripdollar '%sin)
+SIN
+:INHERITED
+* (stripdollar "$sin")
+|sin|
+NIL
+@end example
+
+@c -----------------------------------------------------------------------------
+@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen, Verb- und Substantivform, Hilfsfunktionen
+@section Vergleiche Ausdr@"ucke
+@c -----------------------------------------------------------------------------
+
+kMaxima-Ausdr@"ucke werden als Lisp-Listen der Form @code{(op) arg1 arg2 ...)}
+dargestellt.  @"Aquivalente Ausdr@"ucke k@"onnen eine verschiedene interne
+Darstellung haben, wenn die Operatoren @code{op} Attribute haben.  Zum Beispiel
+sind die beiden kMaxima-Ausdr@"ucke @code{((mplus) $A $B)} und
+@code{((mplus simp) $A $B)} @"aquivalent und stellen die Addition @code{a+b}
+dar.  Daher k@"onnen zwei Ausdr@"ucke nicht mit der Lisp-Funktion @code{equalp}
+auf @"aquivalenz getestet werden.
+
+@findex alike1
+@findex alike
+@findex lisp-array-alike1
+
+Die folgenden Funktionen testen, ob zwei kMaxima-Ausdr@"ucke @"aquivalent sind.
+Die Attribute der Operatoren werden ignoriert.  Die Funktion @code{alike1} wird
+aufgerufen, um zwei kMaxima-Ausdr@"ucke auf @"Aquivalenz zu testen.  Die
+Funktion @code{alike} vergleicht die Listen mit den Argumenten der Ausdr@"ucke.
+Bereits hier ist der Fall implementiert, dass Lisp-Arrays miteinander 
+zu vergleichen sind.  Hierzu wird die Funktion @code{lisp-array-alike1}
+aufgerufen.
+
+@verbatim
+(defun alike1 (x y)
+  (labels ((memqarr (ll)
+             (if (member 'array ll :test #'eq) t)))
+    (cond ((eq x y))
+          ((atom x)
+           (cond ((arrayp x)
+                  (and (arrayp y) (lisp-array-alike1 x y)))
+                 (t (equal x y))))
+          ((atom y) nil)
+          (t
+           (and (not (atom (car x)))
+                (not (atom (car y)))
+                (eq (caar x) (caar y))
+                (eq (memqarr (cdar x)) (memqarr (cdar y)))
+                (alike (cdr x) (cdr y)))))))
+@end verbatim
+
+@verbatim
+(defun lisp-array-alike1 (x y)
+  (and (equal (array-dimensions x) (array-dimensions y))
+       (progn
+         (dotimes (i (array-total-size x))
+           (if (not (alike1 (row-major-aref x i) (row-major-aref y i)))
+               (return-from lisp-array-alike1 nil)))
+         t)))
+@end verbatim
+
+@verbatim
+(defun alike (x y)
+  (do ((x x (cdr x))
+       (y y (cdr y)))
+      ((atom x) (equal x y))
+    (if (or (atom y) (not (alike1 (car x) (car y))))
+        (return nil))))
+@end verbatim
+
+@noindent
+@b{Beispiel:} Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide
+die Addition @code{a+b} repr@"asentieren.
+
+@example
+* (alike1 '((mplus) $a $b) '((mplus simp) $a $b))
+T
+@end example
+
+@findex memalike
+
+@noindent
+Die Funktion @code{memalike} sucht das Argument @code{x} im Ausdruck @code{l}.
+Die @"Aquivalenz wird mit der Funktion @code{alike1} getestet.
+
+@verbatim
+(defun memalike (x l)
+  (do ((l l (cdr l)))
+      ((null l))
+    (when (alike1 x (car l)) (return l))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Der Ausdruck @code{2*a+b} enth@"alt die Argument @code{2*a} und
+@code{$b}.  @code{$a} ist kein Argument des Ausdrucks.
+
+@example
+* (memalike '((mtimes) 2 $A) '((mplus) ((mtimes) 2 $a) $b))
+(((MTIMES) 2 $A) $B)
+* (memalike '$b '((mplus) ((mtimes) 2 $a) $b))
+($B)
+* (memalike '$a '((mplus) ((mtimes) 2 $a) $b))
+NIL
+@end example
+
+@c -----------------------------------------------------------------------------
+@need 800
+@node Weitere Hilfsfunktionen, , Vergleiche Ausdr@"ucke, Hilfsfunktionen
+@section Weitere Hilfsfunktionen
+@c -----------------------------------------------------------------------------
+
+@verbatim
+(defun fixnump (n)
+  (typep n 'fixnum))
+@end verbatim
+
+@verbatim
+(defvar *alphabet* (list #\_ #\%))
+
+(defun alphabetp (ch)
+  (and (characterp ch)
+       (or (alpha-char-p ch)
+           (member ch *alphabet*))))
+@end verbatim
+
+@verbatim
+(defun mminusp (x)
+  (and (not (atom x)) (eq (caar x) 'mminusp)))
+@end verbatim
+
+@verbatim
+(defun mlistp (x)
+  (and (not (atom x)) (not (atom (car x))) (eq (caar x) 'mlist)))
+@end verbatim
+
+@verbatim
+(defun add2lnc (item llist)
+  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
+    (unless (atom item)
+      (setf llist
+            (delete (assoc (car item) llist :test #'equal)
+                    llist :count 1 :test #'equal)))
+    (nconc llist (list item))))
+@end verbatim
+
+@verbatim
+(defvar errset nil)
+
+(defmacro errset (&rest l)
+  `(handler-case (list ,(car l))
+     (error (e) (when errset (error e)))))
+@end verbatim
+
+@c --- End of file Hilfsfunktionen.texi ----------------------------------------
+

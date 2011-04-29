@@ -1,0 +1,527 @@
+@c -----------------------------------------------------------------------------
+@c File     : Hautschleife.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 10.04.2011
+@c Revision : 17.04.2011
+@c 
+@c Copyright 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@menu
+* Einf@"uhrung in die Hauptschleife::
+* Marken f@"ur die Eingaben und Ausgaben::
+* Die Funktion maxima-toplevel-eval::
+* Die Funktion maxima-toplevel-read::
+* Die Funktion maxima-toplevel-loop::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Einf@"uhrung in die Hauptschleife, Marken f@"ur die Eingaben und Ausgaben, Hauptschleife, Hauptschleife
+@section Einf@"uhrung in die Hauptschleife
+@c -----------------------------------------------------------------------------
+
+Mit der Implementation des Parsers und den Routinen f@"ur die lineare Anzeige
+kann jetzt die zentrale Routine @code{maxima-toplevel-loop} vollst@"andig
+implementiert werden.  In der ersten Implementation wird eine 
+Lisp-read-eval-Schleife ausgef@"uhrt.  Die Lisp-Funktion @code{eval} ist durch
+die Maxima-Funktion @code{meval} ersetzt.  Die Lisp-Funktion @code{read} wird
+nun durch die Maxima-Funktion @code{mread} ersetzt und die Lisp-Funktion
+@code{format} wird durch die Maxima-Funktion @code{linear-display} ersetzt.
+
+@c -----------------------------------------------------------------------------
+@node Marken f@"ur die Eingaben und Ausgaben, Die Funktion maxima-toplevel-eval, Einf@"uhrung in die Hauptschleife, Hauptschleife
+@section Marken f@"ur die Eingaben und Ausgaben
+@c -----------------------------------------------------------------------------
+
+kMaxima speichert die Eingaben und die Ergebnisse in Marken ab.  Mit diesen
+Marken kann der Nutzer auf vorherige Eingaben und Ergebnisse zur@"uckgreifen.
+Standardm@"a@ss{}ig ist @code{%i} das Zeichen f@"ur die Eingabemarken und
+@code{%o} das Zeichen f@"ur die Ausgabemarken.  kMaxima kennt noch
+Zwischenmarken @code{%t}, die noch keine Rolle spielen, aber bereits hier
+eingef@"uhrt werden.  Die Marken werden fortlaufend nummeriert.  Die hier
+definierten Funktionen und Variablen werden von der Funktion
+@code{maxima-toplevel-loop} genutzt.
+
+@vindex *linelabel*
+@vindex $linenum
+@vindex $inchar
+@vindex $outchar
+@vindex $linechar
+@vindex $nolabels
+@vindex $labels
+
+Folgende Variablen sind f@"ur die Verwaltung der Marken definiert.  Die globale
+Variable @code{*linelabel*} enth@"alt die zuletzt erzeugte Marke.  Die
+Optionsvariable @code{$linenum} enth@"alt die Nummer der aktuellen Eingabe und
+Ausgabe.  Die Optionsvariablen @code{$inchar}, @code{$outchar} und
+@code{$linechar} enthalten die Zeichen f@"ur die die Eingabe-, Ausgaben- und
+Zwischenmarken.  Mit der Optionsvariablen @code{$nolabels} kann das abspeichern
+in den Marken ausgeschaltet werden.  Die Optionsvariable @code{$labels}
+enth@"alt eine Liste aller erzeugten Marken.
+
+@verbatim
+(defvar *linelabel* nil)
+
+(defmvar $linenum 0)
+(defmvar $inchar   '$%i)
+(defmvar $outchar  '$%o)
+(defmvar $linechar '$%t)
+
+(defmvar $nolabels nil)
+(defmvar $labels (list '(mlist simp)))
+@end verbatim
+
+@findex createlabel
+@findex checklabel
+@findex makelabel
+
+Die Funktion @code{createlabel} setzt ein Symbol oder eine Zeichenkette @code{x}
+und eine Nummer @code{num} zu einem Symbol zusammen, das in das aktuelle
+Package eingetragen wird.  Mit der Funktion @code{checklabel} wird gepr@"uft, ob
+eine Marke zum Symbol @code{x} frei ist.  Die R@"uckgabe ist @code{T}, wenn
+die Marke genutzt werden kann, ansonsten @code{NIL}.  Hat die Optionsvariable
+@code{$nolabels} den Wert @code{T}, ist die R@"uckgabe immer @code{NIL}.  Zudem
+ist die R@"uckgabe @code{NIL}, wenn @code{$linenum} den Wert @code{0} hat.  Die
+Funktion @code{makelabel} generiert eine Marke zum Symbol @code{x}.  Das Symbol
+@code{x} ist ein Wert einer der Variablen @code{$inchar}, @code{$outchar} oder
+@code{$linechar}.  Wenn die Optionsvariable @code{$nolabels} den Wert @code{NIL}
+hat, sollen Marken genutzt werden und die erzeugte Marke wird der Liste in der
+Optionsvariablen @code{$labels}  hinzugef@"ugt.
+
+@verbatim
+(defun createlabel (x num)
+  (intern (format nil "~a~d" x num)))
+
+(defun checklabel (x)
+  (not (or $nolabels
+           (= $linenum 0)
+           (boundp (createlabel x $linenum)))))
+
+(defun makelabel (x)
+  (declare (special *linelabel*))
+  (setq *linelabel* (createlabel x $linenum))
+  (unless $nolabels
+    (when (or (null (cdr $labels))
+              (when (member *linelabel* (cddr $labels) :test #'equal)
+                (setf $labels
+                      (delete *linelabel* $labels :count 1 :test #'eq))
+                t)
+              (not (eq *linelabel* (cadr $labels))))
+      (setq $labels (cons (car $labels) (cons *linelabel* (cdr $labels))))))
+  *linelabel*)
+@end verbatim
+
+@noindent
+@b{Beispiele:} Die folgenden Beispiele zeigen die Verwendung der Funktionen
+@code{createlabel}, @code{checklabel} und @code{makelabel}.
+
+@example
+* (createlabel $inchar $linenum)
+$%I0
+NIL
+* (checklabel (createlabel $inchar $linenum))
+NIL
+* (incf $linenum)
+1
+* (createlabel $inchar $linenum)
+$%I1
+NIL
+* (checklabel (createlabel $inchar $linenum))
+T
+* (makelabel $inchar)
+$%I1
+* *linelabel*
+$%I1
+* $labels
+((MLIST SIMP) $%I1)
+* (set *linelabel* '((mplus) $a $b))
+((MPLUS) $A $B)
+* *linelabel*
+$%I1
+* $%I1
+((MPLUS) $A $B)
+* (checklabel $inchar)
+NIL
+* (incf $linenum)
+2
+* (makelabel $inchar)
+$%I2
+* $labels
+((MLIST SIMP) $%I2 $%I1)
+@end example
+
+@findex getfirstcharlabel
+@findex getlabels
+@findex getlabels2
+
+Mit den Funktionen @code{getlabels} und @code{getlabels2} werden genutzte
+Marken heraus gefiltert.  Die Funktion @code{getlabels} gibt die Marken
+zur@"uck, die mit einem einem bestimmten Zeichen beginnen.  Die Funktion
+@code{getlabels} gibt dagegen die Marken in einem Bereich zur@"uck, der mit
+den Argumenten @code{n1} und @code{n2} angegeben wird.  Hat das optionale
+Argument @code{flag} den Wert @code{T} werden nur Eingabemarken ausgew@"ahlt.
+Die Funktion @code{getfirstcharlabel} ermittelt das erste Zeichen einer Marke,
+das verschieden von dem Zeichen @code{$} und @code{%} ist.
+
+@verbatim
+(defun getfirstcharlabel (x)
+  (let ((c (char (symbol-name x) 1)))
+    (if (char= c #\%)
+        (char (symbol-name x) 2)
+        c)))
+
+(defun getlabels (x)
+  (do ((l (cdr $labels) (cdr l))
+       (ch (getfirstcharlabel x))
+       (acc))
+      ((null l) (reverse acc))
+    (if (char= (getfirstcharlabel (car l)) ch)
+        (push (car l) acc))))
+
+(defun getlabels2 (n1 n2 &optional (flag nil))
+  (do ((i n1 (1+ i))
+       (acc)
+       (l (if flag
+              (list $inchar)
+              (list $inchar $outchar $linechar))))
+      ((> i n2) (reverse acc))
+    (do ((l l (cdr l))
+         (z))
+        ((null l))
+      (if (boundp (setq z (createlabel (first l) i)))
+          (push z acc)))))
+@end verbatim
+
+@findex $labels
+@findex $%th
+
+Zuletzt folgt noch die Implementierung der Nutzerfunktionen @code{$labels} und
+@code{$%th}.  Die Funktion @code{$labels} gibt eine Liste aller Marken zur@"uck,
+die mit dem Argument @code{x} beginnen.  Mit der Funktion @code{$%th} kann auf
+das n-te vorhergehende Ergebnis zur@"uckgegriffen werden.
+
+@verbatim
+(defun $labels (x)
+  (cons '(mlist simp) (getlabels x)))
+
+(defun $%th (x)
+  (prog (l outchar)
+    (if (or (not (fixnump x)) (= x 0))
+        (merror "Improper argument to ~:M:~%~M" '$%th x))
+    (if (> x 0) (setq x (- x)))
+    (if (cdr $labels)
+        (setq l (cddr $labels)
+              outchar (getfirstcharlabel $outchar)))
+  loop
+    (if (null l) (merror "Improper call to %th"))
+    (if (and (char= (getfirstcharlabel (car l)) outchar)
+             (= (setq x (1+ x)) 0))
+        (return (meval (car l))))
+    (setq l (cdr l))
+    (go loop)))
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Die Funktion maxima-toplevel-eval, Die Funktion maxima-toplevel-read, Marken f@"ur die Eingaben und Ausgaben, Hauptschleife
+@section Die Funktion @code{maxima-toplevel-eval}
+@c -----------------------------------------------------------------------------
+
+@findex maxima-toplevel-eval
+
+Die Funktion @code{meval} ersetzt die Lisp-Funktion @code{eval} im 
+kMaxima-Evaluator der in @ref{Der erste Evaluator} beschrieben ist.  In einem
+Computeralgebrasystem werden mathematische Ausdr@"ucke nicht nur ausgewertet,
+sondern nach der Auswertung auch vereinfacht.  Wir bereiten die Auswertung an
+dieser Stelle mit der Einf@"uhrung der Funktion @code{maxima-toplevel-eval} vor.
+Die Funktion ruft zun@"achst @code{meval} f@"ur die Auswertung auf und dann die
+Funktion @code{simplifya}, die den ausgewerteten Ausdruck vereinfacht.  Die
+R@"uckgabe ist ein ausgwerteter und vereinfachter Ausdruck.  Die Funktion
+wird von @code{maxima-toplevel-loop} aufgerufen.
+
+@verbatim
+(defun maxima-toplevel-eval (form)
+  (simplifya (meval form) nil))
+@end verbatim
+
+Die Funktion @code{simplifya} implementiert den Vereinfacher des
+Computeralgebrasystems.  An dieser Stelle f@"uhren wir eine Dummy-Funktion ein,
+die erst in einem sp@"ateren Kapitel mit Code aufgef@"ullt wird.  Die
+Dummy-Funktion hat die Aufgabe das Argument unver@"andert zur@"uckzugeben.  Das
+zweite Argument ist ein Schalter, der sp@"ater genutzt wird, um dem Vereinfacher
+mitzuteilen, dass die Argumente eines Operators bereits vereinfacht sind.
+
+@verbatim
+(defun simplifya (form flag)
+  (declare (ignore flag))
+  form)
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Die Funktion maxima-toplevel-read, Die Funktion maxima-toplevel-loop, Die Funktion maxima-toplevel-eval, Hauptschleife
+@section Die Funktion @code{maxima-toplevel-read}
+@c -----------------------------------------------------------------------------
+
+@findex maxima-toplevel-read
+
+Mit dem Parser ist die Funktion @code{mread} definiert worden, die die Eingabe
+liest und in einen kMaxima-Ausdruck umwandelt.  Die Funktion 
+@code{maxima-toplevel-loop} ruft nun nicht direkt die Funktion @code{mread} auf,
+sondern die Funktion @code{maxima-toplevel-read}.  Zun@"achst wird gepr@"uft, ob
+eine Eingabe von der Tastatur erforderlich ist. Ist dies der Fall, wird eine
+Eingabeaufforderung ausgegeben.  Dann wird gepr@"uft, ob noch Zeichen die 
+Verschiedenen von @code{#\newline} und @code{#\return} einzulesen sind.  Ist
+dies nicht der Fall kehrt die Funktion mit dem Ergebnis @code{eof} zur@"uck.
+Jetzt wird in der @code{cond}-Anweisung gepr@"uft, ob die Eingabe mit einem
+speziellen Symbol beginnt.  Maxima kennt die speziellen Zeichen @code{?} und
+@code{:}, die nicht von @code{mread} gelesen werden, sondern bereits an dieser
+Stelle verarbeitet werden.  Mit @code{:} werden Break-Kommandos eingeleitet.
+Dies implementieren wir an dieser Stelle nicht.  Mit @code{?} sowie @code{??}
+denen ein Leerzeichen folgt, wird eine abk@"urzende Schreibweise f@"ur den Abruf
+von Dokumentation erm@"oglicht.  Anstatt dem Kommando
+@code{describe("integrate")} kann der Nutzer auch @code{? integrate} oder
+@code{?? integrate} eingeben.  Diese Eingaben werden in den entsprechenden
+kMaxima-Ausdruck umgewandelt und als Ergebnis zur@"uckgegeben.  Wird das Zeichen
+@code{?} einem Symbol vorangestellt, so wird ein Lisp-Symbol bezeichnet.  In
+diesem Fall wird die Eingabe an die Funktion @code{mread} weitergereicht, die
+auch Lisp-Symbole verarbeitet.  Liegt kein spezielles Zeichen vor, wird die
+Eingabe in der letzten @code{cond}-Anweisung von der Funktion @code{mread}
+gelesen.  Nach dem Einlesen von der Eingabe wird noch gepr@"uft, ob weitere
+Zeichen in der Eingabe vorhanden sind.  Ist dies nicht der Fall, wird die
+Variable @code{*need-prompt*} auf den Wert @code{t} gesetzt, um zu
+signalisieren, dass beim n@"achsten Aufruf der Funktion
+@code{maxima-toplevel-read} eine Eingabeaufforderung auszugeben ist.
+
+@vindex *need-prompt*
+
+@verbatim
+(defvar *need-prompt* t)
+
+(defun maxima-toplevel-read (stream eof-p eof)
+  (let ((mprompt *mread-prompt*)
+        (*mread-prompt* "")
+        ch)
+    (if (and *need-prompt* (> (length mprompt) 0))
+        (progn
+          (fresh-line *standard-output*)
+          (princ mprompt *standard-output*)
+          (force-output *standard-output*)
+          (setf *prompt-on-read-hang* nil))
+        (progn
+          (setf *prompt-on-read-hang* t)
+          (setf *read-hang-prompt* mprompt)))
+    (tagbody
+     top
+      (setq ch (read-char stream eof-p eof))
+      (cond ((or (eql ch #\newline)
+                 (eql ch #\return))
+             (go top))
+            ((eq ch eof)
+             (return-from maxima-toplevel-read eof)))
+      (unread-char ch stream))
+    (cond
+      ((eql #\? ch)
+       (read-char stream)
+       (let ((next (peek-char nil stream nil)))
+         (cond
+           ((member next '(#\space #\tab #\!))
+            (let ((line (string-trim '(#\space #\tab #\; #\$ )
+                                     (subseq (read-line stream eof-p eof)
+                                             1))))
+              `((displayinput) nil (($describe) ,line $exact))))
+           ((equal next #\?)
+            (let ((line (string-trim '(#\space #\tab #\; #\$ )
+                                     (subseq (read-line stream eof-p eof) 
+                                             1))))
+              `((displayinput) nil (($describe) ,line $inexact))))
+           (t
+            (mread (make-concatenated-stream (make-string-input-stream "?")
+                                             stream)
+                   eof)))))
+      (t
+       (let ((result (mread stream eof))
+             (next-char (read-char-no-hang stream eof-p eof)))
+         (cond ((or (eql next-char nil)
+                    (equal next-char '(nil)))
+                (setf *need-prompt* t))
+               ((member next-char '(#\newline #\return))
+                (setf *need-prompt* t))
+               (t
+                (setf *need-prompt* nil)
+                (unread-char next-char stream)))
+         result)))))
+@end verbatim
+
+@noindent
+@b{Beispiele:} Die ersten Beispiele zeigen die Ergebnisse, wenn das spezielle
+Zeichen @code{?} in der Eingabe gefunden wird.  Das letzte Beispiel zeigt die
+Eingabe eines mathematischen Ausdrucks.
+
+@example
+* (maxima-toplevel-read *standard-input* nil nil)
+? integrate
+((DISPLAYINPUT) NIL (($DESCRIBE) "integrate" $EXACT))
+* (maxima-toplevel-read *standard-input* nil nil)
+?? integrate
+((DISPLAYINPUT) NIL (($DESCRIBE) "integrate" $INEXACT))
+* (maxima-toplevel-read *standard-input* nil nil)
+?integrate;
+((DISPLAYINPUT) NIL INTEGRATE)
+
+* (maxima-toplevel-read *standard-input* nil nil)
+sin(x)+x^2;
+((DISPLAYINPUT) NIL ((MPLUS) (($SIN) $X) ((MEXPT) $X 2)))
+@end example
+
+@c -----------------------------------------------------------------------------
+@node Die Funktion maxima-toplevel-loop, , Die Funktion maxima-toplevel-read, Hauptschleife
+@section Die Funktion @code{maxima-toplevel-loop}
+@c -----------------------------------------------------------------------------
+
+Wir k@"onnen nun mit der Funktion @code{maxima-toplevel-loop} die vollst@"andige
+Abfolge des Einlesen, des Auswertens, Vereinfachens von Ausdr@"ucken und der
+Anzeige des Ergebnisses implementieren. Wir beginnen mit einigen Hilfsfunktionen
+und Variablen.
+
+@vindex *prompt-prefix*
+@vindex *prompt-suffix*
+@vindex $prompt
+@findex main-prompt
+@findex break-prompt
+
+Mit den Funktionen @code{main-prompt} und @code{break-prompt} werden zwei
+unterschiedliche Eingabeaufforderungen implementiert. Die Funktion
+@code{main-prompt} gibt die Eingabeforderung zur@"uck, die ausgegeben wird, wenn
+die Eingabe eines Nutzers von der Tastatur erwartet wird.  Hat die Variable
+@code{$inchar} den Standardwert @code{%i} und hat @code{$linenum} zum Beispiel
+den Wert @code{1}, dann gibt @code{main-prompt} die Zeichenkette @code{($i1)}
+zur@"uck. Siehe auch @ref{Marken f@"ur die Eingaben und Ausgaben}.  Der
+Eingabeaufforderung wird die Zeichenkette @code{*prompt-prefix*}
+vorangestellt und die Zeichenkette @code{*prompt-suffix*} nachgestellt.  Mit
+diesen Zeichenketten k@"onnen besondere Steuerbefehle an ein Terminal gesendet
+werden, um zum Beispiel die Farbe, den Font oder die Schriftgr@"o@ss{}e der
+Eingabeaufforderung festzulegen.
+
+Die Funktion @code{break-prompt} arbeitet wie die Funktion @code{main-prompt}.
+Diese Eingabeaufforderung wird verwendet, wenn eine Datei in einem Demomodus
+ausgef@"uhrt wird oder wenn das Programm unterbrochen wird, um einen Debugger
+aufzurufen.  Zu diesem Zeitpunkt ist weder ein Demomodus, noch ein Debugger
+f@"ur kMaxima implementiert.  Das Zeichen f@"ur die Eingabeaufforderung ist in
+diesem Fall in der Optionsvariablen @code{$prompt} abgelegt und kann vom Nutzer
+ge@"andert werden.
+
+@verbatim
+(defvar *prompt-prefix* "")
+(defvar *prompt-suffix* "")
+(defmvar $prompt "_")
+
+(defun main-prompt ()
+  (declare (special *display-labels-p*))
+  (if *display-labels-p*
+      (let ((*print-circle* nil))
+        (format nil "~A(~A~D) ~A"
+                *prompt-prefix*
+                (print-invert-case (stripdollar $inchar))
+                $linenum
+                *prompt-suffix*))
+      ""))
+
+(defun break-prompt ()
+  (let ((*print-circle* nil))
+    (format nil "~A~A~A"
+            *prompt-prefix*
+            (print-invert-case (stripdollar $prompt))
+            *prompt-suffix*)))
+@end verbatim
+
+@verbatim
+(defun used-area (&optional unused)
+  (declare (ignore unused))
+  (sb-ext:get-bytes-consed))
+@end verbatim
+
+@verbatim
+(defvar *general-display-prefix* "")
+
+(defmvar $showtime nil)
+
+(defun maxima-toplevel-loop (input-stream mode)
+  (declare (special $% $_ $__))
+  (when (eql mode :demo)
+    (format t
+    "~%At the '~A' prompt, type ';' and <enter> to get next demonstration.~&"
+            (print-invert-case (stripdollar $prompt))))
+  (catch 'abort-demo
+    (do ((form)
+         (time) (etime) (area)
+         (eof (list nil))
+         (i-tag)
+         (o-tag))
+        (nil)
+      (catch 'return-from-debugger
+        (when (or (not (checklabel $inchar))
+                  (not (checklabel $outchar)))
+          (incf $linenum))
+        (setq i-tag (makelabel $inchar))
+        (let ((*mread-prompt* (if mode nil (main-prompt))))
+          (setq form (maxima-toplevel-read input-stream nil eof)))
+        (format t "~a" *general-display-prefix*)
+        (if (eq form eof) (return '$done))
+        (setq $__ (caddr form))
+        (unless $nolabels (set i-tag $__))
+        (when mode (linear-display `((mlabel) ,i-tag , $__)))
+        (setq time (get-internal-run-time)
+              etime (get-internal-real-time))
+        (setq area (used-area))
+        (setq $% (maxima-toplevel-eval $__))
+        (setq time (/ (float (- (get-internal-run-time) time))
+                      internal-time-units-per-second)
+              etime (/ (float (- (get-internal-real-time) etime))
+                       internal-time-units-per-second))
+        (setq o-tag (makelabel $outchar))
+        (unless $nolabels (set o-tag $%))
+        (setq $_ $__)
+        (when $showtime
+          (format t "Evaluation took ~,4F seconds (~,4F elapsed)" time etime)
+          (let ((total-bytes (- (used-area) area)))
+            (cond ((> total-bytes (* 1024 1024))
+                   (format t " using ~,3F MB.~%"
+                             (/ total-bytes (* 1024.0 1024.0))))
+                  ((> total-bytes 1024)
+                   (format t " using ~,3F KB.~%" (/ total-bytes 1024.0)))
+                  (t
+                   (format t " using ~:D bytes.~%" total-bytes)))))
+        (unless $nolabels
+          (putprop '$% (cons time etime) 'time)
+          (putprop o-tag (cons time  etime) 'time))
+        (if (eq (caar form) 'displayinput)
+            (linear-display `((mlabel) ,o-tag ,$%)))
+        (when (eq mode ':demo)
+          (princ (break-prompt))
+          (force-output)
+          (let (quitting)
+            (do ((char)) (nil)
+              (case (setq char (read-char *terminal-io*))
+                ((#\page)
+                 (fresh-line)
+                 (princ (break-prompt))
+                 (force-output))
+                ((#\?)
+                 (format t
+                      "Pausing. Type a ';' and <enter> to continue demo.~%"))
+                ((#\space #\; #\n #\e #\x #\t))
+                ((#\newline)
+                 (if quitting (throw 'abort-demo nil) (return nil)))
+                (t (setq quitting t))))))
+        (when mode
+          (do ((char)) (())
+            (setq char (read-char input-stream nil nil))
+            (when (null char)
+              (throw 'macsyma-quit nil))
+            (unless (member char '(#\space #\newline #\return #\tab))
+              (unread-char char input-stream)
+              (return nil))))))))
+@end verbatim
+
+@c --- End of file Hauptschleife.texi ------------------------------------------

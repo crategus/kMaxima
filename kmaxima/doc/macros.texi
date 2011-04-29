@@ -1,0 +1,87 @@
+@c -----------------------------------------------------------------------------
+@c File      : macros.de.texi
+@c License   : GNU General Public License (GPL)
+@c Language  : German
+@c Original  : category-macros.texi revision 1.4
+@c Author    : Dr. Dieter Kaiser
+@c Date      : 05.03.2011
+@c Revision  : 05.03.2011
+@c 
+@c This file is part of Maxima -- GPL CAS based on DOE-MACSYMA
+@c -----------------------------------------------------------------------------
+
+@macro mref {nodename}
+@ifhtml
+@code{@ref{\nodename\}}
+@end ifhtml
+@ifnothtml
+@code{\nodename\}
+@end ifnothtml
+@end macro
+
+@macro mxref {nodename, text}
+@ifhtml
+@code{@ref{\nodename\, \text\}}
+@end ifhtml
+@ifnothtml
+@code{\text\}
+@end ifnothtml
+@end macro
+
+
+@macro mrefdot {nodename}
+@ifhtml
+@code{@ref{\nodename\}}.
+@end ifhtml
+@ifnothtml
+@code{\nodename\}.
+@end ifnothtml
+@end macro
+
+@macro mrefcomma {nodename}
+@ifhtml
+@code{@ref{\nodename\}},
+@end ifhtml
+@ifnothtml
+@code{\nodename\},
+@end ifnothtml
+@end macro
+
+@macro nref {nodename}
+@ifhtml
+@ref{\nodename\}
+@end ifhtml
+@ifnothtml
+\nodename\
+@end ifnothtml
+@end macro
+
+@macro nrefdot {nodename}
+@ifhtml
+@ref{\nodename\}.
+@end ifhtml
+@ifnothtml
+\nodename\.
+@end ifnothtml
+@end macro
+
+@macro nrefcomma {nodename}
+@ifhtml
+@ref{\nodename\},
+@end ifhtml
+@ifnothtml
+\nodename\,
+@end ifnothtml
+@end macro
+
+@iftex
+@hyphenation{
+   End-los-schlei-fe
+   ma-the-ma-ti-sche
+   sig-na-li-siert
+   vor-an-ge-stell-tes
+ }
+@end iftex
+
+@c --- End of file macros.de.texi ----------------------------------------------
+
