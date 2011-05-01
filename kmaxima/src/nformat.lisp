@@ -23,7 +23,6 @@
 ;;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ;;; ----------------------------------------------------------------------------
 
-
 (in-package :kmaxima)
 
 (defmvar $powerdisp nil)
@@ -76,7 +75,7 @@
         ((equal -1 (cadr form)) (list '(mminus) (form-mtimes (cdr form))))
         (t
          (prog (num den minus flag)
-           (do ((l (cdr form) (cdr l)) (dummy)) 
+           (do ((l (cdr form) (cdr l)) (dummy))
                ((null l))
              (setq dummy (nformat (car l)))
              (cond ((atom dummy) (setq num (cons dummy num)))
@@ -94,7 +93,7 @@
                  den (cond ((null den) (setq flag t) nil)
                            ((null (cdr den)) (car den))
                            (t (cons '(mtimes) (nreverse den)))))
-           (if (not flag) 
+           (if (not flag)
                (setq num (list '(mquotient) num den)))
            (return (if minus (list '(mminus) num) num))))))
 
