@@ -230,7 +230,7 @@
       (merror "alias: takes an even number of arguments."))
   (do ((l nil (cons (alias (pop form) (pop form)) l)))
       ((null form)
-       `((mlist simp),@(nreverse l)))))
+       `((mlist simp) ,@(nreverse l)))))
 
 (defun alias (x y)
   (unless (and (symbolp x) (symbolp y))
@@ -241,7 +241,7 @@
          (if (not (eq x y))
              (merror "alias: ~M already is aliased." x)))
         (t
-         (putprop x y'alias)
+         (putprop x y 'alias)
          (putprop y x 'reversealias)
          (add2lnc y $aliases)
          y)))
@@ -258,7 +258,9 @@
            (remprop x 'reversealias)
            (remprop x 'noun)
            (setf $aliases (delete x $aliases :count 1 :test #'eq))
-           (remprop (setq x y) 'alias) (remprop x 'verb) x))))
+           (remprop (setq x y) 'alias)
+           (remprop x 'verb)
+           x))))
 
 ;;; ----------------------------------------------------------------------------
 
