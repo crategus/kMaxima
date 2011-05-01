@@ -31,10 +31,6 @@
 (defprop $linel shadowset assign)
 (defprop $linel *linel* shadowvar)
 
-(defvar *chrps* 0)
-(defvar *lop* nil)
-(defvar *rop* nil)
-
 ;;; ----------------------------------------------------------------------------
 
 (defun strsym (x) 
@@ -86,57 +82,59 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun mgrind (form out &optional (reset-chrps t))
-  (if reset-chrps
-      (setq *chrps* 0))
-  (mprint (msize form nil nil 'mparen 'mparen) out))
-
-(defun mprint (form out)
-  (labels ((mtyotbsp (n out)
-             (declare (fixnum n))
-             (incf *chrps* n)
-             (dotimes (i n)
-               (write-char #\space out)))
-           (charpos ()
-             (- *linel* *chrps*)))
-    (cond ((characterp form)
-           (incf *chrps*)
-           (write-char form out))
-          ((< (car form) (charpos))
-           (mapc #'(lambda (l) (mprint l out)) (cdr form)))
-          (t 
-           (prog ((i *chrps*))
-             (mprint (cadr form) out)
-             (cond ((null (cddr form)) (return nil))
-                   ((and (or (atom (cadr form)) (< (caadr form) (charpos)))
-                         (or (> (charpos) (truncate *linel* 2))
-                             (atom (caddr form))
-                             (< (caaddr form) (charpos))))
-                    (setq i *chrps*)
-                    (mprint (caddr form) out))
-                   (t
-                    (incf i)
-                    (setq *chrps* 0)
-                    (terpri out)
-                    (mtyotbsp i out)
-                    (mprint (caddr form) out)))
-             (do ((l (cdddr form) (cdr l)))
-                 ((null l))
-               (cond ((or (atom (car l)) (< (caar l) (charpos))) nil)
+(let ((chrps 0))
+  
+  (defun mgrind (form out)
+    (setq chrps 0)
+    (mprint (msize form nil nil 'mparen 'mparen) out))
+  
+  (defun mprint (form out)
+    (labels ((mtyotbsp (n out)
+               (declare (fixnum n))
+               (incf chrps n)
+               (dotimes (i n)
+                 (write-char #\space out)))
+             (charpos ()
+               (- *linel* chrps)))
+      (cond ((characterp form)
+             (incf chrps)
+             (write-char form out))
+            ((< (car form) (charpos))
+             (mapc #'(lambda (l) (mprint l out)) (cdr form)))
+            (t 
+             (prog ((i chrps))
+               (mprint (cadr form) out)
+               (cond ((null (cddr form)) (return nil))
+                     ((and (or (atom (cadr form)) (< (caadr form) (charpos)))
+                           (or (> (charpos) (truncate *linel* 2))
+                               (atom (caddr form))
+                               (< (caaddr form) (charpos))))
+                      (setq i chrps)
+                      (mprint (caddr form) out))
                      (t
-                      (setq *chrps* 0)
+                      (incf i)
+                      (setq chrps 0)
                       (terpri out)
-                      (mtyotbsp i out)))
-               (mprint (car l) out)))))))
+                      (mtyotbsp i out)
+                      (mprint (caddr form) out)))
+               (do ((l (cdddr form) (cdr l)))
+                   ((null l))
+                 (cond ((or (atom (car l)) (< (caar l) (charpos))) nil)
+                       (t
+                        (setq chrps 0)
+                        (terpri out)
+                        (mtyotbsp i out)))
+                 (mprint (car l) out)))))))
+)
 
 ;;; ----------------------------------------------------------------------------
 
+(defvar *lop* nil)
+(defvar *rop* nil)
+
 (defun msize (x l r *lop* *rop*)
   (setq x (nformat x))
-  (cond ((atom x)
-         (if *display-mtext-p*
-             (msz (makestring x) l r)
-             (msize-atom x l r)))
+  (cond ((atom x) (msize-atom x l r))
         ((and (atom (car x)) (setq x (cons '(mprogn) x)) nil))
         ((or (<= (lbp (caar x)) (rbp *lop*))
              (> (lbp *rop*) (rbp (caar x))))
@@ -176,13 +174,15 @@
                             (getprop x 'noun))))
              (setq y (exploden (stripdollar y))))
             ((null (setq y (exploden x))))
-            ((getprop x 'noun) (return (msize-atom (getprop x 'noun) l r)))
+            ((getprop x 'noun)
+             (return (msize-atom (getprop x 'noun) l r)))
             ((char= #\$ (car y)) (setq y (slash (cdr y))))
             (t (setq y (cons #\? (slash y)))))
       (return (msz y l r)))))
 
 (defun msz (x l r)
-  (setq x (nreconc l (nconc x r))) (cons (length x) x))
+  (setq x (nreconc l (nconc x r)))
+  (cons (length x) x))
 
 (defvar lb #\[)
 (defvar rb #\])
@@ -224,7 +224,7 @@
   (cons (+ (car l) (car r)) (cons l (cdr r))))
 
 (defun msize-list (x l r)
-  (if (null x) 
+  (if (null x)
       (msz nil l r)
       (do ((nl) (w 0))
           ((null (cdr x))
@@ -287,6 +287,35 @@
 (defprop mlist msize-matchfix grind)
 (defprop mlist ((#\[ ) #\] ) strsym)
 
+(defprop mlabel msize-mlabel grind)
+
+(defun msize-mlabel (x l r)
+  (declare (special *display-labels-p*))
+  (if *display-labels-p*
+      (setq l (cons (msize (cadr x) (list #\( ) (list #\) #\ ) nil nil) l)))
+  (msize (caddr x) l nil *lop* *rop*))
+
+(defprop mtext msize-mtext grind)
+
+(defun msize-mtext (x l r)
+  (setq x (cdr x))
+  (if (null x)
+      (msz nil l r)
+      (do ((nl) (w 0))
+          ((null (cdr x))
+           (setq nl (cons (if (atom (car x))
+                              (msz (makestring (car x)) l r)
+                              (msize (car x) l r *lop* *rop*))
+                          nl))
+           (cons (+ w (caar nl)) (nreverse nl)))
+        (setq nl (cons (if (atom (car x))
+                           (msz (makestring (car x)) l r)
+                           (msize (car x) l nil *lop* *rop*))
+                       nl)
+              w (+ w (caar nl))
+              x (cdr x)
+              l nil))))
+
 (defprop mqapply msz-mqapply grind)
 
 (defun msz-mqapply (x l r)
@@ -296,7 +325,6 @@
 
 (defprop mquote msize-prefix grind)
 
-(defprop msetq msize-infix grind)
 (defprop msetq msize-infix grind)
 (defprop msetq (#\:) strsym)
 (defprop msetq 180 lbp)
