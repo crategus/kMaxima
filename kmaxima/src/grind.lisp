@@ -25,9 +25,13 @@
 
 (in-package :kmaxima)
 
-(defvar *chrps* 0)
 (defvar *linel* 79)
 
+(defmvar $linel 79)
+(defprop $linel shadowset assign)
+(defprop $linel *linel* shadowvar)
+
+(defvar *chrps* 0)
 (defvar *lop* nil)
 (defvar *rop* nil)
 
@@ -52,7 +56,7 @@
                dummy))
           ((not (symbolp x)) (exploden x))
           ((and (setq dummy (getprop x 'reversealias))
-                (not (and (member x $aliases :test #'eq) 
+                (not (and (member x $aliases :test #'eq)
                           (getprop x 'noun))))
            (exploden (stripdollar dummy)))
           ((not (eq (getop x) x))
@@ -82,8 +86,9 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun mgrind (form out)
-  (setq *chrps* 0)
+(defun mgrind (form out &optional (reset-chrps t))
+  (if reset-chrps
+      (setq *chrps* 0))
   (mprint (msize form nil nil 'mparen 'mparen) out))
 
 (defun mprint (form out)
@@ -128,7 +133,10 @@
 
 (defun msize (x l r *lop* *rop*)
   (setq x (nformat x))
-  (cond ((atom x) (msize-atom x l r))
+  (cond ((atom x)
+         (if *display-mtext-p*
+             (msz (makestring x) l r)
+             (msize-atom x l r)))
         ((and (atom (car x)) (setq x (cons '(mprogn) x)) nil))
         ((or (<= (lbp (caar x)) (rbp *lop*))
              (> (lbp *rop*) (rbp (caar x))))
@@ -181,7 +189,7 @@
 
 (defun msize-array (x l r &aux f)
   (declare (special $aliases))
-  (if (eq (caar x) 'mqapply) 
+  (if (eq (caar x) 'mqapply)
       (setq f (cadr x)
             x (cdr x))
       (setq f (caar x)))
@@ -210,7 +218,7 @@
   (setq l (msize (if op
                      (getop (caar x))
                      (caar x))
-                 l 
+                 l
                  (list #\( ) 'mparen 'mparen)
         r (msize-list (cdr x) nil (cons #\) r)))
   (cons (+ (car l) (car r)) (cons l (cdr r))))
@@ -272,8 +280,6 @@
 
 (defprop mparen -1 lbp)
 (defprop mparen -1 rbp)
-
-;;; ----------------------------------------------------------------------------
 
 (defprop mprogn  msize-matchfix grind)
 (defprop mprogn ((#\( ) #\) ) strsym)
@@ -348,7 +354,7 @@
 (defprop mtimes 120 lbp)
 (defprop mtimes 120 rbp)
 
-(defun msz-mtimes (x l r) 
+(defun msz-mtimes (x l r)
   (msznary x l r '(#\* )))
 
 (defprop mquotient msize-infix grind)
