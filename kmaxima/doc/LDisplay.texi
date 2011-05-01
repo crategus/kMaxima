@@ -631,27 +631,54 @@
 @section Die Funktion @code{linear-display}
 @c -----------------------------------------------------------------------------
 
+@findex linear-display
+@vindex *display-labels-p*
+@vindex *display-mtext-p*
+
+Die Funktion @code{linear-display} gibt einen Maxima-Ausdruck @code{form} auf
+der Konsole aus.  Dazu wird die Funktion @code{mgrind} mit dem Ausdruck
+@code{form} und @code{*standard-output*} f@"ur die Standardausgabe aufgerufen.
+@code{mgrind} hat ein drittes optionales Argument.  Hat das dritte Argument
+den Wert @code{nil} wird die globale Variable @code{*chrps*} von @code{mgrind}
+nicht auf den Wert @code{0} zur@"uckgesetzt.  @code{*chrps*} enth@"alt die
+aktuelle Position des Cursors auf der linearen Ausgabe.
+
+Ausdr@"ucke mit dem Operatoren @code{mlabel} und @code{mtext} werden besonders
+behandelt.  Der Operator @code{mlabel} zeigt an, dass eine Marke ausgegeben
+werden muss.  Der Operator @code{mtext} hat eine beliebige Anzahl an Argumenten,
+die nacheinander ausgeben werden.
+
+Mit der globale Variablen @code{*display-labels-p*} wird die Ausgabe der Marken
+kontrolliert.  Der Standardwert ist @code{t} und die Marken werden ausgegeben.
+
+Die globale Variable @code{*display-mtext-p*} wird in @code{linear-display}
+gesetzt, wenn ein @code{mtext}-Ausdruck angezeigt ausgegeben wird.  In diesem
+Fall werden Lisp-Symbole nicht mit einem f@"uhrenden Fragezeichen angezeigt.
+Diese Implementation ist nicht sehr elegant und kann m@"oglicherweise verbessert
+werden.
+
 @verbatim
 (defvar *display-labels-p* t)
+(defvar *display-mtext-p* nil)
+@end verbatim
 
+@verbatim
 (defun linear-display (form)
-  (declare (special *chrps* *display-labels-p*))
+  (declare (special *chrps* *display-labels-p* *display-mtext-p*))
+  (setq *chrps* 0)
   (fresh-line *standard-output*)
   (cond ((not (atom form))
          (cond ((eq (caar form) 'mlabel)
-                (setq *chrps* 0)
                 (cond ((and (cadr form) *display-labels-p*)
                        (princ "(")
                        (setq *chrps*
                              (+  3 (length (mgrind (cadr form) nil))))
                        (princ ") ")))
-                (mprint (msize (caddr form) nil nil 'mparen 'mparen)
-                        *standard-output*))
+                (mgrind (caddr form) *standard-output* nil))
                ((eq (caar form) 'mtext)
-                (do ((form (cdr form) (cdr form))
-                     (fortranp))
+                (do ((form (cdr form) (cdr form)))
                     ((null form))
-                  (setq fortranp (atom (car form)))
+                  (setq *display-mtext-p* (atom (car form)))
                   (mgrind (car form) *standard-output*)))
                (t
                 (mgrind form *standard-output*))))
@@ -659,6 +686,48 @@
          (mgrind form *standard-output*)))
   (terpri))
 @end verbatim
+
+@b{Beispiele:} Das erste Beispiel zeigt die Ausgabe des Ausdrucks @code{a+b}
+auf der Konsole.  Im zweiten Beispiel wird dem Ausdruck eine Marke @code{%o12}
+vorangestellt.  Das letzte Beispiel zeigt die Ausgabe eines
+@code{mtext}-Ausdrucks.
+
+@example
+* (linear-display '((mplus) $a $b))
+a+b
+NIL
+
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+(%o12) a+b
+NIL
+
+* (linear-display '((mtext) $%o12 " " ((mplus) $a $b)))
+%o12 a+b
+NIL
+@end example
+
+In diesem Beispiel ist die Ausgabe der Marken unterdr@"uckt.
+
+@example
+* (setq *display-labels-p* nil)
+NIL
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+a+b
+NIL
+@end example
+
+Ein Lisp-Symbol wird mit einem führenden Fragezeichen ausgegeben.  Ist das 
+Lisp-Symbol Argument des @code{mtext}-Operators wird kein Fragezeichen
+vorangestellt.
+
+@example
+* (linear-display 'symbol)
+?symbol
+NIL
+* (linear-display '((mtext) symbol))
+symbol
+NIL
+@end example
 
 @c --- End of file LDisplay.texi -----------------------------------------------
 

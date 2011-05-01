@@ -14,6 +14,7 @@
 @documentencoding ISO-8859-1
 @end ifnottex
 
+@paragraphindent 0
 @include macros.texi
 
 @setfilename maxima.info

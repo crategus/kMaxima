@@ -382,7 +382,17 @@ $F
 @vindex $aliases
 @findex $alias
 @findex alias
-@findex remalias
+
+Die Nutzerfunktion @code{$alias} definiert einen Alias-Namen f@"ur ein Symbol.
+Der Alias-Name ist wieder ein Symbol.  Hat ein Symbol einen Alias-Namen wird
+das Symbol beim Einlesen vom Parser durch den Alias-Namen ersetzt.  Dazu wird zu
+dem Symbol zum Indikator @code{'alias} der Alias-Name auf die Eigenschaftsliste
+abgelegt.  Umgekehrt erh@"alt das Symbol das den Alias-Namen repr@"asentiert
+einen Eintrag zum Indikator @code{'reversealias} auf der Eigenschaftsliste.
+Wird ein Ausdruck auf der Anzeige ausgegeben, dann werden Symbole, die einen
+Eintrag @code{'reversealias} haben, durch diesen ersetzt.  Symbole, die einen
+Alias-Namen erhalten, werden in die Informationsliste @code{$aliases}
+eingetragen.
 
 @verbatim
 (defmvar $aliases '((mlist simp)))
@@ -403,11 +413,46 @@ $F
          (if (not (eq x y))
              (merror "alias: ~M already is aliased." x)))
         (t
-         (putprop x y'alias)
+         (putprop x y 'alias)
          (putprop y x 'reversealias)
          (add2lnc y $aliases)
          y)))
+@end verbatim
 
+@noindent
+@b{Beispiel:} Die imagin@"are Einheit wird von kMaxima als @code{%i}
+dargestellt.  Bevorzugt der Nutzer die Darstellung @code{I}, kann er @code{I}
+als den Alias-Namen f@"ur @code{%i} definieren.  Liest der Parser einen Ausdruck
+wie @code{2*I}, dann wird das Symbol @code{|$I|} durch das Symbol @code{$%I}
+ersetzt, das intern die imagin@"are Einheit repr@"asentiert.  Das Symbol
+@code{$%I} hat den Eintrag @code{'reversealias} auf der Eigenschaftsliste.  Wird
+der Ausdruck @code{'((mtimes) 2 $%i)} ausgegeben, dann wird das Symbol
+@code{$%i} für die Anzeige durch das vom Nutzer definierte Symbol @code{|$I|}
+ersetzt.
+
+@example
+(%i1) alias(I, %i);
+(%o1) [I]
+
+(%i2) expr : 2*I;
+(%o2) 2*I
+
+(%i3) quit();
+0
+
+* $expr;
+((MTIMES) 2 $%I)
+
+* (symbol-plist '|$I|)
+(ALIAS $%I)
+
+* (symbol-plist '$%i)
+(REVERSEALIAS |$i| ASSIGN NEVERSET)
+@end example
+
+@findex remalias
+
+@verbatim
 (defun remalias (x &optional remp)
   (let ((y (and (or remp
                     (member x (cdr $aliases) :test #'equal))
