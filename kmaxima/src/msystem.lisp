@@ -163,7 +163,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun meval (form &aux u)
-  (cond 
+  (cond
     ((atom form)
      (cond ((not (symbolp form))
             form)
@@ -179,7 +179,7 @@
              ((macro-function op)
               (eval (cons op (cdr form))))
              (t
-              (cons (cons op nil) (mevalargs (cdr form)))))))
+              (cons (car form) (mevalargs (cdr form)))))))
     (t (eval form))))
 
 ;;; ----------------------------------------------------------------------------
