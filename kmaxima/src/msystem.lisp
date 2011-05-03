@@ -40,10 +40,16 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun bye ()
-  (sb-ext:quit))
+  #+(or cmu scl clisp) (ext:quit)
+  #+sbcl               (sb-ext:quit)
+  #+allegro            (excl:exit)
+  #+(or mcl openmcl)   (ccl:quit)
+  #+gcl                (lisp:quit)
+  #+ecl                (si:quit)
+  #+lispworks          (lispworks:quit))
 
 (defun $quit ()
-  (throw 'quit-to-lisp 0))
+  (throw 'maxima-quit-to-lisp 0))
 
 (defun used-area (&optional unused)
   (declare (ignore unused))
@@ -154,8 +160,6 @@
     (go loop)))
 
 ;;; ----------------------------------------------------------------------------
-
-(proclaim '(ftype (function (*) *) meval))
 
 (defun mevalargs (args)
   (mapcar #'meval args))
@@ -339,19 +343,18 @@
 
 (let ((maxima-started nil))
   (defun maxima-toplevel (&optional (input-stream *standard-input*) mode)
-    (let ((*package* (find-package :kmaxima)))
-      (if maxima-started
-          (format t "Maxima restarted.~%")
-          (progn
-            (if (not *maxima-quiet*) (maxima-banner))
-            (setq maxima-started t)))
-      (catch 'quit-maxima-toplevel
-             (in-package :kmaxima)
-             (loop
-               (catch 'maxima-continue
-                      (maxima-toplevel-loop input-stream mode)
-                      (format t *maxima-epilog*)
-                      (bye)))))))
+    (in-package :kmaxima)
+    (if maxima-started
+        (format t "Maxima restarted.~%")
+        (progn
+          (if (not *maxima-quiet*) (maxima-banner))
+          (setq maxima-started t)))
+    (catch 'maxima-quit-toplevel
+           (loop
+             (catch 'maxima-continue
+                    (maxima-toplevel-loop input-stream mode)
+                    (format t *maxima-epilog*)
+                    (bye))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -359,7 +362,7 @@
   (in-package :kmaxima)
   (let ((input-stream *standard-input*)
         (mode nil))
-    (catch 'quit-to-lisp
+    (catch 'maxima-quit-to-lisp
            (loop
             (with-simple-restart (kmaxima "Return to kMaxima top level.")
               (maxima-toplevel input-stream mode))))))
@@ -368,16 +371,14 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun $writefile (x)
-  (let ((msg (dribble x)))
-    (if msg
-        (format t "~&~A~&" msg))
+(defun $writefile (filename)
+  (let ((msg (dribble filename)))
+    (format t "~&~A~&" msg)
     '$done))
 
 (defun $closefile ()
   (let ((msg (dribble)))
-    (if msg
-        (format t "~&~A~&" msg)))
+    (format t "~&~A~&" msg))
   '$done)
 
 ;;; ----------------------------------------------------------------------------
