@@ -1,0 +1,57 @@
+@c -----------------------------------------------------------------------------
+@c File     : System.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 03.05.2011
+@c Revision : 03.05.2011
+@c 
+@c Copyright (C) 2011 Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{*maxima-version*}
+@defvr {Globale Variable} *maxima-version*
+
+Enth@"alt die aktuelle Version von kMaxima.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{maxima-banner}
+@deffn {Funktion} maxima-banner
+
+Beim ersten Start von kMaxima wird die Funktion aufgerufen, um eine Information
+auf der Standardausgabe anzuzeigen.  Die Funktion hat kein Argument.  Der
+R@"uckgabewert ist @code{nil}.
+
+@emph{Seiteneffekte:}
+
+Ausgabe der Information auf der Standardausgabe.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{bye}
+@deffn {Funktion} bye
+
+Beendet kMaxima und Lisp.  Die Funktion hat kein Argument.
+
+@emph{Bemerkung:}
+
+Die Funktion ruft eine vom Lisp abh@"angige Systemfunktion aus.  F@"ur SBCL
+wird die Funktion @code{sb-ext:quit} aufgerufen.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{$quit}
+@deffn {Nutzerfunktion} $quit
+
+Beendet kMaxima ohne die Lisp-Sitzung zu beenden.
+
+@emph{Bemerkung:}
+
+Mit dem Kommando @code{throw 'maxima-quit-to-lisp 0} wird die Catch-Anweisung
+in der Funktion @mref{cl-user::run} ausgef@"uhrt.
+@end deffn
+
+
+@c --- System.texi -------------------------------------------------------------

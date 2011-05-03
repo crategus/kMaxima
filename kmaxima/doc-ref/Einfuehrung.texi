@@ -1,0 +1,14 @@
+@c -----------------------------------------------------------------------------
+@c File     : Einfuehrung.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 30.04.2011
+@c Revision : 30.04.2011
+@c 
+@c Copyright (C) 2011 Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+Der Anfang einer technischen Referenz der Funktionen und Variablen von
+kMaxima.
+

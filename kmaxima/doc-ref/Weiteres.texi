@@ -1,0 +1,166 @@
+@c -----------------------------------------------------------------------------
+@c File     : Weiteres.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 29.04.2011
+@c Revision : 30.04.2011
+@c 
+@c Copyright (C) 2011 Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+Damit nichts verlorengeht, werden hier alle Funktionen und Variablen
+aufgef@"uhrt, f@"ur die noch kein Kapitel zur Verf@"ugung steht.
+
+@c -----------------------------------------------------------------------------
+@anchor{chrps}
+@defvr {Zustandsvariable} chrps
+
+In kMaxima Zustandsvariable lokal zu den Funktion @mref{mgrind} und
+@mrefdot{mprint}
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*display-labels-p*}
+@defvr {Globale Variable} *display-labels-p*
+Standardwert: @code{t}
+
+Kontrolliert die Ausgabe einer Marke, wenn ein Ausdruck ausgegeben wird, der
+den Operator @code{mlabel} f@"ur die Ausgabe einer Marke enth@"alt.  Der
+Standardwert ist @code{t} und die Marke wird ausgegeben.
+
+@emph{Beispiele:}
+
+Im ersten Beispiel wird die Marke @code{%o12} von der Funktion
+@mref{linear-display} ausgegeben, nicht dagegen im zweiten Beispiel.
+
+@example
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+(%o12) a+b
+NIL
+* (setq *display-labels-p* nil)
+NIL
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+a+b
+NIL
+@end example
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{fortranp}
+@defvr {Globale Variable} fortranp
+
+Kontrolliert in Maxima die Ausgabe von @code{mtext}-Ausdr@"ucken.  In kMaxima
+wird die Variable nicht ben@"otigt.  @code{mtext}-Ausdr@"ucke werden von der
+Funktion @mref{msize-mtext} formatiert.  Eine globale Variable ist nicht
+notwendig.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{linear-display}
+@deffn {Funktion} linear-display @var{form}
+
+Gibt den Ausdruck @var{form} auf der Standardausgabe @code{*standard-output*}
+aus.  Die R@"uckgabe ist immer @code{nil}.  @code{linear-display} ruft f@"ur
+die Ausgabe die Funktion @mref{mgrind} mit den Argumenten @var{form} und
+@code{*standard-output*} auf.
+
+@emph{Beispiele:}
+
+Das erste Beispiel zeigt die Ausgabe des Ausdrucks @code{a+b}
+auf der Konsole.  Im zweiten Beispiel wird dem Ausdruck eine Marke @code{%o12}
+vorangestellt.  Das letzte Beispiel zeigt die Ausgabe eines
+@code{mtext}-Ausdrucks.
+
+@example
+* (linear-display '((mplus) $a $b))
+a+b
+NIL
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+(%o12) a+b
+NIL
+* (linear-display '((mtext) $%o12 " " ((mplus) $a $b)))
+%o12 a+b
+NIL
+@end example
+
+In diesem Beispiel ist die Ausgabe der Marken unterdr@"uckt.
+
+@example
+* (setq *display-labels-p* nil)
+NIL
+* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
+a+b
+NIL
+@end example
+
+Ein Lisp-Symbol wird mit einem f@"uhrenden Fragezeichen ausgegeben.  Ist das
+Lisp-Symbol Argument des @code{mtext}-Operators wird kein Fragezeichen
+vorangestellt.
+
+@example
+* (linear-display 'symbol)
+?symbol
+NIL
+* (linear-display '((mtext) symbol))
+symbol
+NIL
+@end example
+
+@emph{Betroffen von:}
+
+Die globale Variable @mref{*display-labels-p*} kontrolliert, ob f@"ur den Fall
+eines @code{mlabel}-Ausdrucks die Marke ausgegeben werden soll.  Der
+Standardwert ist @code{t} und die Marken werden ausgegeben.
+
+Weiterhin sind globale Variablen wirksam, die die Anzeige betreffen.
+
+@emph{Seiteneffekte:}
+
+Die Ausgabe eines Ausdrucks auf der Konsole.
+
+@emph{Unterschied zu Maxima:}
+
+In Maxima ist diese Funktion als @code{linear-displa} bezeichnet.  Die Funktion
+@code{linear-display} ist gegen@"uber dem Original erheblich vereinfacht.  Die
+Sonderf@"alle für die Behandlung von @code{mlabel}- und
+@code{mtext}-Ausdr@"ucken sind entfallen.  Diese Ausdr@"ucke werden von
+@mref{msize} behandelt.
+
+Mit der neuen Implementierung tritt ein Programmfehler nicht mehr auf, der in
+Maxima noch vorhanden ist. Die Anzeige von @code{mtext}-Ausdr@"ucken ist nicht korrekt, wenn mehrere Argumente vorhanden sind und die Zeilen umgebrochen werden
+m@"ussen.
+
+Die folgende Sitzung zeigt den Programmfehler f@"ur die Version Maxima 5.24.
+Die Anzahl der Zeichen wird auf 10 pro Zeile begrenzt.  Im ersten Fall
+wird der Ausdruck @code{expr} korrekt formatiert von der Funktion @code{print}
+ausgegeben.  Im zweiten Fall wird nach Ausgabe der Zeichenkette @code{"..."}
+die Zeile nicht korrekt umgebrochen.  Ursache des Fehlers ist, dass f@"ur
+jedes einzelne Argument die Funktion @code{mgrind} aufgerufen und dabei
+die globale Variable @code{chrps} auf den Wert @code{0} zur@"uckgesetzt wird.
+
+@example
+(%i1) display2d:false$
+(%i2) linel:10$
+(%i3) expr:a+b+c+d+e+f+g+h+i+j$
+
+(%i4) print(expr)$
+
+j+i+h+g+f
+ +e+d+c+b
+ +a 
+
+(%i5) print(expr, "...", expr)$
+
+j+i+h+g+f
+ +e+d+c+b
+ +a ... j+i+h+g+f
+ +e+d+c+b
+ +a 
+
+(%i6) 
+@end example
+@end deffn
+
+@c --- End of File Weiteres.texi -------------------------------------------------
+

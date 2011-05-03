@@ -1,0 +1,82 @@
+\input texinfo
+@c -----------------------------------------------------------------------------
+@c File     : kmaxima-ref.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 29.04..2011
+@c Revision : 30.04.2011
+@c 
+@c Copyright (C) 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@ifnottex
+@documentencoding ISO-8859-1
+@end ifnottex
+
+@include macros.texi
+
+@setfilename maxima.info
+@synindex vr fn
+
+@settitle kMaxima Referenz Manual
+
+@setchapternewpage odd
+@ifinfo
+Das ist ein Texinfo kMaxima Manual
+
+Copyright (C) 2011 by Dr. Dieter Kaiser
+
+@format
+START-INFO-DIR-ENTRY
+* Maxima: (maxima).     Ein Computer Algebra System.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@titlepage
+@sp 10
+@center @titlefont{kMaxima Manual}
+@sp 1
+@center @titlefont{- Technische Referenz -}
+@sp 1
+@center Version 1.0
+@page
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@summarycontents
+@contents
+
+@ifnottex
+@node Top, Einf@"uhrung, (dir), (dir)
+@top
+@end ifnottex
+
+@menu
+* Einf@"uhrung::
+* System::
+* Weitere Funktionen und Variablen::
+* Index der Funktionen und Variablen::
+@end menu
+
+@node Einf@"uhrung, System, Top, Top
+@chapter Einf@"uhrung
+@include Einfuehrung.texi
+
+@node System, Weitere Funktionen und Variablen, Einf@"uhrung, Top
+@chapter System
+@include System.texi
+
+@node Weitere Funktionen und Variablen, Index der Funktionen und Variablen, System, Top
+@chapter Weitere Funktionen und Variablen
+@include Weiteres.texi
+
+@node Index der Funktionen und Variablen, , Weitere Funktionen und Variablen, Top
+@appendix Index der Funktionen und Variablen
+@printindex fn
+@bye
+
+@c --- End of file kmaxima.texi ------------------------------------------------
+
