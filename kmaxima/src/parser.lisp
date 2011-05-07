@@ -40,8 +40,6 @@
 (defvar *prompt-on-read-hang* nil)
 (defvar *read-hang-prompt* "")
 
-(defvar *current-line-info* nil)
-
 (defvar *mopl* nil)
 
 (defvar *mread-prompt* nil)
@@ -60,56 +58,10 @@
     |+| |-| |*| |^| |<| |=| |>| |(| |)| |[| |]| |,|
     |:| |!| |#| |'| |$| |;|
     ;; Two character
-    |**| |^^| |:=| |::| |<=| |>=| |''|
+    |**| |^^| |:=| |::| |<=| |>=| |''| |&&|
     ;; Three character
     |::=|
     )
-
-;;; ----------------------------------------------------------------------------
-
-(defstruct instream
-  stream
-  (line 0 :type fixnum)
-  name)
-
-(let ((stream-list nil))
-  (defun get-instream (str)
-    (or (dolist (v stream-list)
-          (cond ((eq str (instream-stream v))
-                 (return v))))
-        (let (name errset)
-          (errset (setq name (namestring str)))
-          (car (push (make-instream :stream str :name name) stream-list)))))
-
-  (defun newline (str)
-    (incf (instream-line (get-instream str)))
-    (values))
-
-  (defun find-stream (stream)
-     (dolist (v stream-list)
-       (cond ((eq stream (instream-stream v))
-              (return v))))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun add-lineinfo (lis)
-  (if (or (atom lis)
-          (and (eq *parse-window* *standard-input*)
-               (not (find-stream *parse-stream*))))
-      lis
-      (let* ((st (get-instream *parse-stream*))
-             (n (instream-line st))
-             (nam (instream-name st)))
-        (or nam (return-from add-lineinfo lis))
-        (setq *current-line-info*
-              (cond ((eq (cadr *current-line-info*) nam)
-                     (cond ((eql (car *current-line-info*) n)
-                            *current-line-info*)
-                           (t  (cons n (cdr *current-line-info*)))))
-                    (t (list n nam 'src))))
-        (cond ((null (cdr lis))
-               (list (car lis) *current-line-info*))
-              (t (append lis (list *current-line-info*)))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -165,8 +117,6 @@
   (let ((tem (tyi stream eof)))
     (setf (car *parse-window*) tem
           *parse-window* (cdr *parse-window*))
-    (if (eql tem #\newline)
-        (newline stream))
     tem))
 
 (defun parse-tyi ()
@@ -544,7 +494,7 @@
        (set-lbp-and-rbp ',op ',lbp ',rbp))))
 
 (defun set-lbp-and-rbp (op lbp rbp)
-  (cond 
+  (cond
     ((not (consp op))
      (let ((existing-lbp (get op 'lbp))
            (existing-rbp (get op 'rbp)))
@@ -579,7 +529,7 @@
                   ((null lis) nl))))
     `(progn 
        'compile
-       (defprop ,op ,(let nil (copy-tree keys )) keys)
+       (defprop ,op ,(let nil (copy-tree keys)) keys)
        ,@(mapcar 
            #'(lambda (data)
                `(defprop 
@@ -646,7 +596,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun mheader (op)
-  (add-lineinfo (or (getprop op 'mheader) (list op))))
+  (or (getprop op 'mheader) (list op)))
 
 (defmacro def-mheader (op header) `(defprop ,op ,header mheader))
 
@@ -666,7 +616,7 @@
 (defun mread (&rest read-args)
   (progn
     (when *mread-prompt*
-      (and *parse-window* 
+      (and *parse-window*
            (setf (car *parse-window*) nil
                  *parse-window* (cdr *parse-window*)))
       (princ *mread-prompt*)
@@ -684,7 +634,6 @@
           (case (first-c)
             ((|$;| |$$|
               )
-             (setf *current-line-info* nil)
              (return (list (mheader (pop-c))
                            (if labels
                                (cons (mheader '|$[| ) (nreverse labels)))
@@ -700,61 +649,62 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun parse (mode rbp)
-  (do ((left (nud-call (pop-c))         ; Envoke the null left denotation
-       (led-call (pop-c) left)))        ;  and keep calling LED ops as needed
-      ((>= rbp (lbp (first-c)))         ; Until next op lbp too low
-       (convert left mode))))           ;  in which case, return stuff seen
+  (do ((left (nud-call (pop-c))            ; Envoke the null left denotation
+             (led-call (pop-c) left)))     ;  and keep calling LED ops as needed
+      ((>= rbp (lbp (first-c)))            ; Until next op lbp too low
+       (convert left mode))))              ;  in which case, return stuff seen
 
 (defun parse-prefix (op)
-  (list (pos op)                        ; Operator mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (parse (rpos op) (rbp op))))    ; Convert single argument for use
+  (list (pos op)                           ; Operator mode
+        (mheader op)                       ; Standard Macsyma expression header
+        (parse (rpos op) (rbp op))))       ; Convert single argument for use
 
 (defun parse-postfix (op l)
-  (list (pos op)                        ; Operator's mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (convert l (lpos op))))         ; Convert single argument for use
+  (list (pos op)                           ; Operator's mode
+        (mheader op)                       ; Standard Macsyma expression header
+        (convert l (lpos op))))            ; Convert single argument for use
 
 (defun parse-infix (op l)
-  (list (pos op)                        ; Operator's mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (convert l (lpos op))           ; Convert arg1 for immediate use
-        (parse (rpos op) (rbp op))))    ; Look for an arg2 
+  (list (pos op)                           ; Operator's mode
+        (mheader op)                       ; Standard Macsyma expression header
+        (convert l (lpos op))              ; Convert arg1 for immediate use
+        (parse (rpos op) (rbp op))))       ; Look for an arg2 
 
 (defun parse-nary (op l)
-  (list* (pos op)                           ; Operator's mode
-         (mheader op)                       ; Normal Macsyma operator header
-         (convert l (lpos op))              ; Check type-match of arg1 
-         (prsnary op (lpos op) (lbp op))))  ; Search for other args
+  (list* (pos op)                          ; Operator's mode
+         (mheader op)                      ; Normal Macsyma operator header
+         (convert l (lpos op))             ; Check type-match of arg1 
+         (prsnary op (lpos op) (lbp op)))) ; Search for other args
 
 (defun parse-matchfix (op)
-  (list* (pos op)                           ; Operator's mode
-         (mheader op)                       ; Normal Macsyma operator header
+  (list* (pos op)                          ; Operator's mode
+         (mheader op)                      ; Normal Macsyma operator header
          (prsmatch (and (symbolp op)
                         (get op 'match))
-                   (lpos op))))             ; Search for matchfixed forms
+                   (lpos op))))            ; Search for matchfixed forms
 
 (defun parse-nofix (op)
-  (list (pos op) (mheader op)))
+  (list (pos op)
+        (mheader op)))
 
 (defun prsnary (op mode rbp)
-  (do ((nl (list (parse mode rbp))          ; Get at least one form
-           (cons (parse mode rbp) nl)))     ;  and keep getting forms
-      ((not (eq op (first-c)))              ; until a parse pops on a new op
-       (nreverse nl))                       ;  at which time return forms
-      (pop-c)))                             ; otherwise pop op
+  (do ((nl (list (parse mode rbp))         ; Get at least one form
+           (cons (parse mode rbp) nl)))    ;  and keep getting forms
+      ((not (eq op (first-c)))             ; until a parse pops on a new op
+       (nreverse nl))                      ;  at which time return forms
+      (pop-c)))                            ; otherwise pop op
 
-(defun prsmatch (match mode)
-  (cond ((eq match (first-c)) (pop-c) nil)
-        (t
-         (do ((nl (list (parse mode 10))
-                  (cons (parse mode 10) nl)))
-             ((eq match (first-c))
-              (pop-c)
-              (nreverse nl))
-           (if (eq '|$,| (first-c))
-               (pop-c)
-               (mread-synerr "Missing ~A"
+(defun prsmatch (match mode)                      ; Parse for matchfix char
+  (cond ((eq match (first-c)) (pop-c) nil)        ; If immediate match, ()
+        (t                                        ; Else, ...
+         (do ((nl (list (parse mode 10))          ;  Get first element
+                  (cons (parse mode 10) nl)))     ;   and Keep adding elements
+             ((eq match (first-c))                ;  Until we hit the match.
+              (pop-c)                             ;   Throw away match.
+              (nreverse nl))                      ;   Put result back in order
+           (if (eq '|$,| (first-c))               ;  If not end, look for ","
+               (pop-c)                            ;   and pop it if it's there
+               (mread-synerr "Missing ~A"         ;   or give an error message.
                              (mopstrip match)))))))
 
 (defun convert (item mode)
@@ -785,8 +735,8 @@
   (setq left (convert left '$any))
   (if (numberp left) (parse-err))
   (let ((header (if (atom left)
-                    (add-lineinfo (list (amperchk left) 'array))
-                    (add-lineinfo '(mqapply array))))
+                    (list (amperchk left) 'array)
+                    '(mqapply array)))
         (right (prsmatch '|$]| '$any)))
     (cond ((null right)
            (mread-synerr "No subscripts given"))
