@@ -4,17 +4,22 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 03.05.2011
-@c Revision : 03.05.2011
+@c Revision : 07.05.2011
 @c 
 @c Copyright (C) 2011 Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @c -----------------------------------------------------------------------------
-@anchor{*maxima-version*}
-@defvr {Globale Variable} *maxima-version*
+@anchor{bye}
+@deffn {Funktion} bye
 
-Enth@"alt die aktuelle Version von kMaxima.
-@end defvr
+Beendet kMaxima und Lisp.  Die Funktion hat kein Argument.
+
+@emph{Bemerkung:}
+
+Die Funktion ruft eine vom Lisp abh@"angige Systemfunktion aus.  F@"ur SBCL
+wird die Funktion @code{sb-ext:quit} aufgerufen.
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{maxima-banner}
@@ -30,15 +35,134 @@ Ausgabe der Information auf der Standardausgabe.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@anchor{bye}
-@deffn {Funktion} bye
+@anchor{*maxima-epilog*}
+@defvr {Globale Variable} *maxima-epilog*
+Standardwert: @code{""}
 
-Beendet kMaxima und Lisp.  Die Funktion hat kein Argument.
+Der globalen Variablen @code{*maxima-epilog*} kann ein Text zugewiesen werden,
+der ausgegeben wird, wenn die Funktion @mref{maxima-toplevel} beendet wird.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*maxima-quiet*}
+@defvr {Globale Variable} *maxima-quiet*
+Standardwert: @code{nil}
+
+Hat die globale Variable @code{*maxima-quiet*} den Wert @code{t}, gibt die
+Funktion @mref{maxima-banner} keine Information beim Starten von kMaxima aus.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{maxima-toplevel}
+@deffn {Funktion} maxima-toplevel (@var{input-stream}, @var{mode})
+
+Die Funktion @code{maxima-toplevel} startet die eigentliche Hauptschleife
+@mrefdot{maxima-toplevel-loop}  @code{maxima-toplevel} wird von der Funktion
+@mref{cl-user::run} mit den Werten @code{*standard-input*} f@"ur das Argument
+@var{input-stream} und @var{nil} f@"ur das Argument @var{mode} aufgerufen.
+
+@emph{Beispiel:}
+
+@example
+* (load "kmaxima1.lisp")
+T
+* (in-package :kmaxima)
+#<PACKAGE "KMAXIMA">
+* (maxima-toplevel *standard-input* nil)
+kMaxima 0.1
+using Lisp SBCL 1.0.45
+Distributed under the GNU Public License. See the file COPYING.
+Dedicated to the memory of William Schelter.
+KMAXIMA> 
+@end example
+
+@emph{H@"angt ab von:}
+
+Die globale Variable @mref{*maxima-quiet*} kontrolliert, ob ein Banner beim
+ersten Start von Maxima ausgegeben wird.  Die globale Variablen
+@mref{*maxima-epilog*} kann ein Text zugewiesen werden, der ausgegeben wird,
+wenn @code{maxima-toplevel} beendet wird.
+
+@emph{Seiteneffekte:}
+
+Die Ausgabe von Meldungen auf der Konsole, wenn die Funktion
+@code{maxima-toplevel} aufgerufen wird.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{maxima-toplevel-loop}
+@deffn {Funktion} maxima-toplevel-loop @var{input-stream} @var{mode}
+
+Die Funktion @code{maxima-toplevel-loop} ist die zentrale Funktion f@"ur das
+Einlesen eines mathematischen Ausdrucks, der Auswertung und Vereinfachung sowie
+der Ausgabe des Ergebnisses.  Die Funktion wird einer Endlosschleife von der
+Funktion @mref{maxima-toplevel} ausgef@"uhrt.  Das Argument @code{input-stream}
+bezeichnet die Eingabe und das Argument @code{mode} einen Modus in dem die
+Funktion ausgef@"uhrt werden soll.  Sind die Werte @code{*standard-input*} und
+@code{nil}, dann wird von der Tastatur eingelesen.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{*maxima-version*}
+@defvr {Globale Variable} *maxima-version*
+
+Enth@"alt die aktuelle Version von kMaxima.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{meval}
+@deffn {Funktion} meval @var{form}
+
+Implementiert den Evaluator f@"ur kMaxima, der einen kMaxima-Ausdruck @var{form}
+auswertet.  Die R@"uckgabe ist das Ergebnis der Auswertung.  @var{form} muss ein
+g@"ultiger kMaxima-Ausdruck sein.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{mevalargs}
+@deffn {Funktion} mevalargs @var{args}
+
+Wendet die Funktion @mref{meval} nacheinander auf die Argumente der Liste
+@var{args} an.   @code{mevalargs} wird von der Funktion @code{meval} aufgerufen,
+um die Argumente eines Operators auszuwerten.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{mfunctionp}
+@deffn {Funktion} mfunctionp @var{x}
+
+Pr@"uft, ob @var{x} ein Symbol ist, das eine Funktion repr@"asentiert.
 
 @emph{Bemerkung:}
 
-Die Funktion ruft eine vom Lisp abh@"angige Systemfunktion aus.  F@"ur SBCL
-wird die Funktion @code{sb-ext:quit} aufgerufen.
+@code{mfunctionp} ist eine Erweiterung der Lisp-Funktion @code{functionp}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{cl-user::run}
+@deffn {Funktion} cl-user::run
+
+Startet kMaxima aus einer Lisp-Sitzung.
+
+@emph{Beispiel:}
+
+@example
+* (load "kmaxima1.lisp")
+T
+* (run)
+kMaxima 0.1
+using Lisp SBCL 1.0.45
+Distributed under the GNU Public License. See the file COPYING.
+Dedicated to the memory of William Schelter.
+KMAXIMA> 
+@end example
+
+@emph{Bemerkung:}
+
+Die Funktion @code{cl-user::run} ist der geeignete Ort, um die Lisp-Umgebung
+zu initialisieren.  Die Funktion definiert eine Catch-Anweisung mit dem
+Schl@"usselwort @code{'maxima-quit-to-lisp}.  Damit kann kMaxima beendet und
+zur Lisp-Sitzung zur@"uckgekehrt werden.
 @end deffn
 
 @c -----------------------------------------------------------------------------

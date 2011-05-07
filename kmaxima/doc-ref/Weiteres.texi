@@ -107,7 +107,7 @@ symbol
 NIL
 @end example
 
-@emph{Betroffen von:}
+@emph{Hängt ab von:}
 
 Die globale Variable @mref{*display-labels-p*} kontrolliert, ob f@"ur den Fall
 eines @code{mlabel}-Ausdrucks die Marke ausgegeben werden soll.  Der
