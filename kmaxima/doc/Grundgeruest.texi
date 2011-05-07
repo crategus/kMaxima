@@ -33,12 +33,12 @@
 @subsection @"Ubersicht und Definition des Package @code{:kmaxima}
 @c -----------------------------------------------------------------------------
 
-In einem ersten Schritt wird ein Grundger@"ust aufgebaut, das nach und
-nach mit den Funktionalit@"aten eines Computeralgebrasystems aufgef@"ullt wird.
-Dieses Grundger@"ust besteht aus den Funktionen @code{cl-user::run},
-@code{maxima-toplevel} und @code{maxima-toplevel-loop}.  Erg@"anzend
-sind die zwei Funktionen @code{maxima-banner} und @code{bye} definiert.  Drei
-globale Variablen @code{*maxima-quiet*}, @code{*maxima-epilog*} und
+In einem ersten Schritt wird ein Grundger@"ust aufgebaut, das nach und nach mit
+den Funktionalit@"aten eines Computeralgebrasystems aufgef@"ullt wird.  Dieses
+Grundger@"ust besteht aus den Funktionen @code{cl-user::run},
+@code{maxima-toplevel} und @code{maxima-toplevel-loop}.  Erg@"anzend werden die
+zwei Funktionen @code{maxima-banner} und @code{bye} definiert.  Drei globale
+Variablen @code{*maxima-quiet*}, @code{*maxima-epilog*} und
 @code{*maxima-version*} werden eingef@"uhrt.
 
 Die Auswertung von kMaxima-Ausdr@"ucken, die mathematische Ausdr@"ucke,
@@ -106,14 +106,19 @@ die Tastatur ist.  Wird von der Standardeingabe gelesen, hat die Variable
 @code{mode} den Wert @code{nil}.  Die Funktion @code{maxima-toplevel} wird mit
 diesen Argumenten gestartet.
 
+Die Funktionen und Variablen sind im Package @code{:kmaxima} definiert, das
+als erstes von der Funktion @code{run} geladen wird, um diese verf@"ugbar zu
+machen.
+
 @vindex maxima-quit-to-lisp
 
-Die Funktion @code{run} definiert den Catch @code{'maxima-quit-to-lisp}.  Wird
-an irgendeiner Stelle im kMaxima-Code eine Ausnahme zum Beispiel mit dem Befehl
-@code{(throw 'maxima-quit-to-lisp 0)} generiert, wird die Endlosschleife beendet 
-und Maxima kehrt zum Lisp-Prompt zur@"uck.  Der R@"uckgabewert ist diesem Fall
-@code{0}.  Mit anderen R@"uckgabewerten k@"onnen verschiedene Situationen 
-signalisiert werden, die zum Abbruch des Programms gef@"uhrt haben.
+Die Funktion @code{run} definiert den Catch-Anweisung mit dem Schl@"usselwort
+@code{'maxima-quit-to-lisp}.  Wird an irgendeiner Stelle im kMaxima-Code eine
+Ausnahme zum Beispiel mit dem Befehl @code{(throw 'maxima-quit-to-lisp 0)}
+generiert, wird die Endlosschleife beendet und Maxima kehrt zum Lisp-Prompt
+zur@"uck.  Der R@"uckgabewert ist diesem Fall @code{0}.  Mit anderen
+R@"uckgabewerten k@"onnen verschiedene Situationen signalisiert werden, die zum
+Abbruch des Programms gef@"uhrt haben.
 
 Das Lisp-Makro @code{with-simple-restart} bewirkt, dass zum Schl@"usselwort
 @code{kmaxima} der Eintrag @code{"Return to kMaxima top level."} in die Liste
@@ -124,13 +129,13 @@ aufgerufen, erh@"alt der Nutzer die M@"oglichkeit, kMaxima neu zu starten.
 @b{Beispiel:}
 Werden alle Funktionen in @ref{kmaxima.lisp} geladen, kann kMaxima mit dem
 Kommando @code{(run)} vom Lisp-Prompt @code{*} gestartet werden.  Es wird eine
-Information ausgegeben und der Prompt @code{KMAXIMA} wird angezeigt.  Mit dem
+Information ausgegeben und der Prompt @code{KMAXIMA} angezeigt.  Mit dem
 Kommando @code{(break)} wird der Lisp-Debugger gestartet.  Unter den
 R@"uckkehrm@"oglichkeiten findet sich unter Punkt 1 die Auswahl
 @code{"Return to kMaxima top level."}.  Wird diese Option ausgew@"ahlt, wird
 @code{"kMaxima restarted."} ausgegeben, Maxima wird neu gestartet und der
-Prompt @code{KMAXIMA} wird angezeigt.  Die Ausgaben des Lisp-Debuggers h@"angen
-von dem verwendeten Lisp ab.
+Prompt @code{KMAXIMA} angezeigt.  Die Ausgaben des Lisp-Debuggers h@"angen von
+dem verwendeten Lisp ab.
 
 @example
 * (run)
@@ -167,9 +172,9 @@ KMAXIMA>
 Nach der Initialisierung der Lisp-Umgebung startet @code{run} die Funktion
 @code{maxima-toplevel}.  Die Funktion @code{maxima-toplevel} ist die geeignete
 Stelle, um die kMaxima-Umgebung zu initialisieren.  Die Funktion hat die zwei
-optionalen Argumente @code{input-stream} und @code{mode}.  @code{run} startet
-@code{maxima-toplevel} mit den Standardwerten @code{*standard-input*} und
-@code{nil}.  Diese Werte bezeichnen die Eingabe von der Tastatur.
+Argumente @code{input-stream} und @code{mode}.  @code{run} startet
+@code{maxima-toplevel} mit den Werten @code{*standard-input*} und @code{nil}.
+Diese Werte bezeichnen die Eingabe von der Tastatur.
 
 @vindex *maxima-quiet*
 @vindex *maxima-epilog*
@@ -191,14 +196,14 @@ Banners mit der Funktion @code{maxima-banner} unterdr@"uckt.
 
 @verbatim
 (let ((maxima-started nil))
-  (defun maxima-toplevel (&optional (input-stream *standard-input*) mode)
+  (defun maxima-toplevel (input-stream mode)
     (in-package :kmaxima)
     (if maxima-started
         (format t "kMaxima restarted.~%")
         (progn           
           (if (not *maxima-quiet*) (maxima-banner))
           (setq maxima-started t)))
-    (catch 'quit-maxima-toplevel
+    (catch 'maxima-quit-toplevel
            (loop
              (catch 'maxima-continue
                     (maxima-toplevel-loop input-stream mode)
@@ -220,17 +225,18 @@ Lisp-Sitzung zur@"uckkehrt, wo der Nutzer das Package gewechselt hat.
 @vindex maxima-quit-toplevel
 @vindex maxima-continue
 
-@code{maxima-toplevel} definiert den Catch @code{'maxima-quit-toplevel}, welcher
-die Endlosschleife beendet.  Wurde @code{maxima-toplevel} von @code{run}
-gestartet, wird von der Funktion @code{run} kMaxima neu gestartet.  Der zweite
-Catch @code{'maxima-continue} startet die Funktion @code{maxima-toplevel-loop}
-neu.
+@code{maxima-toplevel} definiert eine Catch-Anweisung mit dem Schl@"usselwort
+@code{'maxima-quit-toplevel}, welche die Endlosschleife beendet.  Wurde
+@code{maxima-toplevel} von @code{run} gestartet, wird von der Funktion
+@code{run} kMaxima neu gestartet.  Die zweite Catch-Anweisung mit dem
+Schl@"usselwort @code{'maxima-continue} startet die Funktion
+@code{maxima-toplevel-loop} neu.
 
 @b{Beispiel:}
 Die Sitzung zeigt die unterschiedlichen Aufgaben der Catch-Anweisungen.  Im
 ersten Fall wird die Funktion @code{maxima-toplevel-loop} neu gestartet, im
 zweiten Fall wird kMaxima neu gestartet, im letzten Fall wird kMaxima beendet
-und der Lisp-Prompt @code{*} wird angezeigt.
+und der Lisp-Prompt @code{*} angezeigt.
 
 @need 600
 @example
@@ -290,12 +296,12 @@ Lisp-Dialekte ber@"ucksichtigt.
 @subsection Implementierung der Funktion @code{maxima-toplevel-loop}
 @c -----------------------------------------------------------------------------
 
-Nachdem in den Funktionen @code{run} die Lisp-Umgebung und in 
-@code{maxima-toplevel} die kMaxima-Umgebung initialisiert sind, wird die 
-Funktion @code{maxima-toplevel-loop} gestartet.  Auch diese Funktion startet
+Nachdem in den Funktionen @code{run} die Lisp-Umgebung und in
+@code{maxima-toplevel} die kMaxima-Umgebung initialisiert sind, wird die
+Funktion @code{maxima-toplevel-loop} aufgerufen.  Auch diese Funktion startet
 eine endlose Schleife.
 
-Dies ist eine erste Implementation der Funktion @code{maxima-toplevel-loop},
+Dies ist eine erste Implementierung der Funktion @code{maxima-toplevel-loop},
 die zun@"achst eine Lisp-@code{read}-@code{eval}-Schleife ausf@"uhrt.
 
 @verbatim
@@ -322,14 +328,12 @@ wird in @ref{Der erste Evaluator} durch die Funktion @code{meval} ersetzt,
 @code{read} durch @code{mread} in @ref{Parser} und @code{format} durch
 @code{linear-display} in @ref{Lineare Anzeige}.
 
-@b{Beispiel:} Im Folgenden wird eine Beispielsitzung gezeigt, die allein mit den
-oben definierten Funktionen arbeitet.  kMaxima wird dem Kommando @code{(run)}
-von der Lisp-Kommandozeile gestartet.  Das kMaxima-Banner wird ausgegeben und
-die Eingabeaufforderung @code{KMAXIMA} angezeigt.  Da eine
-Lisp-@code{read}-@code{eval}-Schleife implementiert ist, kann jeder Lisp-Befehl
-eingegeben werden.  Hier ist es das Lisp-Kommando @code{(+ 2 2)}.  Zuletzt
-werden die kMaxima-Sitzung und die Lisp-Sitzung mit dem Kommando @code{(bye)}
-beendet.
+@b{Beispiel:} kMaxima wird dem Kommando @code{(run)} von der Lisp-Kommandozeile
+gestartet.  Das kMaxima-Banner wird ausgegeben und die Eingabeaufforderung
+@code{KMAXIMA} angezeigt.  Da eine Lisp-@code{read}-@code{eval}-Schleife
+implementiert ist, kann jeder Lisp-Befehl eingegeben werden.  Hier ist es das
+Lisp-Kommando @code{(+ 2 2)}.  Zuletzt werden die kMaxima-Sitzung und die
+Lisp-Sitzung mit dem Kommando @code{(bye)} beendet.
 
 @example
 * (run)
