@@ -125,7 +125,7 @@
 (defvar *maxima-epilog* "")
 
 (let ((maxima-started nil))
-  (defun maxima-toplevel (&optional (input-stream *standard-input*) mode)
+  (defun maxima-toplevel (input-stream mode)
     (in-package :kmaxima)
     (if maxima-started
         (format t "kMaxima restarted.~%")
