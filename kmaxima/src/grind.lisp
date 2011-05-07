@@ -293,7 +293,7 @@
   (declare (special *display-labels-p*))
   (if *display-labels-p*
       (setq l (cons (msize (cadr x) (list #\( ) (list #\) #\ ) nil nil) l)))
-  (msize (caddr x) l nil *lop* *rop*))
+  (msize (caddr x) l r *lop* *rop*))
 
 (defprop mtext msize-mtext grind)
 
@@ -429,6 +429,7 @@
 (defprop mminus 100 lbp)
 
 (defprop mequal msize-infix grind)
+(defprop mequal (#\=) strsym)
 (defprop mequal 80 lbp)
 (defprop mequal 80 rbp)
 
