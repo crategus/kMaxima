@@ -50,10 +50,14 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun mminusp (x)
-  (and (not (atom x)) (eq (caar x) 'mminusp)))
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'mminus)))
 
 (defun mlistp (x)
-  (and (not (atom x)) (not (atom (car x))) (eq (caar x) 'mlist)))
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'mlist)))
 
 ;;; ----------------------------------------------------------------------------
 
