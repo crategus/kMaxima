@@ -1,0 +1,230 @@
+@c -----------------------------------------------------------------------------
+@c File     : Parser.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 07.05.2011
+@c Revision : 07.05.2011
+@c 
+@c Copyright (C) 2011 Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@menu
+* Fehlerbehandlung des Parsers::
+* Einlesen von Zeichen::
+* Weitere Funktionen und Variablen des Parsers::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Fehlerbehandlung des Parsers, Einlesen von Zeichen, Parser, Parser
+@section Fehlerbehandlung des Parsers
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{mopstrip}
+@deffn {Funktion} mopstrip @var{x}
+
+Bereitet das Argument @var{x} für die Ausgabe auf der Konsole vor.  Die Symbole
+@var{t} und @var{nil} werden als @code{'true} und @code{'false} zurückgegeben.
+Ist @var{x} ein Symbol mit einem @code{reversealias}, wird dieser zurückgeben.
+Von Maxima-Symbolen wird @code{$}- oder @code{%}-Zeichen entfernt.
+
+Die Funktion wird nur im Zusammenhang der Ausgabe einer Fehlermeldung von der
+Funktion @mref{mread-synerr} genutzt.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{mread-synerr}
+@deffn {Funktion} mread-synerr @var{format-string} @var{l}
+
+Gibt eine Meldung auf der Konsole aus, wenn beim Parsen der Eingabe ein Fehler
+auftritt.  Das Argument @var{format-string} enthält den Text für die Ausgabe.
+Das Argument @var{l} ist eine Liste der Parameter für die Ausgabe.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-err}
+@deffn {Funktion} parse-err
+
+Ruft die Funktion @mref{mread-synerr} mit der Fehlermeldung
+@code{"Syntax error"} auf.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-bug-err}
+@deffn {Funktion} parse-bug-err @var{op}
+
+Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass ein Bug für den
+Operator @var{op} im Parser vorliegt.  Die Funktion wird im Parser aufgerufen,
+wenn ein unerwarteter Fehler auftritt.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-delim-err}
+@deffn {Funktion} parse-delim-err @var{op}
+
+Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass der Operator
+@var{op} mit der Definition als Begrenzungszeichen fehlerhaft eingesetzt wurde.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-erb-err}
+@deffn {Funktion} parse-erb-err @var{op} @var{l}
+
+Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass der Operator
+@var{op} mit der Definition als Begrenzungszeichen fehlerhaft eingesetzt wurde.
+Das zweite Argument @var{l} wird von @code{parse-erb-err} ignoriert.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-premterm-err}
+@deffn {Funktion} parse-premterm-err @var{op}
+
+Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass die Eingabe
+unerwartet beendet wurde.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Einlesen von Zeichen, Weitere Funktionen und Variablen des Parsers, Fehlerbehandlung des Parsers, Parser
+@section Einlesen von Zeichen
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{*parse-tyi*}
+@defvr {Globale Variable} *parse-tyi*
+Standardwert: @code{nil}
+
+Puffer der Funktionen @mrefcomma{parse-tyi} @mref{parse-tyipeek} und
+@mrefdot{unparse-tyi}  Die Funktion @code{unparse-tyi} stellt Zeichen in den
+Puffer zur@"uck.  Die Funktionen @code{parse-tyi} und @code{parse-tyipeek}
+pr@"ufen zuerst, ob ein Zeichen im Puffer vorliegt und geben, wenn vorhanden,
+dieses zur@"uck.  Ansonsten wird das n@"achste Zeichen vom Stream geholt.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*parse-stream*}
+@defvr {Globale Variable} *parse-stream*
+Standwert: @code{nil}
+
+Der Stream von dem der Parser Zeichen einliest.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*parse-stream-eof*}
+@defvr {Globale Variable} *parse-stream-eof*
+Standardwert: @code{-1}
+
+Das Zeichen, mit dem der Parser auf das Ende eines Streams testet.  Die Variable
+hat den Wert @code{-1}.  Unklar ist, warum hier nicht der Wert
+@mref{*mread-eof-obj*} verwendet wird.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*parse-window*}
+@defvr {Globale Variable} *parse-window*
+Standardwert: @code{nil}
+
+Ringpuffer f@"ur die letzten Zeichen, die der Parser gelesen hat.  Die Zeichen
+in diesem Ringpuffer werden von der Fehlerbehandlung @mref{mread-synerr} des
+Parsers genutzt, um dem Nutzer die Stelle in der Eingabe anzuzeigen, wo ein
+Fehler beim Parsen einer Eingabe aufgetreten ist.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*parse-window-length*}
+@defvr {Globale Variable} *parse-window-length*
+Standardwert: @code{25}
+
+Die Gr@"o@ss{}e des Ringpuffers @mrefdot{*parse-window*}  Der Wert wird zu 25
+initialisiert.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*prompt-on-read-hang*}
+@defvr {Globale Variable} *prompt-on-read-hang*
+Standardwert: @code{nil}
+
+Kann von der Funktion @mref{tyi} kein Zeichen gelesen werden, kontrolliert
+die Variable, ob der Nutzer aufgefordert wird, eine Eingabe von der Tastatur
+vorzunehmen.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{*read-hang-prompt*}
+@defvr {Globale Variable} *read-hang-prompt*
+Standardwert: @code{""}
+
+Das Promptzeichen f@"ur die Eingabeaufforderung, wenn der Nutzer von der
+Funktion @mref{tyi} zum Eingeben von Zeichen aufgefordert wird.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{tyi}
+@deffn {Funktion} tyi @var{stream} @var{eof}
+
+Die elementare Routine f@"ur das Lesen eines Zeichens vom Stream 
+@code{*parse-stream*}.  Die Argumente der Funktion sind optional.  Wird die
+Funktion ohne Argumente aufgerufen, werden die Zeichen von der Standardeingabe
+@code{*standard-input*} gelesen und das @code{EOF}-Zeichen ist @code{nil}.
+
+Kann kein Zeichen vom Stream gelesen werden und hat die globale Variable
+@code{*prompt-on-read-hang*} den Wert @code{true}, wird der Prompt
+@code{*read-hang-prompt*} ausgegeben, um ein Zeichen von der Tastatur zu lesen.
+
+Tritt ein Backslash-Zeichen @code{#\} auf, werden alle folgenden
+@code{#\return}- und @code{#\newline}-Zeichen aus dem Stream gelesen.  Mit dem
+Backslah-Zeichen @code{#\} werden Zeilen in der Eingabe fortgesetzt.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-tyi-init}
+@deffn {Funktion} parse-tyi-init @var{stream} @var{eof}
+
+Die Funktion @code{parse-tyi-init} wird immer dann von der Funktion
+@mref{parse-tyi} aufgerufen, wenn das n@"achste Zeichen vom Stream zu lesen ist.
+Ist die globale Variable @mref{*parse-window*} noch nicht initialisiert, wird
+dies erledigt.  @code{*parse-window*} wird dazu eine Liste der L@"ange
+@mref{*parse-window-length*} zugewiesen und mit dem Aufruf @code{nonc} zu
+einer zirkul@"aren Liste initialisiert.  @code{parse-tyi-init} holt sodann mit
+der Funktion @mref{tyi} das n@"achste Zeichen vom Stream, schreibt das Zeichen
+in die zirkul@"are Liste @code{*parse-window*} und gibt das Zeichen eingelesene
+zur@"uck.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-tyi}
+@deffn {Funktion} parse-tyi
+
+Der Parser ruft niemals die Funktion @mref{parse-tyi-init} direkt auf, sondern
+die Funktion @code{parse-tyi}.  Die Funktion pr@"uft zun@"achst, ob ein Zeichen
+im Puffer @mref{*parse-tyi*} vorliegt.  Ist dies der Fall, wird dies
+zur@"uckgegeben und der Puffer entsprechend korrigiert.  Ansonsten wird mit der
+Funktion @code{parse-tyi-init} das n@"achste Zeichen vom Stream
+@mref{*parse-stream*} geholt.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{parse-tyipeek}
+@deffn {Funktion} parse-tyipeek
+
+Die Funktion @code{parse-tyipeek} holt das n@"achste Zeichen vom Stream ohne es
+vom Stream zu entfernen.  Entweder ist noch ein Zeichen im Puffer
+@mref{*parse-stream*} vorhanden, welches zur@"uckgegeben wird, oder es wird mit
+der Funktion @mref{parse-tyi-init} das n@"achste Zeichen vom Stream gelesen und
+in den Puffer geschrieben.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{unparse-tyi}
+@deffn {Funktion} unparse-tyi @var{ch}
+
+Mit der Funktion @code{unparse_tyi} wird das Zeichen @code{ch} wieder in
+in den Puffer @mref{*parse-tyi*} zur@"uckgeschrieben.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Weitere Funktionen und Variablen des Parsers, , Einlesen von Zeichen, Parser
+@section Weitere Funktionen und Variablen des Parsers
+@c -----------------------------------------------------------------------------
+
+@c --- End of file Parser.texi -------------------------------------------------
