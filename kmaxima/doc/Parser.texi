@@ -22,10 +22,10 @@
 @section Einf@"uhrung in den Parser
 @c -----------------------------------------------------------------------------
 
-In @ref{Die Funktion maxima-toplevel-loop} haben wir eine
+In @ref{Die Funktion maxima-toplevel-loop} wurde eine
 Lisp-@code{read}-@code{eval}-Schleife eingef"uhrt, um Eingaben des Nutzers
-zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist mit der Funktion
-@code{meval} ersetzt worden. Siehe @ref{Implementierung des ersten Evaluators}.
+zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist durch die Funktion
+@code{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
 In diesem Kapitel wird nun der Parser implementiert.  Die Funktion @code{mread}
 ist die zentrale Funktion, die die Lisp-Funkion @code{read} ersetzten wird.
 @code{mread} liest mathematische Ausdr@"ucke, Kommandos, Programme und setzt
@@ -94,6 +94,8 @@ wieder entfernt.
   (or (getprop x 'op) x))
 @end verbatim
 
+Für die folgenden Operatoren werden die Namen entsprechend definiert.
+
 @verbatim
 (mapc #'(lambda (x)
           (putprop (car x) (cadr x) 'op)
@@ -106,17 +108,11 @@ wieder entfernt.
         (mand "and")     (mor "or")      (mnot "not")
         (msetq ":")      (mdefine ":=")  (mdefmacro "::=")
         (mquote "'")     (mlist "[")     (mset "::")
-        (mfactorial "!") (marrow "-->")  (mprogn "(")
-        (mcond "if")))
-@end verbatim
-
-@verbatim
-(mapc #'(lambda (x) (putprop (car x) (cadr x) 'op))
-      '((mqapply $subvar) (bigfloat $bfloat)))
+        (mfactorial "!") (mprogn "(")    (mcond "if")))
 @end verbatim
 
 @c -----------------------------------------------------------------------------
-@node Liste der Operatoren, Verwaltung von Streams, Namen der Operatoren, Vorbereitende Funktionen und Makros
+@node Liste der Operatoren, , Namen der Operatoren, Vorbereitende Funktionen und Makros
 @subsection Liste der Operatoren
 @c -----------------------------------------------------------------------------
 
@@ -301,79 +297,6 @@ Nach der Initialisierung enth@"alt die globale Variable
 @end verbatim
 
 @c -----------------------------------------------------------------------------
-@node Verwaltung von Streams, , Liste der Operatoren, Vorbereitende Funktionen und Makros
-@subsection Verwaltung von Streams
-@c -----------------------------------------------------------------------------
-
-F@"ur die Verwaltung von ge@"offnete Streams hat kMaxima einige kleine 
-Hilfsfunktionen.  Die folgende Struktur h@"alt den Stream, die aktuelle 
-Zeilennummer des Streams sowie den Namen fest.
-
-@vindex instream
-
-@verbatim
-(defstruct instream
-  stream
-  (line 0 :type fixnum)
-  name)
-@end verbatim
-
-@findex get-instream
-@findex newline
-@findex find-stream
-
-Die ge@"offneten Streams werden in der Variablen @code{stream-list}
-abgespeichert, die lokal zu den Funktionen @code{get-instream}, @code{newline}
-und @code{find-stream} definiert ist.  Die Funktion @code{get-instream} pr@"uft,
-ob ein Stream bereits in der Liste @code{stream-list} eingetragen ist.  Ist dies
-nicht der Fall, wird der Stream hinzugef@"ugt.  Die Funktion @code{newline}
-erh@"oht den Wert f@"ur die Zahl der Zeilen.  Die Funktion @code{find-stream}
-sucht einen Stream auf der Liste @code{stream-list}.
-
-@verbatim
-(let ((stream-list nil))
-  (defun get-instream (str)
-    (or (dolist (v stream-list)
-          (cond ((eq str (instream-stream v))
-                 (return v))))
-        (let (name errset)
-          (errset (setq name (namestring str)))
-          (car (push (make-instream :stream str :name name) stream-list)))))
-
-  (defun newline (str)
-    (incf (instream-line (get-instream str)))
-    (values))
-
-  (defun find-stream (stream)
-     (dolist (v stream-list)
-       (cond ((eq stream (instream-stream v))
-              (return v))))))
-@end verbatim
-
-@findex add-lineinfo
-
-@verbatim
-(defun add-lineinfo (lis)
-  (if (or (atom lis)
-          (and (eq *parse-window* *standard-input*)
-               (not (find-stream *parse-stream*))))
-      lis
-      (let* ((st (get-instream *parse-stream*))
-             (n (instream-line st))
-             (nam (instream-name st)))
-        (or nam (return-from add-lineinfo lis))
-        (setq *current-line-info*
-              (cond ((eq (cadr *current-line-info*) nam)
-                     (cond ((eql (car *current-line-info*) n)
-                            *current-line-info*)
-                           (t  (cons n (cdr *current-line-info*)))))
-                    (t (list n nam 'src))))
-        (cond ((null (cdr lis))
-               (list (car lis) *current-line-info*))
-              (t (append lis (list *current-line-info*)))))))
-@end verbatim
-
-@c -----------------------------------------------------------------------------
 @node Funktionen und Makros des Parsers, Definition der Operatoren, Vorbereitende Funktionen und Makros, Parser
 @section Funktionen und Makros des Parsers
 @c -----------------------------------------------------------------------------
@@ -389,30 +312,32 @@ sucht einen Stream auf der Liste @code{stream-list}.
 @subsection Einlesen von Zeichen
 @c -----------------------------------------------------------------------------
 
-@findex tyi
-@findex parse-tyi-init
-@findex parse-tyi
-@findex parse-tyipeek
-@findex unparse-tyi
+@vindex *parse-tyi*
+@vindex *parse-stream*
+@vindex *parse-stream-eof*
+@vindex *parse-window*
+@vindex *parse-window-length*
+@vindex *prompt-on-read-hang*
+@vindex *read-hang-prompt*
 
 Die f@"unf Routinen @code{tyi}, @code{parse-tyi-init}, @code{parse-tyi},
 @code{parse-tyipeek} und @code{unparse-tyi} sind f@"ur das Lesen von Zeichen
-von einem Stream verantwortlich. Diese Routinen nutzen f@"ur die Wahrnehmung
+von einem Stream verantwortlich.  Diese Routinen nutzen f@"ur die Wahrnehmung
 ihrer Aufgaben die folgenden globalen Variablen:
 
 @table @code
 @item *parse-tyi*
 Puffer der Funktionen @code{parse-tyi}, @code{parse-tyipeek} und 
-@code{unparse-tyi}.  Die Funktionen @code{unparse-tyi} stellt Zeichen in den
+@code{unparse-tyi}.  Die Funktion @code{unparse-tyi} stellt Zeichen in den
 Puffer zur@"uck.  Die Funktionen @code{parse-tyi} und @code{parse-tyipeek}
-pr@"ufen zuerst, ob ein Zeichen im Puffer vorliegt und geben wenn vorhanden,
+pr@"ufen zuerst, ob ein Zeichen im Puffer vorliegt und geben, wenn vorhanden,
 dieses zur@"uck.  Ansonsten wird das n@"achste Zeichen vom Stream geholt.
 
 @item *parse-stream*
 Der Stream von dem die Funktionen Zeichen lesen.
 
 @item *parse-stream-eof*
-Das Zeichen, um das Ende eines Streams zu testen.  Die Variable hat den Wert
+Das Zeichen, um auf das Ende eines Streams zu testen.  Die Variable hat den Wert
 @code{-1}.  Unklar ist, warum hier nicht das der Wert @code{*mread-eof-obj*}
 verwendet wird.
 
@@ -434,13 +359,19 @@ Das Promptzeichen f@"ur die Eingabeaufforderung, wenn der Nutzer zum Eingeben
 von Zeichen aufgefordert wird.
 @end table
 
+@findex tyi
+@findex parse-tyi-init
+@findex parse-tyi
+@findex parse-tyipeek
+@findex unparse-tyi
+
 Die elementare Routine f@"ur das Lesen eines Zeichens vom Stream 
 @code{*parse-stream*} ist die Funktion @code{tyi}.  Die Argumente der Funktion
-sind Optional.  Wird die Funktion ohne Argumente aufgerufen, werden die Zeichen
+sind optional.  Wird die Funktion ohne Argumente aufgerufen, werden die Zeichen
 von der Standardeingabe @code{*standard-input*} gelesen und das 
-@code{EOF}-Zeichen ist @code{NIL}.  Die Funktion @code{tyi} hat drei
+@code{EOF}-Zeichen ist @code{nil}.  Die Funktion @code{tyi} hat drei
 Hilfsfunktionen, die lokal zur Funktion definiert sind. Diese sind
-@code{tyi-raw}, @code{backslash-check} und @code{eat-continuations}.  
+@code{tyi-raw}, @code{backslash-check} und @code{eat-continuations}.
 
 Die Hilfsfunktion @code{tyi-raw} versucht zun@"achst ein Zeichen zu lesen.  Ist
 dies nicht m@"oglich und hat die Variable @code{*prompt-on-read-hang*} den Wert
@@ -497,6 +428,16 @@ Stream entfernt.
           (backslash-check ch))))))
 @end verbatim
 
+Die Funktion @code{parse-tyi-init} wird immer dann von der Funktion
+@code{parse-tyi} aufgerufen, wenn das n@"achste Zeichen vom Stream zu lesen ist.
+Ist die globale Variable @code{*parse-window*} noch nicht initialisiert, wird
+dies erledigt.  @code{*parse-window*} wird dazu eine Liste der L@"ange
+@code{*parse-window-length*} zugewiesen und mit dem Aufruf @code{nonc} zu
+einer zirkul@"aren Liste initialisiert.  @code{parse-tyi-init} holt sodann mit
+der Funktion @code{tyi} das n@"achste Zeichen vom Stream, schreibt das Zeichen
+in die zirkul@"are Liste @code{*parse-window*} und gibt das Zeichen eingelesene
+zur@"uck.
+
 @verbatim
 (defun parse-tyi-init (stream eof)
   (or *parse-window*
@@ -506,10 +447,15 @@ Stream entfernt.
   (let ((tem (tyi stream eof)))
     (setf (car *parse-window*) tem
           *parse-window* (cdr *parse-window*))
-    (if (eql tem #\newline)
-	(newline stream))
     tem))
 @end verbatim
+
+Der Parser ruft niemals die Funktion @code{parse-tyi-init} direkt auf, sondern
+die Funktion @code{parse-tyi}.  Die Funktion pr@"uft zun@"achst, ob ein Zeichen
+im Puffer @code{*parse-tyi*} vorliegt.  Ist dies der Fall, wird dies
+zur@"uckgegeben und der Puffer entsprechend korrigiert.  Ansonsten wird mit der
+Funktion @code{parse-tyi-init} das n@"achste Zeichen vom Stream
+@code{*parse-stream*} geholt.
 
 @verbatim
 (defun parse-tyi ()
@@ -522,7 +468,15 @@ Stream entfernt.
 	  (t
 	   (setq *parse-tyi* (cdr tem))
 	   (car tem)))))
+@end verbatim
 
+Die Funktion @code{parse-tyipeek} holt das nächste Zeichen vom Stream ohne es
+vom Stream zu entfernen.  Entweder ist noch ein Zeichen im Puffer
+@code{*parse-stream*} vorhanden, welches zurückgegeben wird, oder es wird mit
+der Funktion @code{parse-tyi-init} das nächste Zeichen vom Stream gelesen und
+in den Puffer geschrieben.
+
+@verbatim
 (defun parse-tyipeek ()
   (let ((tem *parse-tyi*))
     (cond ((null tem)
@@ -530,7 +484,12 @@ Stream entfernt.
 	         (parse-tyi-init *parse-stream* *parse-stream-eof*)))
 	  ((atom tem) tem)
 	  (t (car tem)))))
+@end verbatim
 
+Mit der Funktion @code{unparse_tyi} wird ein Zeichen @code{ch} wieder in
+in den Puffer @code{*parse-tyi*} zur@"uckgeschrieben.
+
+@verbatim
 (defun unparse-tyi (ch)
   (let ((tem *parse-tyi*))
     (if (null tem)
