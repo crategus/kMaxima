@@ -5,7 +5,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 29.04..2011
-@c Revision : 30.04.2011
+@c Revision : 07.05.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -57,6 +57,7 @@ END-INFO-DIR-ENTRY
 @menu
 * Einf@"uhrung::
 * System::
+* Parser::
 * Weitere Funktionen und Variablen::
 * Index der Funktionen und Variablen::
 @end menu
@@ -65,11 +66,15 @@ END-INFO-DIR-ENTRY
 @chapter Einf@"uhrung
 @include Einfuehrung.texi
 
-@node System, Weitere Funktionen und Variablen, Einf@"uhrung, Top
+@node System, Parser, Einf@"uhrung, Top
 @chapter System
 @include System.texi
 
-@node Weitere Funktionen und Variablen, Index der Funktionen und Variablen, System, Top
+@node Parser, Weitere Funktionen und Variablen, System, Top
+@chapter Parser
+@include Parser.texi
+
+@node Weitere Funktionen und Variablen, Index der Funktionen und Variablen, Parser, Top
 @chapter Weitere Funktionen und Variablen
 @include Weiteres.texi
 
