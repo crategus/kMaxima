@@ -22,5 +22,21 @@
 
 (defpackage :kmaxima
   (:nicknames :kmaxima)
-  (:use :cl))
+  (:use :cl)
+  (:export
+    #:*alphabet*
+    #:add2lnc
+    #:alphabetp
+    #:defprop
+    #:exploden
+    #:fixnump
+    #:getprop
+    #:getpropl
+    #:mfunctionp
+    #:mlist
+    #:mlistp
+    #:mminus
+    #:mminusp
+    #:putprop
+    ))
 
