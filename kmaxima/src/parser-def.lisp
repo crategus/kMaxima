@@ -144,8 +144,7 @@
         (mand "and")     (mor "or")      (mnot "not")
         (msetq ":")      (mdefine ":=")  (mdefmacro "::=")
         (mquote "'")     (mlist "[")     (mset "::")
-        (mfactorial "!") (marrow "-->")  (mprogn "(")
-        (mcond "if")))
+        (mfactorial "!") (mprogn "(")    (mcond "if")))
 
 (mapc #'(lambda (x) (putprop (car x) (cadr x) 'op))
       '((mqapply $subvar) (bigfloat $bfloat)))
