@@ -202,14 +202,14 @@
    ~%including the characters you just typed which caused the error. Thanks."
     (mopstrip op)))
 
-(defun delim-err (op)
+(defun parse-delim-err (op)
   (mread-synerr "Illegal use of delimiter ~A" (mopstrip op)))
 
-(defun erb-err (op l)
+(defun parse-erb-err (op l)
   (declare (ignore l))
   (mread-synerr "Too many ~A's" (mopstrip op)))
 
-(defun premterm-err (op)
+(defun parse-premterm-err (op)
   (mread-synerr "Premature termination of input at ~A." (mopstrip op)))
 
 ;;; ----------------------------------------------------------------------------
@@ -718,8 +718,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(def-nud-equiv |$]| delim-err)
-(def-led-equiv |$]| erb-err)
+(def-nud-equiv |$]| parse-delim-err)
+(def-led-equiv |$]| parse-erb-err)
 (def-lbp       |$]| 5)
 
 (def-nud-equiv |$[| parse-matchfix)
@@ -748,8 +748,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(def-nud-equiv |$)| delim-err)
-(def-led-equiv |$)| erb-err)
+(def-nud-equiv |$)| parse-delim-err)
+(def-led-equiv |$)| parse-erb-err)
 (def-lbp       |$)| 5)
 
 (def-mheader   |$(| (mprogn))
@@ -1014,15 +1014,15 @@
 (def-lpos      |$,| $any)
 (def-mheader   |$,| ($ev))
 
-(def-nud-equiv $then delim-err)
+(def-nud-equiv $then parse-delim-err)
 (def-lbp $then 5)
 (def-rbp $then 25)
 
-(def-nud-equiv $else delim-err)
+(def-nud-equiv $else parse-delim-err)
 (def-lbp $else 5)
 (def-rbp $else 25)
 
-(def-nud-equiv $elseif delim-err)
+(def-nud-equiv $elseif parse-delim-err)
 (def-lbp  $elseif 5)
 (def-rbp  $elseif 45)
 (def-pos  $elseif $any)
@@ -1143,16 +1143,16 @@
   ($while  . ()))
 
 (def-mheader   |$$| (nodisplayinput))
-(def-nud-equiv |$$| premterm-err)
+(def-nud-equiv |$$| parse-premterm-err)
 (def-lbp       |$$| -1)
 ;No RBP, POS, RPOS, RBP, or MHEADER
 
 (def-mheader   |$;| (displayinput))
-(def-nud-equiv |$;| premterm-err)
+(def-nud-equiv |$;| parse-premterm-err)
 (def-lbp       |$;| -1)
 ;No RBP, POS, RPOS, RBP, or MHEADER
 
-(def-nud-equiv  |$&&| delim-err)
+(def-nud-equiv  |$&&| parse-delim-err)
 (def-lbp        |$&&| -1)
 
 (def-led-equiv  |$#| parse-infix)
