@@ -218,8 +218,150 @@ in den Puffer geschrieben.
 @anchor{unparse-tyi}
 @deffn {Funktion} unparse-tyi @var{ch}
 
-Mit der Funktion @code{unparse_tyi} wird das Zeichen @code{ch} wieder in
-in den Puffer @mref{*parse-tyi*} zur@"uckgeschrieben.
+Mit der Funktion @code{unparse_tyi} wird das Zeichen @code{ch} in den Puffer
+@mref{*parse-tyi*} zur@"uckgeschrieben.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Lesen der Token, Weitere Funktionen und Variablen des Parsers, Einlesen von Zeichen, Parser
+@section Lesen der Token
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{*scan-buffered-token*}
+@defvr {Globale Variable} *scan-buffered-token*
+Standardwert: @code{(nil)}
+
+Ist der Puffer der Funktionen @mref{peek-one-token} und
+@mrefcomma{scan-one-token} f@"ur das Zur@"uckstellen eines Token.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{peek-one-token}
+@deffn {Funktion} peek-one-token @var{eof-p} @var{eof}
+
+Die Funktion @code{peek-one-token} holt das n@"achste Token vom Stream.  Die
+Funktion pr@"uft zun@"achst, ob ein Token im Puffer
+@mref{*scan-buffered-token*} vorliegt.  Ansonsten wird die Funktion
+@mref{scan-one-token} aufgerufen und das Token im Puffer abgelegt.  Die Funktion
+hat die optionalen Argumente @var{eof-p} und @var{eof}, die beide den
+Standardwert @code{nil} haben.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-one-token}
+@deffn {Funktion} scan-one-token @var{eof-p} @var{eof}
+
+Die Funktion @code{scan-one-token} holt das n@"achste Zeichen vom Stream.  Zuvor
+pr@"uft die Funktion, ob noch ein Token im Puffer
+@mref{*scan-buffered-token*} vorliegt.  Die Funktion hat die optionalen
+Argumente @var{eof-p} und @var{eof}, die beide den Standardwert @code{nil}
+haben.
+
+Folgende Funktionen werden aufgerufen, um ein Token vom Stream zu lesen:
+
+@table @emph
+@item scan-operator-token
+Lese einen Operator wie "+" oder "*" vom Stream.
+@item gobble-comment
+Lesen einen Kommentar vom Stream.  Ein Kommentar ist von den Zeichen @code{/*}
+und @code{*/} eingeschlossen.  Kommentare k@"onnen verschachtelt sein.
+@item scan-string
+Lese eine Zeichenkette vom Stream.  kMaxima unterscheidet Lisp-Zeichenketten
+von Maxima-Zeichenketten.
+@item scan-maxima-token
+Lese einen kMaxima-Bezeichner vom Stream.  Einem kMaxima-Bezeichner wird
+intern ein @code{$}-Zeichen vorangestellt.
+@item scan-lisp-token
+Lese einen Lisp-Bezeichner vom Stream.  Einem Lisp-Bezeichner ist bei der
+Eingabe ein @code{?}-Zeichen vorangestellt
+@item scan-keyword-token
+Lese ein Schl@"usselwort vom Stream.  Ein Schl@"usselwort beginnt mit einem
+@code{:}-Zeichen.
+@item scan-number-before-dot
+@itemx scan-number-after-dot
+Lese eine Zahl vom Stream.  Es werden ganze Zahlen und Gleitkommazahlen vom
+Stream gelesen.
+@end table
+
+Alle Funktionen lesen einzelne Zeichen mit der Funktion @mref{parse-tyi} vom
+Stream.  Der Stream von dem gelesen wird ist in der globalen Variablen
+@mref{*parse-stream*} enthalten.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{gobble-comment}
+@deffn {Funktion} gobble-comment
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-operator-token}
+@deffn {Funktion} scan-operator-token
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-operator-token-aux}
+@deffn {Funktion} scan-operator-token-aux
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-maxima-token}
+@deffn {Funktion} scan-maxima-token
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-lisp-token}
+@deffn {Funktion} scan-lisp-token
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-keyword-token}
+@deffn {Funktion} scan-keyword-token
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-token}
+@deffn {Funktion} scan-token
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-string}
+@deffn {Funktion} scan-string
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{readlist}
+@deffn {Funktion} readlist
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{make-number}
+@deffn {Funktion} make-number
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-digits}
+@deffn {Funktion} scan-digits
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-number-exponent}
+@deffn {Funktion} scan-number-exponent
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-number-rest}
+@deffn {Funktion} scan-number-rest
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-number-before-dot}
+@deffn {Funktion} scan-number-before-dot
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{scan-number-after-dot}
+@deffn {Funktion} scan-number-after-dot
 @end deffn
 
 @c -----------------------------------------------------------------------------
