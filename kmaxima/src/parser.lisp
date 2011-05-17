@@ -214,8 +214,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defvar *scan-buffered-token* (list nil)
-  "Put-back buffer for scanner, a state-variable of the reader")
+(defvar *scan-buffered-token* (list nil))
 
 (defun peek-one-token (&optional (eof-p nil) (eof nil))
   (cond ((car *scan-buffered-token*)
@@ -311,7 +310,7 @@
         ((null lis) nil)
         (t
          (parse-tyi)
-         (cond 
+         (cond
            ((atom (cadr lis))
             (setq result (scan-operator-token-aux (list (cdr lis)))))
            ((null (cddr lis))
@@ -323,8 +322,8 @@
            (t
             (let ((res (and (eql (car (cadr lis)) 'ans) (cadadr lis)))
                   (token (scan-operator-token-aux (cddr lis))))
-              (setq result 
-                    (or token 
+              (setq result
+                    (or token
                         res
                         (scan-operator-token-aux (list (cadr lis))))))))
          (or result (unparse-tyi ch))
@@ -349,15 +348,16 @@
         (mread-synerr "Lisp keyword expected."))))
 
 (defun scan-token (flag)
-  (do ((c (parse-tyipeek) (parse-tyipeek))
-       (l () (cons c l)))
-      ((and flag
-            (not (or (digit-char-p c (max 10 *read-base*))
-                     (alphabetp c)
-                     (char= c #\\ ))))
+  (do ((ch (parse-tyipeek) (parse-tyipeek))
+       (l () (cons ch l)))
+      ((or (eql ch *parse-stream-eof*)
+           (and flag
+                (not (or (digit-char-p ch (max 10 *read-base*))
+                         (alphabetp ch)
+                         (char= ch #\\ )))))
        (nreverse (or l (list (parse-tyi)))))
     (when (char= (parse-tyi) #\\ )
-      (setq c (parse-tyi)))
+      (setq ch (parse-tyi)))
     (setq flag t)))
 
 ;;; ----------------------------------------------------------------------------
@@ -367,14 +367,14 @@
                             :fill-pointer 0 :adjustable t)))
     (when init
       (vector-push-extend init buf))
-    (do ((c (parse-tyipeek) (parse-tyipeek)))
-        ((cond ((eql c -1))
-               ((char= c #\")
+    (do ((ch (parse-tyipeek) (parse-tyipeek)))
+        ((cond ((eql ch *parse-stream-eof*))
+               ((char= ch #\")
                 (parse-tyi) t))
          (copy-seq buf))
       (if (char= (parse-tyi) #\\ )
-          (setq c (parse-tyi)))
-          (vector-push-extend c buf))))
+          (setq ch (parse-tyi)))
+          (vector-push-extend ch buf))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -423,10 +423,10 @@
            (scan-number-exponent data)))))
 
 (defun scan-number-before-dot (data)
-  (scan-digits data (push #\. *exponent-chars*) #'scan-number-rest))
+  (scan-digits data (push #\. *exponent-chars*) #'scan-number-rest ))
 
 (defun scan-number-after-dot (data)
-  (scan-digits data *exponent-chars* #'scan-number-exponent))
+  (scan-digits data *exponent-chars* #'scan-number-exponent ))
 
 ;;; ----------------------------------------------------------------------------
 
