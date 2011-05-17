@@ -25,6 +25,9 @@
   (:use :cl)
   (:export
     #:*alphabet*
+    #:*parse-stream*
+    #:*parse-stream-eof*
+    #:$quit
     #:add2lnc
     #:alphabetp
     #:defprop
@@ -32,11 +35,18 @@
     #:fixnump
     #:getprop
     #:getpropl
+    #:implode
     #:mfunctionp
     #:mlist
     #:mlistp
     #:mminus
     #:mminusp
+    #:parse-tyi
+    #:parse-tyipeek
+    #:peek-one-token
     #:putprop
+    #:scan-one-token
+    #:tyi
+    #:unparse-tyi
     ))
 
