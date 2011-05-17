@@ -35,5 +35,6 @@
                (:file "src/nformat")
                (:file "src/grind")
                (:file "src/ldisplay")
-               (:file "src/msystem")))
+               (:file "src/msystem")
+               (:file "src/simplify")))
 
