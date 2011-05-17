@@ -54,10 +54,62 @@
        (not (atom (car x)))
        (eq (caar x) 'mminus)))
 
+(defun mplusp (x)
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'mplus)))
+
+(defun mtimesp (x)
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'mtimes)))
+
+(defun mexptp (x)
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'mexpt)))
+
 (defun mlistp (x)
   (and (not (atom x))
        (not (atom (car x)))
        (eq (caar x) 'mlist)))
+
+;;; ----------------------------------------------------------------------------
+
+(defun mnumberp (x)
+  (or (numberp x)
+      (and (not (atom x))
+           (not (atom (car x)))
+           (member (caar x) '(rat bigfloat)))))
+
+(defun ratnump (x)
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'rat)))
+
+(defun $bfloatp (x)
+  (and (not (atom x))
+       (not (atom (car x)))
+       (eq (caar x) 'bigfloat)))
+
+(defun mnegativep (x)
+  (cond ((and (numberp x) (not (complexp x))) (minusp x))
+        ((or (ratnump x) ($bfloatp x)) (minusp (cadr x)))))
+
+(defun zerop1 (x)
+  (or (and (integerp x) (= 0 x))
+      (and (floatp x) (= 0.0 x))
+      (and ($bfloatp x) (= 0 (second x)))))
+
+(defun onep1 (x)
+  (or (and (integerp x) (= 1 x))
+      (and (floatp x) (= 1.0 x))
+      (and ($bfloatp x) (zerop1 (sub x 1)))))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro ncons (x)
+  `(cons ,x nil))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -83,12 +135,14 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun add2lnc (item llist)
-  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
-    (unless (atom item)
-      (setf llist
-            (delete (assoc (car item) llist :test #'equal)
-                    llist :count 1 :test #'equal)))
-    (nconc llist (list item))))
+  (if (memalike item (if (mlistp llist) (cdr llist) llist))
+      llist
+      (progn
+        (unless (atom item)
+          (setf llist
+               (delete (assoc (car item) llist :test #'equal)
+                       llist :count 1 :test #'equal)))
+        (nconc llist (list item)))))
 
 ;;; ----------------------------------------------------------------------------
 
