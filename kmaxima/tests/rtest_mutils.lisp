@@ -49,22 +49,23 @@
   (assert-equal 'val-2 (cadr (getpropl 'sym '(indic-2)))))
 
 (define-test add2lnc
-  (let ((ll '((mlist))))
-    (assert-equal '((mlist)) ll)
-    (assert-equal '((mlist) $a) (setq ll (add2lnc '$a ll)))
-    (assert-equal '((mlist) $a $b) (setq ll (add2lnc '$b ll)))
-    (assert-equal '((mlist) $a $b $c) (setq ll (add2lnc '$c ll)))
-    (assert-false (setq ll (add2lnc '$b ll)))
+  (let ((l1 nil))
+    (assert-equal '((mlist) $a)       (setq l1 (add2lnc '$a (list '(mlist)))))
+    (assert-equal '((mlist) $a $b)    (add2lnc '$b l1))
+    (assert-equal '((mlist) $a $b $c) (add2lnc '$c l1))
+    (assert-equal '((mlist) $a $b $c) (add2lnc '$b l1)))
     
-    (assert-equal '(a) (setq ll (add2lnc 'a nil)))
-    (assert-equal '(a b) (setq ll (add2lnc 'b ll)))
-    (assert-equal '(a b c) (setq ll (add2lnc 'c ll)))
-    (assert-false (setq ll (add2lnc 'b ll)))
-    
-    (assert-equal '((($f) x y)) (setq ll (add2lnc '(($f) x y) ll)))
-    (assert-equal '((($f) x y) (($g) x y)) (setq ll (add2lnc '(($g) x y) ll)))
-    (assert-equal '((($f) x y) (($g) a b)) (setq ll (add2lnc '(($g) a b) ll)))
-    ))
+  (let ((l2 nil))
+    (assert-equal '(a)     (setq l2 (add2lnc 'a l2)))
+    (assert-equal '(a b)   (add2lnc 'b l2))
+    (assert-equal '(a b c) (add2lnc 'c l2))
+    (assert-equal '(a b c) (add2lnc 'b l2)))
+  
+  (let ((l3 nil))
+    (assert-equal '((($f) x y))            (setq l3 (add2lnc '(($f) x y) l3)))
+    (assert-equal '((($f) x y) (($g) x y)) (add2lnc '(($g) x y) l3))
+    (assert-equal '((($f) x y) (($g) a b)) (add2lnc '(($g) a b) l3)))
+  )
 
 (define-test exploden
   (assert-equal '(#\a #\b ) (exploden 'ab ))
