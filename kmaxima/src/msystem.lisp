@@ -329,10 +329,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun simplifya (form flag)
-  (declare (ignore flag))
-  form)
-
 (defun maxima-toplevel-eval (form)
   (simplifya (meval form) nil))
 
@@ -508,5 +504,12 @@
 
 (defmspec $reset (l)
   (reset1 (cdr l)))
+
+;;; ----------------------------------------------------------------------------
+
+(defun $complex (x y)
+  (cond ((and (numberp x) (numberp y))
+         (complex x y))
+        (t (list '($complex simp) x y))))
 
 ;;; ----------------------------------------------------------------------------
