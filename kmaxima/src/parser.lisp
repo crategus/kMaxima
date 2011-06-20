@@ -288,8 +288,7 @@
 
 (defun scan-operator-token (obj)
   (do ((ch (parse-tyipeek) (parse-tyipeek)))
-      ((not (member ch 
-                    '(#\newline #\tab #\space #\linefeed #\return #\page))))
+      ((not (member ch *whitespaces*)))
     (parse-tyi))
   (scan-operator-token-aux obj))
 
@@ -434,32 +433,24 @@
   (defmacro def-nud-equiv (op equiv)
     (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'nud)))
 
-  (defmacro nud-propl () ''(nud))
-
   (defmacro def-nud-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'nud 'nil) op-l body))
 
   (defmacro def-led-equiv (op equiv)
     (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'led)))
 
-  (defmacro led-propl () ''(led))
-
   (defmacro def-led-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'led 'nil) op-l body)))
 
 ;;; ----------------------------------------------------------------------------
 
-(defmacro def-operatorp ()
-  `(defun operatorp (lex)
-     (and (symbolp lex) (getpropl lex '(,@(nud-propl) ,@(led-propl))))))
+(defun operatorp (lex)
+  (and (symbolp lex)
+       (getpropl lex '(nud led))))
 
-(def-operatorp)
-
-(defmacro def-operatorp1 ()
-  `(defun operatorp1 (lex)
-     (and (symbolp lex) (getpropl lex '(lbp rbp ,@(nud-propl) ,@(led-propl))))))
-
-(def-operatorp1)
+(defun operatorp1 (lex)
+  (and (symbolp lex)
+       (getpropl lex '(lbp rbp nud led))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -882,7 +873,7 @@
             (if propval (putprop '$** propval prop))))
       '(lbp rbp pos rpos lpos mheader))
 
-(inherit-propl  '$** '$^ (led-propl))
+(inherit-propl  '$** '$^ '(led))
 
 (def-lbp       |$^^| 140)
 (def-rbp       |$^^| 139)
