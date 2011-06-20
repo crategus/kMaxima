@@ -27,6 +27,9 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defmacro led-propl () ''(led))
+(defmacro nud-propl () ''(nud))
+
 (defun inherit-propl (op-to op-from getl)
   (let ((propl (getpropl op-from getl)))
     (if propl
