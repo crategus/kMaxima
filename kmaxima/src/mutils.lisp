@@ -162,7 +162,8 @@
                                 *maxfpprintprec*
                                 $fpprintprec)))
              (multiple-value-bind (form width)
-               (cond ((or (zerop a) (<= 1 a 1e7))
+               (cond ((or (zerop a)
+                          (<= 1 a 1e7))
                       (values "~vf" (+ 1 printprec)))
                      ((<= 0.001 a 1)
                       (values "~vf" (+ printprec
@@ -171,12 +172,10 @@
                                              (t 1)))))
                      (t
                       (values "~ve" (+ 5 printprec))))
-               (setq str (format nil form width sym)))
-             (setq str (string-trim " " str))))
+               (setq str (string-trim " " (format nil form width sym))))))
           ((integerp sym)
            (let ((leading-digit (if (> *print-base* 10) #\0 )))
-             (setq str (format nil "~A" sym))
-             (setq str (coerce str 'list))
+             (setq str (coerce (format nil "~A" sym) 'list))
              (if (and leading-digit
                       (not (digit-char-p (car str) 10)))
                  (setq str (cons leading-digit str)))
@@ -186,25 +185,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(let ((string-for-implode
-       (make-array 20 :fill-pointer 0 
-                      :adjustable t 
-                      :element-type '#.(array-element-type "a"))))
-  (defun implode (lis)
-    (let ((ar string-for-implode)
-          (len (length lis)))
-      (unless (> (array-total-size ar) len)
-        (setq ar (adjust-array ar (+ len 20))))
-      (setf (fill-pointer ar) len)
-      (loop
-        for v in lis
-        for i below len
-        do
-        (setf (aref ar i)
-              (cond ((characterp v) v)
-                    ((symbolp v) (char (symbol-name v) 0))
-                    ((numberp v) (code-char v)))))
-      (intern-invert-case ar))))
+(defun implode (lis)
+  (intern-invert-case (coerce lis 'string)))
 
 ;;; ----------------------------------------------------------------------------
 
