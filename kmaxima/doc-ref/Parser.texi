@@ -24,10 +24,11 @@
 @anchor{mopstrip}
 @deffn {Funktion} mopstrip @var{x}
 
-Bereitet das Argument @var{x} für die Ausgabe auf der Konsole vor.  Die Symbole
-@var{t} und @var{nil} werden als @code{'true} und @code{'false} zurückgegeben.
-Ist @var{x} ein Symbol mit einem @code{reversealias}, wird dieser zurückgeben.
-Von Maxima-Symbolen wird @code{$}- oder @code{%}-Zeichen entfernt.
+Bereitet das Argument @var{x} f@"ur die Ausgabe auf der Konsole vor.  Die
+Symbole @var{t} und @var{nil} werden als @code{'true} und @code{'false}
+zur@"uckgegeben.  Ist @var{x} ein Symbol mit einem @code{reversealias}, wird
+dieser zur@"uckgegeben.  Von Maxima-Symbolen wird @code{$}- oder
+@code{%}-Zeichen entfernt.
 
 Die Funktion wird nur im Zusammenhang der Ausgabe einer Fehlermeldung von der
 Funktion @mref{mread-synerr} genutzt.
@@ -38,8 +39,8 @@ Funktion @mref{mread-synerr} genutzt.
 @deffn {Funktion} mread-synerr @var{format-string} @var{l}
 
 Gibt eine Meldung auf der Konsole aus, wenn beim Parsen der Eingabe ein Fehler
-auftritt.  Das Argument @var{format-string} enthält den Text für die Ausgabe.
-Das Argument @var{l} ist eine Liste der Parameter für die Ausgabe.
+auftritt.  Das Argument @var{format-string} enth@"alt den Text f@"ur die
+Ausgabe.  Das Argument @var{l} ist eine Liste der Parameter f@"ur die Ausgabe.
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -54,9 +55,9 @@ Ruft die Funktion @mref{mread-synerr} mit der Fehlermeldung
 @anchor{parse-bug-err}
 @deffn {Funktion} parse-bug-err @var{op}
 
-Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass ein Bug für den
-Operator @var{op} im Parser vorliegt.  Die Funktion wird im Parser aufgerufen,
-wenn ein unerwarteter Fehler auftritt.
+Ruft die Funktion @mref{mread-synerr} mit der Meldung auf, dass ein Bug f@"ur
+den Operator @var{op} im Parser vorliegt.  Die Funktion wird im Parser
+aufgerufen, wenn ein unerwarteter Fehler auftritt.
 @end deffn
 
 @c -----------------------------------------------------------------------------

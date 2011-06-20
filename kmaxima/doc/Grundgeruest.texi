@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 03.05.2011
+@c Revision : 16.06.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -112,7 +112,7 @@ machen.
 
 @vindex maxima-quit-to-lisp
 
-Die Funktion @code{run} definiert den Catch-Anweisung mit dem Schl@"usselwort
+Die Funktion @code{run} definiert die Catch-Anweisung mit dem Schl@"usselwort
 @code{'maxima-quit-to-lisp}.  Wird an irgendeiner Stelle im kMaxima-Code eine
 Ausnahme zum Beispiel mit dem Befehl @code{(throw 'maxima-quit-to-lisp 0)}
 generiert, wird die Endlosschleife beendet und Maxima kehrt zum Lisp-Prompt
@@ -149,14 +149,11 @@ debugger invoked on a SIMPLE-CONDITION in thread #<THREAD
                                                 "initial thread" RUNNING
                                                 @{AA8A901@}>:
   break
-
 Type HELP for debugger help, or (SB-EXT:QUIT) to exit from SBCL.
-
 restarts (invokable by number or by possibly-abbreviated name):
   0: [CONTINUE] Return from BREAK.
   1: [MAXIMA  ] Return to Maxima top level.
   2: [ABORT   ] Exit debugger, returning to top level.
-
 (BREAK "break")
 0] 1
 kMaxima restarted.
@@ -174,7 +171,11 @@ Nach der Initialisierung der Lisp-Umgebung startet @code{run} die Funktion
 Stelle, um die kMaxima-Umgebung zu initialisieren.  Die Funktion hat die zwei
 Argumente @code{input-stream} und @code{mode}.  @code{run} startet
 @code{maxima-toplevel} mit den Werten @code{*standard-input*} und @code{nil}.
-Diese Werte bezeichnen die Eingabe von der Tastatur.
+Diese Werte bezeichnen die Eingabe von der Tastatur.  Als erstes wechselt
+die Funktion @code{maxima-toplevel} zum Package @code{:kmaxima}.  Dies ist
+bereits in der Funktion @code{run} geschehen, aber es kann sein, dass wir aus
+einer Lisp-Umgebung zur@"uckkehren, in der der Nutzer das Package gewechselt
+hat.
 
 @vindex *maxima-quiet*
 @vindex *maxima-epilog*
@@ -217,10 +218,7 @@ Male gestartet wird.  Im zweiten Fall wird kein Banner, sondern die Meldung
 @code{"kMaxima restarted."} ausgegeben.
 
 Die Funktion @code{maxima-toplevel} f@"uhrt eine Endlosschleife aus, in der die
-Funktion @code{maxima-toplevel-loop} aufgerufen wird.  Vor dem Eintritt in die
-Schleife wird das Package zu @code{:kmaxima} gewechselt.  Dies ist bereits in
-@code{run} geschehen.  Es kann jedoch sein, dass kMaxima zum Beispiel von einer
-Lisp-Sitzung zur@"uckkehrt, wo der Nutzer das Package gewechselt hat.
+Funktion @code{maxima-toplevel-loop} aufgerufen wird.
 
 @vindex maxima-quit-toplevel
 @vindex maxima-continue
@@ -301,9 +299,17 @@ Nachdem in den Funktionen @code{run} die Lisp-Umgebung und in
 Funktion @code{maxima-toplevel-loop} aufgerufen.  Auch diese Funktion startet
 eine endlose Schleife.
 
+@code{maxima-toplevel-loop} ist eine zentrale Funktion des zu entwickelnden
+Computeralgebrasystems kMaxima.  Die Aufgabe der Funktion ist das Lesen der
+Eingabe, die Auswertung der Eingabe und die Ausgabe des Ergebnisses.  Sp@"ater
+kommt noch die Vereinfachung eines mathematischen Ausdrucks hinzu.  Dieser
+Prozess wird solange wiederholt, bis die Schleife vom Nutzer oder auf andere
+Weise beendet wird.
+
 Dies ist eine erste Implementierung der Funktion @code{maxima-toplevel-loop},
 die zun@"achst eine Lisp-@code{read}-@code{eval}-Schleife ausf@"uhrt.
 
+@need 1200
 @verbatim
 (defun maxima-toplevel-loop (input-stream mode)
   (declare (ignore input-stream mode))
@@ -312,12 +318,6 @@ die zun@"achst eine Lisp-@code{read}-@code{eval}-Schleife ausf@"uhrt.
     (finish-output)
     (format t "~{~&~S~}" (multiple-value-list (eval (read))))))
 @end verbatim
-
-@code{maxima-toplevel-loop} ist eine zentrale Funktion des zu entwickelnden
-Computeralgebrasystems kMaxima.  Die Aufgabe ist das Lesen der Eingabe, die
-Auswertung der Eingabe und die Ausgabe des Ergebnisses.  Sp@"ater kommt noch die
-Vereinfachung eines mathematischen Ausdrucks hinzu.  Dieser Prozess wird solange
-wiederholt, bis die Schleife vom Nutzer oder auf andere Weise beendet wird.
 
 Das Einlesen der Eingabe wird mit der Lisp-Funktion @code{read} und die
 Auswertung mit der Lisp-Funktion @code{eval} implementiert.  F@"ur die Ausgabe
@@ -365,7 +365,7 @@ dieter@@dieter:~/Lisp/kmaxima$
 @c -----------------------------------------------------------------------------
 
 Der kMaxima-Evaluator soll die Lisp-Funktion @code{eval} ersetzen, die von
-der Funktion @code{maxima-top-level-loop} aufgerufen wird, um die Eingabe des
+der Funktion @code{maxima-toplevel-loop} aufgerufen wird, um die Eingabe des
 Nutzers auszuwerten.  Bevor ein erster Evaluator f@"ur die Auswertung von
 kMaxima-Ausdr@"ucken implementiert wird, muss die Syntax der Ausdr@"ucke
 festgelegt werden.  kMaxima-Ausdr@"ucke m@"ussen beliebige mathematische
@@ -400,7 +400,7 @@ Darstellung handelt es sich bei rationalen Zahlen um Ausdr@"ucke.
 
 Jeder Operator @code{op} repr@"asentiert eine kMaxima-Funktion, ein Kommando,
 eine Pro@-gram@-mier-An@-wei@-sung, einen Datentyp oder eine sonstige
-Eingabe des Nutzers.  Die folgende Tabelle zeigt Beispiele, die die Syntax zu 
+Eingabe des Nutzers.  Die folgende Tabelle zeigt Beispiele, die die Syntax
 demonstrieren:
 
 @verbatim
@@ -451,8 +451,37 @@ der Wert des Symbols zur@"uckgegeben.
 
 In der zweiten @code{cond}-Anweisung wird getestet, ob ein kMaxima-Ausdruck 
 vorliegt.  Dazu wird gepr@"uft, ob das erste Argument des Ausdrucks @code{form} 
-eine Liste ist.  Der Operator ist dann das erste Element der Liste.  Der
-Evaluator behandelt vier verschiedene F@"alle.
+eine Liste ist.  Der Operator ist dann das erste Element der Liste.  
+
+In der letzten @code{cond}-Anweisung wird angenommen, dass ein Lisp-Ausdruck
+vorliegt.  Das Argument @code{form} wird in diesem Fall mit der Lisp-Funktion
+@code{eval} ausgewertet.
+
+@verbatim
+(defun meval (form &aux u)
+  (cond 
+    ((atom form)
+     (cond ((not (symbolp form))
+            form)
+           ((not (boundp form))
+            form)
+           (t (symbol-value form))))
+    ((consp (car form))
+     (let ((op (caar form)))
+       (cond
+         ((mfunctionp op)
+          (apply op (mevalargs (cdr form))))
+         ((setq u (getprop op 'mspec))
+          (apply u (cons form nil)))
+         ((macro-function op)
+          (eval (cons op (cdr form))))
+         (t
+          (cons (car form) (mevalargs (cdr form)))))))
+    (t (eval form))))
+@end verbatim
+
+Trifft der Evaluator auf einen kMaxima-Ausdruck, werden die folgenden vier
+F@"alle unterschieden.
 
 @enumerate
 @item Lisp-Funktion
@@ -486,31 +515,8 @@ nur die Argumente ausgewertet.  Der Ausdruck wird mit den ausgewerteten
 Argumenten zur@"uckgeben.
 @end enumerate
 
-@verbatim
-(defun meval (form &aux u)
-  (cond 
-    ((atom form)
-     (cond ((not (symbolp form))
-            form)
-           ((not (boundp form))
-            form)
-           (t (symbol-value form))))
-    ((consp (car form))
-     (let ((op (caar form)))
-       (cond
-         ((mfunctionp op)
-          (apply op (mevalargs (cdr form))))
-         ((setq u (getprop op 'mspec))
-          (apply u (cons form nil)))
-         ((macro-function op)
-          (eval (cons op (cdr form))))
-         (t
-          (cons (car form) (mevalargs (cdr form)))))))
-    (t (eval form))))
-@end verbatim
-
 Die oben genannten Auswertungen der Funktion @code{meval} sind noch nicht
-vollst@"andig.  Die wichtigste fehlende Fall ist die Auswertung einer
+vollst@"andig.  So fehlt zum Beispiel die Auswertung einer
 kMaxima-Nutzerfunktion.
 
 @findex mevalargs
@@ -541,9 +547,12 @@ definiert.
         ((functionp x))))
 @end verbatim
 
-Die Funktion @code{getprop} arbeitet @"ahnlich wie die Lisp-Funktion
-@code{get}.  Die Funktionen f@"ur das Schreiben und Lesen von Eigenschaften
-von der Lisp-Eigenschaftsliste werden in 
+Die Funktion @code{meval} ruft die Funktion @code{getprop} auf, um zu pr@"ufen,
+ob zum Indikator @code{'mspec} eine Funktion auf der Lisp-Eigenschaftsliste
+abgelegt ist.  @code{getprop} arbeitet @"ahnlich wie die Lisp-Funktion
+@code{get}, testet jedoch zuerst, ob das Argument ein Symbol ist und gibt, wenn
+dies nicht der Fall ist, den Wert @code{nil} zur@"uck.  Die Funktionen f@"ur das
+Schreiben und Lesen von Eigenschaften von der Lisp-Eigenschaftsliste werden in
 @ref{Setzen und Lesen der Eigenschaftsliste} beschrieben.
 
 @c -----------------------------------------------------------------------------
@@ -572,11 +581,13 @@ kMaxima-Nutzerfunktionen, die ihre Argumente nicht auswerten sollen, k@"onnen
 mit dem Makro @code{defmspec} definiert werden.  Der Evaluator testet, ob ein
 Ausdruck eine solche Nutzerfunktion repr@"asentiert und wertet in diesem Fall
 die Argumente der Funktion nicht aus.  Das Makro baut auf @code{defun-prop} auf.
-@code{defun-prop} akzeptiert als erstes Argument @code{f} eine Liste mit zwei
-Elementen.  Das erste Element ist ein Symbol f@"ur den Namen der Funktion.
-Das zweite Element ist ein Indikator, der den Typ der Funktion festlegt.  Im
-Fall der kMaxima-Spezialform @code{defmspec} ist der Typ @code{'mspec}.  Das
-Makro @code{defun-prop} legt nun die Definition der Funktion
+Das Makro @code{defun-prop} dient dazu, die Definition einer Funktion zu einem
+Indikator auf der Eigenschaftsliste des Symbols abzulegen.  @code{defun-prop}
+akzeptiert als erstes Argument @code{f} eine Liste mit zwei Elementen.  Das
+erste Element ist ein Symbol f@"ur den Namen der Funktion.  Das zweite Element
+ist ein Indikator, der den Typ der Funktion festlegt.  Im Fall der
+kMaxima-Spezialform @code{defmspec} ist der Typ @code{'mspec}.  Das Makro
+@code{defun-prop} legt die Definition der Funktion
 @code{`(#'(lambda ,arg ,@@body))} zum Indikator @code{'mspec} in der
 Eigenschaftsliste des Symbols ab, das den Namen der Funktion bezeichnet.
 
@@ -584,6 +595,7 @@ Eigenschaftsliste des Symbols ab, das den Namen der Funktion bezeichnet.
 (defmacro defun-prop (f arg &body body)
   `(setf (get ',(first f) ',(second f)) #'(lambda ,arg ,@body)))
 @end verbatim
+
 @verbatim
 (defmacro defmspec (function . rest)
   `(progn
@@ -619,9 +631,9 @@ gezeigte Anwendung der Funktion mit @code{apply} ausgef@"uhrt wird.
 Als n@"achstes betrachten wir die Implementierung des Makros @code{defmvar}.
 Eine vollst@"andige Implementierung eines Computeralgebrasystems verwendet eine
 Vielzahl von Optionsvariablen, die den Zustand des Systems beschreiben.  Um
-dem Nutzer des Systems zu erm@"oglichen, einzelne oder alle Werte im Laufe einer
-Sitzung auf ihren urspr@"unglichen Wert zur@"ucksetzen, werden die Standardwerte
-der Optionsvariablen abgespeichert.
+dem Nutzer zu erm@"oglichen, einzelne oder alle Werte im Laufe einer Sitzung
+auf ihren urspr@"unglichen Wert zur@"ucksetzen, werden die Standardwerte der
+Optionsvariablen abgespeichert.
 
 @verbatim
 (defvar *variable-initial-values* (make-hash-table))
@@ -827,10 +839,10 @@ einen neuen Wert erhalten haben.  Weiterhin werden die Maxima-Funktionen
 @code{$values} und @code{$options} definiert.  Mit diesen Funktionen kann der
 Nutzer die aktuellen Eintr@"age der Variablen @code{*values*} und
 @code{*options*} ausgeben.  Die R@"uckgabe ist eine Kopie der internen Listen
-und hat das Format eine kMaxima-Liste.  Eine kMaxima-Liste ist ein Ausdruck mit
-dem Operator @code{mlist}.  Der Operator erh@"alt zus@"atzlich das Attribut
-@code{simp}, um anzuzeigen, dass der Ausdruck als ausgewertet und vereinfacht
-angenommen werden kann.
+und hat das Format einer kMaxima-Liste.  Eine kMaxima-Liste ist ein Ausdruck mit
+dem Operator @code{mlist} und den Elementen der Liste als Argumente.  Der
+Operator erh@"alt zus@"atzlich das Attribut @code{simp}, um anzuzeigen, dass
+der Ausdruck als ausgewertet und vereinfacht angenommen werden kann.
 
 @need 600
 @verbatim
@@ -1071,6 +1083,9 @@ $OPTION
 * $option
 1
 @end example
+
+Alle Funktionen, Variablen und Makros die in @ref{Grundger@"ust} definiert wurden
+können mit der Datei kmaxima.lisp in ein Lisp-System geladen werden.  
 
 @c --- End of file Grundgeruest.texi -------------------------------------------
 

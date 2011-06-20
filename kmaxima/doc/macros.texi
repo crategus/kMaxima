@@ -78,6 +78,7 @@
 @hyphenation{
    Ein-ga-be-auf-for-de-run-gen
    End-los-schlei-fe
+   glo-ba-len
    ma-the-ma-ti-sche
    sig-na-li-siert
    vor-an-ge-stell-tes

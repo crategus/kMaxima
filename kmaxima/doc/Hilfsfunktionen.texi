@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 16.04.2011
-@c Revision : 16.04.2011
+@c Revision : 20.06.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 
 Im Gegensatz zu Lisp unterscheidet kMaxima Gro@ss{}- und Kleinschreibung.  Dabei
 besteht die Konvention, dass einem kMaxima-Bezeichner der klein geschrieben ist,
-einem gro@ss{} geschriebenen Lisp-Bezeichner entspricht.  Umgekehrt entspricht
+ein gro@ss{} geschriebener Lisp-Bezeichner entspricht.  Umgekehrt entspricht
 einem gro@ss{} geschriebenen kMaxima-Bezeichner ein klein geschriebener
 Lisp-Bezeichner.  Bezeichner in gemischter Gro@ss{}- und Kleinschreibung werden
 nicht konvertiert.  Diese Konventionen werden von den Funktionen
@@ -48,9 +48,8 @@ eine Zeichenkette.
       (princ-to-string sym))))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Die Beispiele zeigen die Konvertierung f@"ur klein- und
-gro@ss{}geschriebene Symbole sowie Symbole in gemischer Schreibweise.
+gro@ss{}geschriebene Symbole sowie Symbole in gemischter Schreibweise.
 
 @example
 * (print-invert-case '|abc|)
@@ -63,7 +62,6 @@ gro@ss{}geschriebene Symbole sowie Symbole in gemischer Schreibweise.
 
 @findex maybe-invert-string
 
-@noindent
 Die Funktion @code{maybe-invert-string} hat dieselbe Aufgabe wie die Funktion
 @code{print-invert-case}.  Die Funktion @code{maybe-invert-string} erwartet
 jedoch eine Zeichenkette @code{str} als Argument.  Die R@"uckgabe ist wieder
@@ -88,9 +86,8 @@ eine Zeichenkette.
            str))))
 @end verbatim
 
-@noindent
-@b{Beispiele:} Das sind dieselben Beispiele wie oben f@"ur eine Zeichenkette als
-Argument.
+@b{Beispiele:} Dieselben Beispiele wie oben.  Das Argument muss eine
+Zeichenkette sein.  Die R@"uckgabe ist eine Zeichenkette.
 
 @example
 * (maybe-invert-string "abc")
@@ -103,21 +100,19 @@ Argument.
 
 @findex intern-invert-case
 
-@noindent
 Zuletzt wird die Funktion @code{intern-invert-case} eingef@"uhrt.  Diese
 erwartet wieder eine Zeichenkette @code{str} als Argument.  Die Funktion ruft
 die Funktion @code{maybe-invert-case} auf.  Im Unterschied zur Funktion
-@code{maybe-invert-case} ist die R@"uckgabe ein Symbol, das in das aktuelle
-Package geschrieben wird.
+@code{maybe-invert-case} ist die R@"uckgabe ein Symbol, das in das Package
+@code{:kmaxima} geschrieben wird.
 
 @verbatim
 (defun intern-invert-case (str)
   (intern (maybe-invert-string str) :kmaxima))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Zeichenketten werden in ein Symbol umgewandelt und in das
-Package geschrieben.
+Package @code{:kmaxima} geschrieben.
 
 @example
 * (intern-invert-case "abc")
@@ -136,7 +131,7 @@ ABC
 @findex exploden
 
 H@"aufig werden Zahlen, Symbole oder Zeichenketten als eine Liste ihrer
-Zeichen dargestellt.  Dies wird von der Funktion @code{exploden} geleistet.
+Zeichen ben@"otigt.  Dies wird von der Funktion @code{exploden} geleistet.
 Die Funktion enth@"alt Algorithmen f@"ur die Zerlegung von Symbolen, 
 Gleitkommazahlen und ganzen Zahlen.  Alle anderen Argumente der Funktion
 @code{exploden} werden mit der Funktion @code{format} in eine Zeichenkette
@@ -145,19 +140,24 @@ umgewandelt und dann in eine Liste zerlegt.
 @vindex $fpprintprec
 @vindex *maxfpprintprec*
 
-Der Nutzer legt mit der Optionsvariablen @code{$fpprintprec} die Anzahl der
-auszugebenen Stellen einer Gleitkommazahl fest.  Die globale Variable
-@code{*maxfpprintprec*} enth@"alt die maximale Anzahlen der Stellen einer
-Gleitkommazahl, die angezeigt werden k@"onnen.  Hat die Optionsvariable den Wert
-@code{0} oder ist der Wert gr@"o@ss{}er als die maximal m@"ogliche Anzahl an
-Stellen, wird f@"ur die Umwandlung in eine Zeichenkette die Anzahl der Stellen
-in @code{*maxfpprintprec*} verwendet.
+Die Umwandlung von Gleitkommazahlen in die Liste der Zeichen wird von den 
+Variablen @code{$fpprintprec} und @code{*maxfpprintprec*} kontrolliert.  Der
+Nutzer legt mit der Optionsvariablen @code{$fpprintprec} die Anzahl der
+Stellen einer Gleitkommazahl fest.  Die globale Variable @code{*maxfpprintprec*}
+enth@"alt die maximale Anzahl der Stellen einer Gleitkommazahl.  Hat die
+Optionsvariable @code{$fpprintprec} den Wert @code{0} oder ist der Wert
+gr@"o@ss{}er als die maximal Anzahl an Stellen, wird f@"ur die Umwandlung in
+eine Zeichenkette die Anzahl der Stellen in @code{*maxfpprintprec*} verwendet.
+
+Im Unterschied zum Original Maxima ist die Umwandlung von gro@ss{}en
+Gleitkommazahlen nicht implementiert.
 
 @verbatim
 (defmvar $fpprintprec 0)
 (defvar *maxfpprintprec* (ceiling (log (expt 2 (float-digits 1.0d0)) 10.0)))
 @end verbatim
 
+@need 800
 @verbatim
 (defun exploden (sym)
   (declare (special *maxfpprintprec* $fpprintprec))
@@ -194,7 +194,6 @@ in @code{*maxfpprintprec*} verwendet.
     (coerce str 'list)))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Umwandlung von ganzen Zahlen, Gleitkommazahlen, Symbolen und
 Zeichenketten in eine Liste von Zeichen.
 
@@ -211,36 +210,20 @@ Zeichenketten in eine Liste von Zeichen.
 
 @findex implode
 
-@noindent
 Die Funktion @code{implode} leistet die zu der Funktion @code{exploden}
 umgekehrte Aufgabe.  Eine Liste mit Zeichen wird zu einem Symbol
-zusammengesetzt, das in das aktuelle Package geschrieben wird.
+zusammengesetzt, das mit der Funktion @code{intern-invert-case} in das Package
+@code{:kmaxima} geschrieben wird.  Gegen@"uber der Originalfunktion in Maxima
+ist diese Implementation erheblich vereinfacht und akzeptiert nur Listen aus
+Zeichen.
 
 @verbatim
-(let ((string-for-implode
-       (make-array 20 :fill-pointer 0 
-                      :adjustable t 
-                      :element-type '#.(array-element-type "a"))))
-  (defun implode (lis)
-    (let ((ar string-for-implode)
-          (len (length lis)))
-      (unless (> (array-total-size ar) len)
-        (setq ar (adjust-array ar (+ len 20))))
-      (setf (fill-pointer ar) len)
-      (loop
-        for v in lis
-        for i below len
-        do
-        (setf (aref ar i)
-              (cond ((characterp v) v)
-                    ((symbolp v) (char (symbol-name v) 0))
-                    ((numberp v) (code-char v)))))
-      (intern-invert-case ar))))
+(defun implode (lis)
+  (intern-invert-case (coerce lis 'string)))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Listen aus Zeichen werden in ein Symbol umgewandelt und in das
-aktuelle Package geschrieben.
+Package @code{:kmaxima} geschrieben.
 
 @example
 * (implode '(#\1 #\2 #\3))
@@ -259,8 +242,7 @@ NIL
 
 @findex symbolconc
 
-@noindent
-Zuletzt eine Funktion, die Zahlen, Symbole, Zeichenkette und sonstige
+Zuletzt eine Funktion, die Zahlen, Symbole, Zeichenketten und sonstige
 Argumente in ein Symbol umwandelt.  Die Funktion akzeptiert eine
 beliebige Anzahl an Argumenten.  Das Symbol wird dem aktuellen Package
 hinzugef@"ugt.
@@ -279,7 +261,6 @@ hinzugef@"ugt.
                          syms))))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Zahlen, Symbole und Zeichenketten werden zu einem Symbol
 zusammengesetzt.
 
@@ -320,7 +301,6 @@ der Eigenschaftsliste ab.
 (defprop $true T alias)
 @end verbatim
 
-@noindent
 @b{Beispiel:}
 Wenn kMaxima die Zeichenfolge @code{sin} von der Eingabe liest, wird diese
 zun@"achst als ein Maxima-Token interpretiert und in die interne Darstellung
@@ -336,7 +316,6 @@ Die Funktion @code{getalias} gibt diese Substantivform zur@"uck.
 %SIN
 @end example
 
-@noindent
 Die Aliase der Symbole @code{$true} und @code{$false} sind @code{T} und
 @code{NIL}.
 
@@ -349,7 +328,6 @@ NIL
 
 @findex amperchk
 
-@noindent
 Die Funktion @code{amperchk} akzeptiert Symbole und Zeichenketten als Argument.
 Ein Symbol wird sofort zur@"uckgegeben.  Ist das Argument eine Zeichenkette wird
 mit der Funktion @code{getopr} gepr@"uft, ob zu dieser Zeichenkette ein Symbol
@@ -366,7 +344,6 @@ verwandte Funktionen werden sp@"ater erl@"autert.
                        (implode (cons #\$ (coerce name 'list))))))))
 @end verbatim
 
-@noindent
 @b{Beispiel:}
 Die Zeichenkette "+" ist der Name des Operators f@"ur die Addition.  Das Symbol
 das die Addition bezeichnet ist @code{mplus}.  Die Zeichenkette "f" wird in
@@ -419,7 +396,6 @@ eingetragen.
          y)))
 @end verbatim
 
-@noindent
 @b{Beispiel:} Die imagin@"are Einheit wird von kMaxima als @code{%i}
 dargestellt.  Bevorzugt der Nutzer die Darstellung @code{I}, kann er @code{I}
 als den Alias-Namen f@"ur @code{%i} definieren.  Liest der Parser einen Ausdruck
@@ -427,28 +403,26 @@ wie @code{2*I}, dann wird das Symbol @code{|$I|} durch das Symbol @code{$%I}
 ersetzt, das intern die imagin@"are Einheit repr@"asentiert.  Das Symbol
 @code{$%I} hat den Eintrag @code{'reversealias} auf der Eigenschaftsliste.  Wird
 der Ausdruck @code{'((mtimes) 2 $%i)} ausgegeben, dann wird das Symbol
-@code{$%i} für die Anzeige durch das vom Nutzer definierte Symbol @code{|$I|}
+@code{$%i} f@"ur die Anzeige durch das vom Nutzer definierte Symbol @code{|$I|}
 ersetzt.
 
 @example
 (%i1) alias(I, %i);
 (%o1) [I]
-
 (%i2) expr : 2*I;
 (%o2) 2*I
-
 (%i3) quit();
 0
-
 * $expr;
 ((MTIMES) 2 $%I)
-
 * (symbol-plist '|$I|)
 (ALIAS $%I)
-
 * (symbol-plist '$%i)
 (REVERSEALIAS |$i| ASSIGN NEVERSET)
 @end example
+
+@need 900
+HIER FEHLT EINE ERLAEUTERUNG DER FUNKTION REMALIAS
 
 @findex remalias
 
@@ -476,7 +450,6 @@ ersetzt.
 @findex $nounify
 @findex $verbify
 
-@noindent
 Die Funktionen @code{$nounify} und @code{$verbify} implementieren den
 Mechanismus der Verb- und Substantivformen von Symbolen.  Die Verbform eines
 Symbols ist ein Symbol dem ein Dollarzeichen vorangestellt ist.  Die 
@@ -520,14 +493,13 @@ Substantivform, wird dieses zur@"uckgegeben.
                  (t x))))))
 @end verbatim
 
-@noindent
 @b{Beispiele:}
 @code{$nounify} wird mit der Zeichenkette @code{"sin"} aufgerufen.  Die
 R@"uckgabe ist das Symbol @code{%sin}, das die Substantivform bezeichnet.  Auf
 der Eigenschaftsliste wird zum Symbol @code{$sin} in der Verbform zum
 Indikator @code{verb} das Symbol in der Substantivform @code{%sin} abgelegt.
 Umgekehrt wird zum Symbol @code{%sin} die Verbform @code{$sin} zum Indikator
-@code{noun} auf der Eigenschaftliste eingetragen.
+@code{noun} auf der Eigenschaftsliste eingetragen.
 
 @example
 * ($nounify "sin")
@@ -538,7 +510,6 @@ Umgekehrt wird zum Symbol @code{%sin} die Verbform @code{$sin} zum Indikator
 (NOUN $SIN)
 @end example
 
-@noindent
 In diesem Beispiel wird @code{$nounify} mit dem Symbol @code{$cos} als
 Argument aufgerufen.  Wie im obigen Beispiel wird die Substantivform
 zur@"uckgegeben
@@ -555,7 +526,7 @@ zur@"uckgegeben
 Die Funktion @code{$verbify} gibt das zu einem Symbol oder einer Zeichenkette
 geh@"orende Symbol in der Verbform zur@"uck.  F@"ur den Fall, dass das Argument 
 ein Symbol in der Substantivform ist, wird die Funktion @code{$nounify}
-mit der Verform des Argumentes aufgefrufen, um die Verb- und
+mit der Verbform des Argumentes aufgerufen, um die Verb- und
 Substantivformen in die Eigenschaftsliste einzutragen.
 
 @verbatim
@@ -572,10 +543,9 @@ Substantivformen in die Eigenschaftsliste einzutragen.
         (t x)))
 @end verbatim
 
-@noindent
 @b{Beispiele:}
 Wird die @code{$verbify} mit einer Zeichenkette aufgerufen, wird das
-entsprechende Maxima-Symbol mit einem voransgestelltem Dollarzeichen 
+entsprechende Maxima-Symbol mit einem vorangestelltem Dollarzeichen 
 zur@"uckgegeben.  Es werden keine Eintragungen in die Eigenschaftsliste
 der Symbole vorgenommen.  Im zweiten Beispiel wird @code{$verbify} mit dem
 Symbol @code{%tan} aufgerufen.  Jetzt werden die Verb- und Substantivformen
@@ -621,7 +591,6 @@ hat.  Die Funktion @code{stripdollar} entfernt das Zeichen @code{%} oder
         (t x)))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Zahlen sind keine kMaxima-Bezeichner.  Die Symbole
 @code{'$float}, @code{'%sin} und die Zeichenkette @code{"$sin"} sind 
 kMaxima-Bezeichner.
@@ -704,7 +673,6 @@ aufgerufen.
         (return nil))))
 @end verbatim
 
-@noindent
 @b{Beispiel:} Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide
 die Addition @code{a+b} repr@"asentieren.
 
@@ -715,7 +683,6 @@ T
 
 @findex memalike
 
-@noindent
 Die Funktion @code{memalike} sucht das Argument @code{x} im Ausdruck @code{l}.
 Die @"Aquivalenz wird mit der Funktion @code{alike1} getestet.
 
@@ -726,7 +693,6 @@ Die @"Aquivalenz wird mit der Funktion @code{alike1} getestet.
     (when (alike1 x (car l)) (return l))))
 @end verbatim
 
-@noindent
 @b{Beispiele:} Der Ausdruck @code{2*a+b} enth@"alt die Argument @code{2*a} und
 @code{$b}.  @code{$a} ist kein Argument des Ausdrucks.
 

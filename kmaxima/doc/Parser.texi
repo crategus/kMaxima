@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 16.04.2011
+@c Revision : 19.06.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -23,13 +23,13 @@
 @c -----------------------------------------------------------------------------
 
 In @ref{Die Funktion maxima-toplevel-loop} wurde eine
-Lisp-@code{read}-@code{eval}-Schleife eingef"uhrt, um Eingaben des Nutzers
+Lisp-@code{read}-@code{eval}-Schleife eingef@"uhrt, um Eingaben des Nutzers
 zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist durch die Funktion
 @code{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
 In diesem Kapitel wird nun der Parser implementiert.  Die Funktion @code{mread}
 ist die zentrale Funktion, die die Lisp-Funkion @code{read} ersetzten wird.
 @code{mread} liest mathematische Ausdr@"ucke, Kommandos, Programme und setzt
-diese in kMaxima-Ausdr@"ucke um.  Die hier vorgestellen Funktionen entsprechen
+diese in kMaxima-Ausdr@"ucke um.  Die hier vorgestellten Funktionen entsprechen
 im wesentlichen dem Code des Originals Maxima.
 
 @c -----------------------------------------------------------------------------
@@ -40,7 +40,6 @@ im wesentlichen dem Code des Originals Maxima.
 @menu
 * Namen der Operatoren::
 * Liste der Operatoren::
-* Verwaltung von Streams::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -94,7 +93,7 @@ wieder entfernt.
   (or (getprop x 'op) x))
 @end verbatim
 
-Für die folgenden Operatoren werden die Namen entsprechend definiert.
+Der folgende Code initialisiert die Namen der kMaxima-Operatoren:
 
 @verbatim
 (mapc #'(lambda (x)
@@ -117,7 +116,7 @@ Für die folgenden Operatoren werden die Namen entsprechend definiert.
 @c -----------------------------------------------------------------------------
 
 Wenn der Parser Eingaben einliest, dann enthalten diese verschiedene Operatoren
-wie zum Beispiel das Zeichen "+" f@"ur die Addition. Intern wird die Addition
+wie zum Beispiel das Zeichen "+" f@"ur die Addition.  Intern wird die Addition
 mit dem Operator @code{mplus} dargestellt.  Eine Eingabe wie zum Beispiel "a+b"
 wird vom Parser in den internen Ausdruck @code{((mplus) $A $B)} umgewandelt.
 
@@ -153,14 +152,14 @@ den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
    "::="  $::=  mdefmacro   a::=b  ((mdefmacro) $A $B)
 @end verbatim
 
-Aus der obigen Liste sind die Operatoren "&", "&&" und "!!" entfernt worden. 
-Der Operator "''" tritt in der Ausgabe nicht auf.  Der gelesene Ausdruck wird
-sofort ausgewertet.
+Im Unterschied zum Original Maxima sind aus der obigen Liste sind die Operatoren
+"&", "&&" und "!!" entfernt worden.  Der Operator "''" tritt in der Ausgabe
+nicht auf.  Der Operator wird sofort vom Parser angewendet.
 
 Die zu Beginn definierten Symbole sind in der globalen Variablen 
 @code{*symbols-defined*} enthalten.  Mit dem Makro @code{define-initial-symbols}
 wird eine globale Liste @code{*maxima-operators*} mit den Zeichen aufgebaut, die
-einen Operator definieren.  Der Parser liest diese Liste, um Operatoren zu 
+einen Operator definieren.  Der Parser liest diese Liste, um Operatoren zu
 interpretieren.
 
 @vindex *symbols-defined*
@@ -194,7 +193,7 @@ Funktion @code{cstrsetup} auf, die die Liste mit den Zeichen der Operatoren
 f@"ur den Parser generiert.  Die Funktion @code{exploden} ist eine allgemeine 
 Hilfsfunktion.  Sie zerlegt ein Symbol, aber auch Zahlen oder Zeichenketten in
 eine Liste der Zeichen.  So hat zum Beispiel der Aufruf 
-@code{(exploden 'symbol)} das Ergebnis @code{(#\s #\y #\m #\b #\o #\l)}. 
+@code{(exploden 'symbol)} das Ergebnis @code{(#\s #\y #\m #\b #\o #\l)}.
 
 @verbatim
 (defun define-initial-symbols* (l)
@@ -207,7 +206,7 @@ eine Liste der Zeichen.  So hat zum Beispiel der Aufruf
 
 @findex cstrsetup
 
-Die folgende Funktion @code{cstrsetup} generiert die Liste mit den Zeichen f@"ur 
+Die Funktion @code{cstrsetup} generiert die Liste mit den Zeichen f@"ur 
 den Parser.  Die Funktion verwendet die allgemeinen Hilfsfunktionen 
 @code{exploden}, @code{symbolconc} und @code{maybe-invert-string}.  Die
 Funktion @code{exploden} ist oben bereits erl@"autert.  Die Funktion 
@@ -355,7 +354,7 @@ die Variable, ob der Nutzer aufgefordert wird, eine Eingabe von der Tastatur
 vorzunehmen.
 
 @item *read-hang-prompt*
-Das Promptzeichen f@"ur die Eingabeaufforderung, wenn der Nutzer zum Eingeben 
+Das Prompt-Zeichen f@"ur die Eingabeaufforderung, wenn der Nutzer zum Eingeben 
 von Zeichen aufgefordert wird.
 @end table
 
@@ -370,7 +369,7 @@ Die elementare Routine f@"ur das Lesen eines Zeichens vom Stream
 sind optional.  Wird die Funktion ohne Argumente aufgerufen, werden die Zeichen
 von der Standardeingabe @code{*standard-input*} gelesen und das 
 @code{EOF}-Zeichen ist @code{nil}.  Die Funktion @code{tyi} hat drei
-Hilfsfunktionen, die lokal zur Funktion definiert sind. Diese sind
+Hilfsfunktionen, die lokal zur Funktion definiert sind.  Diese sind
 @code{tyi-raw}, @code{backslash-check} und @code{eat-continuations}.
 
 Die Hilfsfunktion @code{tyi-raw} versucht zun@"achst ein Zeichen zu lesen.  Ist
@@ -450,9 +449,9 @@ zur@"uck.
     tem))
 @end verbatim
 
-Der Parser ruft niemals die Funktion @code{parse-tyi-init} direkt auf, sondern
+Der Parser ruft die Funktion @code{parse-tyi-init} direkt auf, sondern
 die Funktion @code{parse-tyi}.  Die Funktion pr@"uft zun@"achst, ob ein Zeichen
-im Puffer @code{*parse-tyi*} vorliegt.  Ist dies der Fall, wird dies
+im Puffer @code{*parse-tyi*} vorliegt.  Ist dies der Fall, wird das Zeichen
 zur@"uckgegeben und der Puffer entsprechend korrigiert.  Ansonsten wird mit der
 Funktion @code{parse-tyi-init} das n@"achste Zeichen vom Stream
 @code{*parse-stream*} geholt.
@@ -470,11 +469,11 @@ Funktion @code{parse-tyi-init} das n@"achste Zeichen vom Stream
 	   (car tem)))))
 @end verbatim
 
-Die Funktion @code{parse-tyipeek} holt das nächste Zeichen vom Stream ohne es
-vom Stream zu entfernen.  Entweder ist noch ein Zeichen im Puffer
-@code{*parse-stream*} vorhanden, welches zurückgegeben wird, oder es wird mit
-der Funktion @code{parse-tyi-init} das nächste Zeichen vom Stream gelesen und
-in den Puffer geschrieben.
+Die Funktion @code{parse-tyipeek} holt das n@"achste Zeichen vom Stream, ohne
+es vom Stream zu entfernen.  Entweder ist noch ein Zeichen im Puffer
+@code{*parse-stream*} vorhanden, welches zur@"uckgegeben wird, oder es wird mit
+der Funktion @code{parse-tyi-init} ein Zeichen vom Stream gelesen und in den
+Puffer geschrieben.
 
 @verbatim
 (defun parse-tyipeek ()
@@ -502,19 +501,34 @@ in den Puffer @code{*parse-tyi*} zur@"uckgeschrieben.
 @subsection Einlesen der Token
 @c -----------------------------------------------------------------------------
 
-Jetzt werden die Funktionen definiert, um ein Token einzulesen.  kMaxima 
+@menu 
+* Einf@"uhrung in Einlesen der Token::
+* Hauptroutine f@"ur das Einlesen der Token::
+* Einlesen von Operatoren::
+* Einlesen von Bezeichnern::
+* Einlesen von Zeichenketten::
+* Einlesen von Zahlen::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Einf@"uhrung in Einlesen der Token, Hauptroutine f@"ur das Einlesen der Token, Einlesen der Token, Einlesen der Token
+@subsubsection Einf@"uhrung in Einlesen der Token
+@c -----------------------------------------------------------------------------
+
+Jetzt werden die Funktionen definiert, um ein Token einzulesen.  kMaxima
 unterscheidet die folgenden Token:
 
 @table @emph
 @item Operator
 Operatoren sind zum Beispiel die Zeichen f@"ur die Addition "+" oder
 Multiplikation "*".  Operatoren werden von der Funktion
-@code{scan-command-token} eingelesen.
+@code{scan-command-token} eingelesen.  Die Operatoren die von dieser Funktion
+behandelt werden, sind in der Liste @code{*maxima-operators*} enthalten.
 
 @item Zahlen
 kMaxima liest ganze Zahlen oder Gleitkommazahlen mit den Funktionen
 @code{scan-number-before-dot}, @code{scan-number-after-dot}, 
-@code{scan-number-exponent} und @code{scan-number-rest} ein. Weitere
+@code{scan-number-exponent} und @code{scan-number-rest} ein.  Weitere
 Funktionen sind @code{scan-digits} und @code{make-number}.
 
 @item Zeichenkette
@@ -533,17 +547,61 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
 @code{scan-keyword-token} eingelesen.
 @end table
 
-@verbatim
-(defvar *scan-buffered-token* (list nil)
-  "Put-back buffer for scanner, a state-variable of the reader")
+@c -----------------------------------------------------------------------------
+@node Hauptroutine f@"ur das Einlesen der Token, Einlesen von Operatoren, Einf@"uhrung in Einlesen der Token, Einlesen der Token
+@subsubsection Hauptroutine f@"ur das Einlesen der Token
+@c -----------------------------------------------------------------------------
 
+@vindex *scan-buffered-token*
+@findex peek-one-token
+@findex scan-one-token
+@findex gooble-comment
+
+kMaxima liest mit der Funktion @code{scan-one-token} die Token von einem Stream.
+Mit der Funktion @code{peek-one-token} wird das n@"achste Token gelesen, ohne
+es vom Stream zu entfernen.  Dazu hat kMaxima den Puffer
+@code{*scan-buffered-token*}.  Wird die Funktion @code{peek-one-token}
+aufgerufen und es liegt kein Token im Puffer vor, wird das n@"achste Token aus
+dem Stream gelesen und in dem Puffer abgelegt.
+
+@verbatim
+(defvar *scan-buffered-token* (list nil))
+@end verbatim
+
+Die Funktion @code{peek-one-token} pr@"uft zun@"achst, ob im Puffer
+@code{*scan-buffered-token*} ein Token vorliegt.  Ist dies der Fall wird das
+Token zur@"uckgegeben.  Ansonsten wird ein Token vom Stream gelesen und in den
+Puffer geschrieben.
+
+@verbatim
 (defun peek-one-token (&optional (eof-p nil) (eof nil))
   (cond ((car *scan-buffered-token*)
          (cdr *scan-buffered-token*))
         (t
          (rplacd *scan-buffered-token* (scan-one-token eof-p eof))
          (cdr (rplaca *scan-buffered-token* t)))))
+@end verbatim
 
+Die Funktion @code{scan-one-token} liest ein einzelnes Token vom Stream.
+Zun@"achst pr@"uft die Funktion jedoch, ob bereits ein Token im Puffer
+@code{*scan-buffered-token*} vorliegt.  Liegt kein Token im Puffer vor, geht die
+Funktion folgendermaßen vor.  Zuerst wird mit der Funktion
+@code{scan-operator-token} geprüft, ob ein Operator im Stream vorliegt.  Dann
+wird geprüft, ob der Stream noch Zeichen enthält.  Ist das nächste Zeichen im
+Stream @code{#\/}, wird mit der Funktion @code{gooble-comment} ein Kommentar
+vom Stream gelesen.  Mit dem Zeichen @code{#\.} beginnt eine Gleitkommazahl,
+die mit der Funktion @code{scan-number-after-dot} vom Stream gelesen wird.
+Als nächste wird geprüft, ob das Zeichen @code{#\"} vom Stream gelesen wurde.
+In diesem Fall wird die Funktion @code{scan-string} aufgerufen, um eine 
+Zeichenkette vom Stream zu lesen.  Mit dem Zeichen @code{#\?} wird eine
+Lisp-Zeichenkette, ein Lisp-Schlüsselwort oder ein Lisp-Bezeichner eingeleitet.
+In diesem Fällen werden die entsprechenden Funktionen @code{scan-string},
+@code{scan-keyword-token} oder @code{scan-lisp-token} aufgerufen.  Liegt jetzt
+eine Ziffer vor, dann wird mit der Funktion @code{scan-number-before-dot} die
+Zahl vom Stream gelesen.  Zuletzt wird die Funktion aufgerufen, um einen
+kMaxima-Bezeichner vom Stream zu lesen.
+
+@verbatim
 (defun scan-one-token (&optional (eof-p nil) (eof nil) &aux test)
   (cond ((car *scan-buffered-token*)
          (rplaca *scan-buffered-token* nil)
@@ -580,7 +638,13 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
         ((digit-char-p test 10)
          (scan-number-before-dot nil))
         (t (scan-maxima-token))))
+@end verbatim
 
+Die Funktion @code{gooble-comment} liest einen Kommentar vom Stream, der von den
+Zeichen @code{/*} und @code{*/} eingeschlossen ist.  Kommentare k@"onnen 
+verschachtelt sein.
+
+@verbatim
 (defun gobble-comment ()
   (prog (c depth)
     (setq depth 1)
@@ -602,7 +666,14 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
                   (parse-tyi)
                   (go read)))))
         (go read)))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Einlesen von Operatoren, Einlesen von Bezeichnern, Hauptroutine f@"ur das Einlesen der Token, Einlesen der Token
+@subsubsection Einlesen von Operatoren
+@c -----------------------------------------------------------------------------
+
+@verbatim
 (defun scan-operator-token (obj)
   (do ((ch (parse-tyipeek) (parse-tyipeek)))
       ((not (member ch
@@ -645,7 +716,14 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
                         (scan-operator-token-aux (list (cadr lis))))))))
          (or result (unparse-tyi ch))
          result)))))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Einlesen von Bezeichnern, Einlesen von Zeichenketten, Einlesen von Operatoren, Einlesen der Token
+@subsubsection Einlesen von Bezeichnern
+@c -----------------------------------------------------------------------------
+
+@verbatim
 (defun scan-maxima-token ()
   (getalias (implode (cons '#\$ (scan-token t)))))
 
@@ -673,7 +751,14 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
     (when (char= (parse-tyi) #\\ )
       (setq c (parse-tyi)))
     (setq flag t)))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Einlesen von Zeichenketten, Einlesen von Zahlen, Einlesen von Bezeichnern, Einlesen der Token
+@subsubsection Einlesen von Zeichenketten
+@c -----------------------------------------------------------------------------
+
+@verbatim
 (defun scan-string (&optional init)
   (let ((buf (make-array 50 :element-type '#.(array-element-type "a")
                             :fill-pointer 0 :adjustable t)))
@@ -687,7 +772,14 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
       (if (char= (parse-tyi) #\\ )
           (setq c (parse-tyi)))
           (vector-push-extend c buf))))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Einlesen von Zahlen, , Einlesen von Zeichenketten, Einlesen der Token
+@subsubsection Einlesen von Zahlen
+@c -----------------------------------------------------------------------------
+
+@verbatim
 (defun readlist (lis)
   (read-from-string (coerce lis 'string)))
 
@@ -748,13 +840,13 @@ Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
 @item @code{nud}-Funktion
 Ein Prefix-Operator hat das Argument auf der rechten Seite des Operators.
 Trifft der Parser auf einen Prefix-Operator wird seine nud-Funktion aufgerufen,
-um das Argument auf der rechten Seite zu lesen. Vordefinierte nud-Funktionen
+um das Argument auf der rechten Seite zu lesen.  Vordefinierte nud-Funktionen
 sind @code{parse-prefix}, @code{parse-matchfix} und @code{parse-nofix}.
 
 @item @code{led}-Funktion
-Postfix-Operatoren haben ihr Argument auf der linken Seite. Infix-Operatoren auf
-der linken und rechten Seite. Um das Argument auf der linken Seite zu holen wird
-vom Parser die led-Funktion des Operators aufgerufen. Vordefinierte 
+Postfix-Operatoren haben ihr Argument auf der linken Seite.  Infix-Operatoren
+auf der linken und rechten Seite.  Um das Argument auf der linken Seite zu holen
+wird vom Parser die led-Funktion des Operators aufgerufen.  Vordefinierte
 led-Funktionen sind @code{parse-postfix}, @code{parse-infix} und 
 @code{parse-nary}.
 
@@ -768,17 +860,17 @@ diesem Beispiel ist @code{2*x} das linke Argument der Addition.  Der Ausdruck
 wird also als @code{(2*x)+3} gelesen.
 
 @item lbp
-Die linke Bindungskraft des Operators. Solange die linke Bindungskraft des 
+Die linke Bindungskraft des Operators.  Solange die linke Bindungskraft des 
 nachfolgenden Operators gr@"o@ss{}er ist als die rechte Bindungskraft des 
 vorhergehenden Operators, f@"ahrt der Parser mit dem Einlesen von Token fort.
 In dem Beispiel @code{3+2*x} wird die Ziffer @code{2} nicht als nachfolgendes
 Argument der Addition eingelesen, da die linksseitige Bindungskraft der 
-Multiplikation gr@"o@ss{}er als die rechtsseitige Bindungskraft der Addition.  
-Der Parser f@"ahrt fort und liest den Ausdruck @code{2*x} vollst@"andig ein.  
+Multiplikation gr@"o@ss{}er als die rechtsseitige Bindungskraft der Addition.
+Der Parser f@"ahrt fort und liest den Ausdruck @code{2*x} vollst@"andig ein.
 Der Ausdruck wird also @code{3+(2*x)} gelesen.
 
 @item pos
-@code{pos} mein "Part of Speach" was mit Wortart @"ubersetzt werden kann.  
+@code{pos} mein "Part of Speach" was mit Wortart @"ubersetzt werden kann.
 Damit kann der Typ des Operators festgelegt werden.  Es werden die Wortarten 
 @code{any} f@"ur einen beliebigen Typ, @code{clause} f@"ur einen logischen Typ 
 und @code{expr} f@"ur einen Ausdruck unterschieden.  Anhand der Wortart kann der
@@ -853,36 +945,29 @@ while   parse-$do                             25   45        clause
 @verbatim
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (defmacro def-nud-equiv (op equiv)
-    (list 'putprop 
-          (list 'quote op) (list 'function equiv) (list 'quote 'nud)))
-
-  (defmacro nud-propl () ''(nud))
+    (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'nud)))
 
   (defmacro def-nud-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'nud 'nil) op-l body))
 
   (defmacro def-led-equiv (op equiv)
-    (list 'putprop 
-          (list 'quote op) (list 'function equiv) (list 'quote 'led)))
-
-  (defmacro led-propl () ''(led))
+    (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'led)))
 
   (defmacro def-led-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'led 'nil) op-l body)))
+@end verbatim
 
-(defmacro def-operatorp ()
-  `(defun operatorp (lex)
-     (and (symbolp lex) (getpropl lex '(,@(nud-propl) ,@(led-propl))))))
+@verbatim
+(defun operatorp (lex)
+  (and (symbolp lex)
+       (getpropl lex '(nud led))))
 
-(def-operatorp)
+(defun operatorp1 (lex)
+  (and (symbolp lex)
+       (getpropl lex '(lbp rbp nud led))))
+@end verbatim
 
-(defmacro def-operatorp1 ()
-  `(defun operatorp1 (lex)
-     (and (symbolp lex) 
-          (getpropl lex '(lbp rbp ,@(nud-propl) ,@(led-propl))))))
-
-(def-operatorp1)
-
+@verbatim
 (defun nud-call (op)
   (let ((tem (getprop op 'nud))
         res)
@@ -1016,11 +1101,13 @@ while   parse-$do                             25   45        clause
 
 (defmacro first-c () '(peek-one-token))
 (defmacro pop-c   () '(scan-one-token))
+@end verbatim
 
+@verbatim
 (defun mread (&rest read-args)
   (progn
     (when *mread-prompt*
-      (and *parse-window* 
+      (and *parse-window*
            (setf (car *parse-window*) nil
                  *parse-window* (cdr *parse-window*)))
       (princ *mread-prompt*)
@@ -1038,7 +1125,6 @@ while   parse-$do                             25   45        clause
           (case (first-c)
             ((|$;| |$$|
               )
-             (setf *current-line-info* nil)
              (return (list (mheader (pop-c))
                            (if labels
                                (cons (mheader '|$[| ) (nreverse labels)))
@@ -1050,7 +1136,9 @@ while   parse-$do                             25   45        clause
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
             (t
              (parse-bug-err 'mread-raw)))))))
+@end verbatim
 
+@verbatim
 (defun parse (mode rbp)
   (do ((left (nud-call (pop-c))         ; Envoke the null left denotation
        (led-call (pop-c) left)))        ;  and keep calling LED ops as needed
@@ -1117,7 +1205,14 @@ while   parse-$do                             25   45        clause
       (mread-synerr "Found ~A expression where ~A expression expected"
                     (get (car item) 'english)
                     (get mode       'english))))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Definition der Operatoren, Nutzerdefinierte Operatoren, Funktionen und Makros des Parsers, Parser
+@section Definition der Operatoren
+@c -----------------------------------------------------------------------------
+
+@verbatim
 (def-nud-equiv |$]| delim-err)
 (def-led-equiv |$]| erb-err)
 (def-lbp       |$]| 5)
@@ -1209,11 +1304,6 @@ while   parse-$do                             25   45        clause
                  (cons (cons ($verbify (caar right)) (cdar right))
                        (cdr right)))))))
 @end verbatim
-
-@c -----------------------------------------------------------------------------
-@node Definition der Operatoren, Nutzerdefinierte Operatoren, Funktionen und Makros des Parsers, Parser
-@section Definition der Operatoren
-@c -----------------------------------------------------------------------------
 
 @verbatim  
 (def-led-equiv |$:| parse-infix)
