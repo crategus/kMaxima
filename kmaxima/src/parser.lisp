@@ -57,9 +57,7 @@
 (define-initial-symbols
     |+| |-| |*| |^| |<| |=| |>| |(| |)| |[| |]| |,|
     |:| |!| |#| |'| |$| |;|
-    ;; Two character
     |**| |^^| |:=| |::| |<=| |>=| |''| |&&|
-    ;; Three character
     |::=|
     )
 
@@ -377,16 +375,13 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun readlist (lis)
-  (read-from-string (coerce lis 'string)))
-
 (defun make-number (data)
   (setq data (nreverse data))
   (let ((marker (car (nth 3 data))))
     (unless (eql marker flonum-exponent-marker)
       (when (member marker '(#\E #\F #\S #\D #\L ))
         (setf (nth 3 data) (list flonum-exponent-marker)))))
-  (readlist (apply #'append data)))
+  (read-from-string (coerce (apply #'append data) 'string)))
 
 (defun scan-digits (data continuation? continuation &optional exponent-p)
   (do ((c (parse-tyipeek) (parse-tyipeek))
