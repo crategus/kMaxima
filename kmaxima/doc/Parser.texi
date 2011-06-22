@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 19.06.2011
+@c Revision : 22.06.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ Lisp-@code{read}-@code{eval}-Schleife eingef@"uhrt, um Eingaben des Nutzers
 zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist durch die Funktion
 @code{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
 In diesem Kapitel wird nun der Parser implementiert.  Die Funktion @code{mread}
-ist die zentrale Funktion, die die Lisp-Funkion @code{read} ersetzten wird.
+ist die zentrale Funktion, die die Lisp-Funkion @code{read} ersetzen wird.
 @code{mread} liest mathematische Ausdr@"ucke, Kommandos, Programme und setzt
 diese in kMaxima-Ausdr@"ucke um.  Die hier vorgestellten Funktionen entsprechen
 im wesentlichen dem Code des Originals Maxima.
@@ -40,6 +40,7 @@ im wesentlichen dem Code des Originals Maxima.
 @menu
 * Namen der Operatoren::
 * Liste der Operatoren::
+* Fehlerbehandlung des Parsers::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -61,7 +62,7 @@ Funktion @code{getopr} wird der Name eines Operators als Zeichenkette
 zur@"uckgegeben.  @code{(getopr 'mplus)} hat also das Ergebnis @code{"+"}.
 Umgekehrt gibt die Funktion @code{getop} das interne Symbol zu einem Namen
 zur@"uck.  @code{(getop "+")} hat das Ergebnis @code{mplus}.  Die Namen der
-Operatoren werden zum Indikator @code{op} in die Eigenschaftsliste des
+Operatoren werden zum Indikator @code{op} in der Eigenschaftsliste des
 dazugeh@"orenden Symbols abgelegt.  Da Zeichenketten keine Eigenschaftsliste
 haben, werden die Namen der Operatoren mit ihrem dazugeh@"orenden Symbol in das
 Hash-Array @code{*opr-table*} eingetragen.
@@ -82,7 +83,7 @@ wieder entfernt.
   (or (getopr0 x) x))
 
 (defun putopr (x y)
-  (or (and (symbolp x) (setf (get x 'opr) y))
+  (or (and (symbolp x) (putprop x y 'opr))
       (and (stringp x) (setf (gethash x *opr-table*) y))))
 
 (defun remopr (x)
@@ -111,11 +112,11 @@ Der folgende Code initialisiert die Namen der kMaxima-Operatoren:
 @end verbatim
 
 @c -----------------------------------------------------------------------------
-@node Liste der Operatoren, , Namen der Operatoren, Vorbereitende Funktionen und Makros
+@node Liste der Operatoren, Fehlerbehandlung des Parsers, Namen der Operatoren, Vorbereitende Funktionen und Makros
 @subsection Liste der Operatoren
 @c -----------------------------------------------------------------------------
 
-Wenn der Parser Eingaben einliest, dann enthalten diese verschiedene Operatoren
+Wenn der Parser Eingaben liest, dann enthalten diese verschiedene Operatoren
 wie zum Beispiel das Zeichen "+" f@"ur die Addition.  Intern wird die Addition
 mit dem Operator @code{mplus} dargestellt.  Eine Eingabe wie zum Beispiel "a+b"
 wird vom Parser in den internen Ausdruck @code{((mplus) $A $B)} umgewandelt.
@@ -124,32 +125,32 @@ Die folgende Tabelle zeigt die Operatoren, die kMaxima zu Beginn kennt, zeigt
 den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
 
 @verbatim
-   "+"    $+    mplus       a+b    ((mplus) $A $B)
-   "-"    $-    mminus      -a     ((mminus) $A)
-   "*"    $+    mtimes      a*b    ((mtimes) $A $B)
-   "^"    $^    mexpt       a^b    ((mexpt)  $A $B)
-   "<"    $<    mlessp      a<b    ((mlessp) $A $B)
-   "="    $=    mequal      a=b    ((mequal) $A $B)
-   ">"    $>    mgreaterp   a>b    ((mqreaterp) $A $B)
-   "("    $(    mprogn      (a,b)  ((mprogn) $A $B)
+   "+"    $+    mplus          a+b    ((mplus) $A $B)
+   "-"    $-    mminus         -a     ((mminus) $A)
+   "*"    $+    mtimes         a*b    ((mtimes) $A $B)
+   "^"    $^    mexpt          a^b    ((mexpt)  $A $B)
+   "<"    $<    mlessp         a<b    ((mlessp) $A $B)
+   "="    $=    mequal         a=b    ((mequal) $A $B)
+   ">"    $>    mgreaterp      a>b    ((mqreaterp) $A $B)
+   "("    $(    mprogn         (a,b)  ((mprogn) $A $B)
    ")"    $)                       
-   "["    $[    mlist       [a,b]  ((mlist $A $B)
+   "["    $[    mlist          [a,b]  ((mlist $A $B)
    "]"    $]                       
-   ","    $,    $ev         a,b    (($ev) $A $B)
-   ":"    $:    msetq       a:b    ((msetq) $A $B)
-   "!"    $!    mfactorial  a!     ((mfactorial) $A)
-   "#"    $#    mnotequal   a#b    ((mnotequal) $A $B)
-   "'"    $'    mquote      'a     ((mquote) $A)
-   ";"    $;                       
-   "$"    $$                       
-   "**"   $**   mexpt       a**b   ((mexpt) $A $B)
-   "^^"   $^^   mncexpt     a^^b   ((mncexpt) $A $B) 
-   ":="   $:=   mdefine     a:=b   ((mdefine) $A $B)
-   "::"   $::   mset        a::b   ((mset) $A $B)
-   "<="   $<=   mleqp       a<=b   ((mleqp) $A $B)
-   ">="   $>=   mgeqp       a>=b   ((mgeqp) $A $B)
+   ","    $,    $ev            a,b    (($ev) $A $B)
+   ":"    $:    msetq          a:b    ((msetq) $A $B)
+   "!"    $!    mfactorial     a!     ((mfactorial) $A)
+   "#"    $#    mnotequal      a#b    ((mnotequal) $A $B)
+   "'"    $'    mquote         'a     ((mquote) $A)
+   ";"    $;    displayinput                   
+   "$"    $$    nodisplayinput                   
+   "**"   $**   mexpt          a**b   ((mexpt) $A $B)
+   "^^"   $^^   mncexpt        a^^b   ((mncexpt) $A $B) 
+   ":="   $:=   mdefine        a:=b   ((mdefine) $A $B)
+   "::"   $::   mset           a::b   ((mset) $A $B)
+   "<="   $<=   mleqp          a<=b   ((mleqp) $A $B)
+   ">="   $>=   mgeqp          a>=b   ((mgeqp) $A $B)
    "''"   $''   tritt in der Ausgabe nicht auf      
-   "::="  $::=  mdefmacro   a::=b  ((mdefmacro) $A $B)
+   "::="  $::=  mdefmacro      a::=b  ((mdefmacro) $A $B)
 @end verbatim
 
 Im Unterschied zum Original Maxima sind aus der obigen Liste sind die Operatoren
@@ -212,7 +213,7 @@ den Parser.  Die Funktion verwendet die allgemeinen Hilfsfunktionen
 Funktion @code{exploden} ist oben bereits erl@"autert.  Die Funktion 
 @code{symbolconc} akzeptiert als Argumente Symbole, Zahlen einschlie@ss{}lich 
 von Gleitkommazahlen und Zeichenketten und bildet aus den Argumenten ein Symbol,
-das in das aktuelle Paket geschrieben wird. Zum Beispiel hat 
+das in das aktuelle Paket geschrieben wird.  Zum Beispiel hat
 @code{(symbolconc "Sym" 3 'x)} das Ergebnis @code{|Sym3X|}.  Die Funktion
 @code{maybe-invert-string} sorgt daf@"ur, dass eine Zeichenkette entsprechend
 der Konvention f@"ur Lisp und Maxima-Symbole die entsprechende Gro@ss{}- und 
@@ -258,10 +259,13 @@ Kleinschreibung aufweist.
 @findex define-symbol
 @findex undefine-symbol
 
-Die Funktion @code{define-symbol} erlauben das Hinzuf@"ugen eines Operators zu 
-der Liste der definierten Operatoren.  Mit der Funktion @code{undefine-symbol} 
+Die Funktion @code{define-symbol} f@"ugt einen Operator der Liste
+@code{*symbols-defined*} der definierten Operatoren hinzu und aktualisiert die
+globale Variable @code{*maxima-operators*}.  Das Argument @code{x} ist eine
+Zeichenkette mit dem Namen des Operators.  Die R@"uckgabe ist ein Symbol, das
+den Operator bezeichnet.  Mit der Funktion @code{undefine-symbol}
 wird eine Operator von den Listen @code{*symbol-defined} und 
-@code{*maxima-operators*}.
+@code{*maxima-operators*} entfernt.
 
 @verbatim
 (defun define-symbol (x)
@@ -276,23 +280,93 @@ kMaxima definiert die folgenden Symbole als Operatoren.
 
 @verbatim
 (define-initial-symbols
-    |+|  |-|  |*|  |^|  |<|  |=|  |>| |(| |)| |[| |]| |,|
-    |:|  |!|  |#|  |'|  |;|  |$|
-    |**| |^^| |:=| |::| |!!| |<=| |>=| |''|
-    |::=|)
+    |+| |-| |*| |^| |<| |=| |>| |(| |)| |[| |]| |,|
+    |:| |!| |#| |'| |$| |;|
+    |**| |^^| |:=| |::| |<=| |>=| |''| |&&|
+    |::=|
+    )
 @end verbatim
 
 Nach der Initialisierung enth@"alt die globale Variable 
 @code{*maxima-operators*} die folgende Liste.
 
 @verbatim
- (NIL (ANS NIL) (#\+ (ANS $+)) (#\- (ANS $-)) (#\* (ANS $*) (#\* (ANS $**)))
+(NIL (ANS NIL) (#\+ (ANS $+)) (#\- (ANS $-)) (#\* (ANS $*) (#\* (ANS $**)))
  (#\^ (ANS $^) (#\^ (ANS $^^))) (#\< (ANS $<) (#\= (ANS $<=))) (#\= (ANS $=))
  (#\> (ANS $>) (#\= (ANS $>=))) (#\( (ANS |$(|)) (#\) (ANS |$)|))
  (#\[ (ANS $[)) (#\] (ANS $])) (#\, (ANS |$,|))
  (#\: (ANS |$:|) (#\= (ANS |$:=|)) (#\: (ANS |$::|) (#\= (ANS |$::=|))))
  (#\! (ANS $!)) (#\# (ANS |$#|)) (#\' (ANS |$'|) (#\' (ANS |$''|)))
- (#\$ (ANS $$)) (#\; (ANS |$;|)))
+ (#\$ (ANS $$)) (#\; (ANS |$;|)) (#\& #\& (ANS $&&)))
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Fehlerbehandlung des Parsers, , Liste der Operatoren, Vorbereitende Funktionen und Makros
+@subsection Fehlerbehandlung des Parsers
+@c -----------------------------------------------------------------------------
+
+@verbatim
+(defun mopstrip (x)
+  (cond ((null x) 'false)
+        ((or (eq x t) (eq x 't)) 'true)
+        ((numberp x) x)
+        ((symbolp x)
+         (or (getprop x 'reversealias)
+             (let ((name (symbol-name x)))
+               (if (member (char name 0) '(#\$ #\%) :test #'char=)
+                   (subseq name 1)
+                   name))))
+        (t x)))
+
+(defun mread-synerr (format-string &rest l)
+  (let (tem
+        errset
+        (file "stdin"))
+    (errset (setq tem (file-position *parse-stream*))
+            (setq file (namestring *parse-stream*)))
+    (when tem
+      (format t "~%~a:~a:" file tem))
+    (format t "incorrect syntax: ")
+    (apply 'format t format-string
+           (mapcar #'(lambda (x)
+                       (if (symbolp x) (print-invert-case x) x))
+                   l))
+    (cond ((eql *parse-stream* *standard-input*)
+           (let ((n *parse-window-length*)
+                 some ch)
+             (loop for i from (1- n) downto (- n 20)
+                   while (setq ch (nth i *parse-window*))
+                   do
+                   (cond ((eql ch #\newline)
+                          (push #\n some)
+                          (push #\\ some))
+                         ((eql ch #\tab)
+                          (push #\t some)
+                          (push #\\ some))
+                         (t (push ch some))))
+             (format t "~%~{~c~}~%~vt^" some (- (length some) 2))
+             (read-line *parse-stream* nil nil))))
+    (terpri)
+    (throw 'maxima-continue t)))
+
+(defun parse-err ()
+  (mread-synerr "Syntax error"))
+
+(defun parse-bug-err (op)
+  (mread-synerr
+    "Parser bug in ~A. Please report this to the Maxima maintainers,~
+   ~%including the characters you just typed which caused the error. Thanks."
+    (mopstrip op)))
+
+(defun parse-delim-err (op)
+  (mread-synerr "Illegal use of delimiter ~A" (mopstrip op)))
+
+(defun parse-erb-err (op l)
+  (declare (ignore l))
+  (mread-synerr "Too many ~A's" (mopstrip op)))
+
+(defun parse-premterm-err (op)
+  (mread-synerr "Premature termination of input at ~A." (mopstrip op)))
 @end verbatim
 
 @c -----------------------------------------------------------------------------
@@ -585,21 +659,21 @@ Puffer geschrieben.
 Die Funktion @code{scan-one-token} liest ein einzelnes Token vom Stream.
 Zun@"achst pr@"uft die Funktion jedoch, ob bereits ein Token im Puffer
 @code{*scan-buffered-token*} vorliegt.  Liegt kein Token im Puffer vor, geht die
-Funktion folgendermaßen vor.  Zuerst wird mit der Funktion
-@code{scan-operator-token} geprüft, ob ein Operator im Stream vorliegt.  Dann
-wird geprüft, ob der Stream noch Zeichen enthält.  Ist das nächste Zeichen im
-Stream @code{#\/}, wird mit der Funktion @code{gooble-comment} ein Kommentar
+Funktion folgenderma@ss{}en vor.  Zuerst wird mit der Funktion
+@code{scan-operator-token} gepr@"uft, ob ein Operator im Stream vorliegt.  Dann
+wird gepr@"uft, ob der Stream noch Zeichen enth@"alt.  Ist das n@"achste Zeichen
+im Stream @code{#\/}, wird mit der Funktion @code{gooble-comment} ein Kommentar
 vom Stream gelesen.  Mit dem Zeichen @code{#\.} beginnt eine Gleitkommazahl,
-die mit der Funktion @code{scan-number-after-dot} vom Stream gelesen wird.
-Als nächste wird geprüft, ob das Zeichen @code{#\"} vom Stream gelesen wurde.
+die mit der Funktion @code{scan-number-after-dot} vom Stream gelesen wird.  Als
+n@"achste wird gepr@"uft, ob das Zeichen @code{#\"} vom Stream gelesen wurde.
 In diesem Fall wird die Funktion @code{scan-string} aufgerufen, um eine 
 Zeichenkette vom Stream zu lesen.  Mit dem Zeichen @code{#\?} wird eine
-Lisp-Zeichenkette, ein Lisp-Schlüsselwort oder ein Lisp-Bezeichner eingeleitet.
-In diesem Fällen werden die entsprechenden Funktionen @code{scan-string},
-@code{scan-keyword-token} oder @code{scan-lisp-token} aufgerufen.  Liegt jetzt
-eine Ziffer vor, dann wird mit der Funktion @code{scan-number-before-dot} die
-Zahl vom Stream gelesen.  Zuletzt wird die Funktion aufgerufen, um einen
-kMaxima-Bezeichner vom Stream zu lesen.
+Lisp-Zeichenkette, ein Lisp-Schl@"usselwort oder ein Lisp-Bezeichner
+eingeleitet.  In diesem F@"allen werden die entsprechenden Funktionen
+@code{scan-string}, @code{scan-keyword-token} oder @code{scan-lisp-token}
+aufgerufen.  Liegt jetzt eine Ziffer vor, dann wird mit der Funktion
+@code{scan-number-before-dot} die Zahl vom Stream gelesen.  Zuletzt wird die
+Funktion aufgerufen, um einen kMaxima-Bezeichner vom Stream zu lesen.
 
 @verbatim
 (defun scan-one-token (&optional (eof-p nil) (eof nil) &aux test)
@@ -676,11 +750,12 @@ verschachtelt sein.
 @verbatim
 (defun scan-operator-token (obj)
   (do ((ch (parse-tyipeek) (parse-tyipeek)))
-      ((not (member ch
-                    '(#\newline #\tab #\space #\linefeed #\return #\page))))
+      ((not (member ch *whitespaces*)))
     (parse-tyi))
   (scan-operator-token-aux obj))
+@end verbatim
 
+@verbatim
 (defun scan-operator-token-aux (obj)
   (labels ((parser-assoc (ch lis)
              (do ((v lis (cdr v)))
@@ -764,14 +839,14 @@ verschachtelt sein.
                             :fill-pointer 0 :adjustable t)))
     (when init
       (vector-push-extend init buf))
-    (do ((c (parse-tyipeek) (parse-tyipeek)))
-        ((cond ((eql c -1))
-               ((char= c #\")
+    (do ((ch (parse-tyipeek) (parse-tyipeek)))
+        ((cond ((eql ch *parse-stream-eof*))
+               ((char= ch #\")
                 (parse-tyi) t))
          (copy-seq buf))
       (if (char= (parse-tyi) #\\ )
-          (setq c (parse-tyi)))
-          (vector-push-extend c buf))))
+          (setq ch (parse-tyi)))
+          (vector-push-extend ch buf))))
 @end verbatim
 
 @c -----------------------------------------------------------------------------
@@ -780,16 +855,13 @@ verschachtelt sein.
 @c -----------------------------------------------------------------------------
 
 @verbatim
-(defun readlist (lis)
-  (read-from-string (coerce lis 'string)))
-
 (defun make-number (data)
   (setq data (nreverse data))
   (let ((marker (car (nth 3 data))))
     (unless (eql marker flonum-exponent-marker)
       (when (member marker '(#\E #\F #\S #\D #\L ))
         (setf (nth 3 data) (list flonum-exponent-marker)))))
-  (readlist (apply #'append data)))
+  (read-from-string (coerce (apply #'append data) 'string)))
 
 (defun scan-digits (data continuation? continuation &optional exponent-p)
   (do ((c (parse-tyipeek) (parse-tyipeek))
@@ -870,7 +942,7 @@ Der Parser f@"ahrt fort und liest den Ausdruck @code{2*x} vollst@"andig ein.
 Der Ausdruck wird also @code{3+(2*x)} gelesen.
 
 @item pos
-@code{pos} mein "Part of Speach" was mit Wortart @"ubersetzt werden kann.
+@code{pos} meint "Part of Speach" was mit Wortart @"ubersetzt werden kann.
 Damit kann der Typ des Operators festgelegt werden.  Es werden die Wortarten 
 @code{any} f@"ur einen beliebigen Typ, @code{clause} f@"ur einen logischen Typ 
 und @code{expr} f@"ur einen Ausdruck unterschieden.  Anhand der Wortart kann der

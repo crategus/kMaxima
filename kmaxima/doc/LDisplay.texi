@@ -28,10 +28,6 @@
 
 @verbatim
 (defmvar $powerdisp nil)
-(defmvar $pfeformat nil)
-(defmvar $%edispflag nil)
-(defmvar $exptdispflag t)
-(defmvar $sqrtdispflag t)
 (defmvar $negsumdispflag t)
 
 (defun nformat (form)
@@ -71,7 +67,16 @@
                    args
                    (nreverse args)))
               (t (nreverse args)))))
+@end verbatim
 
+@findex form-mtimes
+@vindex $pfeformat
+
+@verbatim
+(defmvar $pfeformat nil)
+@end verbatim
+
+@verbatim
 (defun form-mtimes (form)
   (cond ((null (cdr form)) '((mtimes)))
         ((equal -1 (cadr form)) (list '(mminus) (form-mtimes (cdr form))))
@@ -98,7 +103,32 @@
            (if (not flag) 
                (setq num (list '(mquotient) num den)))
            (return (if minus (list '(mminus) num) num))))))
+@end verbatim
 
+@findex form-mexpt
+@vindex $sqrtdispflag
+@vindex $%edispflag
+@vindex $exptdispflag
+
+Die Formatierung von @code{mexpt}-Ausdr@"ucken wird von den Optionsvariablen
+@code{$sqrtdispflag}, @code{$%edispflag} und @code{$exptdispflag} kontrolliert.
+Hat die Optionsvariable @code{$sqrtdispflag} den Wert @code{T}, dann wird ein
+Ausdruck mit der Wurzelfunktion wie zum Beispiel @code{((mexpt) $a ((rat) 1 2))}
+f@"ur die externe Darstellung als @code{((%sqrt) $a)} formatiert.  Die
+Optionsvariable @code{%edispflag} kontrolliert die Formatierung der 
+Exponentialfunktion.  Hat @code{%edispflag} den Wert @code{T}, wird die
+Exponentiation der Exponentialfunktion mit einem negativen Exponenten als
+Quotient formatiert.  Entsprechend kontrolliert die Optionsvariable
+@code{$exptdispflag} die Formatierung der Exponentiation mit einer Basis die
+verschieden von @code{%e} ist.
+
+@verbatim
+(defmvar $%edispflag nil)
+(defmvar $exptdispflag t)
+(defmvar $sqrtdispflag t)
+@end verbatim
+
+@verbatim
 (defun form-mexpt (form &aux expr)
   (cond ((and $sqrtdispflag (alike1 '((rat) 1 2) (caddr form)))
          (list '(%sqrt) (cadr form)))
@@ -113,6 +143,25 @@
                                   (list '(mexpt) (cadr form) (cadr expr)))))
         (t (cons '(mexpt) (cdr form)))))
 @end verbatim
+
+@b{Beispiele:}
+@example
+* (let (($sqrtdispflag nil))
+    (form-mexpt '((mexpt simp) $a ((rat) 1 2))))
+((MEXPT) $A ((RAT) 1 2))
+* (let (($sqrtdispflag t)) (form-mexpt '((mexpt simp) $a ((rat) 1 2))))
+((%SQRT) $A)
+
+* (let (($%edispflag nil)) (form-mexpt '((mexpt simp) $%e -2)))
+((MEXPT) $%E -2)
+* (let (($%edispflag t)) (form-mexpt '((mexpt simp) $%e -2)))
+((MQUOTIENT) 1 ((MEXPT) $%E 2))
+
+* (let (($exptdispflag nil)) (form-mexpt '((mexpt simp) $a -2)))
+((MEXPT) $A -2)
+* (let (($exptdispflag t)) (form-mexpt '((mexpt simp) $a -2)))
+((MQUOTIENT) 1 ((MEXPT) $A 2))
+@end example
 
 @c -----------------------------------------------------------------------------
 @node Formatierung von Ausdr@"ucken f@"ur die Anzeige, Die Funktion linear-display, Externe Darstellung von Ausdr@"ucken, Lineare Anzeige
