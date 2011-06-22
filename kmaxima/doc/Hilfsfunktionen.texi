@@ -544,7 +544,7 @@ Substantivformen in die Eigenschaftsliste einzutragen.
 @end verbatim
 
 @b{Beispiele:}
-Wird die @code{$verbify} mit einer Zeichenkette aufgerufen, wird das
+Wird die Funktion @code{$verbify} mit einer Zeichenkette aufgerufen, wird das
 entsprechende Maxima-Symbol mit einem vorangestelltem Dollarzeichen 
 zur@"uckgegeben.  Es werden keine Eintragungen in die Eigenschaftsliste
 der Symbole vorgenommen.  Im zweiten Beispiel wird @code{$verbify} mit dem
