@@ -77,9 +77,7 @@
   (define-initial-symbols* (delete opr *symbols-defined* :test #'equal)))
 
 (defun cstrsetup (arg)
-  (labels ((add2cstr (x tree ans)
-             (add2cstr1 (nconc (exploden x) (cons (list 'ans ans) nil)) tree))
-           (add2cstr1 (x tree)
+  (labels ((add2cstr1 (x tree)
              (cond ((null tree) x)
                    ((atom (car tree))
                     (cond ((equal (car tree) (car x))
@@ -96,7 +94,9 @@
                     tree)
                    (t
                     (rplacd tree (add2cstr1 x (cdr tree)))
-                    tree))))
+                    tree)))
+           (add2cstr (x tree ans)
+             (add2cstr1 (nconc (exploden x) (cons (list 'ans ans) nil)) tree)))
     (do ((arg arg (cdr arg))
          (tree nil))
         ((null arg) (list* () '(ans ()) tree))
@@ -126,7 +126,7 @@
       x))
 
 (defun putopr (x y)
-  (or (and (symbolp x) (setf (get x 'opr) y))
+  (or (and (symbolp x) (putprop x y 'opr))
       (and (stringp x) (setf (gethash x *opr-table*) y))))
 
 (defun remopr (x)
