@@ -24,27 +24,36 @@
   (:nicknames :kmaxima)
   (:use :cl)
   (:export
+    #:%sqrt
     #:*alphabet*
     #:*parse-stream*
     #:*parse-stream-eof*
+    #:$%e
+    #:$%edispflag
+    #:$exptdispflag
     #:$quit
+    #:$sqrtdispflag
     #:add2lnc
     #:alphabetp
     #:defprop
     #:exploden
     #:fixnump
+    #:form-mexpt
     #:getprop
     #:getpropl
     #:implode
+    #:mexpt
     #:mfunctionp
     #:mlist
     #:mlistp
     #:mminus
     #:mminusp
+    #:mquotient
     #:parse-tyi
     #:parse-tyipeek
     #:peek-one-token
     #:putprop
+    #:rat
     #:scan-one-token
     #:tyi
     #:unparse-tyi
