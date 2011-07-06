@@ -34,7 +34,7 @@
                (:file "src/parser")
                (:file "src/nformat")
                (:file "src/grind")
-               (:file "src/ldisplay")
+               (:file "src/display")
                (:file "src/msystem")
                (:file "src/simplify")))
 
