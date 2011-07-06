@@ -216,7 +216,7 @@
         (if (eq form eof) (return '$done))
         (setq $__ (caddr form))
         (unless $nolabels (set i-tag $__))
-        (when mode (linear-display `((mlabel) ,i-tag , $__)))
+        (when mode (mdisplay `((mlabel) ,i-tag , $__)))
         (setq time (get-internal-run-time)
               etime (get-internal-real-time))
         (setq area (used-area))
@@ -242,7 +242,7 @@
           (putprop '$% (cons time etime) 'time)
           (putprop o-tag (cons time  etime) 'time))
         (if (eq (caar form) 'displayinput)
-            (linear-display `((mlabel) ,o-tag ,$%)))
+            (mdisplay `((mlabel) ,o-tag ,$%)))
         (when (eq mode ':demo)
           (princ (break-prompt))
           (force-output)
@@ -504,12 +504,5 @@
 
 (defmspec $reset (l)
   (reset1 (cdr l)))
-
-;;; ----------------------------------------------------------------------------
-
-(defun $complex (x y)
-  (cond ((and (numberp x) (numberp y))
-         (complex x y))
-        (t (list '($complex simp) x y))))
 
 ;;; ----------------------------------------------------------------------------
