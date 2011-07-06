@@ -25,11 +25,18 @@
 
 (in-package :kmaxima)
 
+(defmvar $display2d nil)
+
 (defvar *display-labels-p* t)
 
-(defun linear-display (form)
-  (fresh-line *standard-output*)
-  (mgrind form *standard-output*)
-  (terpri))
+;;; ----------------------------------------------------------------------------
+
+(defun mdisplay (form)
+  (cond ($display2d
+         (merror "2D-display is not yet implemented."))
+        (t
+         (fresh-line *standard-output*)
+         (mgrind form *standard-output*)
+         (terpri))))
 
 ;;; ----------------------------------------------------------------------------
