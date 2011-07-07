@@ -1017,13 +1017,17 @@ while   parse-$do                             25   45        clause
 @verbatim
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (defmacro def-nud-equiv (op equiv)
-    (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'nud)))
+    (list 'putprop (list 'quote op)
+                   (list 'function equiv)
+                   (list 'quote 'nud)))
 
   (defmacro def-nud-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'nud 'nil) op-l body))
 
   (defmacro def-led-equiv (op equiv)
-    (list 'putprop (list 'quote op) (list 'function equiv) (list 'quote 'led)))
+    (list 'putprop (list 'quote op)
+                   (list 'function equiv)
+                   (list 'quote 'led)))
 
   (defmacro def-led-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'led 'nil) op-l body)))

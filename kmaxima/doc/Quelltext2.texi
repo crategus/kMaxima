@@ -18,7 +18,7 @@
 * parser.lisp::
 * nformat.lisp::
 * grind.lisp::
-* ldisplay.lisp::
+* display.lisp::
 * msystem.lisp::
 @end menu
 
@@ -120,7 +120,7 @@
 
 @c -----------------------------------------------------------------------------
 @page
-@node grind.lisp, ldisplay.lisp, nformat.lisp, Quelltext
+@node grind.lisp, display.lisp, nformat.lisp, Quelltext
 @section grind.lisp
 @c -----------------------------------------------------------------------------
 
@@ -134,21 +134,21 @@
 
 @c -----------------------------------------------------------------------------
 @page
-@node ldisplay.lisp, msystem.lisp, grind.lisp, Quelltext
-@section ldisplay.lisp
+@node display.lisp, msystem.lisp, grind.lisp, Quelltext
+@section display.lisp
 @c -----------------------------------------------------------------------------
 
 @iftex
 @smallformat
 @end iftex
-@verbatiminclude ../src/ldisplay.lisp
+@verbatiminclude ../src/display.lisp
 @iftex
 @end smallformat
 @end iftex
 
 @c -----------------------------------------------------------------------------
 @page
-@node msystem.lisp, , ldisplay.lisp, Quelltext
+@node msystem.lisp, , display.lisp, Quelltext
 @section msystem.lisp
 @c -----------------------------------------------------------------------------
 

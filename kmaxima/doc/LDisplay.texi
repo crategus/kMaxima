@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 10.04.2011
-@c Revision : 17.04.2011
+@c Revision : 07.07.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -12,8 +12,9 @@
 @menu
 * Einf@"uhrung in die lineare Anzeige::
 * Externe Darstellung von Ausdr@"ucken::
+* Hilfsfunktionen der linearen Anzeige::
 * Formatierung von Ausdr@"ucken f@"ur die Anzeige::
-* Die Funktion linear-display::
+* Die Funktion mdisplay::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -21,15 +22,65 @@
 @section Einf@"uhrung in die lineare Anzeige
 @c -----------------------------------------------------------------------------
 
+@verbatim
+            grind            strsym         lbp   rbp
+mparen                                       -1    -1 
+mprogn      msize-matchfix   ((#\( ) #\))            
+mlist       msize-matchfix   ((#\[ ) #\])            
+mlabel      msize-mlabel                             
+mtext       msize-mtext                              
+mqapply     msz-mqapply                              
+mquote      msize-prefix                             
+msetq       msize-infix      (#\:)          180    20
+mset        msize-infix      (#\: #\:)      180    20
+mdefine     msz-mdef         (#\: #\=)      180    20
+mdefmacro   msz-mdef         (#\: #\: #\=)  180    20
+mfactorial  msize-postfix                   160      
+mexpt       msz-mexpt                       140   139
+mncexpt     msize-infix      (#\^ #\^)      140   139
+mnctimes    msize-nary                      130   129
+mtimes      msz-mtimes                      120   120
+mquotient   msize-infix      (#\/)          120   120
+rat         msize-infix      (#\/)          120   120
+mplus       msz-mplus                       100   100
+mminus      msize-prefix     (#\-)          100   100
+mequal      msize-infix      (#\=)           80    80
+mnotequal   msize-infix                      80    80
+mgreaterp   msize-infix                      80    80
+mgeqp       msize-infix                      80    80
+mlessp      msize-infix                      80    80
+mleqp       msize-infix                      80    80
+mnot        msize-prefix                           70
+mand        msize-nary                       65    65
+mor         msize-nary                       60    60
+mcond       msz-mcond                        45    45
+%mcond      msz-mcond                        45    45                     
+mdo         msz-mdo                          25    25
+mdoin       msz-mdoin                        30    30
+%mdo        msz-mdo                          25    25
+%mdoin      msz-mdoin                        30    30
+text-string msize-text-string   
+@end verbatim
+
 @c -----------------------------------------------------------------------------
-@node Externe Darstellung von Ausdr@"ucken, Formatierung von Ausdr@"ucken f@"ur die Anzeige, Einf@"uhrung in die lineare Anzeige, Lineare Anzeige
+@node Externe Darstellung von Ausdr@"ucken, Hilfsfunktionen der linearen Anzeige, Einf@"uhrung in die lineare Anzeige, Lineare Anzeige
 @section Externe Darstellung von Ausdr@"ucken
 @c -----------------------------------------------------------------------------
 
-@verbatim
-(defmvar $powerdisp nil)
-(defmvar $negsumdispflag t)
+@findex nformat
 
+kMaxima unterscheidet bei Ausdr@"ucken zwischen einer internen Darstellung und
+einer externen Darstellung.  Bevor ein Ausdruck in das Format f@"ur die Ausgabe
+umgewandelt wird, wird dieser in eine externe Darstellung gebracht.  In der
+externen Darstellung wird zum Beispiel die Wurzelfunktion als @code{(%sqrt) $x)}
+dargestellt.  Die interne Darstellung dieses Ausdrucks ist dagegen
+@code{((mexpt) $x ((rat) 1 2))}.  Die Formatierung in die externe Darstellung
+wird von der Funktion @code{nformat} geleistet.  @code{nformat} f@"uhrt
+spezielle Formatierungen f@"ur negative Zahlen, Boolesche Wert, negative
+rationale Zahlen, Summen, Produkte und Exponentiationen aus.  Verschiedene
+Optionsvariablen kontrollieren die Art der Formatierung.
+
+@verbatim
 (defun nformat (form)
   (cond ((atom form)
          (cond ((and (numberp form) (minusp form)) (list '(mminus) (- form)))
@@ -46,7 +97,36 @@
         ((eq 'mtimes (caar form)) (form-mtimes form))
         ((eq 'mexpt (caar form)) (form-mexpt form))
         (t form)))
+@end verbatim
 
+@vindex $powerdisp
+@vindex $negsumdispflag
+@findex $form-mplus
+
+Die Funktion @code{form-mplus} formatiert Summe in eine externe Darstellung.
+Die Formatierung wird von den Optionsvariablen @code{$powerdisp} und 
+@code{$negsumdispflag} kontrolliert. Die Terme einer Summe liegen intern
+in einer alphabetisch aufsteigenden Ordnung vor.  F@"ur die externe Darstellung
+wird die Ordnung umgekehrt.  Ein interner Ausdruck @code{((mplus) $a $b $c}
+wird daher als @code{a + b + c} ausgegeben.  Hat die Optionsvariable
+@code{$powerdisp} den Wert @code{true}, handelt es sich um die Terme einer
+Taylor-Reihenentwicklung, die das Symbol @code{'trunc} als Attribut des
+Operators f@"ur die Addition enth@"alt oder handelt es sich um einen
+Kettenbruch, der mit dem Symbol @code{'cf} als Attribut bezeichnet wird, dann
+wird die Reihenfolge der Terme nicht umgekehrt.
+
+Die Optionsvariable @code{$negsumdispflag} kontrolliert die Darstellung der
+Differenz von zwei Termen.  Hat die Optionsvariable @code{$negsumdispflag} den
+Wert @code{true}, dann wird eine Differenz immer als @code{a - b} angezeigt 
+und nicht, wie es die Ordnung der Terme einer Summe vorsehen w@"urde, als 
+@code{-b + a}.
+
+@verbatim
+(defmvar $powerdisp nil)
+(defmvar $negsumdispflag t)
+@end verbatim
+
+@verbatim
 (defun form-mplus (form &aux args trunc)
   (setq args (mapcar #'nformat (cdr form)))
   (setq trunc (member 'trunc (cdar form) :test #'eq))
@@ -69,8 +149,46 @@
               (t (nreverse args)))))
 @end verbatim
 
-@findex form-mtimes
+@b{Beispiele:}
+
+Die Ordnung der Termine wird f@"ur die Ausgabe umgekehrt.
+
+@example
+* (form-mplus '((mplus) $a $b $c))
+((MPLUS) $C $B $A)
+@end example
+
+Die Optionsvariable @code{$powerdisp} kontrolliert die Ordnung der Terme.
+
+@example
+* (let (($powerdisp t)) (form-mplus '((mplus) $a $b $c)))
+((MPLUS) $A $B $C)
+* (let (($powerdisp nil)) (form-mplus '((mplus) $a $b $c)))
+((MPLUS) $C $B $A)
+@end example
+
+Mit der Optionsvariablen @code{$negsumdispflag} wird die Ausgabe von 
+Differenzen @code{a - b} kontrolliert.
+
+@example
+* (form-mplus '((mplus) $a ((mminus) $b)))
+((MPLUS) $A ((MMINUS) $B))
+* (let (($negsumdispflag nil)) (form-mplus '((mplus) $a ((mminus) $b))))
+((MPLUS) ((MMINUS) $B) $A)
+@end example
+
 @vindex $pfeformat
+@findex form-mtimes
+
+Produkte werden von der Funktion @code{form-mtimes} in die externe Darstellung
+formatiert.  Im Unterschied zur Addition wird bei Multiplikation die Ordnung der
+Terme nicht umgekehrt.  Die Faktoren werden gegebenenfalls so formatiert, dass
+sie @"uber einem gemeinsamen Nenner dargestellt werden.  Weiterhin wird beim
+mehrfachen Auftreten von negativen Vorzeichen, das gemeinsame Vorzeichen des
+Produkts ermittelt.  Mit der Optionsvariablen @code{$pfeformat} wird die
+Formatierung von rationalen Zahlen kontrolliert, die in einem Produkt auftreten.
+Hat @code{$pfeformat} den Wert @code{true}, werden rationale Zahlen vor das
+Produkt gezogen.
 
 @verbatim
 (defmvar $pfeformat nil)
@@ -79,31 +197,72 @@
 @verbatim
 (defun form-mtimes (form)
   (cond ((null (cdr form)) '((mtimes)))
-        ((equal -1 (cadr form)) (list '(mminus) (form-mtimes (cdr form))))
+        ((equal -1 (cadr form))
+         (list '(mminus) (form-mtimes (cdr form))))
         (t
          (prog (num den minus flag)
-           (do ((l (cdr form) (cdr l)) (dummy)) 
+           (do ((l (cdr form) (cdr l))
+                (fact))
                ((null l))
-             (setq dummy (nformat (car l)))
-             (cond ((atom dummy) (setq num (cons dummy num)))
-                   ((eq 'mminus (caar dummy))
-                    (setq minus (not minus) l (append dummy (cdr l))))
-                   ((or (eq 'mquotient (caar dummy))
-                        (and (not $pfeformat) (eq 'rat (caar dummy))))
-                    (cond ((not (equal 1 (cadr dummy)))
-                           (setq num (cons (cadr dummy) num))))
-                    (setq den (cons (caddr dummy) den)))
-                   (t (setq num (cons dummy num)))))
+             (setq fact (nformat (car l)))
+             (cond ((atom fact) (setq num (cons fact num)))
+                   ((eq 'mminus (caar fact))
+                    (setq minus (not minus)
+                          l (append fact (cdr l))))
+                   ((or (eq 'mquotient (caar fact))
+                        (and (not $pfeformat)
+                             (eq 'rat (caar fact))))
+                    (cond ((not (equal 1 (cadr fact)))
+                           (setq num (cons (cadr fact) num))))
+                    (setq den (cons (caddr fact) den)))
+                   (t (setq num (cons fact num)))))
            (setq num (cond ((null num) 1)
                            ((null (cdr num)) (car num))
                            (t (cons '(mtimes) (nreverse num))))
                  den (cond ((null den) (setq flag t) nil)
                            ((null (cdr den)) (car den))
                            (t (cons '(mtimes) (nreverse den)))))
-           (if (not flag) 
+           (if (not flag)
                (setq num (list '(mquotient) num den)))
            (return (if minus (list '(mminus) num) num))))))
 @end verbatim
+
+@b{Beispiele:}
+
+Die Reihenfolge der Faktoren wird nicht umgekehrt.
+
+@example
+* (form-mtimes '((mtimes) $a $b $c))
+((MTIMES) $A $B $C)
+@end example
+
+Mehrfache negative Vorzeichen werden zusammengefasst.
+
+@example
+* (form-mtimes '((mtimes) ((mminus) $a) $b $c))
+((MMINUS) ((MTIMES) $A $B $C))
+* (form-mtimes '((mtimes) ((mminus) $a) ((mminus) $b) $c))
+((MTIMES) $A $B $C)
+@end example
+
+Die Faktoren werden @"uber einen gemeinsamen Nenner dargestellt.
+
+@example
+* (form-mtimes '((mtimes) $a ((mquotient) 1 $b) $c))
+((MQUOTIENT) ((MTIMES) $A $C) $B)
+@end example
+
+Hat die Optionsvariable @code{$pfeformat} den Wert @code{true}, wird eine 
+rationale Zahl vor der Faktoren gezogen.
+
+@example
+* (form-mtimes '((mtimes) ((rat) 1 3) $a ((mquotient) 1 $b) $c))
+((MQUOTIENT) ((MTIMES) $A $C) ((MTIMES) 3 $B))
+* (setq $pfeformat t)
+T
+* (form-mtimes '((mtimes) ((rat) 1 3) $a ((mquotient) 1 $b) $c))
+((MQUOTIENT) ((MTIMES) ((RAT) 1 3) $A $C) $B)
+@end example
 
 @findex form-mexpt
 @vindex $sqrtdispflag
@@ -164,53 +323,176 @@ verschieden von @code{%e} ist.
 @end example
 
 @c -----------------------------------------------------------------------------
-@node Formatierung von Ausdr@"ucken f@"ur die Anzeige, Die Funktion linear-display, Externe Darstellung von Ausdr@"ucken, Lineare Anzeige
-@section Formatierung von Ausdr@"ucken f@"ur die Anzeige
+@node Hilfsfunktionen der linearen Anzeige, Formatierung von Ausdr@"ucken f@"ur die Anzeige, Externe Darstellung von Ausdr@"ucken, Lineare Anzeige
+@section Hilfsfunktionen der linearen Anzeige
 @c -----------------------------------------------------------------------------
 
+@findex strsym
+
+Die Funktion @code{strsym} ist eine kleine Hilfsfunktion, um das Zeichen f@"ur die
+Anzeige eines Operators von der Eigenschaftsliste zu lesen.  Die Funktionen f@"ur
+die lineare Anzeige legen die Zeichen zum Symbol @code{'strsym} auf der
+Eigenschaftsliste ab.  Weiterhin pr@"uft die Funktion, ob ein Zeichen zum Symbol
+@code{'dissym} auf der Eigenschaftsliste abgelegt ist.  Die Routinen f@"ur die
+zweidimensionale Anzeige nutzen dieses Symbol.
+
 @verbatim
-(in-package :kmaxima)
-
-(defvar *chrps* 0)
-(defvar *linel* 79)
-
-(defvar *lop* nil)
-(defvar *rop* nil)
-
 (defun strsym (x) 
   (or (getprop x 'strsym) (getprop x 'dissym)))
+@end verbatim
 
+Im folgenden werden einige Beispiele f@"ur die Operatoren @code{mequal}, 
+@code{rat} und @code{msetq} gezeigt.
+
+@example
+* (strsym 'mequal)
+(#\=)
+* (strsym 'rat)
+(#\/)
+* (strsym 'msetq)
+(#\:)
+* (strsym 'mset)
+(#\: #\:)
+@end example
+
+@findex makestring
+@findex makestring1
+@vindex $stringdisp
+@vindex $lispdisp
+@findex mstring
+
+Die Funktionen @code{makestring} und @code{makestring1} wandeln Zahlen, 
+Zeichenketten und Symbole in eine Liste aus Zeichen um.  Ist das Argument
+ein Symbol, wird ein eventuell vorhandener Reverse-Alias-Name beachtet.  F@"ur
+Operatoren zum Namen des Operators umgewandelt.  Die Zeichen @code{%} und 
+@code{$} die einen Verb- und Substantiv-Bezeichner bezeichnen, werden entfernt.
+Die Funktion @code{makestring} wird von den Optionsvariablen @code{$stringdisp}
+und @code{$lispdisp} kontrolliert.  Hat @code{$stringdisp} den Wert @code{true}
+wird eine Zeichenkette in Anf@"uhrungszeichen gesetzt.  Hat @code{$lispdisp}
+den Wert @code{true}, erhalten Lisp-Symbole ein f@"uhrendes Fragezeichen @code{?}.
+
+@verbatim
 (defmvar $stringdisp nil)
 (defmvar $lispdisp nil)
+@end verbatim
 
+@verbatim
 (defun makestring (x)
   (declare (special $aliases))
-  (let (dummy)
+  (let (y)
     (cond ((numberp x) (exploden x))
           ((stringp x)
-           (setq dummy (coerce x 'list))
+           (setq y (coerce x 'list))
            (if $stringdisp
-               (cons #\" (nconc dummy (list #\")))
-               dummy))
+               (cons #\" (nconc y (list #\")))
+               y))
           ((not (symbolp x)) (exploden x))
-          ((and (setq dummy (getprop x 'reversealias))
-                (not (and (member x $aliases :test #'eq) 
+          ((and (setq y (getprop x 'reversealias))
+                (not (and (member x $aliases :test #'eq)
                           (getprop x 'noun))))
-           (exploden (stripdollar dummy)))
+           (exploden (stripdollar y)))
           ((not (eq (getop x) x))
            (makestring (getop x)))
-          (t
-           (setq dummy (exploden x))
-           (cond ((null dummy) nil)
-                 ((char= #\$ (car dummy)) (cdr dummy))
-                 ((char= #\% (car dummy)) (cdr dummy))
-                 ($lispdisp (cons #\? dummy))
-                 (t dummy))))))
+          ((null (setq y (exploden x))))
+          ((or (char= #\$ (car y))
+               (char= #\% (car y)))
+           (cdr y))
+          ($lispdisp (cons #\? y))
+          (t y))))
+@end verbatim
 
+@verbatim
 (defun makestring1 (x)
   (let (($stringdisp nil) ($lispdisp nil))
     (makestring x)))
+@end verbatim
 
+@c -----------------------------------------------------------------------------
+@node Formatierung von Ausdr@"ucken f@"ur die Anzeige, Die Funktion mdisplay, Hilfsfunktionen der linearen Anzeige, Lineare Anzeige
+@section Formatierung von Ausdr@"ucken f@"ur die Anzeige
+@c -----------------------------------------------------------------------------
+
+@vindex *linel*
+@vindex $linel
+
+Die globalen Variablen @code{*linel*} und @code{$linel} enthalten die Anzahl
+der Zeichen einer Ausgabezeile f@"ur die Formatierung der Ausgabe durch die
+Funktion @code{mprint}.  Die Variable @code{$linel} ist eine Optionsvariable,
+die vom Nutzer gesetzt werden kann.  Die Variable hat die Eigenschaft
+@code{'shadowvar}.  Immer wenn @code{$linel} vom Nutzer einen neuen Wert 
+erh@"alt, wird auch die Variable @code{*linel*} auf den Wert gesetzt.
+
+@verbatim
+(defvar *linel* 79)
+(defmvar $linel 79)
+(defprop $linel shadowset assign)
+(defprop $linel *linel* shadowvar)
+@end verbatim
+
+@findex mgrind
+@findex mprint
+
+Die Funktion @code{mgrind} gibt einen kMaxima-Ausdruck auf dem Stream @code{out}
+aus.  Dazu wird der Ausdruck mit der Funktion @code{msize} f@"ur die Ausgabe
+formatiert und mit der Funktion @code{mprint} ausgegeben.  Die zu den Funktionen
+lokale Zustandsvariable @code{chrps} enth@"alt die aktuelle Position des Cursors.
+Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen Variablen 
+@code{*linel*} enthalten.
+
+@verbatim
+(let ((chrps 0))
+  
+  (defun mgrind (form out)
+    (setq chrps 0)
+    (mprint (msize form nil nil 'mparen 'mparen) out))
+  
+  (defun mprint (form out)
+    (labels ((mtyotbsp (n out)
+               (declare (fixnum n))
+               (incf chrps n)
+               (dotimes (i n)
+                 (write-char #\space out)))
+             (charpos ()
+               (- *linel* chrps)))
+      (cond ((characterp form)
+             (incf chrps)
+             (write-char form out))
+            ((< (car form) (charpos))
+             (mapc #'(lambda (l) (mprint l out)) (cdr form)))
+            (t 
+             (prog ((i chrps))
+               (mprint (cadr form) out)
+               (cond ((null (cddr form)) (return nil))
+                     ((and (or (atom (cadr form)) (< (caadr form) (charpos)))
+                           (or (> (charpos) (truncate *linel* 2))
+                               (atom (caddr form))
+                               (< (caaddr form) (charpos))))
+                      (setq i chrps)
+                      (mprint (caddr form) out))
+                     (t
+                      (incf i)
+                      (setq chrps 0)
+                      (terpri out)
+                      (mtyotbsp i out)
+                      (mprint (caddr form) out)))
+               (do ((l (cdddr form) (cdr l)))
+                   ((null l))
+                 (cond ((or (atom (car l)) (< (caar l) (charpos))) nil)
+                       (t
+                        (setq chrps 0)
+                        (terpri out)
+                        (mtyotbsp i out)))
+                 (mprint (car l) out)))))))
+)
+@end verbatim
+
+@findex mstring
+
+Die Funktion @code{mstring} arbeitet @"ahnlich wie die Funktion @code{mstring}
+mit dem Unterschied, dass die Funktion @code{mstring} eine Zeichenkette als
+Ergebnis hat.
+
+@verbatim
 (defun mstring (x)
   (labels ((string1 (x l)
              (cond ((atom x) (cons x l))
@@ -219,49 +501,9 @@ verschieden von @code{%e} ist.
                         ((null x) l)
                       (setq l (string1 (car x) l)))))))
     (nreverse (string1 (msize x nil nil 'mparen 'mparen) nil))))
+@end verbatim
 
-(defun mgrind (form out)
-  (setq *chrps* 0)
-  (mprint (msize form nil nil 'mparen 'mparen) out))
-
-(defun mprint (form out)
-  (labels ((mtyotbsp (n out)
-             (declare (fixnum n))
-             (incf *chrps* n)
-             (dotimes (i n)
-               (write-char #\space out)))
-           (charpos ()
-             (- *linel* *chrps*)))
-    (cond ((characterp form)
-           (incf *chrps*)
-           (write-char form out))
-          ((< (car form) (charpos))
-           (mapc #'(lambda (l) (mprint l out)) (cdr form)))
-          (t 
-           (prog ((i *chrps*))
-             (mprint (cadr form) out)
-             (cond ((null (cddr form)) (return nil))
-                   ((and (or (atom (cadr form)) (< (caadr form) (charpos)))
-                         (or (> (charpos) (truncate *linel* 2))
-                             (atom (caddr form))
-                             (< (caaddr form) (charpos))))
-                    (setq i *chrps*)
-                    (mprint (caddr form) out))
-                   (t
-                    (incf i)
-                    (setq *chrps* 0)
-                    (terpri out)
-                    (mtyotbsp i out)
-                    (mprint (caddr form) out)))
-             (do ((l (cdddr form) (cdr l)))
-                 ((null l))
-               (cond ((or (atom (car l)) (< (caar l) (charpos))) nil)
-                     (t
-                      (setq *chrps* 0)
-                      (terpri out)
-                      (mtyotbsp i out)))
-               (mprint (car l) out)))))))
-
+@verbatim
 (defun msize (x l r *lop* *rop*)
   (setq x (nformat x))
   (cond ((atom x) (msize-atom x l r))
@@ -676,15 +918,15 @@ verschieden von @code{%e} ist.
 @end verbatim
 
 @c -----------------------------------------------------------------------------
-@node Die Funktion linear-display, , Formatierung von Ausdr@"ucken f@"ur die Anzeige, Lineare Anzeige
-@section Die Funktion @code{linear-display}
+@node Die Funktion mdisplay, , Formatierung von Ausdr@"ucken f@"ur die Anzeige, Lineare Anzeige
+@section Die Funktion @code{mdisplay}
 @c -----------------------------------------------------------------------------
 
-@findex linear-display
+@findex mdisplay
 @vindex *display-labels-p*
 @vindex *display-mtext-p*
 
-Die Funktion @code{linear-display} gibt einen Maxima-Ausdruck @code{form} auf
+Die Funktion @code{mdisplay} gibt einen Maxima-Ausdruck @code{form} auf
 der Konsole aus.  Dazu wird die Funktion @code{mgrind} mit dem Ausdruck
 @code{form} und @code{*standard-output*} f@"ur die Standardausgabe aufgerufen.
 @code{mgrind} hat ein drittes optionales Argument.  Hat das dritte Argument
@@ -700,7 +942,7 @@ die nacheinander ausgeben werden.
 Mit der globale Variablen @code{*display-labels-p*} wird die Ausgabe der Marken
 kontrolliert.  Der Standardwert ist @code{t} und die Marken werden ausgegeben.
 
-Die globale Variable @code{*display-mtext-p*} wird in @code{linear-display}
+Die globale Variable @code{*display-mtext-p*} wird in @code{mdisplay}
 gesetzt, wenn ein @code{mtext}-Ausdruck angezeigt ausgegeben wird.  In diesem
 Fall werden Lisp-Symbole nicht mit einem f@"uhrenden Fragezeichen angezeigt.
 Diese Implementation ist nicht sehr elegant und kann m@"oglicherweise verbessert
@@ -765,7 +1007,7 @@ a+b
 NIL
 @end example
 
-Ein Lisp-Symbol wird mit einem führenden Fragezeichen ausgegeben.  Ist das 
+Ein Lisp-Symbol wird mit einem f@"uhrenden Fragezeichen ausgegeben.  Ist das 
 Lisp-Symbol Argument des @code{mtext}-Operators wird kein Fragezeichen
 vorangestellt.
 

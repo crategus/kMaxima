@@ -294,7 +294,7 @@ Lisp-Dialekte ber@"ucksichtigt.
 @subsection Implementierung der Funktion @code{maxima-toplevel-loop}
 @c -----------------------------------------------------------------------------
 
-Nachdem in den Funktionen @code{run} die Lisp-Umgebung und in
+Nachdem in den Funktion @code{run} die Lisp-Umgebung und in der Funktion
 @code{maxima-toplevel} die kMaxima-Umgebung initialisiert sind, wird die
 Funktion @code{maxima-toplevel-loop} aufgerufen.  Auch diese Funktion startet
 eine endlose Schleife.
