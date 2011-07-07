@@ -281,7 +281,7 @@
 (defprop mparen -1 lbp)
 (defprop mparen -1 rbp)
 
-(defprop mprogn  msize-matchfix grind)
+(defprop mprogn msize-matchfix grind)
 (defprop mprogn ((#\( ) #\) ) strsym)
 
 (defprop mlist msize-matchfix grind)
