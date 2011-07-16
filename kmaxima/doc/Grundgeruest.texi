@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 16.06.2011
+@c Revision : 16.07.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -46,10 +46,13 @@ Funktionen, Variablen und kMaxima-Programme repr@"asentieren, wird von einem
 Evaluator geleistet.  In @ref{Der erste Evaluator} wird eine erste
 Implementierung beschrieben.  In den weiteren Kapiteln folgt eine Beschreibung
 der ersten Makros und Funktionen, die von dem Evaluator ausgewertet werden.  In
-@ref{Implementierung der Zuweisung mset} wird die Zuweisung eines Wertes an eine
-Variable implementiert.  Zuletzt wird in
-@ref{Implementierung der Funktion $reset} gezeigt, wie die globalen Variablen
-in kMaxima auf ihren Anfangswert zur@"uckgesetzt werden k@"onnen.
+@ref{Implementierung der Zuweisung mset} wird am Beispiel der Implementierung
+der Zuweisung eines Wertes an eine Variable gezeigt, wie bereits mit den wenigen
+vorhandenen Mitteln Funktionalit@"aten eines Computeralgebrasystems
+vollst@"andig implementiert werden k@"onnen.  Zuletzt wird in
+@ref{Implementierung der Funktion $reset} in einem weiteren Beispiel gezeigt,
+wie die globalen Variablen in kMaxima auf ihren Anfangswert zur@"uckgesetzt
+werden k@"onnen.
 
 Um das hier zu entwickelnde Programm vom Original Maxima zu unterscheiden, 
 soll es kMaxima f@"ur "kleines" Maxima genannt werden.  kMaxima definiert das
@@ -99,16 +102,16 @@ globale Lisp-Variablen initialisiert werden.
 (import 'cl-user::run)
 @end verbatim
 
-Die Funktion @code{run} definiert die lokalen Variablen @code{input-stream} und
-@code{mode}.  Die Variable @code{input-stream} wird zu @code{*standard-input*}
-initialisiert.  Das ist die Standardeingabe des Systems, welche im Allgemeinen
-die Tastatur ist.  Wird von der Standardeingabe gelesen, hat die Variable
-@code{mode} den Wert @code{nil}.  Die Funktion @code{maxima-toplevel} wird mit
-diesen Argumenten gestartet.
-
-Die Funktionen und Variablen sind im Package @code{:kmaxima} definiert, das
+Alle Funktionen und Variablen sind im Package @code{:kmaxima} definiert, das
 als erstes von der Funktion @code{run} geladen wird, um diese verf@"ugbar zu
 machen.
+
+Dann werden die Funktion @code{run} und die lokalen Variablen
+@code{input-stream} sowie @code{mode} definiert.  Die Variable
+@code{input-stream} wird zu @code{*standard-input*} initialisiert.  Das ist die
+Standardeingabe des Systems, welche im Allgemeinen die Tastatur ist.  Wird von
+der Standardeingabe gelesen, hat die Variable @code{mode} den Wert @code{nil}.
+Die Funktion @code{maxima-toplevel} wird mit diesen Argumenten gestartet.
 
 @vindex maxima-quit-to-lisp
 
@@ -173,22 +176,21 @@ Argumente @code{input-stream} und @code{mode}.  @code{run} startet
 @code{maxima-toplevel} mit den Werten @code{*standard-input*} und @code{nil}.
 Diese Werte bezeichnen die Eingabe von der Tastatur.  Als erstes wechselt
 die Funktion @code{maxima-toplevel} zum Package @code{:kmaxima}.  Dies ist
-bereits in der Funktion @code{run} geschehen, aber es kann sein, dass wir aus
-einer Lisp-Umgebung zur@"uckkehren, in der der Nutzer das Package gewechselt
+bereits in der Funktion @code{run} geschehen, aber es kann sein, dass kMaxima
+aus einer Lisp-Umgebung zur@"uckkehrt, in der der Nutzer das Package gewechselt
 hat.
 
 @vindex *maxima-quiet*
 @vindex *maxima-epilog*
 
 An dieser Stelle werden die globalen Variablen @code{*maxima-quiet*} und
-@code{*maxima-epilog*} eingef@"uhrt.  Endet die Endlosschleife, die von
+@code{*maxima-epilog*} eingef@"uhrt.  Hat die Variable @code{*maxima-quiet*}
+den Wert @code{t} wird die Ausgabe eines Banners mit der Funktion
+@code{maxima-banner} unterdr@"uckt.  Endet die Endlosschleife, die von
 @code{maxima-toplevel} ausgef@"uhrt wird, dann wird @code{*maxima-epilog*}
 ausgegeben und kMaxima mit dem Funktionsaufruf @code{bye} beendet.  Der
 Standardwert der Variablen @code{*maxima-epilog*} ist eine leere Zeichenkette
 @code{""}.
-
-Hat die Variable @code{*maxima-quiet*} den Wert @code{t} wird die Ausgabe eines
-Banners mit der Funktion @code{maxima-banner} unterdr@"uckt.
 
 @verbatim
 (defvar *maxima-quiet* nil)
@@ -294,7 +296,7 @@ Lisp-Dialekte ber@"ucksichtigt.
 @subsection Implementierung der Funktion @code{maxima-toplevel-loop}
 @c -----------------------------------------------------------------------------
 
-Nachdem in den Funktion @code{run} die Lisp-Umgebung und in der Funktion
+Nachdem in der Funktion @code{run} die Lisp-Umgebung und in der Funktion
 @code{maxima-toplevel} die kMaxima-Umgebung initialisiert sind, wird die
 Funktion @code{maxima-toplevel-loop} aufgerufen.  Auch diese Funktion startet
 eine endlose Schleife.
@@ -326,7 +328,7 @@ Funktionen werden in den folgenden Kapiteln ersetzt, um mathematische
 Ausdr@"ucke einzulesen, zu verarbeiten und auszugeben.  Die Funktion @code{eval}
 wird in @ref{Der erste Evaluator} durch die Funktion @code{meval} ersetzt,
 @code{read} durch @code{mread} in @ref{Parser} und @code{format} durch
-@code{linear-display} in @ref{Lineare Anzeige}.
+@code{mdisplay} in @ref{Lineare Anzeige}.
 
 @b{Beispiel:} kMaxima wird dem Kommando @code{(run)} von der Lisp-Kommandozeile
 gestartet.  Das kMaxima-Banner wird ausgegeben und die Eingabeaufforderung
@@ -337,16 +339,15 @@ Lisp-Sitzung mit dem Kommando @code{(bye)} beendet.
 
 @example
 * (run)
-Maxima 0.1 http://maxima.sourceforge.net
+kMaxima 0.1
 using Lisp SBCL 1.0.45
 Distributed under the GNU Public License. See the file COPYING.
 Dedicated to the memory of William Schelter.
-The function bug_report() provides bug reporting information.
 
 KMAXIMA> (+ 2 2)
 4
 KMAXIMA> (bye)
-dieter@@dieter:~/Lisp/kmaxima$
+dieter@@dieter:~/Lisp/kMaxima/kmaxima1$ 
 @end example
 
 @c -----------------------------------------------------------------------------
@@ -390,18 +391,18 @@ Das erste Element eines Ausdrucks ist eine Liste @code{(op)} mit dem Operator
 Operator mit Attributen versehen werden kann, ohne dass die Implementation des
 Evaluators modifiziert werden muss.  Ein Beispiel ist ein Ausdruck der Form
 @code{((mplus simp) $a $b)}.  Hier zeigt das Attribut @code{simp} an, dass der
-mathematische Ausdruck @code{a + b} von Maxima ausgewertet und vereinfacht ist.
+mathematische Ausdruck @code{a + b} von kMaxima ausgewertet und vereinfacht ist.
 
 Nicht alle Datentypen werden von kMaxima als @emph{Atome} repr@"asentiert.  So
 werden rationale Zahlen von kMaxima intern als @code{((rat) <num> <den>)} 
 dargestellt, wobei @code{<num>} und @code{<den>} ganze Zahlen sind, welche den 
-Nenner und Z@"ahler der rationalen Zahl bilden.  Aufgrund dieser internen 
-Darstellung handelt es sich bei rationalen Zahlen um Ausdr@"ucke.
+Z@"ahler und Nenner der rationalen Zahl bilden.  Bei rationalen Zahlen handelt
+es sich daher um Ausdr@"ucke.
 
 Jeder Operator @code{op} repr@"asentiert eine kMaxima-Funktion, ein Kommando,
 eine Pro@-gram@-mier-An@-wei@-sung, einen Datentyp oder eine sonstige
 Eingabe des Nutzers.  Die folgende Tabelle zeigt Beispiele, die die Syntax
-demonstrieren:
+demonstrieren.
 
 @verbatim
 Eingabe         interne Darstellung       Beschreibung
@@ -555,7 +556,34 @@ dies nicht der Fall ist, den Wert @code{nil} zur@"uck.  Die Funktionen f@"ur das
 Schreiben und Lesen von Eigenschaften von der Lisp-Eigenschaftsliste werden in
 @ref{Setzen und Lesen der Eigenschaftsliste} beschrieben.
 
+@b{Beispiele:}
+Die folgenden Beispiele zeigen die verschiedenen Auswertungen, die von der
+Funktion @code{meval} ausgef@"uhrt werden.  Um eine kMaxima-Spezialform zu
+definieren, wird das Makro @code{defmspec} genutzt, das im folgenden Kapitel
+eingef@"uhrt wird.
+
+@example
+* (meval 'a)
+A
+* (setq a 123)
+123
+* (meval 'a)
+123
+* (meval '((sin) 0.5))
+0.47942555
+* (defmspec add (args) (+ (cadr args) (caddr args)))
+#<FUNCTION (LAMBDA (ARGS)) {AB40975}>
+* (meval '((add) 10 20))
+30
+* (defmacro show (text) (format t "Nachricht: ~A~%" text))
+SHOW
+* (meval '((show) "Dies ist eine Nachricht."))
+Nachricht: Dies ist eine Nachricht.
+NIL
+@end example
+
 @c -----------------------------------------------------------------------------
+@need 1200
 @node Die ersten Makros und weitere Funktionen, Implementierung von Funktionen, Der erste Evaluator, Grundger@"ust
 @section Die ersten Makros und weitere Funktionen
 @c -----------------------------------------------------------------------------
@@ -567,11 +595,12 @@ Schreiben und Lesen von Eigenschaften von der Lisp-Eigenschaftsliste werden in
 @end menu
 
 @c -----------------------------------------------------------------------------
-@findex defmspec
-@findex defun-prop
 @node Das Makro defmspec, Das Makro defmvar, Die ersten Makros und weitere Funktionen, Die ersten Makros und weitere Funktionen
 @subsection Das Makro @code{defmspec}
 @c -----------------------------------------------------------------------------
+
+@findex defmspec
+@findex defun-prop
 
 Bevor mit der Implementation von Funktionalit@"aten fortgefahren wird, die auf
 den ersten Entwurf des Evaluators aufbauen, sollen zwei wichtige Makros 
@@ -622,11 +651,12 @@ gezeigte Anwendung der Funktion mit @code{apply} ausgef@"uhrt wird.
 @end example
 
 @c -----------------------------------------------------------------------------
-@findex defmvar
-@vindex *variable-initial-values*
 @node Das Makro defmvar, Setzen und Lesen der Eigenschaftsliste, Das Makro defmspec, Die ersten Makros und weitere Funktionen
 @subsection Das Makro @code{defmvar}
 @c -----------------------------------------------------------------------------
+
+@findex defmvar
+@vindex *variable-initial-values*
 
 Als n@"achstes betrachten wir die Implementierung des Makros @code{defmvar}.
 Eine vollst@"andige Implementierung eines Computeralgebrasystems verwendet eine
@@ -634,6 +664,11 @@ Vielzahl von Optionsvariablen, die den Zustand des Systems beschreiben.  Um
 dem Nutzer zu erm@"oglichen, einzelne oder alle Werte im Laufe einer Sitzung
 auf ihren urspr@"unglichen Wert zur@"ucksetzen, werden die Standardwerte der
 Optionsvariablen abgespeichert.
+
+Das Makro @code{defmvar} automatisiert diese Aufgabe f@"ur den Programmierer.
+Jede globale Variable die mit diesem Makro definiert wird, wird zusammen mit
+ihrem Wert in der globalen Hash-Tabelle @code{*variable-initial-values*}
+abgelegt.
 
 @verbatim
 (defvar *variable-initial-values* (make-hash-table))
@@ -646,11 +681,6 @@ Optionsvariablen abgespeichert.
        (setf (gethash ',var *variable-initial-values*) ,(first val-and-doc)))
      (defvar ,var ,@val-and-doc)))
 @end verbatim
-
-Das Makro @code{defmvar} automatisiert diese Aufgabe f@"ur den Programmierer.
-Jede globale Variable die mit diesem Makro definiert wird, wird zusammen mit
-ihrem Wert in der globalen Hash-Tabelle @code{*variable-initial-values*}
-abgelegt.
 
 @b{Beispiel:} Das folgende Beispiel zeigt die Definition der Variablen 
 @code{$myvar} mit einem Standardwert von @code{1.25}.  Mit der Lisp-Funktion
@@ -665,13 +695,14 @@ T
 @end example
 
 @c -----------------------------------------------------------------------------
+@node Setzen und Lesen der Eigenschaftsliste, , Das Makro defmvar, Die ersten Makros und weitere Funktionen
+@subsection Setzen und Lesen der Eigenschaftsliste
+@c -----------------------------------------------------------------------------
+
 @findex defprop
 @findex putprop
 @findex getprop
 @findex getpropl
-@node Setzen und Lesen der Eigenschaftsliste, , Das Makro defmvar, Die ersten Makros und weitere Funktionen
-@subsection Setzen und Lesen der Eigenschaftsliste
-@c -----------------------------------------------------------------------------
 
 Die Lisp-Eigenschaftsliste wird von kMaxima h@"aufig genutzt, um Eigenschaften
 f@"ur Lisp-Symbole abzulegen.  Diese Eigenschaften k@"onnen Werte und Funktionen
@@ -681,9 +712,13 @@ Programmiersprachen notwendig sind.
 
 Um eine einheitliche Syntax zu erm@"oglichen, werden f@"ur das Setzen eines
 Wertes die Funktion @code{putprop} und das Makro @code{defprop} definiert.
-Mit der Funktion @code{getprop} kann eine Eigenschaft zu einem Symbol gelesen
-werden.  Im Unterschied zur Lisp-Funktion @code{get} testet die Funktion
-@code{getprop} zun@"achst, ob das erste Argument ein Symbol ist.
+Im Unterschied zur Funktion @code{putprop} wertet das Makro @code{defprop}
+die Argumente nicht aus.  Das erlaubt eine bequemere Schreibweise, da auf
+das voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
+die Argumente Symbole sind.  Mit der Funktion @code{getprop} kann eine
+Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
+@code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
+ein Symbol ist.  Ist dies nicht der Fall ist die R@"uckgabe @code{nil}.
 
 @verbatim
 (defun putprop (sym val indic)
@@ -691,7 +726,7 @@ werden.  Im Unterschied zur Lisp-Funktion @code{get} testet die Funktion
        (setf (get sym indic) val)))
 
 (defmacro defprop (sym val indic)
-  `(putmprop ',sym ',val ',indic))
+  `(putprop ',sym ',val ',indic))
 
 (defun getprop (sym indic)
   (and (symbolp sym)
@@ -700,8 +735,12 @@ werden.  Im Unterschied zur Lisp-Funktion @code{get} testet die Funktion
 
 Bereits an dieser Stelle ist zus@"atzlich die Funktion @code{getpropl}
 eingef@"uhrt.  @code{getpropl} ist eine Verallgemeinerung der Funktion
-@code{getprop}, die auch eine Liste als zweites Argument akzeptiert.
+@code{getprop}, die auch eine Liste als zweites Argument akzeptiert und eine
+Liste zur@"uckgibt, deren erstes Element der Indikator ist, zu dem der erste
+Eintrag auf der Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der
+Liste sind die folgenden Eintr@"age der Eigenschaftsliste.
 
+@need 800
 @verbatim
 (defun getpropl (sym indicator-list)
   (cond ((symbolp sym)
@@ -712,17 +751,29 @@ eingef@"uhrt.  @code{getpropl} ist eine Verallgemeinerung der Funktion
         (t (return-from getpropl nil))))
 @end verbatim
 
-@b{Beispiele:} Die folgenden Beispiele zeigen einige Anwendungen der Funktionen.
+@b{Beispiele:} Es folgen einige Beispiele f@"ur die Anwendung der Funktionen.
 
 @example
-* (putprop '((op)) 1.25 'indic)
-NIL
-* (putprop 'op 1.25 'indic)
-1.25
-* (getprop 'op 'indic)
-1.25
-* (getpropl 'op '(indic))
-(INDIC 1.25)
+* (putprop 'op 0.25 'float)
+0.25
+* (getprop 'op 'float)
+0.25
+* (defprop op 25 integer)
+25
+* (getprop 'op 'integer)
+25
+* (putprop 'op 1/2 'rational)
+1/2
+* (symbol-plist 'op)
+(RATIONAL 1/2 INTEGER 25 FLOAT 0.25)
+* (getpropl 'op '(float integer))
+(INTEGER 25 FLOAT 0.25)
+* (getpropl 'op '(rational integer))
+(RATIONAL 1/2 INTEGER 25 FLOAT 0.25)
+* (getpropl 'op '(float))
+(FLOAT 0.25)
+* (getpropl 'op '(float integer))
+(INTEGER 25 FLOAT 0.25)
 @end example
 
 @c -----------------------------------------------------------------------------
@@ -737,7 +788,6 @@ NIL
 @end menu
 
 @c -----------------------------------------------------------------------------
-@findex $quit
 @node Implementierung einfacher Nutzerfunktionen, Implementierung der Zuweisung mset, Implementierung von Funktionen, Implementierung von Funktionen
 @subsection Implementierung einfacher Nutzerfunktionen
 @c -----------------------------------------------------------------------------
@@ -751,6 +801,8 @@ NIL
 @node Die Funktion $quit, Die Funktionen $writefile und $closefile, Implementierung einfacher Nutzerfunktionen, Implementierung einfacher Nutzerfunktionen
 @subsubsection Die Funktion @code{$quit}
 @c -----------------------------------------------------------------------------
+
+@findex $quit
 
 Der Evaluator kann jede Lisp-Funktion ausf@"uhren.  kMaxima-Nutzerfunktionen 
 k@"onnen daher als Lisp-Funktion implementiert werden.  kMaxima-Funktionen haben
@@ -784,11 +836,12 @@ KMAXIMA>
 @end example
 
 @c -----------------------------------------------------------------------------
-@findex $writefile
-@findex $closefile
 @node Die Funktionen $writefile und $closefile, , Die Funktion $quit, Implementierung einfacher Nutzerfunktionen
 @subsubsection Die Funktionen @code{$writefile} und @code{$closefile}
 @c -----------------------------------------------------------------------------
+
+@findex $writefile
+@findex $closefile
 
 Zwei weitere Funktionen sind @code{$writefile} und @code{$closefile} mit denen
 die Aufzeichnung einer kMaxima-Sitzung in eine Datei gestartet und beendet
@@ -807,10 +860,11 @@ werden kann.  Die Implementierung nutzt die Lisp-Funktion @code{dribble}.
 @end verbatim
 
 @c -----------------------------------------------------------------------------
-@findex mset
 @node Implementierung der Zuweisung mset, Implementierung der Funktion $reset, Implementierung einfacher Nutzerfunktionen, Implementierung von Funktionen
 @subsection Implementierung der Zuweisung @code{mset}
 @c -----------------------------------------------------------------------------
+
+@findex mset
 
 Die Zuweisung eines Wertes an ein Symbol soll in einer vollst@"andigen 
 Implementierung mit den Operatoren @code{:} und @code{::} m@"oglich sein.
@@ -835,7 +889,7 @@ Zun@"achst werden die globalen Variablen @code{*values*} und @code{*options*}
 definiert.  Die Variable @code{*values*} ist eine Liste, die alle vom Nutzer
 eingef@"uhrten Variablen enth@"alt.  Die Variable @code{*options*} ist die Liste
 der Optionsvariablen, die mit @code{defmvar} definiert wurden und vom Nutzer
-einen neuen Wert erhalten haben.  Weiterhin werden die Maxima-Funktionen
+einen neuen Wert erhalten haben.  Weiterhin werden die kMaxima-Funktionen
 @code{$values} und @code{$options} definiert.  Mit diesen Funktionen kann der
 Nutzer die aktuellen Eintr@"age der Variablen @code{*values*} und
 @code{*options*} ausgeben.  Die R@"uckgabe ist eine Kopie der internen Listen
@@ -887,8 +941,8 @@ neuen Wert erh@"alt.
 
 Die Zuweisung eines Wertes an ein Symbol kann kontrolliert werden.  Dazu wird
 eine Funktion zum Indikator @code{'assign} in die Eigenschaftsliste des 
-Symbols abgelegt.  Verschiedene Funktionen, die die Zuweisung kontrollieren,
-sind im Folgenden gezeigt.
+Symbols abgelegt.  Es werden die Funktionen @code{neverset}, @code{booleset}
+und @code{shadowset} definiert, die die Zuweisung kontrollieren.
 
 @findex neverset
 @findex booleset
@@ -908,10 +962,12 @@ sind im Folgenden gezeigt.
 
 Erh@"alt ein Symbol @code{$a} zum Beispiel die Eigenschaft @code{neverset} mit 
 dem Befehl @code{(defprop $a neverset assign)}, so kann dem Symbol @code{$a} 
-kein Wert zugewiesen werden.  Das Symbol verh@"alt sich dann wie eine Konstante.
-Die Funktion @code{booleset} kontrolliert dagegen, ob dem Symbol ein boolescher
-Wert zugewiesen wird.  Mit der Funktion @code{shadowset} kann einem Symbol die 
-Eigenschaft gegeben werden, einer weiteren Variablen denselben Wert zuzuweisen.
+kein Wert zugewiesen werden.  Das Symbol verh@"alt sich wie eine Konstante.
+Die Funktion @code{booleset} kontrolliert, ob dem Symbol ein boolescher Wert
+zugewiesen wird.  Ist dies nicht der Fall, wird die Ausf@"uhrung mit einer
+Fehlermeldung abgebrochen.  Mit der Funktion @code{shadowset} kann einem Symbol
+die Eigenschaft gegeben werden, einer weiteren Variablen, die Shadow-Variable
+genannt wird, denselben Wert zuzuweisen.
 
 @findex merror
 
@@ -949,7 +1005,8 @@ wenn die Zuweisung eines Wertes an eine Variable nicht m@"oglich ist.
 @end verbatim
 
 @b{Beispiele:} Immer wenn die Variable @code{$numer} einen Wert erh@"alt, wird
-dieser auch der Variablen @code{$float} zugewiesen.
+dieser auch der Shadow-Variablen @code{$float} zugewiesen.  Diese
+Funktionalit@"at ist auf gleiche Weise im Original Maxima implementiert.
 
 @example
 * (defmvar $numer nil)
@@ -967,7 +1024,8 @@ $FLOAT
 @end example
 
 Der Optionsvariablen @code{$optionset} k@"onnen nur die booleschen Werte
-@code{T} oder @code{NIL} zugewiesen werden.
+@code{T} oder @code{NIL} zugewiesen werden.  Wird versucht eine Zahl zuzuweisen,
+bricht die Ausf@"uhrung mit einer Fehlermeldung ab.
 
 @example
 KMAXIMA> (defprop $optionset booleset assign)
@@ -983,7 +1041,8 @@ assignment: cannot assign 99 to $OPTIONSET
 @end group
 @end example
 
-Das Symbol @code{$%pi} wird als Konstante deklariert.
+Das Symbol @code{$%pi} wird als Konstante deklariert.  Es kann kein Wert
+zugewiesen werden.
 
 @example
 KMAXIMA> (defprop $%pi neverset assign)
@@ -994,10 +1053,12 @@ assignment: cannot assign 1 to $%PI
 @end example
 
 @c -----------------------------------------------------------------------------
-@findex $reset
 @node Implementierung der Funktion $reset, , Implementierung der Zuweisung mset, Implementierung von Funktionen
 @subsection Implementierung der Funktion @code{$reset}
 @c -----------------------------------------------------------------------------
+
+@findex $reset
+@findex reset1
 
 An dieser Stelle schlie@ss{}en wir die Implementierung einer Nutzerfunktion an,
 mit der die Werte von globalen Optionsvariablen auf ihren Anfangswert
@@ -1012,20 +1073,64 @@ Einige Hinweise zur Implementierung der Funktion @code{reset1}.  Die Funktion
 @code{maybe-reset} ist lokal zur Funktion @code{reset1} definiert.  Da
 @code{maybe-reset} eine Hilfsfunktion f@"ur @code{reset1} ist, verstecken wir
 diese innerhalb der Funktion @code{reset1}.  Weiterhin nutzt die urspr@"ungliche
-Version Seiteneffekte, um die Liste @code{actually-reset} in der Funktion
-@code{maybe-reset} zu modifizieren.  Dies ist hier nicht der Fall.  Die Funktion
-@code{maybe-reset} hat den R@"uckgabewert @code{nil}, wenn der Wert @code{key}
-nicht zur@"uckgesetzt wurde und ansonsten den Wert @code{key}.  Die Akkumulation
-der Liste @code{actually-reset} geschieht nicht durch einen Seiteneffekt in der
-Routine @code{maybe-reset}, sondern in der Routine @code{reset1}.
+Version im Original Maxima Seiteneffekte, um die Liste @code{actually-reset} der
+Funktion @code{maybe-reset} zu modifizieren.  Dies ist hier nicht der Fall.  Die
+Funktion @code{maybe-reset} hat den R@"uckgabewert @code{nil}, wenn der Wert
+@code{key} nicht zur@"uckgesetzt wurde und ansonsten den Wert @code{key}.  Die
+Akkumulation der Liste @code{actually-reset} geschieht nicht durch einen
+Seiteneffekt in der Routine @code{maybe-reset}, sondern in der Routine
+@code{reset1} selbst.
+
+@findex msetq
+@findex mquote
+
+Wir f@"ugen an dieser Stelle noch die zwei kMaxima-Spezialformen @code{msetq}
+und @code{mquote} ein.  Die Zuweisung ist mit der Lisp-Funktion @code{mset}
+implementiert.  Diese Funktion wertet die Argumente aus.  Die
+kMaxima-Spezialform @code{msetq} ruft die Funktion @code{mset} auf, wobei
+das erste Argument nicht, aber das zweite Argument mit einem Aufruf von
+@code{meval} ausgewertet wird.
+
+@verbatim
+(defmspec msetq (l)
+  (mset (cadr l) (meval (caddr l))))
+@end verbatim
+
+@b{Beispiel:} Das Beispiel zeigt den Unterschied der Zuweisung eines Wertes
+f@"ur die Lisp-Funktion @code{mset} und die kMaxima-Spezialform @code{msetq}.
+
+@example
+* (setq a 'b)
+B
+* (meval '((mset) a 123))
+123
+* a
+B
+* b
+123
+* (meval '((msetq) a 999))
+999
+* a
+999
+* b
+123
+@end example
+
+Das Makro @code{mquote} repräsentiert den Quote-Operator in einem
+kMaxima-Ausdruck.  Die Auswertung eines Arguments @code{a} kann damit zum
+Beispiel wie in dem folgendem kMaxima-Ausdruck @code{'((mquote) a)}
+verhindert werden.
 
 @verbatim
 (defmspec mquote (form)
   (cadr form))
-
-(defmspec msetq (l)
-  (mset (cadr l) (meval (caddr l))))
 @end verbatim
+
+Zuletzt die Implementierung der Funktionen @code{$reset} und @code{reset1}.
+Da eine kMaxima-Spezialform auf der Eigenschaftsliste abgelegt wird, soll die
+Definition der Nutzer-Funktion @code{$reset} so kurz als m@"oglich sein.  Wir 
+führen hier die Konvention ein, dass die eigentliche Funktion eine Lisp-Funktion
+mit dem Index @code{1} ein.
 
 @verbatim
 (defmspec $reset (l)
@@ -1084,8 +1189,8 @@ $OPTION
 1
 @end example
 
-Alle Funktionen, Variablen und Makros die in @ref{Grundger@"ust} definiert wurden
-können mit der Datei kmaxima.lisp in ein Lisp-System geladen werden.  
+Alle Funktionen, Variablen und Makros die in @ref{Grundger@"ust} definiert
+wurden k@"onnen mit der Datei kmaxima.lisp in ein Lisp-System geladen werden.
 
 @c --- End of file Grundgeruest.texi -------------------------------------------
 
