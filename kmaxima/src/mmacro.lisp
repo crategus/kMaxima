@@ -24,6 +24,9 @@
 
 (in-package :kmaxima)
 
+(defvar ^w nil)
+(defvar ttyoff '^w)
+
 ;;; ----------------------------------------------------------------------------
 
 (defmacro defun-prop (f arg &body body)
