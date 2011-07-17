@@ -28,6 +28,40 @@
     #:*alphabet*
     #:*parse-stream*
     #:*parse-stream-eof*
+    
+    ;; Globals for the display functions in display.lisp
+    #:*displayp*
+    #:*linearray*
+    #:*lines*
+    #:*level*
+    #:*break*
+    #:*size*
+    #:*bkpt*
+    #:*bkptout*
+    #:*bkptwd*
+    #:*bkptdp*
+    #:*bkptht*
+    #:*bkptlevel*
+    #:*width*
+    #:*height*
+    #:*depth*
+    #:*right*
+    #:*maxht*
+    #:*maxdp*
+    #:*oldrow*
+    #:*oldcol*
+    #:*mratp*
+    
+    ;; Function in display.lisp
+    #:mdisplay
+    #:dimension
+    #:dimension-nary
+    #:dimnary
+    #:dim-mquotient
+    #:d-hbar
+    #:dratio
+    #:checkfit
+    
     #:$%e
     #:$%edispflag
     #:$exptdispflag
@@ -48,7 +82,10 @@
     #:mlistp
     #:mminus
     #:mminusp
+    #:mparen
+    #:mplus
     #:mquotient
+    #:mtimes
     #:parse-tyi
     #:parse-tyipeek
     #:peek-one-token
