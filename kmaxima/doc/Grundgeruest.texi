@@ -572,7 +572,7 @@ A
 * (meval '((sin) 0.5))
 0.47942555
 * (defmspec add (args) (+ (cadr args) (caddr args)))
-#<FUNCTION (LAMBDA (ARGS)) {AB40975}>
+#<FUNCTION (LAMBDA (ARGS)) @{AB40975@}>
 * (meval '((add) 10 20))
 30
 * (defmacro show (text) (format t "Nachricht: ~A~%" text))
