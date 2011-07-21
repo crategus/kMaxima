@@ -76,6 +76,18 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+
+;;; ----------------------------------------------------------------------------
+
 (defun mnumberp (x)
   (or (numberp x)
       (and (not (atom x))
