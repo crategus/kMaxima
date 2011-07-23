@@ -1,10 +1,5 @@
 ;;;; Created on 2011-05-15 22:26:13
 
-(load "lisp/lisp-unit.lisp")
-
-(defpackage :kmaxima-tests
-  (:use :common-lisp :lisp-unit :kmaxima))
-
 (in-package :kmaxima-tests)
 
 (define-test tyi-string-stream

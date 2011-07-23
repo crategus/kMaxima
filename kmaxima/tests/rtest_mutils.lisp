@@ -1,10 +1,5 @@
 ;;;; Created on 2011-05-08 21:55:08
 
-(load "lisp/lisp-unit.lisp")
-
-(defpackage :kmaxima-tests
-  (:use :common-lisp :lisp-unit :kmaxima))
-
 (in-package :kmaxima-tests)
 
 (define-test mfunctionp

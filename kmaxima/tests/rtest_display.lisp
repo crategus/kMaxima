@@ -1,21 +1,14 @@
 ;;;; Created on 2011-07-17 12:51:13
 
-(load "lisp/lisp-unit.lisp")
-
-(defpackage :kmaxima-tests
-  (:use :common-lisp :lisp-unit :kmaxima))
-
 (in-package :kmaxima-tests)
 
 (defmacro with-display (&body body)
-  `(let ((*displayp* t)
-        (*linearray* (if *displayp* (make-array 80.) *linearray*))
-        (*mratp* nil)
-        (*maxht*     1) (*maxdp*  0) (*width*  0)
-        (*height*    0) (*depth*  0) (*level*  0) (*size*    2)
-        (*break*     0) (*right*  0) (*lines*  1) (*bkpt*  nil)
-        (*bkptwd*    0) (*bkptht* 1) (*bkptdp* 0) (*bkptout* 0)
-        (*bkptlevel* 0))
+  `(let ((*mratp* nil)
+         (*maxht*     1) (*maxdp*  0) (*width*  0)
+         (*height*    0) (*depth*  0) (*level*  0) (*size*    2)
+         (*break*     0) (*right*  0) (*lines*  1) (*bkpt*  nil)
+         (*bkptwd*    0) (*bkptht* 1) (*bkptdp* 0) (*bkptout* 0)
+         (*bkptlevel* 0))
      (progn
        ,@body)))
 
