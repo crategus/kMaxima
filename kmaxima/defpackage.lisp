@@ -24,13 +24,27 @@
   (:nicknames :kmaxima)
   (:use :cl)
   (:export
-    #:%sqrt
-    #:*alphabet*
-    #:*parse-stream*
-    #:*parse-stream-eof*
+    ;; General symbols
+    #:$false
+    #:$true
+    #:simp
     
-    ;; Globals for the display functions in display.lisp
-    #:*displayp*
+    ;; nformat.lisp
+    #:$powerdisp
+    #:$pfeformat
+    #:$%edispflag
+    #:$exptdispflag
+    #:$sqrtdispflag
+    #:$negsumdispflag
+    
+    #:nformat
+    #:nformat-all
+    #:nformat-mplus
+    #:nformat-mtimes
+    #:nformat-mexpt
+    
+    ;; display.lisp
+    #:*in-display-p*
     #:*linearray*
     #:*lines*
     #:*level*
@@ -52,7 +66,6 @@
     #:*oldcol*
     #:*mratp*
     
-    ;; Function in display.lisp
     #:mdisplay
     #:dimension
     #:dimension-nary
@@ -62,9 +75,8 @@
     #:dratio
     #:checkfit
     
+    
     #:$%e
-    #:$%edispflag
-    #:$exptdispflag
     #:$quit
     #:$sqrtdispflag
     #:add2lnc
@@ -72,7 +84,6 @@
     #:defprop
     #:exploden
     #:fixnump
-    #:form-mexpt
     #:getprop
     #:getpropl
     #:implode
@@ -94,5 +105,11 @@
     #:scan-one-token
     #:tyi
     #:unparse-tyi
+    
+    #:%sqrt
+    #:*alphabet*
+    #:*parse-stream*
+    #:*parse-stream-eof*
+    
     ))
 
