@@ -162,6 +162,8 @@
                  (cons #\\ x))))
     (prog (y)
       (cond ((numberp x) (setq y (exploden x)))
+            ((eq x nil) (setq y (exploden (stripdollar '$false))))
+            ((eq x t) (setq y (exploden (stripdollar '$true))))
             ((stringp x)
              (setq y (coerce x 'list))
              (do ((l y (cdr l)))
