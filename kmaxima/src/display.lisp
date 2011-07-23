@@ -40,8 +40,7 @@
 (defmvar $rmxchar "]")
 
 (defvar *display-labels-p* t)
-(defvar *displayp* nil)
-(defvar *linearray* (make-array 80. :initial-element nil))
+(defvar *linearray* (make-array 80 :initial-element nil))
 
 (defvar *lines*     1)
 (defvar *level*     0)
@@ -98,14 +97,12 @@
   (declare (special *linel*))
   (when (not #.ttyoff)
     (cond ($display2d
-           (let ((*displayp* t)
-                 (*linearray* (if *displayp* (make-array 80.) *linearray*))
-                 (*mratp* (checkrat form))
+           (let ((*mratp* (checkrat form))
                  (*maxht*     1) (*maxdp*  0) (*width*  0)
                  (*height*    0) (*depth*  0) (*level*  0) (*size*    2)
                  (*break*     0) (*right*  0) (*lines*  1) (*bkpt*  nil)
                  (*bkptwd*    0) (*bkptht* 1) (*bkptdp* 0) (*bkptout* 0)
-                 (*bkptlevel* 0) (in-p   nil))
+                 (*bkptlevel* 0))
              (unwind-protect
                (progn
                  (setq form (dimension form nil 'mparen 'mparen 0 0))
@@ -322,6 +319,8 @@
   (cond ((and (symbolp form)
               (getprop form atom-context))
          (funcall (getprop form atom-context) form result))
+         ((eq form nil) (dimension-string (makestring '$false) result))
+         ((eq form t) (dimension-string (makestring '$true) result))
         ((typep form 'string)
          (dimension-string (makestring form) result))
         (t
@@ -758,7 +757,7 @@
 
 (defun dimension-superscript (form result)
   (prog (exp (w 0) (h 0) (d 0) bas)
-    (setq exp (let ((size 1))
+    (setq exp (let ((*size* 1))
                 (dimension (caddr form) nil 'mparen 'mparen nil 0))
           w *width*
           h *height*
