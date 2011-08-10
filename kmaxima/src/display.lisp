@@ -27,7 +27,7 @@
 
 (defvar *debug-dimension* nil)
 
-(defmvar $display2d nil)
+(defmvar $display2d t)
 (defmvar $leftjust nil)
 (defmvar $display_format_internal nil)
 (defmvar $noundisp nil)
@@ -38,6 +38,13 @@
 (defmvar $absboxchar "!")
 (defmvar $lmxchar "[")
 (defmvar $rmxchar "]")
+
+(defmvar $stardisp nil)
+(defprop $stardisp stardisp assign)
+
+(defun stardisp (symbol val)
+  (declare (ignore symbol))
+  (putprop 'mtimes (if val '(#\*) '(#\space)) 'dissym))
 
 (defvar *display-labels-p* t)
 (defvar *linearray* (make-array 80 :initial-element nil))
@@ -599,7 +606,7 @@
 (displa-def rat dim-rat "/")
 
 (defun dim-rat (form result)
-  (if $pfeformat
+  (if $ratdispflag
       (dimension-nary form result)
       (dim-mquotient form result)))
 
@@ -823,7 +830,7 @@
 
 (defun dim-mdefine (form result)
   (let (($noundisp t)
-        ($stringdisp t))
+        ($stringdispflag t))
     (dimension-infix (if (cdddr form)
                          (list (car form) 
                                (cadr form)
@@ -848,12 +855,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (displa-def mnctimes dimension-nary " . ")
-
-(defprop $stardisp stardisp assign)
-
-(defun stardisp (symbol val)
-  (declare (ignore symbol))
-  (putprop 'mtimes (if val '(#\*) '(#\space)) 'dissym))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1173,9 +1174,7 @@
            (setq result
                  (cons #\space
                        (dimension (cadr form) result 'mdo 'mparen 4 *right*))
-                 w (+ 4 *width*)
-                 h *height*
-                 d *depth*
+                 w (+ 4 *width*) h *height* d *depth*
                  brkflag t)))
     (cond ((or (null (caddr form))
                (equal 1 (caddr form))))
@@ -1184,9 +1183,7 @@
            (setq result
                  (cons #\space
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
-                 w (+ 6 w *width*)
-                 h (max h *height*)
-                 d (max d *depth*))))
+                 w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
     (setq form (cdddr form))
     (cond ((equal 1 (car form)))
           ((not (null (car form)))
@@ -1194,25 +1191,19 @@
            (setq result
                  (cons #\space
                        (dimension (car form) result 'mdo 'mparen (+ 6 w) 0))
-                 w (+ 6 w *width*)
-                 h (max h *height*)
-                 d (max d *depth*)))
+                 w (+ 6 w *width*) h (max h *height*) d (max d *depth*)))
           ((not (null (cadr form)))
            (push-string "next " result)
            (setq result
                  (cons #\space
                        (dimension (cadr form) result 'mdo 'mparen (+ 6 w) 0))
-                 w (+ 6 w *width*)
-                 h (max h *height*)
-                 d (max d *depth*))))
+                 w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
     (cond ((not (null (caddr form)))
            (push-string "thru " result)
            (setq result
                  (cons #\space
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
-                 w (+ 6 w *width*)
-                 h (max h *height*)
-                 d (max d *depth*)
+                 w (+ 6 w *width*) h (max h *height*) d (max d *depth*)
                  brkflag t)))
     (cond ((not (null (cadddr form)))
            (cond ((and (not (atom (cadddr form)))
@@ -1222,17 +1213,14 @@
                         (cons #\space
                               (dimension (cadr (cadddr form))
                                          result 'mdo 'mparen (+ 7 w) 0))
-                        w (+ 7 w *width*)
-                        h (max h *height*)
-                        d (max d *depth*)))
+                        w (+ 7 w *width*) h (max h *height*) d (max d *depth*)))
                  (t
                   (push-string "unless " result)
                   (setq result
                         (cons #\space
                               (dimension (cadddr form)
                                          result 'mdo 'mparen (+ 8 w) 0))
-                        w (+ 8 w *width*)
-                        h (max h *height*)
+                        w (+ 8 w *width*) h (max h *height*)
                         d (max d *depth*))))))
     (if brkflag (checkbreak result w))
     (push-string "do " result)
