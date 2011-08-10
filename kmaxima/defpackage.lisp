@@ -30,8 +30,8 @@
     #:simp
     
     ;; nformat.lisp
-    #:$powerdisp
-    #:$pfeformat
+    #:$powerdispflag
+    #:$ratdispflag
     #:$%edispflag
     #:$exptdispflag
     #:$sqrtdispflag
