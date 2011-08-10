@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 16.04.2011
-@c Revision : 20.06.2011
+@c Revision : 10.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -616,7 +616,7 @@ NIL
 @section Vergleiche Ausdr@"ucke
 @c -----------------------------------------------------------------------------
 
-kMaxima-Ausdr@"ucke werden als Lisp-Listen der Form @code{(op) arg1 arg2 ...)}
+kMaxima-Ausdr@"ucke werden als Lisp-Listen der Form @code{((op) arg1 arg2 ...)}
 dargestellt.  @"Aquivalente Ausdr@"ucke k@"onnen eine verschiedene interne
 Darstellung haben, wenn die Operatoren @code{op} Attribute haben.  Zum Beispiel
 sind die beiden kMaxima-Ausdr@"ucke @code{((mplus) $A $B)} und

@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 22.06.2011
+@c Revision : 10.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -1014,36 +1014,97 @@ unless  parse-$do                             25   45        clause
 while   parse-$do                             25   45        clause
 @end verbatim
 
-@verbatim
-(eval-when (:execute :compile-toplevel :load-toplevel)
+@c -----------------------------------------------------------------------------
+@anchor{def-nud-equiv}
+@deffn {Makro} def-nud-equiv op equiv
+
+@emph{Quelltext:}
+@smalllisp
+@group
   (defmacro def-nud-equiv (op equiv)
     (list 'putprop (list 'quote op)
                    (list 'function equiv)
                    (list 'quote 'nud)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-nud-fun}
+@deffn {Makro} def-nud-fun op-name op-l . body
+
+@emph{Quelltext:}
+@smalllisp
+@group
   (defmacro def-nud-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'nud 'nil) op-l body))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-led-equiv}
+@deffn {Makro} def-led-equiv op equiv
+
+@emph{Quelltext:}
+@smalllisp
+@group
   (defmacro def-led-equiv (op equiv)
     (list 'putprop (list 'quote op)
                    (list 'function equiv)
                    (list 'quote 'led)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-led-fun}
+@deffn {Makro} def-led-fun op-name op-l . body
+
+@emph{Quelltext:}
+@smalllisp
+@group
   (defmacro def-led-fun (op-name op-l . body)
     (list* 'defun-prop (list* op-name 'led 'nil) op-l body)))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{operatoro}
+@deffn {Funktion} operatorp lex
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun operatorp (lex)
   (and (symbolp lex)
        (getpropl lex '(nud led))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{operatorp1}
+@deffn {Funktion} operatorp1 lex
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun operatorp1 (lex)
   (and (symbolp lex)
        (getpropl lex '(lbp rbp nud led))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{nud-call}
+@deffn {Funktion} nud-call op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun nud-call (op)
   (let ((tem (getprop op 'nud))
         res)
@@ -1054,7 +1115,17 @@ while   parse-$do                             25   45        clause
                   (cons '$any op))
               (funcall tem op)))
     res))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{led-call}
+@deffn {Funktion} led-call op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun led-call (op l)
   (let ((tem (getprop op 'led))
         res)
@@ -1063,7 +1134,17 @@ while   parse-$do                             25   45        clause
               (mread-synerr "~A is not an infix operator" (mopstrip op))
               (funcall tem op l)))
     res))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-nud}
+@deffn {Makro} def-nud (op . lbp-rpb) bvl . body
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-nud ((op . lbp-rbp) bvl . body)
   (let ((lbp (nth 0 lbp-rbp))
         (rbp (nth 1 lbp-rbp)))
@@ -1071,7 +1152,17 @@ while   parse-$do                             25   45        clause
        'compile
        ,(make-parser-fun-def op 'nud bvl body)
        (set-lbp-and-rbp ',op ',lbp ',rbp))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{set-lbp-and-rbp}
+@deffn {Funktion} set-lbp-and-rpb op lbp rbp
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun set-lbp-and-rbp (op lbp rbp)
   (cond 
     ((not (consp op))
@@ -1090,7 +1181,17 @@ while   parse-$do                             25   45        clause
                       op)))))
     (t
      (mapcar #'(lambda (x) (set-lbp-and-rbp x lbp rbp)) op))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-led}
+@deffn {Makro} def-led (op . lbp-rpp) bvl . body
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-led((op . lbp-rbp) bvl . body)
   (let ((lbp (nth 0 lbp-rbp))
         (rbp (nth 1 lbp-rbp)))
@@ -1098,7 +1199,17 @@ while   parse-$do                             25   45        clause
        'compile
        ,(make-parser-fun-def  op 'led bvl body)
        (set-lbp-and-rbp ',op ',lbp ',rbp))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-collisions}
+@deffn {Makro} def-collisions op &rest alist 
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-collisions (op &rest alist)
   (let ((keys (do ((i 1 (ash i 1))
                    (lis  alist (cdr lis))
@@ -1107,7 +1218,7 @@ while   parse-$do                             25   45        clause
     `(progn 
        'compile
        (defprop ,op ,(let nil (copy-tree keys )) keys)
-       ,@(mapcar 
+       ,@@(mapcar 
            #'(lambda (data)
                `(defprop 
                   ,(car data)
@@ -1117,7 +1228,17 @@ while   parse-$do                             25   45        clause
                        ((null lis) i))
                   ,op))
           alist))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{collision-lookup}
+@deffn {Funktion} collision-lookup op active-bitmask key-bitmask
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun collision-lookup (op active-bitmask key-bitmask)
   (let ((result (logand active-bitmask key-bitmask)))
     (if (not (zerop result))
@@ -1125,7 +1246,17 @@ while   parse-$do                             25   45        clause
             ((null l) (parse-bug-err 'collision-check))
           (if (not (zerop (logand result (cdar l))))
               (return (caar l)))))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{collision-check}
+@deffn {Funktion} collision-check op active-bitmask key
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun collision-check (op active-bitmask key)
   (let ((key-bitmask (get key op)))
     (if (not key-bitmask)
@@ -1142,44 +1273,176 @@ while   parse-$do                             25   45        clause
                             (mopstrip key)
                             (mopstrip collision))))
       (logior (cdr (assoc key (get op 'keys) :test #'eq)) active-bitmask))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{lbp}
+@deffn {Funktion} lbp lex
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun lbp (lex)
   (cond ((getprop lex 'lbp)) (t 200)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-lbp}
+@deffn {Makro} def-lbp sym val
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-lbp (sym val)
   `(defprop ,sym ,val lbp))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{rbp}
+@deffn {Funktion} rbp lex
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun rbp (lex)
   (cond ((getprop lex 'rbp)) (t 200)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-rbp}
+@deffn {Makro} def-rbp sym val
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-rbp (sym val) 
   `(defprop ,sym ,val rbp))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-match}
+@deffn {Makro} def-match x m
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-match (x m) 
   `(defprop ,x ,m match))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{lpos}
+@anchor{rpos}
+@anchor{pos}
+@deffn  {Funktion} lpos op
+@deffnx {Funktion} rpos op
+@deffnx {Funktion} pos op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun lpos (op) (cond ((getprop op 'lpos)) (t '$any)))
 (defun rpos (op) (cond ((getprop op 'rpos)) (t '$any)))
 (defun pos  (op) (cond ((getprop op 'pos))  (t '$any)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-pos}
+@anchor{def-rpos}
+@anchor{def-lpos}
+@deffn  {Makro} def-pos op pos
+@deffnx {Makro} def-rpos op pos
+@deffnx {Makro} def-lpos op pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-pos  (op pos) `(defprop ,op ,pos  pos))
 (defmacro def-rpos (op pos) `(defprop ,op ,pos rpos))
 (defmacro def-lpos (op pos) `(defprop ,op ,pos lpos))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{mheader}
+@deffn {Funktion} mheader op 
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun mheader (op)
   (add-lineinfo (or (getprop op 'mheader) (list op))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-mheader}
+@deffn {Makro} def-mheader op header
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro def-mheader (op header) `(defprop ,op ,header mheader))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$any}
+@anchor{$clause}
+@anchor{$expr}
+@defvr  {Symbol} $any
+@defvrx {Symbol} $clause
+@defvrx {Symbol} $expr
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defprop $any    "untyped"   english)
 (defprop $clause "logical"   english)
 (defprop $expr   "algebraic" english)
+@end group
+@end smalllisp
+@end defvr
 
+@c -----------------------------------------------------------------------------
+@anchor{first-c}
+@anchor{pop-c}
+@deffn  {Makro} first-c
+@deffnx {Makro} pop-c
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defmacro first-c () '(peek-one-token))
 (defmacro pop-c   () '(scan-one-token))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{mread}
+@deffn {Funktion} mread &rest read-args
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun mread (&rest read-args)
   (progn
     (when *mread-prompt*
@@ -1189,7 +1452,17 @@ while   parse-$do                             25   45        clause
       (princ *mread-prompt*)
       (force-output))
     (apply 'mread-raw read-args)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{mread-raw}
+@deffn {Funktion} mread-raw *parse-stream* &optinal *mread-eof-obj*
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun mread-raw (*parse-stream* &optional *mread-eof-obj*)
   (let ((*scan-buffered-token* (list nil))
         *parse-tyi*)
@@ -1212,54 +1485,142 @@ while   parse-$do                             25   45        clause
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
             (t
              (parse-bug-err 'mread-raw)))))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{parse}
+@deffn {Funktion} parse mode rbp
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse (mode rbp)
   (do ((left (nud-call (pop-c))         ; Envoke the null left denotation
        (led-call (pop-c) left)))        ;  and keep calling LED ops as needed
       ((>= rbp (lbp (first-c)))         ; Until next op lbp too low
        (convert left mode))))           ;  in which case, return stuff seen
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-prefix}
+@deffn {Funktion} parse-prefix op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-prefix (op)
   (list (pos op)                        ; Operator mode
         (mheader op)                    ; Standard Macsyma expression header
         (parse (rpos op) (rbp op))))    ; Convert single argument for use
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-postfix}
+@deffn {Funktion} parse-postfix op l
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-postfix (op l)
   (list (pos op)                        ; Operator's mode
         (mheader op)                    ; Standard Macsyma expression header
         (convert l (lpos op))))         ; Convert single argument for use
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-infix}
+@deffn {Funktion} parse-infix op l
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-infix (op l)
   (list (pos op)                        ; Operator's mode
         (mheader op)                    ; Standard Macsyma expression header
         (convert l (lpos op))           ; Convert arg1 for immediate use
-        (parse (rpos op) (rbp op))))    ; Look for an arg2 
+        (parse (rpos op) (rbp op))))    ; Look for an arg2
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-nary}
+@deffn {Funktion} parse-nary op l
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-nary (op l)
   (list* (pos op)                           ; Operator's mode
          (mheader op)                       ; Normal Macsyma operator header
          (convert l (lpos op))              ; Check type-match of arg1 
          (prsnary op (lpos op) (lbp op))))  ; Search for other args
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-matchfix}
+@deffn {Funktion} parse-matchfix op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-matchfix (op)
   (list* (pos op)                           ; Operator's mode
          (mheader op)                       ; Normal Macsyma operator header
          (prsmatch (and (symbolp op)
                         (get op 'match))
                    (lpos op))))             ; Search for matchfixed forms
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-nofix}
+@deffn {Funktion} parse-nofix op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun parse-nofix (op)
   (list (pos op) (mheader op)))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{prsnary}
+@deffn {Funktion} prsnary op mode rbp
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun prsnary (op mode rbp)
   (do ((nl (list (parse mode rbp))          ; Get at least one form
            (cons (parse mode rbp) nl)))     ;  and keep getting forms
       ((not (eq op (first-c)))              ; until a parse pops on a new op
        (nreverse nl))                       ;  at which time return forms
       (pop-c)))                             ; otherwise pop op
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{prsmatch}
+@deffn {Funktion} prsmatch match mode
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun prsmatch (match mode)
   (cond ((eq match (first-c)) (pop-c) nil)
         (t
@@ -1272,7 +1633,17 @@ while   parse-$do                             25   45        clause
                (pop-c)
                (mread-synerr "Missing ~A"
                              (mopstrip match)))))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{convert}
+@deffn {Funktion} convert item mode
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun convert (item mode)
   (if (or (eq mode (car item))                    ; If modes match exactly
           (eq '$any mode)                         ;    or target is $ANY
@@ -1281,7 +1652,9 @@ while   parse-$do                             25   45        clause
       (mread-synerr "Found ~A expression where ~A expression expected"
                     (get (car item) 'english)
                     (get mode       'english))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Definition der Operatoren, Nutzerdefinierte Operatoren, Funktionen und Makros des Parsers, Parser
@@ -1733,41 +2106,107 @@ while   parse-$do                             25   45        clause
 @section Nutzerdefinierte Operatoren
 @c -----------------------------------------------------------------------------
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{$prefix}
+@deffn {Funktion} $prefix operator &optional rbp rpos pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $prefix (operator &optional (rbp 180) (rpos '$any) (pos '$any))
   (def-operator operator 
                 pos () () rbp rpos () t
                 '(nud . parse-prefix) 'msize-prefix 'dimension-prefix ())
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$postfix}
+@deffn {Funktion} $postfix operator &optional lbp lpos pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $postfix (operator &optional (lbp 180) (lpos '$any) (pos '$any))
   (def-operator operator pos lbp lpos () () t ()
                 '(led . parse-postfix) 'msize-postfix 'dimension-postfix ())
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$infix}
+@deffn {Funktion} $infix operator &optional lbp rpb lpos rpos pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $infix (operator &optional (lbp 180) (rbp 180) (lpos '$any) 
                                   (rpos '$any) (pos  '$any))
   (def-operator operator pos lbp lpos rbp rpos t t
                 '(led . parse-infix) 'msize-infix 'dimension-infix ())
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$nary}
+@deffn {Funktion} $nary operator &optional bp argpos pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $nary (operator &optional (bp 180) (argpos '$any) (pos '$any))
   (def-operator operator pos bp  argpos bp () t t
                 '(led . parse-nary) 'msize-nary 'dimension-nary ())
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$matchfix}
+@deffn {Funktion} $matchfix operator match &optional argpos pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $matchfix (operator match &optional (argpos '$any) (pos '$any))
   (def-operator operator pos () argpos () () () ()
                 '(nud . parse-matchfix)
                 'msize-matchfix 
                 'dimension-match match)
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{$nofix}
+@deffn {Funktion} $nofix operator &optional pos
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun $nofix (operator &optional (pos '$any))
   (def-operator operator pos () () () () () ()
                 '(nud . parse-nofix) 'msize-nofix 'dimension-nofix ())
   operator)
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{def-operator}
+@deffn {Funktion} def-operator op pos lbp lpos rbp rpos sp1 sp2 parse-data grind-fn dim-fn match
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun def-operator (op pos lbp lpos rbp rpos sp1 sp2 
                         parse-data grind-fn dim-fn match)
   (let ((x))
@@ -1806,7 +2245,17 @@ while   parse-$do                             25   45        clause
       (when lpos (putprop op lpos 'lpos))
       (when rpos (putprop op rpos 'rpos))
       (getopr op))))
+@end group
+@end smalllisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{op-setup}
+@deffn {Funktion} op-setup op
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun op-setup (op)
   (declare (special *mopl* $props))
   (let ((dummy (or (get op 'op) (coerce (makestring1 op) 'string))))
@@ -1815,27 +2264,9 @@ while   parse-$do                             25   45        clause
     (if (and (operatorp1 op) (not (member dummy (cdr $props) :test #'eq)))
         (push dummy *mopl*))
     (add2lnc dummy $props)))
-
-;(defun kill-operator (op)
-;  (let
-;    ((opr (getprop op 'op))
-;     (noun-form ($nounify op)))
-;    (unless (member opr *builtin-$props* :test #'equal)
-;      (undefine-symbol opr)
-;      (remopr opr)
-;      (rempropchk opr)
-;      (mapc #'(lambda (x) 
-;                (remprop op x))
-;            '(nud nud-expr nud-subr     ; NUD info
-;              led led-expr led-subr     ; LED info
-;              lbp rbp                   ; Binding power info
-;              lpos rpos pos             ; Part-Of-Speech info
-;              grind dimension dissym    ; Display info
-;              op))                      ; Operator info
-;      (mapc #'(lambda (x)
-;                (remprop noun-form x)) 
-;            '(dimension dissym lbp rbp)))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
 @c --- End of file Parser.texi -------------------------------------------------
 

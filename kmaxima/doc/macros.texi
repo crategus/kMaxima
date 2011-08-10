@@ -5,7 +5,7 @@
 @c Original  : category-macros.texi revision 1.4
 @c Author    : Dr. Dieter Kaiser
 @c Date      : 05.03.2011
-@c Revision  : 03.05.2011
+@c Revision  : 10.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -76,12 +76,17 @@
 
 @iftex
 @hyphenation{
-   Ein-ga-be-auf-for-de-run-gen
+   Ban-ners
+   Dar-stel-lung
    End-los-schlei-fe
-   glo-ba-len
+   ex-ter-ne
+   ge-schrie-be-ner
+   kon-trol-liert
    ma-the-ma-ti-sche
+   Op-ti-ons-va-ri-a-ble
    sig-na-li-siert
    vor-an-ge-stell-tes
+   Wur-zel-funk-tion
  }
 @end iftex
 

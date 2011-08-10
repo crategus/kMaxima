@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 16.07.2011
+@c Revision : 10.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -106,12 +106,12 @@ Alle Funktionen und Variablen sind im Package @code{:kmaxima} definiert, das
 als erstes von der Funktion @code{run} geladen wird, um diese verf@"ugbar zu
 machen.
 
-Dann werden die Funktion @code{run} und die lokalen Variablen
-@code{input-stream} sowie @code{mode} definiert.  Die Variable
-@code{input-stream} wird zu @code{*standard-input*} initialisiert.  Das ist die
-Standardeingabe des Systems, welche im Allgemeinen die Tastatur ist.  Wird von
-der Standardeingabe gelesen, hat die Variable @code{mode} den Wert @code{nil}.
-Die Funktion @code{maxima-toplevel} wird mit diesen Argumenten gestartet.
+Dann werden die lokalen Variablen @code{input-stream} sowie @code{mode}
+definiert.  Die Variable @code{input-stream} wird zu @code{*standard-input*}
+initialisiert.  Das ist die Standardeingabe des Systems, welche im Allgemeinen
+die Tastatur ist.  Wird von der Standardeingabe gelesen, hat die Variable
+@code{mode} den Wert @code{nil}.  Die Funktion @code{maxima-toplevel} wird mit
+diesen Argumenten gestartet.
 
 @vindex maxima-quit-to-lisp
 
@@ -186,11 +186,11 @@ hat.
 An dieser Stelle werden die globalen Variablen @code{*maxima-quiet*} und
 @code{*maxima-epilog*} eingef@"uhrt.  Hat die Variable @code{*maxima-quiet*}
 den Wert @code{t} wird die Ausgabe eines Banners mit der Funktion
-@code{maxima-banner} unterdr@"uckt.  Endet die Endlosschleife, die von
-@code{maxima-toplevel} ausgef@"uhrt wird, dann wird @code{*maxima-epilog*}
-ausgegeben und kMaxima mit dem Funktionsaufruf @code{bye} beendet.  Der
-Standardwert der Variablen @code{*maxima-epilog*} ist eine leere Zeichenkette
-@code{""}.
+@code{maxima-banner} unterdr@"uckt.  Endet die Endlosschleife, die von der
+Funktion @code{maxima-toplevel} ausgef@"uhrt wird, dann wird
+@code{*maxima-epilog*} ausgegeben und kMaxima mit dem Funktionsaufruf @code{bye}
+beendet.  Der Standardwert der Variablen @code{*maxima-epilog*} ist eine leere
+Zeichenkette @code{""}.
 
 @verbatim
 (defvar *maxima-quiet* nil)
@@ -255,9 +255,9 @@ NIL
 @vindex *maxima-version*
 
 @code{maxima-toplevel} ruft noch die zwei Funktionen @code{maxima-banner}
-und @code{bye} auf.  Die Funktion @code{maxima-banner} gibt eine Information 
-aus, wenn Maxima neu gestartet wird.  Die aktuelle Version ist in der
-globalen Variablen @code{*maxima-version*} enthalten.
+und @code{bye} auf.  Die Funktion @code{maxima-banner} gibt eine Information
+aus, wenn Maxima zum ersten Mal gestartet wird.  Die aktuelle Version ist in
+der globalen Variablen @code{*maxima-version*} enthalten.
 
 @verbatim
 (defvar *maxima-version* 0.1)
@@ -387,9 +387,9 @@ verschachtelte Listen entstehen.
 @end table
 
 Das erste Element eines Ausdrucks ist eine Liste @code{(op)} mit dem Operator
-@code{op} als Element der Liste.  Diese Darstellung hat den Vorteil, dass der
-Operator mit Attributen versehen werden kann, ohne dass die Implementation des
-Evaluators modifiziert werden muss.  Ein Beispiel ist ein Ausdruck der Form
+@code{op} als erstes Element der Liste.  Diese Darstellung hat den Vorteil, dass
+der Operator mit Attributen versehen werden kann, ohne dass die Implementation
+des Evaluators modifiziert werden muss.  Ein Beispiel ist ein Ausdruck der Form
 @code{((mplus simp) $a $b)}.  Hier zeigt das Attribut @code{simp} an, dass der
 mathematische Ausdruck @code{a + b} von kMaxima ausgewertet und vereinfacht ist.
 
@@ -447,12 +447,12 @@ teilweise unterdr@"ucken.
 Die folgende Funktion @code{meval} ist eine erste Implementierung des
 Evaluators.  Zuerst werden in der @code{cond}-Anweisung Atome behandelt.
 Es werden drei F@"alle unterschieden.  Ist das Atom kein Symbol oder hat das
-Symbol keinen Wert wird der Ausdruck selbst zur@"uckgegeben.  Ansonsten wird
+Symbol keinen Wert wird das Atom selbst zur@"uckgegeben.  Ansonsten wird
 der Wert des Symbols zur@"uckgegeben.
 
 In der zweiten @code{cond}-Anweisung wird getestet, ob ein kMaxima-Ausdruck 
 vorliegt.  Dazu wird gepr@"uft, ob das erste Argument des Ausdrucks @code{form} 
-eine Liste ist.  Der Operator ist dann das erste Element der Liste.  
+eine Liste ist.  Der Operator ist dann das erste Element der Liste.
 
 In der letzten @code{cond}-Anweisung wird angenommen, dass ein Lisp-Ausdruck
 vorliegt.  Das Argument @code{form} wird in diesem Fall mit der Lisp-Funktion
@@ -714,7 +714,7 @@ Um eine einheitliche Syntax zu erm@"oglichen, werden f@"ur das Setzen eines
 Wertes die Funktion @code{putprop} und das Makro @code{defprop} definiert.
 Im Unterschied zur Funktion @code{putprop} wertet das Makro @code{defprop}
 die Argumente nicht aus.  Das erlaubt eine bequemere Schreibweise, da auf
-das voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
+das Voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
 die Argumente Symbole sind.  Mit der Funktion @code{getprop} kann eine
 Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
 @code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
@@ -866,7 +866,7 @@ werden kann.  Die Implementierung nutzt die Lisp-Funktion @code{dribble}.
 
 @findex mset
 
-Die Zuweisung eines Wertes an ein Symbol soll in einer vollst@"andigen 
+Die Zuweisung eines Wertes an ein Symbol soll in einer vollst@"andigen
 Implementierung mit den Operatoren @code{:} und @code{::} m@"oglich sein.
 Das Symbol @code{$a} erh@"alt zum Beispiel den Wert @code{0} mit dem Kommando
 @code{a:0} oder @code{'a::0}.  W@"ahrend der Operator @code{:} sein erstes
@@ -913,7 +913,7 @@ der Ausdruck als ausgewertet und vereinfacht angenommen werden kann.
 @vindex $optionset
 
 Weiterhin wird der Schalter @code{$optionset} definiert, der die Werte @code{t}
-und @code{nil} annehmen kann.  Hat @code{$optionset} den Wert @code{true},
+und @code{nil} annehmen kann.  Hat @code{$optionset} den Wert @code{t},
 gibt kMaxima eine Information aus, wenn eine Optionsvariable vom Nutzer einen
 neuen Wert erh@"alt.
 
@@ -1116,7 +1116,7 @@ B
 123
 @end example
 
-Das Makro @code{mquote} repräsentiert den Quote-Operator in einem
+Das Makro @code{mquote} repr@"asentiert den Quote-Operator in einem
 kMaxima-Ausdruck.  Die Auswertung eines Arguments @code{a} kann damit zum
 Beispiel wie in dem folgendem kMaxima-Ausdruck @code{'((mquote) a)}
 verhindert werden.

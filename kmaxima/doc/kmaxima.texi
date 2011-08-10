@@ -5,7 +5,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 16.04.2011
+@c Revision : 10.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -13,6 +13,8 @@
 @ifnottex
 @documentencoding ISO-8859-1
 @end ifnottex
+
+@afourpaper
 
 @paragraphindent 0
 @include macros.texi
@@ -63,6 +65,7 @@ END-INFO-DIR-ENTRY
 * Hilfsfunktionen::
 * Parser::
 * Lineare Anzeige::
+* 2D-Anzeige::
 * Hauptschleife::
 * kmaxima.lisp::
 * Quelltext::
@@ -85,11 +88,15 @@ END-INFO-DIR-ENTRY
 @chapter Parser
 @include Parser.texi
 
-@node Lineare Anzeige, Hauptschleife, Parser, Top
+@node Lineare Anzeige, 2D-Anzeige, Parser, Top
 @chapter Lineare Anzeige
 @include LDisplay.texi
 
-@node Hauptschleife, kmaxima.lisp, Lineare Anzeige, Top
+@node 2D-Anzeige, Hauptschleife, Lineare Anzeige, Top
+@chapter 2D-Anzeige
+@include 2DDisplay.texi
+
+@node Hauptschleife, kmaxima.lisp, 2D-Anzeige, Top
 @chapter Hauptschleife
 @include Hauptschleife.texi
 
