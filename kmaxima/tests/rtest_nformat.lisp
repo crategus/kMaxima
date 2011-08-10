@@ -25,7 +25,7 @@
 
 (define-test nformat-mplus
   (assert-equal '((mplus) $c $b $a) (nformat-mplus '((mplus simp) $a $b $c)))
-  (let (($powerdisp t))
+  (let (($powerdispflag t))
     (assert-equal '((mplus) $a $b $c) (nformat-mplus '((mplus simp) $a $b $c))))
   (assert-equal '((mplus) $a ((mminus) $b))
                   (nformat-mplus '((mplus simp) $a ((mtimes simp) -1 $b))))
@@ -38,7 +38,7 @@
                 (nformat-mtimes '((mtimes simp) ((rat simp) 2 3) $x)))
   (assert-equal '((mminus) ((mquotient) ((mtimes) 2 $x) 3))
                 (nformat-mtimes '((mtimes simp) ((rat simp) -2 3) $x)))
-  (let (($pfeformat t))
+  (let (($ratdispflag t))
     (assert-equal '((mtimes) ((rat) 2 3) $x)
                   (nformat-mtimes '((mtimes simp) ((rat simp) 2 3) $x)))
     (assert-equal '((mminus) ((mtimes) ((rat) 2 3) $x))
