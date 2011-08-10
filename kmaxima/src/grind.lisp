@@ -38,8 +38,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmvar $stringdisp nil)
-(defmvar $lispdisp nil)
+(defmvar $stringdispflag nil)
+(defmvar $lispdispflag nil)
 
 (defun makestring (x)
   (declare (special $aliases))
@@ -47,7 +47,7 @@
     (cond ((numberp x) (exploden x))
           ((stringp x)
            (setq y (coerce x 'list))
-           (if $stringdisp
+           (if $stringdispflag
                (cons #\" (nconc y (list #\")))
                y))
           ((not (symbolp x)) (exploden x))
@@ -61,11 +61,11 @@
           ((or (char= #\$ (car y))
                (char= #\% (car y)))
            (cdr y))
-          ($lispdisp (cons #\? y))
+          ($lispdispflag (cons #\? y))
           (t y))))
 
 (defun makestring1 (x)
-  (let (($stringdisp nil) ($lispdisp nil))
+  (let (($stringdispflag nil) ($lispdispflag nil))
     (makestring x)))
 
 ;;; ----------------------------------------------------------------------------
@@ -143,6 +143,8 @@
          (the (values t) (funcall (get (caar x) 'grind) x l r)))
         (t (msize-function x l r nil))))
 
+;;; ----------------------------------------------------------------------------
+
 (defun msize-paren (x l r)
   (msize x (cons #\( l) (cons #\) r) 'mparen 'mparen))
 
@@ -194,12 +196,10 @@
       (setq f (cadr x)
             x (cdr x))
       (setq f (caar x)))
-  (cond ((and (symbolp (caar x))
-              (getprop (caar x) 'verb)
+  (cond ((and (getprop (caar x) 'verb)
               (getprop (caar x) 'alias))
          (setq l (revappend '(#\' #\' ) l)))
-        ((and (symbolp (caar x))
-              (get (caar x) 'noun)
+        ((and (getprop (caar x) 'noun)
               (not (member (caar x) (cdr $aliases) :test #'eq))
               (not (get (caar x) 'reversealias)))
          (setq l (cons #\' l))))
@@ -232,10 +232,11 @@
           ((null (cdr x))
            (setq nl (cons (msize (car x) l r 'mparen 'mparen) nl))
            (cons (+ w (caar nl)) (nreverse nl)))
-        (declare (fixnum w))
         (setq nl (cons (msize (car x) l (list #\, ) 'mparen 'mparen) nl)
               w (+ w (caar nl))
               x (cdr x) l nil))))
+
+;;; ----------------------------------------------------------------------------
 
 (defun msize-prefix (x l r)
   (msize (cadr x) (revappend (strsym (caar x)) l) r (caar x) *rop*))
@@ -289,13 +290,19 @@
 (defprop mlist msize-matchfix grind)
 (defprop mlist ((#\[ ) #\] ) strsym)
 
+;;; ----------------------------------------------------------------------------
+
 (defprop mlabel msize-mlabel grind)
 
 (defun msize-mlabel (x l r)
   (declare (special *display-labels-p*))
-  (if *display-labels-p*
-      (setq l (cons (msize (cadr x) (list #\( ) (list #\) #\ ) nil nil) l)))
-  (msize (caddr x) l r *lop* *rop*))
+  (cond (*display-labels-p*
+         (setq l (msize (cadr x) (list #\( ) (list #\) #\ ) nil nil)
+               r (msize (caddr x) nil r 'mparen 'mparen))
+         (cons (+ (car l) (car r)) (cons l (cons r nil))))
+        (t (msize (caddr x) l r 'mparen 'mparen))))
+
+;;; ----------------------------------------------------------------------------
 
 (defprop mtext msize-mtext grind)
 
@@ -318,9 +325,9 @@
               x (cdr x)
               l nil))))
 
-(defprop mqapply msz-mqapply grind)
+(defprop mqapply msize-mqapply grind)
 
-(defun msz-mqapply (x l r)
+(defun msize-mqapply (x l r)
   (setq l (msize (cadr x) l (list #\( ) *lop* 'mfunction)
         r (msize-list (cddr x) nil (cons #\) r)))
   (cons (+ (car l) (car r)) (cons l (cdr r))))
@@ -337,76 +344,39 @@
 (defprop mset 180 lbp)
 (defprop mset  20 rbp)
 
-(defprop mdefine msz-mdef grind)
+(defprop mdefine msize-mdef grind)
 (defprop mdefine (#\: #\=) strsym)
 (defprop mdefine 180 lbp)
 (defprop mdefine  20 rbp)
 
-(defprop mdefmacro msz-mdef grind)
+(defprop mdefmacro msize-mdef grind)
 (defprop mdefmacro (#\: #\: #\=) strsym)
 (defprop mdefmacro 180 lbp)
 (defprop mdefmacro  20 rbp)
 
-(defun msz-mdef (x l r)
+(defun msize-mdef (x l r)
   (setq l (msize (cadr x) l (copy-list (strsym (caar x))) *lop* (caar x))
         r (msize (caddr x) nil r (caar x) *rop*))
   (setq x (cons (- (car l) (caadr l)) (cddr l)))
-  (if (and (not (atom (cadr r))) (not (atom (caddr r)))
+  (if (and (not (atom (cadr r)))
+           (not (atom (caddr r)))
            (< (+ (car l) (caadr r) (caaddr r)) *linel*))
       (setq x (nconc x (list (cadr r) (caddr r)))
             r (cons (car r) (cdddr r))))
   (cons (+ (car l) (car r)) (cons (cadr l) (cons x (cdr r)))))
 
-(defprop mfactorial msize-postfix grind)
-(defprop mfactorial 160 lbp)
+;;; ----------------------------------------------------------------------------
 
-(defprop mexpt msz-mexpt grind)
-(defprop mexpt 140 lbp)
-(defprop mexpt 139 rbp)
-
-(defun msz-mexpt (x l r)
-  (setq l (msize (cadr x) l nil *lop* 'mexpt)
-        r (if (mminusp (setq x (nformat (caddr x))))
-              (msize (cadr x) (reverse '(#\^ #\-)) r 'mexpt *rop*)
-              (msize x (list #\^) r 'mexpt *rop*)))
-  (list (+ (car l) (car r)) l r))
-
-(defprop mncexpt msize-infix grind)
-(defprop mncexpt (#\^ #\^) strsym)
-(defprop mncexpt 140 lbp)
-(defprop mncexpt 139 rbp)
-
-(defprop mnctimes msize-nary grind)
-(defprop mnctimes 130 lbp)
-(defprop mnctimes 129 rbp)
-
-(defprop mtimes msz-mtimes grind)
-(defprop mtimes 120 lbp)
-(defprop mtimes 120 rbp)
-
-(defun msz-mtimes (x l r)
-  (msznary x l r '(#\* )))
-
-(defprop mquotient msize-infix grind)
-(defprop mquotient (#\/) strsym)
-(defprop mquotient 120 lbp)
-(defprop mquotient 120 rbp)
-
-(defprop rat msize-infix grind)
-(defprop rat (#\/) strsym)
-(defprop rat 120 lbp)
-(defprop rat 120 rbp)
-
-(defprop mplus msz-mplus grind)
+(defprop mplus msize-mplus grind)
 (defprop mplus 100 lbp)
 (defprop mplus 100 rbp)
 
-(defun msz-mplus (x l r)
+(defun msize-mplus (x l r)
   (cond ((null (cddr x))
          (if (null (cdr x))
              (msize-function x l r t)
              (msize (cadr x) (append (list #\+ ) l) r 'mplus *rop*)))
-        (t 
+        (t
          (setq l (msize (cadr x) l nil *lop* 'mplus) x (cddr x))
          (do ((nl (list l)) (w (car l)) (dissym))
              ((null (cdr x))
@@ -429,6 +399,48 @@
 (defprop mminus (#\-) strsym)
 (defprop mminus 100 rbp)
 (defprop mminus 100 lbp)
+
+(defprop mtimes msize-mtimes grind)
+(defprop mtimes 120 lbp)
+(defprop mtimes 120 rbp)
+
+(defun msize-mtimes (x l r)
+  (msznary x l r '(#\* )))
+
+(defprop mnctimes msize-nary grind)
+(defprop mnctimes 130 lbp)
+(defprop mnctimes 129 rbp)
+
+(defprop mexpt msize-mexpt grind)
+(defprop mexpt 140 lbp)
+(defprop mexpt 139 rbp)
+
+(defun msize-mexpt (x l r)
+  (setq l (msize (cadr x) l nil *lop* 'mexpt)
+        r (if (mminusp (setq x (nformat (caddr x))))
+              (msize (cadr x) (reverse '(#\^ #\-)) r 'mexpt *rop*)
+              (msize x (list #\^) r 'mexpt *rop*)))
+  (list (+ (car l) (car r)) l r))
+
+(defprop mncexpt msize-infix grind)
+(defprop mncexpt (#\^ #\^) strsym)
+(defprop mncexpt 140 lbp)
+(defprop mncexpt 139 rbp)
+
+(defprop mquotient msize-infix grind)
+(defprop mquotient (#\/) strsym)
+(defprop mquotient 120 lbp)
+(defprop mquotient 120 rbp)
+
+(defprop rat msize-infix grind)
+(defprop rat (#\/) strsym)
+(defprop rat 120 lbp)
+(defprop rat 120 rbp)
+
+(defprop mfactorial msize-postfix grind)
+(defprop mfactorial 160 lbp)
+
+;;; ----------------------------------------------------------------------------
 
 (defprop mequal msize-infix grind)
 (defprop mequal (#\=) strsym)
@@ -466,119 +478,72 @@
 (defprop mor 60 lbp)
 (defprop mor 60 rbp)
 
-(defprop mcond msz-mcond grind)
+;;; ----------------------------------------------------------------------------
+
+(defprop mcond msize-mcond grind)
 (defprop mcond 45 lbp)
 (defprop mcond 45 rbp)
 
-(defprop %mcond msz-mcond grind)
-(defprop %mcond 45 lbp)
-(defprop %mcond 45 rbp)
+(defun msize-mcond (x l r)
+  (labels ((strmcond (x)
+             (let ((l (reverse (cdr x))))
+               (if (and (or (eq (car l) nil) (eq (car l) '$false))
+                        (eq (cadr l) t))
+                   (setq l (reverse (cddr l)))
+                   (setq l (reverse l)))
+               (append `($if)
+                       (do ((l l (cddr l))
+                            (sym nil '$elseif)
+                            (res nil))
+                           ((null (cddr l))
+                            (if (and sym (not (eq t (car l))))
+                                (append res `(,sym ,(car l) $then ,(cadr l)))
+                                (if (eq t (car l))
+                                    (append res `($else ,(cadr l)))
+                                    (append res `(,(car l) $then ,(cadr l))))))
+                         (setq res (append res
+                                           (if sym `(,sym ,(car l)) `(,(car l)))
+                                           `($then ,(cadr l)))))))))
+    (msznary (cons '(mcond) (strmcond x)) l r '(#\space))))
 
-(defun msz-mcond (x l r)
-  (let ((if (nreconc l '(#\i #\f #\space))))
-    (setq if (cons (length if) if)
-          l (msize (cadr x) nil nil 'mcond 'mparen))
-    (let ((args (cdddr x))
-          (else-literal (reverse (exploden " else ")))
-          (elseif-literal (reverse (exploden " elseif ")))
-          (then-literal (reverse (exploden " then ")))
-          (parts)
-          (part))
-      (let ((sgra (reverse args)))
-        (if (and (or (eq (car sgra) nil) (eq (car sgra) '$false)) 
-                 (eq (cadr sgra) t))
-            (setq args (reverse (cddr sgra)))))
-      (setq parts (list if l))
-      (setq part (cond ((= (length args) 0)
-                        `(,(msize (caddr x) 
-                                  (copy-tree then-literal) 
-                                  r 'mcond *rop*)))
-                       (t
-                        `(,(msize (caddr x) 
-                                  (copy-tree then-literal) 
-                                  nil 'mcond 'mparen))))
-            parts (append parts part))
-      (loop while (>= (length args) 2) do
-            (let ((maybe-elseif (car args)) (else-or-then (cadr args)))
-              (cond
-                ((= (length args) 2)
-                 (cond
-                   ((eq maybe-elseif t)
-                    (let ((else-arg else-or-then))
-                      (setq part `(,(msize else-arg 
-                                           (copy-tree else-literal) 
-                                           r 'mcond *rop*))
-                            parts (append parts part))))
-                   (t
-                    (let ((elseif-arg maybe-elseif) (then-arg else-or-then))
-                      (setq part `(,(msize elseif-arg 
-                                           (copy-tree elseif-literal) 
-                                           nil 'mcond 'mparen)
-                                   ,(msize then-arg 
-                                           (copy-tree then-literal) 
-                                           r 'mcond *rop*))
-                            parts (append parts part))))))
-                (t
-                 (let ((elseif-arg maybe-elseif) (then-arg else-or-then))
-                   (setq part `(,(msize elseif-arg 
-                                        (copy-tree elseif-literal) 
-                                        nil 'mcond 'mparen)
-                                ,(msize then-arg 
-                                        (copy-tree then-literal) 
-                                        nil 'mcond 'mparen))
-                         parts (append parts part))))))
-            (setq args (cddr args)))
-      (cons (apply '\+ (mapcar #'car parts)) parts))))
+;;; ----------------------------------------------------------------------------
 
-(defprop text-string msize-text-string grind)
-
-(defun msize-text-string (x ll r)
-  (declare (ignore ll r))
-  (cons (length (cdr x)) (cdr x)))
-
-(defprop mdo msz-mdo grind)
+(defprop mdo msize-mdo grind)
 (defprop mdo 25 lbp)
 (defprop mdo 25 rbp)
 
-(defprop mdoin msz-mdoin grind)
+(defun msize-mdo (x l r)
+  (labels ((strmdo (x)
+             (nconc (cond ((second x) `($for ,(second x))))
+                    (cond ((eql 1 (third x)) nil)
+                          ((third x)  `($from ,(third x))))
+                    (cond ((eql 1 (fourth x)) nil)
+                          ((fourth x) `($step ,(fourth x)))
+                          ((fifth x)  `($next ,(fifth x))))
+                    (cond ((sixth x)  `($thru ,(sixth x))))
+                    (cond ((null (seventh x)) nil)
+                          ((and (consp (seventh x))
+                                (eq 'mnot (caar (seventh x))))
+                           `($while ,(cadr (seventh x))))
+                          (t `($unless ,(seventh x))))
+                    `($do ,(eighth x)))))
+    (msznary (cons '(mdo) (strmdo x)) l r '(#\space))))
+
+;;; ----------------------------------------------------------------------------
+
+(defprop mdoin msize-mdoin grind)
 (defprop mdoin 30 lbp)
 (defprop mdoin 30 rbp)
 
-(defprop %mdo msz-mdo grind)
-(defprop %mdo 25 lbp)
-(defprop %mdo 25 rbp)
-
-(defprop %mdoin msz-mdoin grind)
-(defprop %mdoin 30 lbp)
-(defprop %mdoin 30 rbp)
-
-(defun msz-mdo (x l r)
-  (msznary (cons '(mdo) (strmdo x)) l r '(#\space)))
-
-(defun msz-mdoin (x l r)
-  (msznary (cons '(mdo) (strmdoin x)) l r '(#\space)))
-
-(defun strmdo (x)
-  (nconc (cond ((second x) `($for ,(second x))))
-         (cond ((equal 1 (third x)) nil)
-               ((third x)  `($from ,(third x))))
-         (cond ((equal 1 (fourth x)) nil)
-               ((fourth x) `($step ,(fourth x)))
-               ((fifth x)  `($next ,(fifth x))))
-         (cond ((sixth x)  `($thru ,(sixth x))))
-         (cond ((null (seventh x)) nil)
-               ((and (consp (seventh x)) (eq 'mnot (caar (seventh x))))
-                `($while ,(cadr (seventh x))))
-               (t `($unless ,(seventh x))))
-         `($do ,(eighth x))))
-
-(defun strmdoin (x)
-  (nconc `($for ,(second x) $in ,(third x))
-         (cond ((sixth x) `($thru ,(sixth x))))
-         (cond ((null (seventh x)) nil)
-               ((and (consp (seventh x)) (eq 'mnot (caar (seventh x))))
-                `($while ,(cadr (seventh x))))
-               (t `($unless ,(seventh x))))
-         `($do ,(eighth x))))
+(defun msize-mdoin (x l r)
+  (labels ((strmdoin (x)
+             (nconc `($for ,(second x) $in ,(third x))
+                    (cond ((null (seventh x)) nil)
+                          ((and (consp (seventh x))
+                                (eq 'mnot (caar (seventh x))))
+                           `($while ,(cadr (seventh x))))
+                          (t `($unless ,(seventh x))))
+                    `($do ,(eighth x)))))
+    (msznary (cons '(mdo) (strmdoin x)) l r '(#\space))))
 
 ;;; ----------------------------------------------------------------------------
