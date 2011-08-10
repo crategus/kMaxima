@@ -25,8 +25,8 @@
 
 (in-package :kmaxima)
 
-(defmvar $powerdisp nil)
-(defmvar $pfeformat nil)
+(defmvar $powerdispflag nil)
+(defmvar $ratdispflag nil)
 (defmvar $%edispflag nil)
 (defmvar $exptdispflag t)
 (defmvar $sqrtdispflag t)
@@ -50,13 +50,10 @@
 
 (defun nformat-all (form)
   (setq form (nformat form))
-  (if (or (atom form)
-          (eq (caar form) 'bigfloat))
+  (if (atom form)
       form
       (cons (delete 'simp (copy-list (car form)) :count 1 :test #'eq)
-            (if (member (caar form) '(mdo mdoin) :test #'eq)
-                (mapcar #'(lambda (u) (if u (nformat-all u))) (cdr form))
-                (mapcar #'nformat-all (cdr form))))))
+            (mapcar #'nformat-all (cdr form)))))
 
 (defun nformat-mplus (form &aux args trunc)
   (setq args (mapcar #'nformat (cdr form)))
@@ -64,11 +61,11 @@
   (cons (if trunc '(mplus trunc) '(mplus))
         (cond ((and (member 'ratsimp (cdar form) :test #'eq)
                     (not (member 'simp (cdar form) :test #'eq)))
-               (if $powerdisp (nreverse args) args))
+               (if $powerdispflag (nreverse args) args))
               ((and trunc
                     (not (member 'simp (cdar form) :test #'eq)))
                (nreverse args))
-              ((or $powerdisp
+              ((or $powerdispflag
                    trunc
                    (member 'cf (cdar form) :test #'eq))
                args)
@@ -94,7 +91,7 @@
                     (setq minus (not minus)
                           l (append fact (cdr l))))
                    ((or (eq 'mquotient (caar fact))
-                        (and (not $pfeformat)
+                        (and (not $ratdispflag)
                              (eq 'rat (caar fact))))
                     (cond ((not (equal 1 (cadr fact)))
                            (setq num (cons (cadr fact) num))))
