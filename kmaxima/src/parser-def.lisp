@@ -112,26 +112,25 @@
 
 ;;; ----------------------------------------------------------------------------
 
-;; op and opr properties
-
-(defvar *opr-table* (make-hash-table :test #'equal))
-
-(defun getopr0 (x)
-  (or (getprop x 'opr)
-      (and (stringp x)
-           (gethash x *opr-table*))))
+(let ((opr-table (make-hash-table :test #'equal)))
+  
+  (defun getopr0 (x)
+    (or (getprop x 'opr)
+        (and (stringp x)
+             (gethash x opr-table))))
+  
+  (defun putopr (x y)
+    (or (and (symbolp x) (putprop x y 'opr))
+        (and (stringp x) (setf (gethash x opr-table) y))))
+  
+  (defun remopr (x)
+    (or (and (symbolp x) (remprop x 'opr))
+        (and (stringp x) (remhash x opr-table))))
+)
 
 (defun getopr (x)
   (or (getopr0 x)
       x))
-
-(defun putopr (x y)
-  (or (and (symbolp x) (putprop x y 'opr))
-      (and (stringp x) (setf (gethash x *opr-table*) y))))
-
-(defun remopr (x)
-  (or (and (symbolp x) (remprop x 'opr))
-      (and (stringp x) (remhash x *opr-table*))))
 
 (defun getop (x)
   (or (getprop x 'op) x))
