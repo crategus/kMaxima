@@ -380,7 +380,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun merror (message &rest args)
-  (format t message args)
+  (apply #'format `(t ,message ,@args))
   (format t "~& -- an error. To debug this try: debugmode(true);~%")
   (throw 'maxima-continue 'maxima-error))
 
