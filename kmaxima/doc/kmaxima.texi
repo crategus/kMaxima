@@ -17,6 +17,7 @@
 @afourpaper
 
 @paragraphindent 0
+@exampleindent 0
 @include macros.texi
 
 @setfilename maxima.info

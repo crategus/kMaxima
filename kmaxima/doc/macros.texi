@@ -74,6 +74,19 @@
 @end ifnothtml
 @end macro
 
+@macro mexample {body}
+@ifhtml
+@example
+\body\
+@end example
+@end ifhtml
+@ifnothtml
+@smallexample
+\body\
+@end smallexample
+@end ifnothtml
+@end macro
+
 @iftex
 @hyphenation{
    Ban-ners

@@ -15,7 +15,7 @@
 * Alias und Reversealias::
 * Verb- und Substantivform::
 * Vergleiche Ausdr@"ucke::
-* Weitere Hilfsfunktionen::
+* Weitere Hilfsfunktionen und Variablen::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -612,7 +612,7 @@ NIL
 @end example
 
 @c -----------------------------------------------------------------------------
-@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen, Verb- und Substantivform, Hilfsfunktionen
+@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen und Variablen, Verb- und Substantivform, Hilfsfunktionen
 @section Vergleiche Ausdr@"ucke
 @c -----------------------------------------------------------------------------
 
@@ -624,10 +624,6 @@ sind die beiden kMaxima-Ausdr@"ucke @code{((mplus) $A $B)} und
 dar.  Daher k@"onnen zwei Ausdr@"ucke nicht mit der Lisp-Funktion @code{equalp}
 auf @"aquivalenz getestet werden.
 
-@findex alike1
-@findex alike
-@findex lisp-array-alike1
-
 Die folgenden Funktionen testen, ob zwei kMaxima-Ausdr@"ucke @"aquivalent sind.
 Die Attribute der Operatoren werden ignoriert.  Die Funktion @code{alike1} wird
 aufgerufen, um zwei kMaxima-Ausdr@"ucke auf @"Aquivalenz zu testen.  Die
@@ -636,7 +632,34 @@ Bereits hier ist der Fall implementiert, dass Lisp-Arrays miteinander
 zu vergleichen sind.  Hierzu wird die Funktion @code{lisp-array-alike1}
 aufgerufen.
 
-@verbatim
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{alike1}
+@deffn {Funktion} alike1 x y
+
+Die Funktion @code{alike1} testet, ob die beiden Argumente @var{x} und @var{y}
+@"aquivalent sind.  Die Argumente sind beliebige kMaxima-Ausdr@"ucke.  Sind die
+Argumente @"aquivalent ist die R@"uckgabe @code{t} und ansonsten @code{nil}.
+Die Argumente werden auf syntaktische @"Aquivalenz gepr@"uft.  Daher k@"onnen 
+mathematisch @"aquivalente Ausdr@"ucke gegen@"uber einem Test mit der Funktion
+@code{alike1} voneinander verschieden sein.  Nicht ber@"ucksichtigt werden beim
+Vergleich auf @"Aquivalenz die Attribute der Operatoren.  Daher sind zum
+Beispiel @code{((mplus simp) $a $b)} und @code{((mplus) $a $b)} @"aquivalent.
+
+Siehe auch die Funktion @mrefcomma{alike} um Listen miteinander zu vergleichen
+und @mrefcomma{memalike} um zu pr@"ufen, ob ein Element in einer Liste enthalten
+ist.
+
+@emph{Beispiel:}
+Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide die Addition
+@code{a+b} repr@"asentieren.
+
+@mexample{
+* (alike1 '((mplus) $a $b) '((mplus simp) $a $b))
+T}
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun alike1 (x y)
   (labels ((memqarr (ll)
              (if (member 'array ll :test #'eq) t)))
@@ -652,9 +675,22 @@ aufgerufen.
                 (eq (caar x) (caar y))
                 (eq (memqarr (cdar x)) (memqarr (cdar y)))
                 (alike (cdr x) (cdr y)))))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{lisp-array-alike1}
+@deffn {Funktion} lisp-array-alike1 x y
+
+Die Funktion @code{lisp-array-alike1} testet, ob die Argumente @var{x} und
+@var{y} zwei gleiche Lisp-Arrays sind.  Ist dies der Fall, ist das Ergebnis
+@code{t} und ansonsten @code{nil}.  Die Argumente m@"ussen Lisp-Arrays sein.
+@code{lisp-array-alike1} wird von der Funktion @mref{alike1} aufgerufen.
+
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun lisp-array-alike1 (x y)
   (and (equal (array-dimensions x) (array-dimensions y))
        (progn
@@ -662,54 +698,161 @@ aufgerufen.
            (if (not (alike1 (row-major-aref x i) (row-major-aref y i)))
                (return-from lisp-array-alike1 nil)))
          t)))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@verbatim
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{alike}
+@deffn {Funktion} alike x y
+
+Die Argumente @var{x} und @var{y} sind Listen, deren Elemente nacheinander
+mit der Funktion @mref{alike1} auf @"Aquivalenz getestet werden.
+@"Ublicherweise sind handelt es sich dabei um die Listen mit den Argumenten
+eines kMaxima-Ausdrucks.
+
+@need 1200
+@emph{Quelltext:}
+@smalllisp
+@group
 (defun alike (x y)
   (do ((x x (cdr x))
        (y y (cdr y)))
       ((atom x) (equal x y))
     (if (or (atom y) (not (alike1 (car x) (car y))))
         (return nil))))
-@end verbatim
+@end group
+@end smalllisp
+@end deffn
 
-@b{Beispiel:} Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide
-die Addition @code{a+b} repr@"asentieren.
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{memalike}
+@deffn {Funktion} memalike x l
 
-@example
-* (alike1 '((mplus) $a $b) '((mplus simp) $a $b))
-T
-@end example
+Die Funktion @code{memalike} sucht das Argument @var{x} in der Liste @var{l}.
+Die @"Aquivalenz wird mit der Funktion @mref{alike1} getestet.
 
-@findex memalike
+@emph{Beispiele:}
+Der Ausdruck @code{2*a+b} enth@"alt die Argument @code{2*a} und @code{$b}.
+@code{$a} ist kein Argument des Ausdrucks.
 
-Die Funktion @code{memalike} sucht das Argument @code{x} im Ausdruck @code{l}.
-Die @"Aquivalenz wird mit der Funktion @code{alike1} getestet.
-
-@verbatim
-(defun memalike (x l)
-  (do ((l l (cdr l)))
-      ((null l))
-    (when (alike1 x (car l)) (return l))))
-@end verbatim
-
-@b{Beispiele:} Der Ausdruck @code{2*a+b} enth@"alt die Argument @code{2*a} und
-@code{$b}.  @code{$a} ist kein Argument des Ausdrucks.
-
-@example
+@smallexample
 * (memalike '((mtimes) 2 $A) '((mplus) ((mtimes) 2 $a) $b))
 (((MTIMES) 2 $A) $B)
 * (memalike '$b '((mplus) ((mtimes) 2 $a) $b))
 ($B)
 * (memalike '$a '((mplus) ((mtimes) 2 $a) $b))
 NIL
-@end example
+@end smallexample
+
+@emph{Quelltext:}
+@smalllisp
+@group
+(defun memalike (x l)
+  (do ((l l (cdr l)))
+      ((null l))
+    (when (alike1 x (car l)) (return l))))
+@end group
+@end smalllisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @need 800
-@node Weitere Hilfsfunktionen, , Vergleiche Ausdr@"ucke, Hilfsfunktionen
-@section Weitere Hilfsfunktionen
+@node Weitere Hilfsfunktionen und Variablen, , Vergleiche Ausdr@"ucke, Hilfsfunktionen
+@section Weitere Hilfsfunktionen und Variablen
 @c -----------------------------------------------------------------------------
+
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{$props}
+@defvr {Systemvariable} $props
+Standardwert: @code{[]}
+
+Die Systemvariable @code{$props} ist eine Informationsliste f@"ur den Nutzer
+und enth@"alt die Symbole, die vom Nutzer eine Eigenschaft erhalten haben.
+
+@code{$props} hat die @code{assign}-Eigenschaft @code{neverset}.  Der
+Systemvariablen kann daher vom Nutzer kein Wert zugewiesen werden.
+
+Siehe zum Beispiel die Funktion @mrefcomma{op-setup} die Symbole in der Liste
+@code{$props} ablegt, die als Operator definiert werden.
+@end defvr
+
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{add2lnc}
+@deffn {Funktion} add2lnc item llist
+
+Die Funktion @code{add2lnc} f@"ugt der Liste @var{llist} das Element @var{item}
+hinzu.  @"Ublicherweise ist ein @var{item} ein Symbol und @var{llist} eine der
+Informationslisten, die kMaxima zur Verf@"ugung stellt.  Die Informationslisten
+haben das interne Format @code{((mlist simp) $item1 $item2 ...)}.  @var{item}
+kann auch eine Liste sein.  F@"ur Symbole oder Listen als Argument @var{item}
+verh@"alt sich die Funktion etwas unterschiedlich.
+
+Es wird zun@"achst gepr@"uft, ob das Argument @var{item} bereits in der Liste
+enthalten ist.  Der Test wird mit der Funktion @mref{memalike} durchgef@"uhrt,
+die die Funktion @mref{alike1} nacheinander auf die Elemente der Liste anwendet.
+Ist @var{item} kein Element der Liste wird das Element am Ende der Liste
+hinzugef@"ugt.
+
+F@"ur den Fall das das Argument @var{item} eine Liste ist, wird gepr@"uft, ob
+das erste Element der Liste @var{item} bereits in der Liste enthalten ist.  Ist
+dies der Fall, wird das vorhandene Element von der Liste gel@"oscht und das
+neue Element an das Ende der Liste angeh@"angt.
+
+Die R@"uckgabe ist die modifizierte Liste @var{llist}.
+
+@emph{Seiteneffekte:} Das Argument @var{llist} wird modifiziert und enth@"alt
+nach dem Aufruf der Funktion eine aktualisierte Liste.
+
+@emph{Beispiele:}
+Die ersten Beispiele zeigen die @"ubliche Verwendung der Funktion
+@code{add2lnc}.  Symbole werden hier der Informationsliste @mref{$props}@w{}
+hinzugef@"ugt.
+
+@smallexample
+* $props
+((MLIST SIMP))
+* (add2lnc '$a $props)
+((MLIST SIMP) $A)
+* (add2lnc '$b $props)
+((MLIST SIMP) $A $B)
+* (add2lnc '$c $props)
+((MLIST SIMP) $A $B $C)
+* (add2lnc '$b $props)
+((MLIST SIMP) $A $B $C)
+@end smallexample
+
+Die M@"oglichkeit einer Liste als erstes Argument wird von Maxima genutzt, um
+die Abh@"angigkeit einer Funktion von Variablen in der Informationsliste
+@code{$dependencies} zu aktualisieren.  Hier sind @code{f(x,y)} und
+@code{g(x,y)} zwei Funktionen, die von den Variablen @code{x} und @code{y}
+abh@"angen sollen.  Im letzten Beispiel wird die Abh@"angigkeit von den
+Variablen @code{a} und @code{b} neu definiert.  Der alte Eintrag ist entfernt.
+
+@smallexample
+* (defvar $dependencies '((mlist simp)))
+$DEPENDENCIES
+* (add2lnc '($f $x $y) $dependencies)
+((MLIST SIMP) ($F $X $Y))
+* (add2lnc '($g $x $y) $dependencies)
+((MLIST SIMP) ($F $X $Y) ($G $X $Y))
+* (add2lnc '($f $a $b) $dependencies)
+((MLIST SIMP) ($G $X $Y) ($F $A $B))
+@end smallexample
+
+@emph{Quelltext:}
+@smalllisp
+@group
+(defun add2lnc (item llist)
+  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
+    (unless (atom item)
+      (setf llist
+            (delete (assoc (car item) llist :test #'equal)
+                    llist :count 1 :test #'equal)))
+    (nconc llist (list item))))
+@end group
+@end smalllisp
+@end deffn
 
 @verbatim
 (defun fixnump (n)
@@ -733,16 +876,6 @@ NIL
 @verbatim
 (defun mlistp (x)
   (and (not (atom x)) (not (atom (car x))) (eq (caar x) 'mlist)))
-@end verbatim
-
-@verbatim
-(defun add2lnc (item llist)
-  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
-    (unless (atom item)
-      (setf llist
-            (delete (assoc (car item) llist :test #'equal)
-                    llist :count 1 :test #'equal)))
-    (nconc llist (list item))))
 @end verbatim
 
 @verbatim

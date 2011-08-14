@@ -204,7 +204,7 @@ Funktion @mrefcomma{nformat-all} die die Funktion @code{nformat} rekursiv auf
 die Teilausdr@"ucke eines Ausdrucks anwendet.
 
 @emph{Beispiele:}
-@smallexample
+@example
 * (nformat '((mtimes simp) -2 $x))
 ((MMINUS) ((MTIMES) 2 $X))
 
@@ -219,10 +219,10 @@ die Teilausdr@"ucke eines Ausdrucks anwendet.
 
 * (nformat-all '((mexpt simp) ((mtimes simp) -2 $x) ((rat simp) 1 2)))
 ((%SQRT) ((MMINUS) ((MTIMES) 2 $X)))
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun nformat (form)
   (cond ((atom form)
@@ -240,7 +240,7 @@ die Teilausdr@"ucke eines Ausdrucks anwendet.
         ((eq 'mexpt (caar form)) (nformat-mexpt form))
         (t form)))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkungen:}
 Im Unterschied zum Original Maxima werden die booleschen Konstanten @code{t}
@@ -272,7 +272,7 @@ R@"uckgabe ist ein Ausdruck in der externen Darstellung.
 
 @emph{Quelltext:}
 
-@smalllisp
+@lisp
 @group
 (defun nformat-all (form)
   (setq form (nformat form))
@@ -281,7 +281,7 @@ R@"uckgabe ist ein Ausdruck in der externen Darstellung.
       (cons (delete 'simp (copy-list (car form)) :count 1 :test #'eq)
             (mapcar #'nformat-all (cdr form)))))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkung:}
 Gegen@"uber dem Original in Maxima ist der Test auf einen
@@ -316,34 +316,34 @@ und nicht, wie es die Ordnung der Terme einer Summe vorsehen w@"urde, als
 
 Die Ordnung der Termine wird f@"ur die Ausgabe umgekehrt.
 
-@smallexample
+@example
 * (nformat-mplus '((mplus simp) $a $b $c))
 ((MPLUS) $C $B $A)
-@end smallexample
+@end example
 
 Die Optionsvariable @code{$powerdisp} kontrolliert die Ordnung der Terme.
 
-@smallexample
+@example
 * (let (($powerdisp t)) (nformat-mplus '((mplus simp) $a $b $c)))
 ((MPLUS) $A $B $C)
 * (let (($powerdisp nil)) (nformat-mplus '((mplus simp) $a $b $c)))
 ((MPLUS) $C $B $A)
-@end smallexample
+@end example
 
 Mit der Optionsvariablen @code{$negsumdispflag} wird die Ausgabe von 
 Differenzen @code{a - b} kontrolliert.
 
-@smallexample
+@example
 * (nformat-mplus '((mplus simp) $a ((mminus simp) $b)))
 ((MPLUS) $A ((MMINUS) $B))
 * (let (($negsumdispflag nil))
     (nformat-mplus '((mplus simp) $a ((mminus simp) $b))))
 ((MPLUS) ((MMINUS) $B) $A)
-@end smallexample
+@end example
 
 @emph{Quelltext:}
 
-@smalllisp
+@lisp
 @group
 (defun nformat-mplus (form &aux args trunc)
   (setq args (mapcar #'nformat (cdr form)))
@@ -366,7 +366,7 @@ Differenzen @code{a - b} kontrolliert.
                    (nreverse args)))
               (t (nreverse args)))))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Funktion den Namen @code{form-mplus}.  Die Funktion
@@ -407,41 +407,41 @@ Teilausdrücke in die externe Darstellung zu formatieren.
 
 Die Reihenfolge der Faktoren wird nicht umgekehrt.
 
-@smallexample
+@example
 * (nformat-mtimes '((mtimes simp) $a $b $c))
 ((MTIMES) $A $B $C)
-@end smallexample
+@end example
 
 Mehrfache negative Vorzeichen werden zusammengefasst.
 
-@smallexample
+@example
 * (nformat-mtimes '((mtimes simp) ((mminus simp) $a) $b $c))
 ((MMINUS) ((MTIMES) $A $B $C))
 * (nformat-mtimes '((mtimes simp) ((mminus simp) $a) ((mminus simp) $b) $c))
 ((MTIMES) $A $B $C)
-@end smallexample
+@end example
 
 Die Faktoren werden @"uber einen gemeinsamen Nenner dargestellt.
 
-@smallexample
+@example
 * (nformat-mtimes '((mtimes simp) $a ((mquotient) 1 $b) $c))
 ((MQUOTIENT) ((MTIMES) $A $C) $B)
-@end smallexample
+@end example
 
 Hat die Optionsvariable @code{$ratdispflag} den Wert @code{t}, wird eine 
 rationale Zahl vor die Faktoren gezogen.
 
-@smallexample
+@example
 * (nformat-mtimes '((mtimes simp) ((rat simp) 1 3) $a ((mquotient) 1 $b) $c))
 ((MQUOTIENT) ((MTIMES) $A $C) ((MTIMES) 3 $B))
 * (setq $ratdispflag t)
 T
 * (nformat-mtimes '((mtimes simp) ((rat simp) 1 3) $a ((mquotient) 1 $b) $c))
 ((MQUOTIENT) ((MTIMES) ((RAT) 1 3) $A $C) $B)
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun nformat-mtimes (form)
   (cond ((null (cdr form)) '((mtimes)))
@@ -474,7 +474,7 @@ T
                (setq num (list '(mquotient) num den)))
            (return (if minus (list '(mminus) num) num))))))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Funktion den Namen @code{form-mtimes}.  Die
@@ -512,7 +512,7 @@ Siehe auch die Funktion @mrefcomma{nformat-all} um einen Ausdruck
 einschlie@ss{}lich aller Teilausdr@"ucke zu formatieren.
 
 @emph{Beispiele:}
-@smallexample
+@example
 * (let (($sqrtdispflag nil))
     (nformat-mexpt '((mexpt simp) $a ((rat simp) 1 2))))
 ((MEXPT) $A ((RAT SIMP) 1 2))
@@ -529,10 +529,10 @@ einschlie@ss{}lich aller Teilausdr@"ucke zu formatieren.
 ((MEXPT) $A -2)
 * (let (($exptdispflag t)) (nformat-mexpt '((mexpt simp) $a -2)))
 ((MQUOTIENT) 1 ((MEXPT) $A 2))
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun nformat-mexpt (form &aux expr)
   (cond ((and $sqrtdispflag (alike1 '((rat) 1 2) (caddr form)))
@@ -548,7 +548,7 @@ einschlie@ss{}lich aller Teilausdr@"ucke zu formatieren.
                                   (list '(mexpt) (cadr form) (cadr expr)))))
         (t (cons '(mexpt) (cdr form)))))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Funktion den Namen @code{form-mexpt}.  Die
@@ -577,7 +577,7 @@ zweidimensionale Anzeige nutzen dieses Symbol.
 Im folgenden werden einige Beispiele f@"ur die Operatoren @code{mequal}, 
 @code{rat} und @code{msetq} gezeigt.
 
-@smallexample
+@example
 * (strsym 'mequal)
 (#\=)
 * (strsym 'rat)
@@ -586,15 +586,15 @@ Im folgenden werden einige Beispiele f@"ur die Operatoren @code{mequal},
 (#\:)
 * (strsym 'mset)
 (#\: #\:)
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun strsym (x) 
   (or (getprop x 'strsym) (getprop x 'dissym)))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -633,18 +633,17 @@ vorhandener Reverse-Alias-Name beachtet.  F@"ur Operatoren zum Namen des
 Operators umgewandelt.  Die Zeichen @code{%} und @code{$} die einen Verb- und
 Substantiv-Bezeichner bezeichnen, werden entfernt.
 
-Die Funktion @code{makestring} wird von den Optionsvariablen
-@mref{$stringdispflag} und @mref{$lispdispflag} kontrolliert.  Hat
-@code{$stringdispflag} den Wert @code{t} wird eine Zeichenkette in
-Anf@"uhrungszeichen gesetzt.  Hat @code{$lispdispflag} den Wert @code{t},
-erhalten Lisp-Symbole ein f@"uhrendes Fragezeichen @code{?}.
+@code{makestring} wird von den Optionsvariablen @mref{$stringdispflag} und
+@mref{$lispdispflag} kontrolliert.  Hat @code{$stringdispflag} den Wert @code{t}
+wird eine Zeichenkette in Anf@"uhrungszeichen gesetzt.  Hat @code{$lispdispflag}
+den Wert @code{t}, erhalten Lisp-Symbole ein f@"uhrendes Fragezeichen @code{?}.
 
 Siehe auch die Funktion @mrefdot{makestring1}  Diese Funktion bindet die
 Optionsvariablen @code{$stringdispflag} und @code{$lispdispflag} an den Wert
 @code{nil}.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun makestring (x)
   (declare (special $aliases))
@@ -669,7 +668,7 @@ Optionsvariablen @code{$stringdispflag} und @code{$lispdispflag} an den Wert
           ($lispdispflag (cons #\? y))
           (t y))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -681,13 +680,13 @@ Optionsvariablen @mref{$stringdispflag} und @mref{$lispdispflag} an den Wert
 @code{nil} gebunden werden.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun makestring1 (x)
   (let (($stringdispflag nil) ($lispdispflag nil))
     (makestring x)))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -710,12 +709,12 @@ die vom Nutzer gesetzt werden kann.  Die Variable hat die Eigenschaft
 erh@"alt, wird auch die globale Variable @code{*linel*} auf den Wert gesetzt.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 (defvar *linel* 79)
 (defmvar $linel 79)
 (defprop $linel shadowset assign)
 (defprop $linel *linel* shadowvar)
-@end smalllisp
+@end lisp
 @end defvr
 
 @c -----------------------------------------------------------------------------
@@ -732,7 +731,7 @@ Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen Variablen
 @code{*linel*} enthalten.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 (let ((chrps 0))
 
 @group  
@@ -781,7 +780,7 @@ Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen Variablen
                  (mprint (car l) out)))))))
 )
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -793,7 +792,7 @@ mit dem Unterschied, dass die Funktion @code{mstring} eine Zeichenkette als
 Ergebnis hat.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun mstring (x)
   (labels ((string1 (x l)
@@ -804,7 +803,7 @@ Ergebnis hat.
                       (setq l (string1 (car x) l)))))))
     (nreverse (string1 (msize x nil nil 'mparen 'mparen) nil))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -828,7 +827,7 @@ externe Darstellung formatiert.  Dann werden ...
 
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize (x l r *lop* *rop*)
   (setq x (nformat x))
@@ -842,7 +841,7 @@ externe Darstellung formatiert.  Dann werden ...
          (the (values t) (funcall (get (caar x) 'grind) x l r)))
         (t (msize-function x l r nil))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -850,12 +849,12 @@ externe Darstellung formatiert.  Dann werden ...
 @deffn {Funktion} msize-paren x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-paren (x l r)
   (msize x (cons #\( l) (cons #\) r) 'mparen 'mparen))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -863,7 +862,7 @@ externe Darstellung formatiert.  Dann werden ...
 @deffn {Funktion} msize-atom x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-atom (x l r)
   (declare (special $aliases))
@@ -897,7 +896,7 @@ externe Darstellung formatiert.  Dann werden ...
             (t (setq y (cons #\? (slash y)))))
       (return (msz y l r)))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -905,12 +904,12 @@ externe Darstellung formatiert.  Dann werden ...
 @deffn {Funktion} msz x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msz (x l r)
   (setq x (nreconc l (nconc x r))) (cons (length x) x))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -924,16 +923,16 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 
 @emph{Beispiele:}
 
-@smallexample
+@example
 * (msize-array '(($f array simp) $x) nil nil)
 (4 (2 #\f #\[) (2 #\x #\]))
 
 * (msize-array '((mqapply simp) (($F simp array) $a $b) $x) nil nil)
 (11 (9 (3 #\( #\f #\[) (2 #\a #\,) (4 #\b #\] #\) #\[)) (2 #\x #\]))
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-array (x l r &aux f)
   (declare (special $aliases))
@@ -952,7 +951,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
         r (msize-list (cdr x) nil (cons #\] r)))
   (cons (+ (car l) (car r)) (cons l (cdr r))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -960,7 +959,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-function x l r op
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-function (x l r op)
   (declare (special $aliases))
@@ -980,7 +979,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
         r (msize-list (cdr x) nil (cons #\) r)))
   (cons (+ (car l) (car r)) (cons l (cdr r))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -988,7 +987,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-list x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-list (x l r)
   (if (null x)
@@ -1001,7 +1000,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
               w (+ w (caar nl))
               x (cdr x) l nil))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1009,12 +1008,12 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-prefix x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-prefix (x l r)
   (msize (cadr x) (revappend (strsym (caar x)) l) r (caar x) *rop*))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1022,7 +1021,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-infix x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-infix (x l r)
   (if (not (= (length (cdr x)) 2))
@@ -1031,7 +1030,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
         r (msize (caddr x) (reverse (strsym (caar x))) r (caar x) *rop*))
   (list (+ (car l) (car r)) l r))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1039,12 +1038,12 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-postfix x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-postfix (x l r)
   (msize (cadr x) l (append (strsym (caar x)) r) *lop* (caar x)))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1052,12 +1051,12 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-nofix x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-nofix (x l r)
   (msize (caar x) l r (caar x) *rop*))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1065,7 +1064,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-matchfix x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-matchfix (x l r)
   (setq l (nreconc l (car (strsym (caar x))))
@@ -1077,7 +1076,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 (defun msize-nary (x l r)
   (msznary x l r (strsym (caar x))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1085,7 +1084,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msznary x l r strsym
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msznary (x l r strsym)
   (cond ((null (cddr x)) (msize-function x l r t))
@@ -1102,7 +1101,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
                        nl)
                  w (+ (caar nl) w))))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 
@@ -1111,7 +1110,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mlabel x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mlabel (x l r)
   (declare (special *display-labels-p*))
@@ -1121,7 +1120,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
          (cons (+ (car l) (car r)) (cons l (cons r nil))))
         (t (msize (caddr x) l r 'mparen 'mparen))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1129,7 +1128,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mtext x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mtext (x l r)
   (setq x (cdr x))
@@ -1150,7 +1149,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
               x (cdr x)
               l nil))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1158,14 +1157,14 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mqapply x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mqapply (x l r)
   (setq l (msize (cadr x) l (list #\( ) *lop* 'mfunction)
         r (msize-list (cddr x) nil (cons #\) r)))
   (cons (+ (car l) (car r)) (cons l (cdr r))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1173,7 +1172,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mdef x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mdef (x l r)
   (setq l (msize (cadr x) l (copy-list (strsym (caar x))) *lop* (caar x))
@@ -1186,7 +1185,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
             r (cons (car r) (cdddr r))))
   (cons (+ (car l) (car r)) (cons (cadr l) (cons x (cdr r)))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1194,7 +1193,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mplus x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mplus (x l r)
   (cond ((null (cddr x))
@@ -1220,7 +1219,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
                  w (+ (caar nl) w)
                  x (cdr x))))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1228,12 +1227,12 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mtimes x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mtimes (x l r)
   (msznary x l r '(#\* )))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1241,7 +1240,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mexpt x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mexpt (x l r)
   (setq l (msize (cadr x) l nil *lop* 'mexpt)
@@ -1250,7 +1249,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
               (msize x (list #\^) r 'mexpt *rop*)))
   (list (+ (car l) (car r)) l r))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1258,7 +1257,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @deffn {Funktion} msize-mcond x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mcond (x l r)
   (labels ((strmcond (x)
@@ -1282,7 +1281,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
                                            `($then ,(cadr l)))))))))
     (msznary (cons '(mcond) (strmcond x)) l r '(#\space))))
 @end group
-@end smalllisp
+@end lisp
 
 @emph{Bemerkung:}
 Gegen@"uber dem Original Maxima ist die Funktion deutlich kompakter.  F@"ur die
@@ -1297,7 +1296,7 @@ nun vergleichbar mit der der Funktionen @mref{msize-mdo} und
 @deffn {Funktion} msize-mdo x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mdo (x l r)
   (labels ((strmdo (x)
@@ -1316,7 +1315,7 @@ nun vergleichbar mit der der Funktionen @mref{msize-mdo} und
                     `($do ,(eighth x)))))
     (msznary (cons '(mdo) (strmdo x)) l r '(#\space))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -1324,7 +1323,7 @@ nun vergleichbar mit der der Funktionen @mref{msize-mdo} und
 @deffn {Funktion} msize-mdoin x l r
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun msize-mdoin (x l r)
   (labels ((strmdoin (x)
@@ -1337,7 +1336,7 @@ nun vergleichbar mit der der Funktionen @mref{msize-mdo} und
                     `($do ,(eighth x)))))
     (msznary (cons '(mdo) (strmdoin x)) l r '(#\space))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
