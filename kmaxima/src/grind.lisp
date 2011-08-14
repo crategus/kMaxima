@@ -358,13 +358,16 @@
 (defun msize-mdef (x l r)
   (setq l (msize (cadr x) l (copy-list (strsym (caar x))) *lop* (caar x))
         r (msize (caddr x) nil r (caar x) *rop*))
-  (setq x (cons (- (car l) (caadr l)) (cddr l)))
-  (if (and (not (atom (cadr r)))
-           (not (atom (caddr r)))
-           (< (+ (car l) (caadr r) (caaddr r)) *linel*))
-      (setq x (nconc x (list (cadr r) (caddr r)))
-            r (cons (car r) (cdddr r))))
-  (cons (+ (car l) (car r)) (cons (cadr l) (cons x (cdr r)))))
+  (cond ((not (atom (cadr l)))
+         (setq x (cons (- (car l) (caadr l)) (cddr l)))
+         (if (and (not (atom (cadr r)))
+                  (not (atom (caddr r)))
+                  (< (+ (car l) (caadr r) (caaddr r)) *linel*))
+             (setq x (nconc x (list (cadr r) (caddr r)))
+                   r (cons (car r) (cdddr r))))
+         (cons (+ (car l) (car r)) (cons (cadr l) (cons x (cdr r)))))
+        (t
+         (cons (+ (car l) (car r)) (cons l (ncons r))))))
 
 ;;; ----------------------------------------------------------------------------
 
