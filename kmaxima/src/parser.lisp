@@ -40,10 +40,10 @@
 (defvar *prompt-on-read-hang* nil)
 (defvar *read-hang-prompt* "")
 
-(defvar *mopl* nil)
-
 (defvar *mread-prompt* nil)
 (defvar *mread-eof-obj* nil)
+
+(defvar *mopl* nil)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1187,7 +1187,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun def-operator (op pos lbp lpos rbp rpos sp1 sp2 
+(defun def-operator (op pos lbp lpos rbp rpos sp1 sp2
                         parse-data grind-fn dim-fn match)
   (let ((x))
     (if (or (and rbp (not (integerp (setq x rbp))))
@@ -1228,31 +1228,13 @@
 
 (defun op-setup (op)
   (declare (special *mopl* $props))
-  (let ((dummy (or (get op 'op) (coerce (makestring1 op) 'string))))
-    (putprop op dummy 'op)
-    (putopr dummy op)
-    (if (and (operatorp1 op) (not (member dummy (cdr $props) :test #'eq)))
-        (push dummy *mopl*))
-    (add2lnc dummy $props)))
-
-;(defun kill-operator (op)
-;  (let
-;    ((opr (getprop op 'op))
-;     (noun-form ($nounify op)))
-;    (unless (member opr *builtin-$props* :test #'equal)
-;      (undefine-symbol opr)
-;      (remopr opr)
-;      (rempropchk opr)
-;      (mapc #'(lambda (x) 
-;                (remprop op x))
-;            '(nud nud-expr nud-subr     ; NUD info
-;              led led-expr led-subr     ; LED info
-;              lbp rbp                   ; Binding power info
-;              lpos rpos pos             ; Part-Of-Speech info
-;              grind dimension dissym    ; Display info
-;              op))                      ; Operator info
-;      (mapc #'(lambda (x)
-;                (remprop noun-form x)) 
-;            '(dimension dissym lbp rbp)))))
+  (let ((opr (or (getprop op 'op)
+                 (coerce (makestring1 op) 'string))))
+    (putprop op opr 'op)
+    (putopr opr op)
+    (if (and (operatorp1 op)
+             (not (member opr (cdr $props) :test #'eq)))
+        (push opr *mopl*))
+    (add2lnc opr $props)))
 
 ;;; ----------------------------------------------------------------------------
