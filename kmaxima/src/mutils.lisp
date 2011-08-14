@@ -27,6 +27,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defmvar $props '((mlist simp)))
+(setf (get '$props 'assign) 'neverset)
+
+;;; ----------------------------------------------------------------------------
+
 (defun mfunctionp (x)
   (cond ((symbolp x)
          (and (not (macro-function x))
@@ -289,7 +294,7 @@
     (merror "alias: the arguments must be symbolic names: found ~M and ~M"
             x y))
   (cond ((eq x y) y)
-        ((get x 'reversealias)
+        ((getprop x 'reversealias)
          (if (not (eq x y))
              (merror "alias: ~M already is aliased." x)))
         (t
