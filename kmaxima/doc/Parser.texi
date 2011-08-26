@@ -397,7 +397,25 @@ Nach der Initialisierung enth@"alt die globale Variable
 @subsection Fehlerbehandlung des Parsers
 @c -----------------------------------------------------------------------------
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{mopstrip}
+@deffn {Funktion} mopstrip x
+
+Die Funktion @code{mopstrip} wird von den Funktionen f@"ur die Fehlerbehandlung
+des Parsers aufgerufen.  Das Argument @var{x} ist ein Ausdruck, der auf einfache
+Weise formatiert wird.  Die R@"uckgabe ist das Ergebnis der Formatierung.
+
+So werden die booleschen Konstanten @code{t} und @code{nil} zu @code{$true} und
+@code{$false} formatiert,  von Maxima-Bezeichnern werden die f@"uhrenden Zeichen
+@code{$} oder @code{%} entfernt und Symbole die einen Reverse-Alias haben,
+werden durch diesen ersetzt.
+
+Siehe auch die Funktion @mref{mread-synerr} f@"ur die Ausgabe von Fehlern beim
+Parsen eines Ausdrucks.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun mopstrip (x)
   (cond ((null x) 'false)
         ((or (eq x t) (eq x 't)) 'true)
@@ -409,7 +427,32 @@ Nach der Initialisierung enth@"alt die globale Variable
                    (subseq name 1)
                    name))))
         (t x)))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{mread-synerr}
+@deffn {Funktion} mread-synerr format-string &rest l
+
+Tritt ein Fehler beim Parsen eines Ausdrucks von dem Stream
+@mref{*parse-stream*} auf, wird von den Funktionen des Parsers die Funktion
+@code{mread-synerr} aufgerufen.  Liest der Parser aus einer Datei, wird der
+Dateiname ermittelt und ausgegeben.  Dann wird die mit dem Argument
+@var{format-string} @"ubergebenen Fehlermeldung mit den Argumenten der Liste
+@var{l} ausgegeben.  Zuletzt wird ein Teil der fehlerhaften Eingabe ausgegeben
+und die Stelle markiert, an der der Fehler festgestellt wurde.  Dazu werden die
+letzten Zeichen der Eingabe vom Parser in der globalen Liste
+@mref{*parse-window*} gespeichert.
+
+Die Funktionen @mrefcomma{parse-err} @mrefcomma{parse-bug-err}@w{}
+@mrefcomma{parse-delim-err} @mref{parse-erb-err} und
+@mref{parse-premterm-err} sind spezialisierte Funktionen f@"ur bestimmte
+Fehler, die die Funktion @code{mread-synerr} aufrufen.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun mread-synerr (format-string &rest l)
   (let (tem
         errset
@@ -423,43 +466,121 @@ Nach der Initialisierung enth@"alt die globale Variable
            (mapcar #'(lambda (x)
                        (if (symbolp x) (print-invert-case x) x))
                    l))
-    (cond ((eql *parse-stream* *standard-input*)
-           (let ((n *parse-window-length*)
-                 some ch)
-             (loop for i from (1- n) downto (- n 20)
-                   while (setq ch (nth i *parse-window*))
-                   do
-                   (cond ((eql ch #\newline)
-                          (push #\n some)
-                          (push #\\ some))
-                         ((eql ch #\tab)
-                          (push #\t some)
-                          (push #\\ some))
-                         (t (push ch some))))
-             (format t "~%~{~c~}~%~vt^" some (- (length some) 2))
-             (read-line *parse-stream* nil nil))))
+    (when (eql *parse-stream* *standard-input*)
+      (let ((n *parse-window-length*)
+            some ch)
+        (loop for i from (1- n) downto (- n 20)
+              while (setq ch (nth i *parse-window*))
+              do
+              (cond ((eql ch #\newline)
+                     (push #\n some)
+                     (push #\\ some))
+                    ((eql ch #\tab)
+                     (push #\t some)
+                     (push #\\ some))
+                    (t (push ch some))))
+        (format t "~%~@{~c~@}~%~vt^" some (- (length some) 2))
+        (read-line *parse-stream* nil nil)))
     (terpri)
     (throw 'maxima-continue t)))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-err}
+@deffn {Funktion} parse-err
+
+Die Funktion @code{parse-err} wird f@"ur eine allgemeine Fehler aufgerufen,
+die beim Parsen einer Eingabe auftreten.
+
+Siehe auch die Funktion @mrefdot{mread-synerr}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun parse-err ()
   (mread-synerr "Syntax error"))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-bug-err}
+@deffn {Funktion} parse-bug-err op
+
+Die Funktion @code{parse-bug-err} wird vom Parser aufgerufen, wenn ein
+interner Fehler beim Parsen einer Eingabe aufgetreten ist.
+
+Siehe auch die Funktion @mrefdot{mread-synerr}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun parse-bug-err (op)
   (mread-synerr
     "Parser bug in ~A. Please report this to the Maxima maintainers,~
    ~%including the characters you just typed which caused the error. Thanks."
     (mopstrip op)))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-delim-err}
+@deffn {Funktion} parse-delim-err op
+
+Die Funktion @code{parse-delim-err} wird vom Parser aufgerufen, wenn beim
+Einlesen der Eingabe ein Fehler beim Lesen eines Begrenzungszeichen auftritt.
+
+Siehe auch die Funktion @mrefdot{mread-synerr}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun parse-delim-err (op)
   (mread-synerr "Illegal use of delimiter ~A" (mopstrip op)))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-erb-err}
+@deffn {Funktion} parse-erb-err op l
+
+Die Funktion @code{parse-erb-err} wird vom Parser aufgerufen, wenn beim
+Lesen der Eingabe eine schlie@ss{}ende Klammer auftritt und die @"offnende
+Klammer fehlt.
+
+Siehe auch die Funktion @mrefdot{mread-synerr}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun parse-erb-err (op l)
   (declare (ignore l))
   (mread-synerr "Too many ~A's" (mopstrip op)))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@anchor{parse-premterm-err}
+@deffn {Funktion} parse-premterm-err op
+
+Die Funktion @code{parse-premterm-err} wird vom Parser aufgerufen, wenn eine
+Eingabe vorzeitig abbricht.
+
+Siehe auch die Funktion @mrefdot{mread-synerr}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun parse-premterm-err (op)
   (mread-synerr "Premature termination of input at ~A." (mopstrip op)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Funktionen und Makros des Parsers, Definition der Operatoren, Vorbereitende Funktionen und Makros, Parser
