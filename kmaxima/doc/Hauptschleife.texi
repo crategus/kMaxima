@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 10.04.2011
-@c Revision : 17.04.2011
+@c Revision : 27.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -23,12 +23,12 @@
 @c -----------------------------------------------------------------------------
 
 Mit der Implementation des Parsers und den Routinen f@"ur die lineare Anzeige
-kann jetzt die zentrale Routine @code{maxima-toplevel-loop} vollst@"andig
-implementiert werden.  In der ersten Implementation wird eine 
+und der 2D-Anzeige kann jetzt die zentrale Routine @code{maxima-toplevel-loop}
+vollst@"andig implementiert werden.  In der ersten Implementation wird eine 
 Lisp-read-eval-Schleife ausgef@"uhrt.  Die Lisp-Funktion @code{eval} ist durch
-die Maxima-Funktion @code{meval} ersetzt.  Die Lisp-Funktion @code{read} wird
-nun durch die Maxima-Funktion @code{mread} ersetzt und die Lisp-Funktion
-@code{format} wird durch die Maxima-Funktion @code{linear-display} ersetzt.
+die Maxima-Funktion @mref{meval} ersetzt.  Die Lisp-Funktion @code{read} wird
+nun durch die Maxima-Funktion @mref{mread} ersetzt und die Lisp-Funktion
+@code{format} wird durch die Maxima-Funktion @mref{mdisplay} ersetzt.
 
 @c -----------------------------------------------------------------------------
 @node Marken f@"ur die Eingaben und Ausgaben, Die Funktion maxima-toplevel-eval, Einf@"uhrung in die Hauptschleife, Hauptschleife
