@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 10.04.2011
-@c Revision : 10.08.2011
+@c Revision : 26.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -14,7 +14,6 @@
 * Externe Darstellung von Ausdr@"ucken::
 * Hilfsfunktionen der linearen Anzeige::
 * Formatierung von Ausdr@"ucken f@"ur die Anzeige::
-* Die Funktion mdisplay::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -66,41 +65,38 @@ mdoin       msize-mdoin                      30    30
 @section Externe Darstellung von Ausdr@"ucken
 @c -----------------------------------------------------------------------------
 
-kMaxima unterscheidet bei Ausdr@"ucken zwischen einer internen Darstellung und
-einer externen Darstellung.  Bevor ein Ausdruck in das Format f@"ur die Ausgabe
-umgewandelt wird, wird dieser in eine externe Darstellung gebracht.  In der
-externen Darstellung wird zum Beispiel die Wurzelfunktion als @code{(%sqrt) $x)}
-dargestellt.  Die interne Darstellung dieses Ausdrucks ist dagegen
-@code{((mexpt) $x ((rat) 1 2))}.  Die Formatierung in die externe Darstellung
-wird von der Funktion @code{nformat} geleistet.  @code{nformat} f@"uhrt
-spezielle Formatierungen f@"ur negative Zahlen, Boolesche Wert, negative
-rationale Zahlen, Summen, Produkte und Exponentiationen aus.  Verschiedene
-Optionsvariablen kontrollieren die Art der Formatierung.
+kMaxima unterscheidet Ausdr@"ucke in einer internen Darstellung von Ausdr@"ucken
+in einer externen Darstellung, wie sie f@"ur die Ausgabe von Ausdr@"ucke auf der
+Anzeige verwendet wird.  In der externen Darstellung wird zum Beispiel die
+Wurzelfunktion als @code{(%sqrt) $x)} dargestellt.  Die interne Darstellung
+ist dagegen @code{((mexpt) $x ((rat) 1 2))}.  Die Formatierung in die externe
+Darstellung wird von der Funktion @mref{nformat} geleistet.  @code{nformat}
+f@"uhrt spezielle Formatierungen f@"ur negative Zahlen, Summen, Produkte und
+Exponentiationen aus.  Verschiedene Optionsvariablen kontrollieren die Art der
+Formatierung.
 
 @c -----------------------------------------------------------------------------
+@need 800
 @anchor{$powerdispflag}
 @defvr {Optionsvariable} $powerdispflag
 Standardwert: @code{nil}
 
 Die Optionsvariable @code{$powerdispflag} kontrolliert die Formatierung von
-@code{mplus}-Ausdr@"ucken mit der Funktion @mrefdot{nformat-mplus}  Die Terme
-einer Summe liegen intern in einer alphabetisch aufsteigenden Ordnung vor.
-F@"ur die externe Darstellung wird die Ordnung umgekehrt.  Ein interner Ausdruck
-@code{((mplus) $a $b $c} wird daher als @code{a + b + c} ausgegeben.  Hat die
-Optionsvariable @code{$powerdispflag} den Wert @code{true}, handelt es sich um
-die Terme einer Taylor-Reihenentwicklung, die das Symbol @code{'trunc} als
-Attribut des Operators f@"ur die Addition enth@"alt oder handelt es sich um
-einen Kettenbruch, der mit dem Symbol @code{'cf} als Attribut bezeichnet wird,
-dann wird die Reihenfolge der Terme nicht umgekehrt.
+@code{mplus}-Ausdr@"ucken, die von der Funktion @mref{nformat-mplus}@w{}
+ausgef@"uhrt wird.  Die Terme einer Summe liegen intern in einer alphabetisch
+aufsteigenden Ordnung vor.  F@"ur die externe Darstellung wird die Ordnung
+umgekehrt.  Ein interner Ausdruck @code{((mplus) $a $b $c} wird daher als
+@code{c + b + a} ausgegeben.  Hat die Optionsvariable @code{$powerdispflag} den
+Wert @code{true}, dann wird die Reihenfolge der Terme nicht umgekehrt.
 
 Siehe auch die Funktionen @mref{nformat} und @mref{nformat-all} f@"ur die
 Formatierung von kMaxima-Ausdr@"ucken sowie die Optionsvariable
-@mrefcomma{$negsumdispflag}, die die Formatierung von Differenzen f@"ur die
+@mrefcomma{$negsumdispflag} die die Formatierung von Differenzen f@"ur die
 externe Darstellung kontrolliert.
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Optionsvariable den Namen @code{$powerdisp}.  Um
-eine konsistente Bezeichnung der Optionsvariablen für die Formatierung zu
+eine konsistente Bezeichnung der Optionsvariablen f@"ur die Formatierung zu
 erhalten, ist die Variable zu @code{$powerdispflag} umbenannt.
 @end defvr
 
@@ -117,8 +113,8 @@ Terme einer Summe vorsehen w@"urde, als @code{-b + a}.
 
 Siehe auch die Funktionen @mref{nformat} und @mref{nformat-all} f@"ur die
 Formatierung von kMaxima-Ausdr@"ucken sowie die Optionsvariable
-@mrefcomma{$powerdispflag}, die die Reihenfolge der Terme einer Summe
-kontrolliert.
+@mrefcomma{$powerdispflag} die die Reihenfolge der Terme einer Summe
+in der externen Darstellung kontrolliert.
 @end defvr
 
 @c -----------------------------------------------------------------------------
@@ -135,7 +131,7 @@ F@"ur ein Beispiel siehe die Funktion @mrefdot{nformat-mtimes}
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Optionsvariable den Namen @code{$pfeformat}.  Um
-eine konsistente Bezeichnung der Optionsvariablen für die Formatierung zu
+eine konsistente Bezeichnung der Optionsvariablen f@"ur die Formatierung zu
 erhalten, ist die Variable zu @code{$ratdispflag} umbenannt.
 @end defvr
 
@@ -146,8 +142,8 @@ Standardwert: @code{nil}
 
 Die Optionsvariable @code{$%edispflag} kontrolliert die Formatierung der
 Exponentialfunktion durch die Funktion @mrefdot{nformat-mexpt}  Hat
-@code{%edispflag} den Wert @code{t}, wird die Exponentiation der
-Exponentialfunktion mit einem negativen Exponenten als Quotient formatiert.
+@code{%edispflag} den Wert @code{t}, wird die Exponentialfunktion mit einem
+negativen Exponenten als Quotient formatiert.
 @end defvr
 
 @c -----------------------------------------------------------------------------
@@ -177,31 +173,33 @@ Wert @code{t}, dann wird ein Ausdruck mit der Wurzelfunktion wie zum Beispiel
 @anchor{nformat}
 @deffn {Funktion} nformat form
 
-Das Argument @code{form} ist ein kMaxima-Ausdruck, dessen Hauptoperator in einer
-internen Darstellung vorliegt.  Die R@"uckgabe ist ein ein kMaxima-Ausdruck,
-wobei der Hauptoperator in eine externe Darstellung f@"ur die Anzeige
-formatiert ist.  Die Formatierung wird f@"ur den Hauptoperator nur dann
-ausgef@"uhrt, wenn der Hauptoperator das Attribut @code{simp} f@"ur einen
-vereinfachten Ausdruck hat.
+Das Argument @code{form} ist ein kMaxima-Ausdruck, dessen Hauptoperator mit
+seinen Argumenten in einer internen Darstellung vorliegt.  Die R@"uckgabe ist
+ein ein kMaxima-Ausdruck, wobei der Hauptoperator und seine Argumente in eine
+externe Darstellung f@"ur die Anzeige formatiert sind.  Die Formatierung wird
+f@"ur nur dann ausgef@"uhrt, wenn der Hauptoperator ein Attribut, insbesondere
+den @code{simp}-Schalter aufweist.  Bei der Formatierung in die externe
+Darstellung werden bis auf wenige Ausnahmen die Attribute von einem Operator
+entfernt.
 
-Die Formatierung von Atomen, negativen Zahlen und rationalen Zahlen wird
-direkt in der Funktion @code{nformat} vorgenommen.  F@"ur die Formatierung
+Die Formatierung von negativen Zahlen wird direkt in der Funktion
+@code{nformat} vorgenommen.  F@"ur die Formatierung
 von Summen, Produkten und der Exponentiation werden die Funktionen
 @mrefcomma{nformat-mplus} @mref{nformat-mtimes} und @mref{nformat-mexpt}@w{}
 aufgerufen.
 
-Die Formatierung in die externe Darstellung wird von den folgenden
-Optionsvariablen kontrolliert:
-@mrefcomma{$powerdispflag}@w{}
-@mrefcomma{$negsumdispflag}@w{}
-@mrefcomma{$ratdispflag}@w{}
-@mrefcomma{$%edispflag}@w{}
-@mref{$exptdispflag} und
-@mrefdot{$sqrtdispflag}
+Die Formatierung in die externe Darstellung wird f@"ur eine Summe von den
+Optionsvariablen @mref{$powerdispflag} und @mrefcomma{$negsumdispflag}@w{}
+f@"ur ein Produkt von der Optionsvariablen @mref{$ratdispflag} und f@"ur die
+Exponentiation von den Optionsvariablen @mrefcomma{$%edispflag}@w{}
+@mref{$exptdispflag} und @mref{$sqrtdispflag} kontrolliert.  Siehe dazu die
+jeweiligen oben genannten Funktionen sowie die Dokumentation der
+Optionsvariablen.
 
-F@"ur die Formatierung aller Teilausdr@"ucke eines kMaxima-Ausdrucks siehe die
-Funktion @mrefcomma{nformat-all} die die Funktion @code{nformat} rekursiv auf
-die Teilausdr@"ucke eines Ausdrucks anwendet.
+Die Funktion @code{nformat} formatiert nur den Hauptoperator und seine
+Argumente. F@"ur die Formatierung aller Teilausdr@"ucke eines kMaxima-Ausdrucks
+siehe die Funktion @mrefcomma{nformat-all} die die Funktion @code{nformat}
+rekursiv auf die Teilausdr@"ucke eines Ausdrucks anwendet.
 
 @emph{Beispiele:}
 @example
@@ -266,9 +264,9 @@ Original Maxima implementiert und nicht dokumentiert.
 @deffn {Funktion} nformat-all form
 
 Wendet die Funktion @mref{nformat} zun@"achst auf den Ausdruck @var{form} und
-dann rekursiv auf die Argumente an.  Im Unterschied zu der Funktion
-@code{nformat} wird der Ausdruck @var{form} vollst@"andig formatiert.  Die
-R@"uckgabe ist ein Ausdruck in der externen Darstellung.
+dann rekursiv auf die Argumente und Teilausdr@"ucke an.  Im Unterschied zu der
+Funktion @code{nformat} wird der Ausdruck @var{form} vollst@"andig formatiert.
+Die R@"uckgabe ist ein Ausdruck in der externen Darstellung.
 
 @emph{Quelltext:}
 
@@ -287,30 +285,37 @@ R@"uckgabe ist ein Ausdruck in der externen Darstellung.
 Gegen@"uber dem Original in Maxima ist der Test auf einen
 @code{bigfloat}-Ausdruck entfernt.  Da @code{nformat} im Unterschied zum
 Original die booleschen Variablen @code{t} und @code{nil} nicht formatiert,
-kann der Test auf einen @code{mdo-} oder @code{mdoin}-Ausdruck entfallen.
+kann der Test auf einen @code{mdo-} oder @code{mdoin}-Ausdruck entfallen,
+wodurch die hier gezeigte Funktion einfacher wird.
 @end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{nformat-mplus}
 @deffn {Funktion} nformat-mplus form
 
-Die Funktion @code{form-mplus} formatiert Summe in eine externe Darstellung.
-Die Formatierung wird von den Optionsvariablen @code{$powerdisp} und 
-@code{$negsumdispflag} kontrolliert. Die Terme einer Summe liegen intern
-in einer alphabetisch aufsteigenden Ordnung vor.  F@"ur die externe Darstellung
+Die Funktion @code{nformat-mplus} formatiert eine Summe in eine externe
+Darstellung.
+
+Die Formatierung wird von den Optionsvariablen @mref{$powerdispflag} und
+@mref{$negsumdispflag} kontrolliert.  Die Terme einer Summe liegen intern in
+einer alphabetisch aufsteigenden Ordnung vor.  F@"ur die externe Darstellung
 wird die Ordnung umgekehrt.  Ein interner Ausdruck @code{((mplus) $a $b $c}
-wird daher als @code{a + b + c} ausgegeben.  Hat die Optionsvariable
-@code{$powerdisp} den Wert @code{true}, handelt es sich um die Terme einer
-Taylor-Reihenentwicklung, die das Symbol @code{'trunc} als Attribut des
-Operators f@"ur die Addition enth@"alt oder handelt es sich um einen
-Kettenbruch, der mit dem Symbol @code{'cf} als Attribut bezeichnet wird, dann
-wird die Reihenfolge der Terme nicht umgekehrt.
+wird daher als @code{c + b + a} ausgegeben.  Hat die Optionsvariable
+@code{$powerdispflag} den Wert @code{true}, dann wird die Reihenfolge der Terme
+nicht umgekehrt.
 
 Die Optionsvariable @code{$negsumdispflag} kontrolliert die Darstellung der
 Differenz von zwei Termen.  Hat die Optionsvariable @code{$negsumdispflag} den
 Wert @code{true}, dann wird eine Differenz immer als @code{a - b} angezeigt 
 und nicht, wie es die Ordnung der Terme einer Summe vorsehen w@"urde, als 
-@code{-b + a}.
+@code{-b + a}.  Dies trifft jedoch nicht zu, wenn die Optionsvariable
+@code{$powerdispflag} ebenfalls den Wert @code{true} hat.  In diesem Fall werden
+die Terme immer in einer aufsteigenden Ordnung angezeigt.
+
+Die Funktion wird von der Funktion @mref{nformat} aufgerufen, um einen
+@code{mplus}-Ausdruck in die externe Darstellung zu formatieren.  Siehe auch
+die Funktion @mrefcomma{nformat-all}, um einen Ausdruck einschließlich seiner
+Teilausdrücke in die externe Darstellung zu formatieren.
 
 @emph{Beispiele:}
 
@@ -345,21 +350,13 @@ Differenzen @code{a - b} kontrolliert.
 
 @lisp
 @group
-(defun nformat-mplus (form &aux args trunc)
+(defun nformat-mplus (form &aux args)
   (setq args (mapcar #'nformat (cdr form)))
-  (setq trunc (member 'trunc (cdar form) :test #'eq))
-  (cons (if trunc '(mplus trunc) '(mplus))
-        (cond ((and (member 'ratsimp (cdar form) :test #'eq)
-                    (not (member 'simp (cdar form) :test #'eq)))
-               (if $powerdispflag (nreverse args) args))
-              ((and trunc
-                    (not (member 'simp (cdar form) :test #'eq)))
-               (nreverse args))
-              ((or $powerdispflag
-                   trunc
-                   (member 'cf (cdar form) :test #'eq))
+  (cons '(mplus)
+        (cond ($powerdispflag
                args)
-              ((and $negsumdispflag (null (cdddr form)))
+              ((and $negsumdispflag
+                    (null (cdddr form)))
                (if (and (not (mminusp (car args)))
                         (mminusp (cadr args)))
                    args
@@ -370,22 +367,19 @@ Differenzen @code{a - b} kontrolliert.
 
 @emph{Bemerkung:}
 Im Original Maxima hat diese Funktion den Namen @code{form-mplus}.  Die Funktion
-ist umbenannt, um eine einheitliche Bezeichnung der Funktionen für die 
-Formatierung in eine externe Darstellung zu erhalten.
+ist umbenannt, um eine einheitliche Bezeichnung der Funktionen f@"ur die 
+Formatierung in eine externe Darstellung zu erhalten.  Weiterhin ist die
+Funktion gegen@"uber dem Original stark vereinfacht.  So werden Ausdr@"ucke
+mit den Attributen @code{trunc}, @code{cf} oder oder @code{ratsimp} nicht
+besonders behandelt.
 @end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{nformat-mtimes}
 @deffn {Funktion} nformat-mtimes form
 
-Das Argument @var{form} ist eine @code{mtimes}-Ausdruck, der in die externe
-Darstellung formatiert wird.  Die Argumente des @code{mtimes}-Operators werden
-im Allgemeinen nicht formatiert.  Ausnahmen sind negative Ausdrücke, die zu
-einem @code{mminus}-Ausdruck formatiert werden und rationale Zahlen, die in
-Abhängigkeit von der Optionsvariablen @mref{$ratdispflag} formatiert werden.
-Das Ergebnis kann die Operatoren @code{mminus} und @code{mquotient} enthalten.
-Die Operatoren werden ohne das Attribut @code{simp} eingefügt.  Ein
-@code{simp}-Attribut vom @code{mtimes}-Operator wird entfernt.
+Das Argument @var{form} ist ein @code{mtimes}-Ausdruck, der in die externe
+Darstellung formatiert wird.
 
 Im Unterschied zur Addition wird bei Multiplikation die Ordnung der Terme nicht
 umgekehrt.  Die Faktoren werden gegebenenfalls so formatiert, dass sie @"uber
@@ -488,11 +482,11 @@ die Formatierung in eine externe Darstellung zu erhalten.
 
 Das Argument @var{form} ist ein @code{mexpt}-Ausdruck.  Die R@"uckgabe ist
 ein @code{mexpt}-Ausdruck in einer externen Formatierung f@"ur die Anzeige.  Es
-werden keine Teilausdr@"ucke formatiert.  Bei der Formatierung wird das
-Attribut @code{'simp} vom @code{mexpt}-Operator entfernt.  Das Ergebnis kann
-die Operatoren @code{mquotient} f@"ur einen Bruch oder den Operator @code{%sqrt}
-f@"ur die Wurzelfunktion enthalten.  Die Operatoren werden ohne das Attribut
-@code{'simp} in den Ausdruck eingef@"ugt.
+wird nur der Hauptoperator und seine Argumente formatiert.  Bei der Formatierung
+wird das Attribut @code{'simp} vom @code{mexpt}-Operator entfernt.  Das Ergebnis
+kann die Operatoren @code{mquotient} f@"ur einen Bruch oder den Operator
+@code{%sqrt} f@"ur die Wurzelfunktion enthalten.  Die Operatoren werden ohne das
+Attribut @code{'simp} in den Ausdruck eingef@"ugt.
 
 Die Formatierung von @code{mexpt}-Ausdr@"ucken wird von den
 Optionsvariablen @mrefcomma{$sqrtdispflag} @mref{$%edispflag} und
@@ -627,11 +621,12 @@ Im Original Maxima hat diese Variable den Namen @code{$lispdisp}.
 @anchor{makestring}
 @deffn {Funktion} makestring
 
-Die Funktion @code{makestring} wandelt Zahlen, Zeichenketten und Symbole in eine
-Liste aus Zeichen um.  Ist das Argument ein Symbol, wird ein eventuell
-vorhandener Reverse-Alias-Name beachtet.  F@"ur Operatoren zum Namen des
-Operators umgewandelt.  Die Zeichen @code{%} und @code{$} die einen Verb- und
-Substantiv-Bezeichner bezeichnen, werden entfernt.
+Die Funktion @code{makestring} wandelt Zahlen, Zeichenketten, Symbole und
+Ausdr@"ucke in eine Liste aus Zeichen um.  Ist das Argument ein Symbol, wird ein
+eventuell vorhandener Reverse-Alias-Name beachtet.  F@"ur Operatoren wird
+der Name des Operators als eine Zeichenkette dargestellt.  Die Zeichen @code{%}
+und @code{$}, die einen Verb- und Substantiv-Bezeichner vorangestellt sind,
+werden entfernt.
 
 @code{makestring} wird von den Optionsvariablen @mref{$stringdispflag} und
 @mref{$lispdispflag} kontrolliert.  Hat @code{$stringdispflag} den Wert @code{t}
@@ -641,6 +636,33 @@ den Wert @code{t}, erhalten Lisp-Symbole ein f@"uhrendes Fragezeichen @code{?}.
 Siehe auch die Funktion @mrefdot{makestring1}  Diese Funktion bindet die
 Optionsvariablen @code{$stringdispflag} und @code{$lispdispflag} an den Wert
 @code{nil}.
+
+Beispiele:
+
+@example
+* (makestring 'mplus)
+(#\+)
+* (makestring 'mequal)
+(#\=)
+* (makestring '100)
+(#\1 #\0 #\0)
+* (makestring "string")
+(#\s #\t #\r #\i #\n #\g)
+* (makestring '$symbol)
+(#\s #\y #\m #\b #\o #\l)
+@end example
+
+Zum Symbol @code{$sqrt} wird der Alias-Name @code{$mysqrt} mit der Funktion
+@mref{alias} definiert.  Die Funktion @code{makestring} gibt in diesem Fall
+f@"ur das Symbol @code{$sqrt} den Alias-Namen als eine Liste der Zeichen
+zur@"uck.
+
+@example
+* (alias '$mysqrt '$sqrt)
+$SQRT
+* (makestring '$sqrt)
+(#\m #\y #\s #\q #\r #\t)
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -690,7 +712,7 @@ Optionsvariablen @mref{$stringdispflag} und @mref{$lispdispflag} an den Wert
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Formatierung von Ausdr@"ucken f@"ur die Anzeige, Die Funktion mdisplay, Hilfsfunktionen der linearen Anzeige, Lineare Anzeige
+@node Formatierung von Ausdr@"ucken f@"ur die Anzeige, , Hilfsfunktionen der linearen Anzeige, Lineare Anzeige
 @section Formatierung von Ausdr@"ucken f@"ur die Anzeige
 @c -----------------------------------------------------------------------------
 
@@ -726,9 +748,9 @@ erh@"alt, wird auch die globale Variable @code{*linel*} auf den Wert gesetzt.
 Die Funktion @code{mgrind} gibt einen kMaxima-Ausdruck auf dem Stream @code{out}
 aus.  Dazu wird der Ausdruck mit der Funktion @code{msize} f@"ur die Ausgabe
 formatiert und mit der Funktion @code{mprint} ausgegeben.  Die zu den Funktionen
-lokale Zustandsvariable @code{chrps} enth@"alt die aktuelle Position des Cursors.
-Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen Variablen 
-@code{*linel*} enthalten.
+lokale Zustandsvariable @code{chrps} enth@"alt die aktuelle Position des
+Cursors.  Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen
+Variablen @code{*linel*} enthalten.
 
 @emph{Quelltext:}
 @lisp
@@ -787,7 +809,7 @@ Die Anzahl der Zeichen einer Ausgabezeile ist in der globalen Variablen
 @anchor{mstring}
 @deffn {Funktion} mstring x
 
-Die Funktion @code{mstring} arbeitet @"ahnlich wie die Funktion @code{mstring}
+Die Funktion @code{mstring} arbeitet @"ahnlich wie die Funktion @code{mgrind}
 mit dem Unterschied, dass die Funktion @code{mstring} eine Zeichenkette als
 Ergebnis hat.
 
@@ -1265,7 +1287,8 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 (defun msize-mcond (x l r)
   (labels ((strmcond (x)
              (let ((l (reverse (cdr x))))
-               (if (and (or (eq (car l) nil) (eq (car l) '$false))
+               (if (and (or (eq (car l) nil)
+                            (eq (car l) '$false))
                         (eq (cadr l) t))
                    (setq l (reverse (cddr l)))
                    (setq l (reverse l)))
@@ -1274,13 +1297,16 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
                             (sym nil '$elseif)
                             (res nil))
                            ((null (cddr l))
-                            (if (and sym (not (eq t (car l))))
+                            (if (and sym
+                                     (not (eq t (car l))))
                                 (append res `(,sym ,(car l) $then ,(cadr l)))
                                 (if (eq t (car l))
                                     (append res `($else ,(cadr l)))
-                                    (append res `(,(car l) $then ,(cadr l))))))
+                                    (append res
+                                            `(,(car l) $then ,(cadr l))))))
                          (setq res (append res
-                                           (if sym `(,sym ,(car l)) `(,(car l)))
+                                           (if sym
+                                               `(,sym ,(car l)) `(,(car l)))
                                            `($then ,(cadr l)))))))))
     (msznary (cons '(mcond) (strmcond x)) l r '(#\space))))
 @end group
@@ -1341,109 +1367,6 @@ nun vergleichbar mit der der Funktionen @mref{msize-mdo} und
 @end group
 @end lisp
 @end deffn
-
-@c -----------------------------------------------------------------------------
-@node Die Funktion mdisplay, , Formatierung von Ausdr@"ucken f@"ur die Anzeige, Lineare Anzeige
-@section Die Funktion @code{mdisplay}
-@c -----------------------------------------------------------------------------
-
-@findex mdisplay
-@vindex *display-labels-p*
-@vindex *display-mtext-p*
-
-Die Funktion @code{mdisplay} gibt einen Maxima-Ausdruck @code{form} auf
-der Konsole aus.  Dazu wird die Funktion @code{mgrind} mit dem Ausdruck
-@code{form} und @code{*standard-output*} f@"ur die Standardausgabe aufgerufen.
-@code{mgrind} hat ein drittes optionales Argument.  Hat das dritte Argument
-den Wert @code{nil} wird die globale Variable @code{*chrps*} von @code{mgrind}
-nicht auf den Wert @code{0} zur@"uckgesetzt.  @code{*chrps*} enth@"alt die
-aktuelle Position des Cursors auf der linearen Ausgabe.
-
-Ausdr@"ucke mit dem Operatoren @code{mlabel} und @code{mtext} werden besonders
-behandelt.  Der Operator @code{mlabel} zeigt an, dass eine Marke ausgegeben
-werden muss.  Der Operator @code{mtext} hat eine beliebige Anzahl an Argumenten,
-die nacheinander ausgeben werden.
-
-Mit der globale Variablen @code{*display-labels-p*} wird die Ausgabe der Marken
-kontrolliert.  Der Standardwert ist @code{t} und die Marken werden ausgegeben.
-
-Die globale Variable @code{*display-mtext-p*} wird in @code{mdisplay}
-gesetzt, wenn ein @code{mtext}-Ausdruck angezeigt ausgegeben wird.  In diesem
-Fall werden Lisp-Symbole nicht mit einem f@"uhrenden Fragezeichen angezeigt.
-Diese Implementation ist nicht sehr elegant und kann m@"oglicherweise verbessert
-werden.
-
-@verbatim
-(defvar *display-labels-p* t)
-(defvar *display-mtext-p* nil)
-@end verbatim
-
-@verbatim
-(defun linear-display (form)
-  (declare (special *chrps* *display-labels-p* *display-mtext-p*))
-  (setq *chrps* 0)
-  (fresh-line *standard-output*)
-  (cond ((not (atom form))
-         (cond ((eq (caar form) 'mlabel)
-                (cond ((and (cadr form) *display-labels-p*)
-                       (princ "(")
-                       (setq *chrps*
-                             (+  3 (length (mgrind (cadr form) nil))))
-                       (princ ") ")))
-                (mgrind (caddr form) *standard-output* nil))
-               ((eq (caar form) 'mtext)
-                (do ((form (cdr form) (cdr form)))
-                    ((null form))
-                  (setq *display-mtext-p* (atom (car form)))
-                  (mgrind (car form) *standard-output*)))
-               (t
-                (mgrind form *standard-output*))))
-        (t
-         (mgrind form *standard-output*)))
-  (terpri))
-@end verbatim
-
-@emph{Beispiele:} Das erste Beispiel zeigt die Ausgabe des Ausdrucks @code{a+b}
-auf der Konsole.  Im zweiten Beispiel wird dem Ausdruck eine Marke @code{%o12}
-vorangestellt.  Das letzte Beispiel zeigt die Ausgabe eines
-@code{mtext}-Ausdrucks.
-
-@example
-* (linear-display '((mplus) $a $b))
-a+b
-NIL
-
-* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
-(%o12) a+b
-NIL
-
-* (linear-display '((mtext) $%o12 " " ((mplus) $a $b)))
-%o12 a+b
-NIL
-@end example
-
-In diesem Beispiel ist die Ausgabe der Marken unterdr@"uckt.
-
-@example
-* (setq *display-labels-p* nil)
-NIL
-* (linear-display '((mlabel) $%o12 ((mplus) $a $b)))
-a+b
-NIL
-@end example
-
-Ein Lisp-Symbol wird mit einem f@"uhrenden Fragezeichen ausgegeben.  Ist das 
-Lisp-Symbol Argument des @code{mtext}-Operators wird kein Fragezeichen
-vorangestellt.
-
-@example
-* (linear-display 'symbol)
-?symbol
-NIL
-* (linear-display '((mtext) symbol))
-symbol
-NIL
-@end example
 
 @c --- End of file LDisplay.texi -----------------------------------------------
 
