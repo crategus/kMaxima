@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 10.08.2011
+@c Revision : 27.08.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -420,7 +420,7 @@ durch das Voranstellen eines @code{$}- oder @code{%}-Zeichens.  Siehe
 @ref{Verb- und Substantivform} f@"ur weitere Ausf@"uhrungen zu diesem Thema.
 
 @c -----------------------------------------------------------------------------
-@findex meval
+@anchor{meval}
 @node Implementierung des ersten Evaluators, , Syntax von kMaxima-Ausdr@"ucken, Der erste Evaluator
 @subsection Implementierung des ersten Evaluators
 @c -----------------------------------------------------------------------------
