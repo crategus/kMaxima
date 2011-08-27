@@ -55,21 +55,13 @@
       (cons (delete 'simp (copy-list (car form)) :count 1 :test #'eq)
             (mapcar #'nformat-all (cdr form)))))
 
-(defun nformat-mplus (form &aux args trunc)
+(defun nformat-mplus (form &aux args)
   (setq args (mapcar #'nformat (cdr form)))
-  (setq trunc (member 'trunc (cdar form) :test #'eq))
-  (cons (if trunc '(mplus trunc) '(mplus))
-        (cond ((and (member 'ratsimp (cdar form) :test #'eq)
-                    (not (member 'simp (cdar form) :test #'eq)))
-               (if $powerdispflag (nreverse args) args))
-              ((and trunc
-                    (not (member 'simp (cdar form) :test #'eq)))
-               (nreverse args))
-              ((or $powerdispflag
-                   trunc
-                   (member 'cf (cdar form) :test #'eq))
+  (cons '(mplus)
+        (cond ($powerdispflag
                args)
-              ((and $negsumdispflag (null (cdddr form)))
+              ((and $negsumdispflag
+                    (null (cdddr form)))
                (if (and (not (mminusp (car args)))
                         (mminusp (cadr args)))
                    args
