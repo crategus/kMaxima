@@ -658,7 +658,7 @@ Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide die Addition
 T}
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun alike1 (x y)
   (labels ((memqarr (ll)
@@ -676,7 +676,7 @@ T}
                 (eq (memqarr (cdar x)) (memqarr (cdar y)))
                 (alike (cdr x) (cdr y)))))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c --- 10.08.2011 --------------------------------------------------------------
@@ -689,7 +689,7 @@ Die Funktion @code{lisp-array-alike1} testet, ob die Argumente @var{x} und
 @code{lisp-array-alike1} wird von der Funktion @mref{alike1} aufgerufen.
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun lisp-array-alike1 (x y)
   (and (equal (array-dimensions x) (array-dimensions y))
@@ -699,7 +699,7 @@ Die Funktion @code{lisp-array-alike1} testet, ob die Argumente @var{x} und
                (return-from lisp-array-alike1 nil)))
          t)))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c --- 10.08.2011 --------------------------------------------------------------
@@ -713,7 +713,7 @@ eines kMaxima-Ausdrucks.
 
 @need 1200
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun alike (x y)
   (do ((x x (cdr x))
@@ -722,7 +722,7 @@ eines kMaxima-Ausdrucks.
     (if (or (atom y) (not (alike1 (car x) (car y))))
         (return nil))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c --- 10.08.2011 --------------------------------------------------------------
@@ -736,24 +736,24 @@ Die @"Aquivalenz wird mit der Funktion @mref{alike1} getestet.
 Der Ausdruck @code{2*a+b} enth@"alt die Argument @code{2*a} und @code{$b}.
 @code{$a} ist kein Argument des Ausdrucks.
 
-@smallexample
+@example
 * (memalike '((mtimes) 2 $A) '((mplus) ((mtimes) 2 $a) $b))
 (((MTIMES) 2 $A) $B)
 * (memalike '$b '((mplus) ((mtimes) 2 $a) $b))
 ($B)
 * (memalike '$a '((mplus) ((mtimes) 2 $a) $b))
 NIL
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun memalike (x l)
   (do ((l l (cdr l)))
       ((null l))
     (when (alike1 x (car l)) (return l))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -809,7 +809,7 @@ Die ersten Beispiele zeigen die @"ubliche Verwendung der Funktion
 @code{add2lnc}.  Symbole werden hier der Informationsliste @mref{$props}@w{}
 hinzugef@"ugt.
 
-@smallexample
+@example
 * $props
 ((MLIST SIMP))
 * (add2lnc '$a $props)
@@ -820,7 +820,7 @@ hinzugef@"ugt.
 ((MLIST SIMP) $A $B $C)
 * (add2lnc '$b $props)
 ((MLIST SIMP) $A $B $C)
-@end smallexample
+@end example
 
 Die M@"oglichkeit einer Liste als erstes Argument wird von Maxima genutzt, um
 die Abh@"angigkeit einer Funktion von Variablen in der Informationsliste
@@ -829,7 +829,7 @@ die Abh@"angigkeit einer Funktion von Variablen in der Informationsliste
 abh@"angen sollen.  Im letzten Beispiel wird die Abh@"angigkeit von den
 Variablen @code{a} und @code{b} neu definiert.  Der alte Eintrag ist entfernt.
 
-@smallexample
+@example
 * (defvar $dependencies '((mlist simp)))
 $DEPENDENCIES
 * (add2lnc '($f $x $y) $dependencies)
@@ -838,10 +838,10 @@ $DEPENDENCIES
 ((MLIST SIMP) ($F $X $Y) ($G $X $Y))
 * (add2lnc '($f $a $b) $dependencies)
 ((MLIST SIMP) ($G $X $Y) ($F $A $B))
-@end smallexample
+@end example
 
 @emph{Quelltext:}
-@smalllisp
+@lisp
 @group
 (defun add2lnc (item llist)
   (unless (memalike item (if (mlistp llist) (cdr llist) llist))
@@ -851,26 +851,68 @@ $DEPENDENCIES
                     llist :count 1 :test #'equal)))
     (nconc llist (list item))))
 @end group
-@end smalllisp
+@end lisp
 @end deffn
 
-@verbatim
+@c -----------------------------------------------------------------------------
+@anchor{fixnump}
+@deffn {Funktion} fixnump n
+
+Ist das Argument @var{n} eine ganze Zahl vom Typ @code{fixnum}, ist das Ergebnis
+@code{true} und ansonsten @code{false}.
+
+Der Bereich der ganzen Zahlen vom Typ @code{fixnum} ist abh@"angig von der
+Lisp-Implementation.  Der gr@"o@ss{}te Wert ist @code{most-positive-fixnum} und
+der kleinste ist @code{most-negative-fixnum}.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fixnump (n)
   (typep n 'fixnum))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@verbatim
-(defvar *alphabet* (list #\_ #\%))
+@c -----------------------------------------------------------------------------
+@anchor{*alphabetp*}
+@defvr {Globale Variable} *alphabetp*
+Standardwert: @code{(#\_ #\%)}
 
+Die globale Liste @code{*alphabetp*} enth@"alt die Zeichen, die in kMaxima
+zus@"atzlich zu den Zeichen @code{A ... Z} und @code{a ... z} alphabetische
+Zeichen sind.  Die Funktion @mref{alphabetp} ber@"ucksichtigt bei einem Test
+die in @code{*alphabetp*} enthaltenen Zeichen.
+
+kMaxima-Bezeichner k@"onnen alle Zeichen enthalten, die alphabetisch sind.
+Sonderzeichen, die der globalen Variablen @code{*alphabetp*} hinzugef@"ugt
+werden, k@"onnen zus@"atzlich in Bezeichnern verwendet werden.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{alphabetp}
+@deffn {Funktion} alphabetp ch
+
+Hat das Ergebnis @code{true}, wenn das Argument @var{ch} ein alphabetisches
+Zeichen ist.  Alphabetisch sind die Zeichen @code{A ... Z} und @code{a ... z}
+sowie die Zeichen, die in der globalen Variablen @mref{*alphabetp*} enthalten
+sind.
+
+@emph{Quelltext:}
+
+@lisp
+@group
 (defun alphabetp (ch)
   (and (characterp ch)
        (or (alpha-char-p ch)
            (member ch *alphabet*))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @verbatim
 (defun mminusp (x)
-  (and (not (atom x)) (eq (caar x) 'mminusp)))
+  (and (not (atom x)) (eq (caar x) 'mminus)))
 @end verbatim
 
 @verbatim
