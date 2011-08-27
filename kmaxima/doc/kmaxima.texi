@@ -68,6 +68,7 @@ END-INFO-DIR-ENTRY
 * Lineare Anzeige::
 * 2D-Anzeige::
 * Hauptschleife::
+* Vereinfachung::
 * kmaxima.lisp::
 * Quelltext::
 * Index der Funktionen und Variablen::
@@ -97,11 +98,15 @@ END-INFO-DIR-ENTRY
 @chapter 2D-Anzeige
 @include 2DDisplay.texi
 
-@node Hauptschleife, kmaxima.lisp, 2D-Anzeige, Top
+@node Hauptschleife, Vereinfachung, 2D-Anzeige, Top
 @chapter Hauptschleife
 @include Hauptschleife.texi
 
-@node kmaxima.lisp, Quelltext, Hauptschleife, Top
+@node Vereinfachung, kmaxima.lisp, Hauptschleife, Top
+@chapter Vereinfachung
+@include Vereinfachung.texi
+
+@node kmaxima.lisp, Quelltext, Vereinfachung, Top
 @appendix kmaxima.lisp
 @include Quelltext1.texi
 
