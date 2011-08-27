@@ -491,7 +491,8 @@
 (defun msize-mcond (x l r)
   (labels ((strmcond (x)
              (let ((l (reverse (cdr x))))
-               (if (and (or (eq (car l) nil) (eq (car l) '$false))
+               (if (and (or (eq (car l) nil)
+                            (eq (car l) '$false))
                         (eq (cadr l) t))
                    (setq l (reverse (cddr l)))
                    (setq l (reverse l)))
@@ -500,13 +501,16 @@
                             (sym nil '$elseif)
                             (res nil))
                            ((null (cddr l))
-                            (if (and sym (not (eq t (car l))))
+                            (if (and sym
+                                     (not (eq t (car l))))
                                 (append res `(,sym ,(car l) $then ,(cadr l)))
                                 (if (eq t (car l))
                                     (append res `($else ,(cadr l)))
-                                    (append res `(,(car l) $then ,(cadr l))))))
+                                    (append res
+                                            `(,(car l) $then ,(cadr l))))))
                          (setq res (append res
-                                           (if sym `(,sym ,(car l)) `(,(car l)))
+                                           (if sym
+                                               `(,sym ,(car l)) `(,(car l)))
                                            `($then ,(cadr l)))))))))
     (msznary (cons '(mcond) (strmcond x)) l r '(#\space))))
 
