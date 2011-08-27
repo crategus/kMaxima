@@ -1,0 +1,13 @@
+@c -----------------------------------------------------------------------------
+@c File     : Vereinfachung.texi
+@c License  : GNU General Public License (GPL)
+@c Language : German
+@c Author   : Dr. Dieter Kaiser
+@c Date     : 27.08.2011
+@c Revision : 27.08.2011
+@c 
+@c Copyright (C) 2011 by Dr. Dieter Kaiser
+@c -----------------------------------------------------------------------------
+
+@c --- End of file Vereinfachung.texi ------------------------------------------
+
