@@ -20,6 +20,7 @@
 * grind.lisp::
 * display.lisp::
 * msystem.lisp::
+* simplify.lisp::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -148,7 +149,7 @@
 
 @c -----------------------------------------------------------------------------
 @page
-@node msystem.lisp, , display.lisp, Quelltext
+@node msystem.lisp, simplify.lisp, display.lisp, Quelltext
 @section msystem.lisp
 @c -----------------------------------------------------------------------------
 
@@ -156,6 +157,20 @@
 @smallformat
 @end iftex
 @verbatiminclude ../src/msystem.lisp
+@iftex
+@end smallformat
+@end iftex
+
+@c -----------------------------------------------------------------------------
+@page
+@node simplify.lisp, , msystem.lisp, Quelltext
+@section simplify.lisp
+@c -----------------------------------------------------------------------------
+
+@iftex
+@smallformat
+@end iftex
+@verbatiminclude ../src/simplify.lisp
 @iftex
 @end smallformat
 @end iftex
