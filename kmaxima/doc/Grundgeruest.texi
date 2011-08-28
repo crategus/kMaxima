@@ -969,21 +969,30 @@ Fehlermeldung abgebrochen.  Mit der Funktion @code{shadowset} kann einem Symbol
 die Eigenschaft gegeben werden, einer weiteren Variablen, die Shadow-Variable
 genannt wird, denselben Wert zuzuweisen.
 
-@findex merror
+@c -----------------------------------------------------------------------------
+@anchor{merror}
+@deffn {Funktion} merror message &rest args
 
-Die folgende Funktion @code{merror} wird aufgerufen, wenn ein Fehler auftritt,
+Die Funktion @code{merror} wird aufgerufen, wenn ein Fehler auftritt,
 der zum Abbruch der Ausf@"uhrung f@"uhrt.  Nach der Ausgabe einer Meldung
 wird ein nicht-lokaler R@"ucksprung zum Catch @code{'maxima-continue}
 ausgef@"uhrt.  Dieser R@"ucksprung startet die Routine
 @code{maxima-toplevel-loop} neu.
 
-@need 500
-@verbatim
+Das Argument @var{message} enth@"alt den Text der Fehlermeldung, der
+gegebenenfalls Formatierungsbefehle f@"ur auszugebende Variablen enth@"alt,
+die mit dem Argument @var{args} @"ubergeben werden.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun merror (message &rest args)
-  (apply #'format `(t ,message ,@args))
+  (apply #'format `(t ,message ,@@args))
   (format t "~& -- an error. To debug this try: debugmode(true);~%")
   (throw 'maxima-continue 'maxima-error))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @vindex *munbindp*
 @findex mseterror
