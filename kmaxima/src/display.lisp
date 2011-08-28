@@ -481,6 +481,10 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(displa-def mminus dimension-prefix "- ")
+(displa-def mquote dimension-prefix "'")
+(displa-def mnot   dimension-prefix "not ")
+
 (defun dimension-prefix (form result)
   (prog (dissym (symlength 0))
     (setq dissym (getprop (caar form) 'dissym)
@@ -493,6 +497,16 @@
     (return result)))
 
 ;;; ----------------------------------------------------------------------------
+
+(displa-def msetq     dimension-infix  " : ")
+(displa-def mset      dimension-infix  " :: ")
+(displa-def marrow    dimension-infix  " -> " 80 80)
+(displa-def mgreaterp dimension-infix  " > ")
+(displa-def mgeqp     dimension-infix  " >= ")
+(displa-def mequal    dimension-infix  " = ")
+(displa-def mnotequal dimension-infix  " # ")
+(displa-def mleqp     dimension-infix  " <= ")
+(displa-def mlessp    dimension-infix  " < ")
 
 (defun dimension-infix (form result)
   (unless (= (length (cdr form)) 2)
@@ -516,6 +530,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(displa-def mfactorial dimension-postfix "!")
+
 (defun dimension-postfix (form result)
   (prog (dissym (symlength 0))
     (setq dissym (getprop (caar form) 'dissym)
@@ -534,6 +550,10 @@
   (revappend form result))
 
 ;;; ----------------------------------------------------------------------------
+
+(displa-def mprogn dimension-match "(" ")")
+(displa-def mlist  dimension-match "[" "]")
+(displa-def mangle dimension-match "<" ">")
 
 (defun dimension-match (form result)
   (prog (dissym (symlength 0))
@@ -610,6 +630,8 @@
       (dimension-nary form result)
       (dim-mquotient form result)))
 
+;;; ----------------------------------------------------------------------------
+
 (displa-def mquotient dim-mquotient "/")
 
 (defun dim-mquotient (form result)
@@ -655,8 +677,10 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(displa-def mtimes dimension-nary " ")
+(displa-def mtimes   dimension-nary " ")
 (displa-def mnctimes dimension-nary " . ")
+(displa-def mnctimes dimension-nary " . ")
+(displa-def mcomma   dimension-nary  ", " 10 10)
 
 (defun dimension-nary (form result)
   (cond ((null (cddr form))
@@ -751,6 +775,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(displa-def mand dimension-nary  " and ")
+(defprop mand    dimnary-boolean dimension-nary-helper)
+(displa-def mor  dimension-nary  " or ")
+(defprop mor     dimnary-boolean dimension-nary-helper)
+
 (defun dimnary-boolean (form result *lop* op *rop* w)
   (declare (ignore op))
   (if (and (consp form)
@@ -761,6 +790,8 @@
       (dimension form result *lop* *rop* w *right*)))
 
 ;;; ----------------------------------------------------------------------------
+
+(displa-def mexpt dimension-superscript)
 
 (defun dimension-superscript (form result)
   (prog (exp (w 0) (h 0) (d 0) bas)
@@ -819,14 +850,22 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(displa-def bigfloat  dim-bigfloat)
-(displa-def mquote    dimension-prefix "'")
-(displa-def msetq     dimension-infix  " : ")
-(displa-def mset      dimension-infix  " :: ")
-(displa-def mdefine   dim-mdefine      " := ")
-(displa-def mdefmacro dim-mdefine      " ::= ")
+(displa-def mncexpt dim-mncexpt "^^")
+
+(defun dim-mncexpt (form result)
+  (dimension-superscript (list '(mncexpt)
+                               (cadr form) 
+                               (cons '(mangle) (cddr form)))
+                         result))
 
 ;;; ----------------------------------------------------------------------------
+
+(displa-def bigfloat dim-bigfloat)
+
+;;; ----------------------------------------------------------------------------
+
+(displa-def mdefine   dim-mdefine      " := ")
+(displa-def mdefmacro dim-mdefine      " ::= ")
 
 (defun dim-mdefine (form result)
   (let (($noundisp t)
@@ -837,24 +876,6 @@
                                (cons '(mprogn) (cddr form)))
                          form)
                      result)))
-
-;;; ----------------------------------------------------------------------------
-
-(displa-def mfactorial dimension-postfix "!")
-(displa-def mexpt      dimension-superscript)
-(displa-def mncexpt    dim-mncexpt "^^")
-
-;;; ----------------------------------------------------------------------------
-
-(defun dim-mncexpt (form result)
-  (dimension-superscript (list '(mncexpt)
-                               (cadr form) 
-                               (cons '(mangle) (cddr form)))
-                         result))
-
-;;; ----------------------------------------------------------------------------
-
-(displa-def mnctimes dimension-nary " . ")
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1094,21 +1115,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(displa-def marrow    dimension-infix  " -> " 80. 80.)
-(displa-def mgreaterp dimension-infix  " > ")
-(displa-def mgeqp     dimension-infix  " >= ")
-(displa-def mequal    dimension-infix  " = ")
-(displa-def mnotequal dimension-infix  " # ")
-(displa-def mleqp     dimension-infix  " <= ")
-(displa-def mlessp    dimension-infix  " < ")
-(displa-def mnot      dimension-prefix "not ")
-(displa-def mand      dimension-nary   " and ")
-(defprop mand dimnary-boolean dimension-nary-helper)
-(displa-def mor       dimension-nary   " or ")
-(defprop mor dimnary-boolean dimension-nary-helper)
-
-;;; ----------------------------------------------------------------------------
-
 (displa-def mcond  dim-mcond)
 (displa-def %mcond dim-mcond)
 
@@ -1270,14 +1276,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(displa-def mprogn dimension-match "(" ")")
-(displa-def mlist  dimension-match "[" "]")
-(displa-def mangle dimension-match "<" ">")
-(displa-def mcomma dimension-nary  ", " 10. 10.)
-
-;;; ----------------------------------------------------------------------------
-
-(displa-def mabs   dim-mabs)
+(displa-def mabs dim-mabs)
 
 (defun dim-mabs (form result &aux arg bar)
   (setq arg (dimension (cadr form) nil 'mparen 'mparen nil 0))
@@ -1404,6 +1403,8 @@
                *depth* (1+ *depth*))
          (update-heights *height* *depth*)
          result)))
+
+;;; ----------------------------------------------------------------------------
 
 (displa-def mlabox dim-mlabox)
 
