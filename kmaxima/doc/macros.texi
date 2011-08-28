@@ -98,6 +98,7 @@
    ma-the-ma-ti-sche
    Op-ti-ons-va-ri-a-ble
    sig-na-li-siert
+   Ver-ein-fach-ung
    vor-an-ge-stell-tes
    Wur-zel-funk-tion
  }
