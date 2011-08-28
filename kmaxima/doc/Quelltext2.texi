@@ -21,6 +21,7 @@
 * display.lisp::
 * msystem.lisp::
 * simplify.lisp::
+* mload.lisp::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -163,7 +164,7 @@
 
 @c -----------------------------------------------------------------------------
 @page
-@node simplify.lisp, , msystem.lisp, Quelltext
+@node simplify.lisp, mload.lisp, msystem.lisp, Quelltext
 @section simplify.lisp
 @c -----------------------------------------------------------------------------
 
@@ -171,6 +172,20 @@
 @smallformat
 @end iftex
 @verbatiminclude ../src/simplify.lisp
+@iftex
+@end smallformat
+@end iftex
+
+@c -----------------------------------------------------------------------------
+@page
+@node mload.lisp, , simplify.lisp, Quelltext
+@section mload.lisp
+@c -----------------------------------------------------------------------------
+
+@iftex
+@smallformat
+@end iftex
+@verbatiminclude ../src/mload.lisp
 @iftex
 @end smallformat
 @end iftex
