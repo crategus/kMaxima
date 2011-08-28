@@ -79,6 +79,11 @@
        (not (atom (car x)))
        (eq (caar x) 'mlist)))
 
+(defun op-equalp (e &rest op)
+  (and (consp e)
+       (consp (car e))
+       (some #'(lambda (s) (equal (caar e) s)) op)))
+
 ;;; ----------------------------------------------------------------------------
 
 (defun mop (form)
@@ -109,10 +114,6 @@
        (not (atom (car x)))
        (eq (caar x) 'bigfloat)))
 
-(defun mnegativep (x)
-  (cond ((and (numberp x) (not (complexp x))) (minusp x))
-        ((or (ratnump x) ($bfloatp x)) (minusp (cadr x)))))
-
 (defun zerop1 (x)
   (or (and (integerp x) (= 0 x))
       (and (floatp x) (= 0.0 x))
@@ -122,6 +123,10 @@
   (or (and (integerp x) (= 1 x))
       (and (floatp x) (= 1.0 x))
       (and ($bfloatp x) (zerop1 (sub x 1)))))
+
+(defun mnegativep (x)
+  (cond ((realp x) (minusp x))
+        ((ratnump x) (minusp (rat-num x)))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -399,5 +404,23 @@
                  (format t "~&~15A          ~A" symbol (get symbol indic)))
                 ))
           (return))))))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro while (cond &rest body)
+  `(do ()
+       ((not ,cond))
+     ,@body))
+
+;;; ----------------------------------------------------------------------------
+
+(defun $sconcat (&rest x)
+  (let ((ans ""))
+    (dolist (v x)
+      (setq ans (concatenate 'string ans
+                             (cond ((stringp v) v)
+                                   (t
+                                    (coerce (mstring v) 'string))))))
+    ans))
 
 ;;; ----------------------------------------------------------------------------
