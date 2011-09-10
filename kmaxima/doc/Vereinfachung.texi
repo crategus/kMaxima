@@ -101,6 +101,7 @@ negatives Vorzeichen vor einer Summe in die Summe herein multipliziert.
 @menu
 * Pr@"ufe Anzahl der Argumente von Funktionen f@"ur die Vereinfachung::
 * Funktionen um den Vereinfacher aufzurufen::
+* Vereinfachung von rationalen Zahlen::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -182,7 +183,7 @@ abgebrochen.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Funktionen um den Vereinfacher aufzurufen, Pr@"ufe Anzahl der Argumente von Funktionen f@"ur die Vereinfachung, Hilfsfunktionen der Vereinfachung
+@node Funktionen um den Vereinfacher aufzurufen, Vereinfachung von rationalen Zahlen, Pr@"ufe Anzahl der Argumente von Funktionen f@"ur die Vereinfachung, Hilfsfunktionen der Vereinfachung
 @subsection Funktionen, um den Vereinfacher aufzurufen
 @c -----------------------------------------------------------------------------
 
@@ -322,19 +323,6 @@ abgebrochen.
 @c -----------------------------------------------------------------------------
 
 @c -----------------------------------------------------------------------------
-@anchor{inv}
-@deffn {Funktion} inv x
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun inv (x)
-  (power x -1))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
 @anchor{neg}
 @deffn {Funktion} neg x
 
@@ -367,6 +355,33 @@ abgebrochen.
 @end deffn
 
 @c -----------------------------------------------------------------------------
+@anchor{power}
+@deffn {Funktion} power bas pow
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun power (bas pow)
+  (cond ((eql 1 pow) bas)
+        (t (simplifya `((mexpt) ,bas ,pow) t))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{inv}
+@deffn {Funktion} inv x
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun inv (x)
+  (power x -1))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
 @anchor{div}
 @deffn {Funktion} div x y
 
@@ -382,17 +397,230 @@ abgebrochen.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@anchor{power}
-@deffn {Funktion} power bas pow
+@node Vereinfachung von rationalen Zahlen, Pr@"ufe Anzahl der Argumente von Funktionen f@"ur die Vereinfachung, Hilfsfunktionen der Vereinfachung
+@subsection Vereinfachung von rationalen Zahlen
+@c -----------------------------------------------------------------------------
+
+kMaxima verwendet nicht die in Lisp vorhanden rationalen Zahlen.  In kMaxima
+werden rationale Zahlen als ein Ausdruck der Form @code{((rat simp) num den)}
+dargestellt.  @code{rat} ist der interne Operator, der eine rationale Zahl
+bezeichnet.  Das Attribut @code{simp} zeigt an, dass es sich um eine bereits
+vereinfachte rationale Zahl handelt.  In diesem Fall sind der Z@"ahler
+@code{num} und Nenner @code{den} gek@"urzt und der Nenner ist immer positiv.
+Mit der Funktion @mref{make-rat} kann eine rationale Zahl erzeugt werden, die
+vereinfacht ist.  Die Funktion @mref{simp-rat} wird von der Hauptroutine
+@mref{simplifya} aufgerufen, um zu pr@"ufen, ob eine rationale Zahl vereinfacht
+ist.  Die Funktion @mref{rat-to-float} wandelt eine rationale Zahl in eine
+Gleitkommazahl um.  Zuletzt sind noch die Funktionen @mref{rat-num} und
+@mref{rat-den} definiert, um jeweils den Z@"ahler oder den Nenner einer
+rationalen Zahl zu erhalten.  Im Original Maxima wird @"uberwiegend mit Befehlen
+wie zum Beispiel @code{(cadr x)} oder @code{(second x)} direkt auf die
+Darstellung der rationalen Zahl als ein kMaxima-Ausdruck zugegriffen.  Um die
+Implementierung einer rationalen Zahl zu verbergen, um zum Beispiel diese
+sp@"ater durch eine andere zu ersetzen, soll dies in kMaxima vermieden werden.
+
+@c -----------------------------------------------------------------------------
+@anchor{make-rat}
+@deffn {Funktion} make-rat n d
+
+Erzeugt eine rationale Zahl der Form @code{((rat simp) num den)}.  Das
+Argument @var{n} ist der Nenner und @var{d} der Z@"ahler.  Nenner und Z@"ahler
+werden gek@"urzt.  Wird dabei der Nenner zu @code{1}, gibt die Funktion den
+Z@"ahler als ganze Zahl zur@"uck.  Weiterhin ist der Nenner immer positiv.  Die
+Argumente m@"ussen ganze Zahlen sein.
+
+@code{make-rat} vereinfacht die rationale Zahl zu einer Gleitkommazahl, wenn
+die Optionsvariable @mref{$float} den Wert @code{t} hat.
+
+Immer wenn eine rationale Zahl aus zwei ganzen Zahlen erzeugt werden muss, kann
+die Funktion @code{make-rat} aufgerufen werden.  Es ist sichergestellt, dass
+eine korrekt formatierte und vereinfachte rationale, ganze oder Gleitkommazahl
+zur@"uckgegeben wird.
+
+Siehe auch die Funktion @mref{simp-rat} sowie die Funktionen 
+@mref{rat-num} und @mrefcomma{rat-den} um den Z@"ahler und Nenner einer
+rationalen Zahl zu erhalten.
+
+@emph{Beispiele:}
+@example
+* (make-rat 1 2)
+((RAT SIMP) 1 2)
+* (make-rat 6 4)
+((RAT SIMP) 3 2)
+* (make-rat 6 -4)
+((RAT SIMP) -3 2)
+* (make-rat 6 -2)
+-3
+* (let (($float t)) (make-rat 1 2))
+0.5
+@end example
 
 @emph{Quelltext:}
 @lisp
 @group
-(defun power (bas pow)
-  (cond ((eql 1 pow) bas)
-        (t (simplifya `((mexpt) ,bas ,pow) t))))
+(defun make-rat (n d)
+  (cond ((zerop n) 0)
+        ((eql d 1) n)
+        (t
+         (let ((u (gcd n d)))
+           (setq n (truncate n u)
+                 d (truncate d u))
+           (when (minusp d) (setq n (- n) d (- d)))
+           (cond ((eql d 1) n)
+                 ($float (float (/ n d)))
+                 (t (list '(rat simp) n d)))))))
 @end group
 @end lisp
+
+@emph{Hinweis:}
+Im Original Maxima hat diese Funktion den Namen @code{*red}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{simp-rat}
+@deffn {Funktion} simp-rat x y z
+
+Die Funktion @code{simp-rat} wird von der Funktion @mref{simplifya} aufgerufen,
+um zu pr@"ufen, ob das Argument @var{x} eine vereinfachte rationale Zahl der
+Form @code{((rat simp) num den)} ist.  Hat der Operator @code{rat} nicht das
+Attribut @code{simp} wird die Funktion @mref{make-rat} aufgerufen, um die
+rationale Zahl zu vereinfachen.
+
+Weiterhin beachtet @code{simp-rat} die Optionsvariable @mrefdot{$float}  Hat
+@code{$float} den Wert @code{true}, wird die rationale Zahl in eine
+Gleitkommazahl umgewandelt.
+
+@code{simp-rat} sollte nie direkt aufgerufen werden.  Wie f@"ur andere
+Funktionen der Vereinfachung auch, bleibt ein Aufruf von @code{simp-rat} der
+Funktion @code{simplifya} vorbehalten.  @code{simp-rat} ben@"otigt die Argumente
+@var{y} und @var{z} nicht.  Diese werden hier ignoriert und sind vorhanden,
+damit alle Funktionen der Vereinfachung eine einheitliche Syntax mit drei
+Argumenten haben.
+
+@emph{Beispiele:}
+@example
+* (simp-rat '((rat)  3 6) nil nil)
+((RAT SIMP) 1 2)
+* (simp-rat '((rat simp)  1 2) nil nil)
+((RAT SIMP) 1 2)
+* (let (($float t)) (simp-rat '((rat simp)  1 2) nil nil))
+0.5
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun simp-rat (x y z)
+  (declare (ignore y z))
+  (cond ((member 'simp (cdar x) :test #'eq)
+         (if $float
+             (rat-to-float x)
+             x))
+        (t (make-rat (cadr x) (caddr x)))))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+Im Original Maxima hat diese Funktion den Namen @code{*red1}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{rat-to-float}
+@deffn {Funktion} rat-to-float x
+
+Das Argument @var{x} ist eine rationale Zahl der Form
+@code{((rat simp) num den)}, die in eine Gleitkommazahl umgewandelt wird.  Die
+Gleitkommazahl wird als Ergebnis zur@"uckgegeben.
+
+Siehe auch die Optionsvariable @mrefcomma{$float} mit der die Umwandlung
+von rationalen Zahlen in Gleitkommazahlen kontrolliert wird.
+
+@emph{Beispiel:}
+@example
+* (rat-to-float '((rat simp) 1 2))
+0.5
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun rat-to-float (x)
+  (float (/ (cadr x) (caddr x))))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+Im Original Maxima hat diese Funktion den Namen @code{fpcofrat}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{rat-num}
+@deffn {Funktion} rat-num x
+
+Das Argument @var{x} ist eine rationale Zahl der Form
+@code{((rat simp) num den)} oder eine ganze Zahl.  Die R@"uckgabe ist der
+Z@"ahler @code{num}, wenn das Argument eine rationale Zahl ist.  Ist das
+Argument @var{x} eine ganze Zahl, wird diese zur@"uckgegeben.
+
+@code{rat-num} akzeptiert auch eine Gleitkommazahl als Argument @var{x} und
+gibt diese als Ergebnis zur@"uck.  Aus Gr@"unden der Effizienz wird dieser Fall
+nicht getestet.  Es ist die Verantwortung der aufrufenden Funktion,
+@code{rat-num} mit korrekten Argumenten aufzurufen.
+
+Siehe auch die Funktion @mrefdot{rat-den}
+
+@emph{Beispiele:}
+@example
+* (rat-num '((rat simp) 3 2))
+3
+* (rat-num 5)
+5
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun rat-num (x)
+  (if (numberp x) x (cadr x)))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+Im Original Maxima hat diese Funktion den Namen @code{num1}.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{rat-den}
+@deffn {Funktion} rat-den x
+
+Das Argument @var{x} ist eine rationale Zahl der Form
+@code{((rat simp) num den)} oder eine ganze Zahl.  Die R@"uckgabe ist der Nenner
+@var{den}, wenn das Argument eine rationale Zahl ist.  Ist das Argument @var{x}
+eine ganze Zahl, wird @code{1} zur@"uckgegeben.
+
+@code{rat-den} akzeptiert auch eine Gleitkommazahl als Argument @var{x} und
+gibt in diesem Fall auch das Ergebnis @code{1} zur@"uck.  Aus Gr@"unden der
+Effizienz wird dieser Fall nicht getestet.  Es ist die Verantwortung der
+aufrufenden Funktion, @code{rat-den} mit korrekten Argumenten aufzurufen.
+
+@emph{Beispiele:}
+@example
+* (rat-den '((rat simp) 3 2))
+2
+* (rat-den 5)
+1
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun rat-den (x)
+  (if (numberp x) 1 (caddr x)))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+Im Original Maxima hat diese Funktion den Namen @code{denom1}.
 @end deffn
 
 @c -----------------------------------------------------------------------------
@@ -416,29 +644,6 @@ abgebrochen.
 
 (setf (get '$%gamma '$numer)
       0.5772156649015328606065120900824024310421593359399235988057672348)
-
-;;; ----------------------------------------------------------------------------
-
-(defun make-rat (n d)
-  (cond ((zerop n) 0)
-        ((eql d 1) n)
-        (t
-         (let ((u (gcd n d)))
-           (setq n (truncate n u)
-                 d (truncate d u))
-           (when (minusp d) (setq n (- n) d (- d)))
-           (cond ((eql d 1) n)
-                 ($float (float (/ n d)))
-                 (t (list '(rat simp) n d)))))))
-
-(defun rat-to-float (x)
-  (float (/ (cadr x) (caddr x))))
-
-(defun rat-num (x)
-  (if (numberp x) x (cadr x)))
-
-(defun rat-den (x)
-  (if (numberp x) 1 (caddr x)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -510,9 +715,15 @@ abgebrochen.
            (mplusp (caddr x)))
       (addn (mapcar #'(lambda (z) (mul -1 z)) (cdaddr x)) t)
       x))
+@end smalllisp
 
-;;; ----------------------------------------------------------------------------
+@c -----------------------------------------------------------------------------
+@anchor{simplifya}
+@deffn {Funktion} simplifya x y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun simplifya (x y)
   (cond ((not $simp) x)
         ((atom x)
@@ -533,7 +744,11 @@ abgebrochen.
                        (not (member 'array (cdar x) :test #'eq)))
                   (funcall w x 1 y))
                  (t (simpargs x y)))))))
+@end group
+@end lisp
+@end deffn
 
+@smalllisp
 (defun simpargs (x y)
   (if (and (member 'array (cdar x) :test #'eq)
            (null (margs x)))
