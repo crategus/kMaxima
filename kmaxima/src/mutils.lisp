@@ -128,6 +128,20 @@
   (cond ((realp x) (minusp x))
         ((ratnump x) (minusp (rat-num x)))))
 
+(defun maxima-constantp (x)
+  (or (numberp x)
+;      (and (symbolp x) (kindp x '$constant))
+      ))
+
+(defun constant (x)
+  (cond ;((symbolp x) (kindp x '$constant))
+        ;(($subvarp x)
+        ; (and (kindp (caar x) '$constant)
+        ;      (do ((x (cdr x) (cdr x)))
+        ;          ((null x) t)
+        ;        (if (not ($constantp (car x))) (return nil)))))
+        (t nil)))
+
 ;;; ----------------------------------------------------------------------------
 
 (defmacro ncons (x)
@@ -390,6 +404,21 @@
   (do ((l l (cdr l)))
       ((null l))
     (when (alike1 x (car l)) (return l))))
+
+;;; ----------------------------------------------------------------------------
+
+(defun free (expr var)
+  (cond ((alike1 expr var) nil)
+        ((atom expr) t)
+        (t
+         (and (listp (car expr))
+              (free (caar expr) var)
+              (freel (cdr expr) var)))))
+
+(defun freel (l var)
+  (do ((l l (cdr l)))
+      ((null l) t)
+    (when (not (free (car l) var)) (return nil))))
 
 ;;; ----------------------------------------------------------------------------
 
