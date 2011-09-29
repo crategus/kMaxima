@@ -31,10 +31,15 @@
 (defmvar $%enumer nil)
 (defmvar $negdistrib t)
 
+(defmvar $domain '$real)
+(defmvar $radexpand t)
+(defmvar $numer_pbranch t)
+
 (defmvar $expop 0)
 (defmvar $expon 0)
 
 (defvar *dosimp* nil)
+(defvar *errorsw* nil)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -113,8 +118,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun inv (x)
-  (power x -1))
+(defun sub (x y)
+  (cond ((eql 0 y) x)
+        ((eql 0 x) (neg y))
+        ((and (numberp x) (numberp y)) (- x y))
+        (t (add x (neg y)))))
 
 (defun neg (x)
   (declare (special $negdistrib))
@@ -122,20 +130,17 @@
         (t (let (($negdistrib t))
              (simplifya `((mtimes) -1 ,x) t)))))
 
-(defun sub (x y)
-  (cond ((eql 0 y) x)
-        ((eql 0 x) (neg y))
-        ((and (numberp x) (numberp y)) (- x y))
-        (t (add x (neg y)))))
+(defun power (bas pow)
+  (cond ((eql 1 pow) bas)
+        (t (simplifya `((mexpt) ,bas ,pow) t))))
+
+(defun inv (x)
+  (power x -1))
 
 (defun div (x y)
   (if (eql 1 x)
       (inv y)
       (mul x (inv y))))
-
-(defun power (bas pow)
-  (cond ((eql 1 pow) bas)
-        (t (simplifya `((mexpt) ,bas ,pow) t))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -170,12 +175,12 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun addk (xx yy)
-  (cond ((eql xx 0) yy)
-        ((eql yy 0) xx)
-        ((and (numberp xx) (numberp yy)) (+ xx yy))
+(defun addk (x y)
+  (cond ((eql x 0) y)
+        ((eql y 0) x)
+        ((and (numberp x) (numberp y)) (+ x y))
         (t
-         (prog (g a b (x xx) (y yy))
+         (prog (g a b)
            (cond ((numberp x)
                   (cond ((floatp x) (return (+ x (rat-to-float y))))
                         (t (setq x (list '(rat) x 1)))))
@@ -220,6 +225,17 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun exptb (a b)
+  (cond ((eql a (get '$%e '$numer))
+         (exp (float b)))
+        ((or (floatp a) (not (minusp b)))
+         (expt a b))
+        (t
+         (setq b (expt a (- b)))
+         (make-rat 1 b))))
+
+;;; ----------------------------------------------------------------------------
+
 (defun simpcheck (e flag)
   (cond (flag e)
         (t
@@ -245,11 +261,7 @@
                 (setq x (get '$%e '$numer)))
                (t x)))
         ((atom (car x))
-         (cond ((and (cdr x) (atom (cdr x)))
-                (merror "simplifya: Found a cons with an atomic cdr."))
-               (t
-                (cons (car x)
-                      (mapcar #'(lambda (x) (simplifya x y)) (cdr x))))))
+         (merror "simplifya: Found an illegal kMaxima expression."))
         ((eq (caar x) 'rat) (simp-rat x 1 nil))
         ((and (not *dosimp*) (member 'simp (cdar x) :test #'eq)) x)
         (t
@@ -327,6 +339,26 @@
          (mul -1 (simplifya (cadr x) z)))
         (t
          (sub (simplifya (cadr x) z) (addn (cddr x) z)))))
+
+;;; ----------------------------------------------------------------------------
+
+;;; Implementation of the Square root function
+
+(defprop $sqrt %sqrt verb)
+(defprop $sqrt %sqrt alias)
+
+(defprop %sqrt $sqrt noun)
+(defprop %sqrt $sqrt reversealias)
+
+(defprop %sqrt simp-sqrt operators)
+
+(defun $sqrt (z)
+  (simplifya (list '(%sqrt) z) nil))
+
+(defun simp-sqrt (x ignored z)
+  (declare (ignore ignored))
+  (oneargcheck x)
+  (simplifya (list '(mexpt) (cadr x) '((rat simp) 1 2)) z))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -488,9 +520,9 @@
                    ;; to 4*sqrt(2). In simptimes this is further simplified
                    ;; to 2^(5/2).
                    (multiple-value-bind (n1 d1)
-                       (truncate (num1 n) (denom1 n))
+                       (truncate (rat-num n) (rat-den n))
                      (multiple-value-bind (n2 d2)
-                         (truncate (num1 m) (denom1 m))
+                         (truncate (rat-num m) (rat-den m))
                        (cond ((eql d1 d2)
                               ;; Case I: -> (v*a^n1+w*a^n2)*a^(c+d1/r)
                               (setq x1
@@ -498,27 +530,27 @@
                                                (timesk w (exptb a n2)))
                                          (power a
                                                 (add c
-                                                     (div d1 (denom1 n))))))
+                                                     (div d1 (rat-den n))))))
                               (go equt2))
                              ((minusp d2)
                               ;; Case II:: d2 is negative, adjust n1.
-                              (setq n1 (add n1 (div (sub d1 d2) (denom1 n))))
+                              (setq n1 (add n1 (div (sub d1 d2) (rat-den n))))
                               (setq x1
                                     (mul (addk (timesk v (exptb a n1))
                                                (timesk w (exptb a n2)))
                                          (power a
                                                 (add c
-                                                     (div d2 (denom1 n))))))
+                                                     (div d2 (rat-den n))))))
                               (go equt2))
                              ((minusp d1)
                               ;; Case II: d1 is negative, adjust n2.
-                              (setq n2 (add n2 (div (sub d2 d1) (denom1 n))))
+                              (setq n2 (add n2 (div (sub d2 d1) (rat-den n))))
                               (setq x1
                                     (mul (addk (timesk v (exptb a n1))
                                                (timesk w (exptb a n2)))
                                          (power a 
                                                 (add c
-                                                     (div d1 (denom1 n))))))
+                                                     (div d1 (rat-den n))))))
                               (go equt2))
                              ;; This clause should never be reached.
                              (t (merror "Internal error in simplus."))))))))
@@ -546,7 +578,7 @@
   del
      (cond ((not (mtimesp (cadr fm)))
             (go check))
-           ((onep (cadadr fm))
+           ((eql 1 (cadadr fm))
             ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
             (rplacd (cadr fm) (cddadr fm))
             (return (cdr fm)))
@@ -571,7 +603,7 @@
                  (list* '(mtimes) x1 x)
                  (if (mtimesp x1) (testtneg x1) x1)))
      (if (not (mtimesp (cadr fm))) (go check))
-     (when (and (onep (cadadr fm)) flag (null (cdddr (cadr fm))))
+     (when (and (eql 1 (cadadr fm)) flag (null (cdddr (cadr fm))))
        ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
        (rplaca (cdr fm) (caddr (cadr fm))) (go check))
      (go del)
@@ -638,7 +670,7 @@
     (when (mplusp product) (setq product (list '(mtimes simp) product)))
     (cond ((zerop1 factor)
            (cond ((mnegativep power)
-                  (if errorsw
+                  (if *errorsw*
                       (throw 'errorsw t)
                       (merror "Division by 0")))
                  ((mnumberp product)
@@ -676,11 +708,11 @@
 
 (defun exponent-of (m base)
   (unless (and (mnumberp m)
-               (ratgreaterp m 0)
+               (not (mnegativep m))
                (integerp base)
                (not (eql (abs base) 1)))
     (return-from exponent-of nil))
-  (cond ((ratgreaterp 1 m)
+  (cond ((great 1 m)
          (let ((expo (exponent-of (inv m) base)))
            (when expo (- expo))))
         ((ratnump m)
@@ -728,7 +760,7 @@
             (go less))
            ((mexptp (cadr fm))
             (cond ((alike1 (car x) (cadadr fm))
-                   (cond ((zerop1 (setq w (plsk (caddr (cadr fm)) w)))
+                   (cond ((zerop1 (setq w (add (caddr (cadr fm)) w)))
                           (go del))
                          ((and (mnumberp w)
                                (or (mnumberp (car x))
@@ -765,7 +797,7 @@
                   ((and (onep1 w)
                         (or (ratnump (car x))
                             (and (integerp (car x))
-                                 (not (onep (car x))))))
+                                 (not (eql 1 (car x))))))
                    ;; Multiplying a^k * rational.
                    (let* ((numerator (if (integerp (car x)) 
                                          (car x)
@@ -1018,7 +1050,7 @@
      (cond ((and (eq (car x) '$%i) (eql w 1))
             (rplacd fm (cddr fm))
             (return (rplaca y (timesk -1 (car y)))))
-           ((zerop1 (setq w (plsk 1 w)))
+           ((zerop1 (setq w (add 1 w)))
             (go del))
            ((and (mnumberp (car x)) (mnumberp w))
             (return (rplaca (cdr fm) (exptrl (car x) w))))
@@ -1082,17 +1114,18 @@
                   ((or (member (setq z ($csign pot)) '($neg $nz))
                        (and *zexptsimp? (eq ($asksign pot) '$neg)))
                    ;; A negative exponent. Maxima error.
-                   (cond ((not errorsw) (merror "expt: undefined: 0 to a negative exponent."))
+                   (cond ((not *errorsw*)
+                          (merror "expt: undefined: 0 to a negative exponent."))
                          (t (throw 'errorsw t))))
                   ((and (member z '($complex $imaginary))
                         ;; A complex exponent. Look at the sign of the realpart.
                         (member (setq z ($sign ($realpart pot))) 
                                 '($neg $nz $zero)))
-                   (cond ((not errorsw)
+                   (cond ((not *errorsw*)
                           (merror "expt: undefined: 0 to a complex exponent."))
                          (t (throw 'errorsw t))))
                   ((and *zexptsimp? (eq ($asksign pot) '$zero))
-                   (cond ((not errorsw)
+                   (cond ((not *errorsw*)
                           (merror "expt: undefined: 0^0"))
                          (t (throw 'errorsw t))))
                   ((not (member z '($pos $pz)))
@@ -1102,7 +1135,7 @@
                    ;; Look for the imaginary symbol to be consistent with 
                    ;; old code.
                    (cond ((not (free pot '$%i))
-                          (cond ((not errorsw)
+                          (cond ((not *errorsw*)
                                  (merror "expt: undefined: 0 to a complex exponent."))
                                 (t (throw 'errorsw t))))
                          (t
@@ -1302,7 +1335,7 @@
                    ;; taylorize %e^taylor(...)
                    (return ($taylor x)))))
            (t
-            (let ((y (mget gr '$numer)))
+            (let ((y (get gr '$numer)))
               ;; Check for a numeric constant.
               (and y
                    (floatp y)
@@ -1388,6 +1421,25 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun %itopot (pot)
+  (if (fixnump pot)
+      (let ((i (boole boole-and pot 3)))
+	(cond ((eql i 0) 1)
+	      ((eql i 1) '$%i)
+	      ((eql i 2) -1)
+	      (t (mul -1 '$%i))))
+      (power -1 (mul pot (inv 2)))))
+
+;;; ----------------------------------------------------------------------------
+
+(defun zerores (r1 r2)
+  (cond ((or (floatp r1) (floatp r2)) 0.0)
+        (t 0)))
+
+;;; ----------------------------------------------------------------------------
+
+(defvar exptrlsw nil)
+
 (defun exptrl (r1 r2)
   (cond ((eql r2 1) r1)
         ((eql r2 1.0)
@@ -1395,8 +1447,8 @@
                (t (list '(mexpt simp) r1 1.0))))
         ((zerop1 r1)
          (cond ((or (zerop1 r2) (mnegativep r2))
-                (if (not errorsw)
-                    (merror "expt: undefined: ~M" (list '(mexpt) r1 r2))
+                (if (not *errorsw*)
+                    (merror "expt: undefined: ~a" (list '(mexpt) r1 r2))
                     (throw 'errorsw t)))
                (t (zerores r1 r2))))
         ((or (zerop1 r2) (onep1 r1))
@@ -1407,22 +1459,29 @@
          (exptb (float r1) (floor r2)))
         ((or $numer
              (and (floatp r2)
-                  (or (plusp (rat-num r1))
-                      $numer_pbranch)))
+                  (or $numer_pbranch
+                      (plusp (rat-num r1)))))
          (let (y)
            (cond ((minusp (setq r1 (addk 0.0 r1)))
-                  (cond ((or $numer_pbranch (eq $domain '$complex))
-                         ;; for R1<0:
-                         ;; R1^R2 = (-R1)^R2*cos(pi*R2) + i*(-R1)^R2*sin(pi*R2)
+                  (cond ((or $numer_pbranch
+                             (eq $domain '$complex))
                          (setq r2 (addk 0.0 r2))
-                         (setq y (exptrl (- r1) r2)
-                               r2 (* (get '$%pi '$numer) r2))
-                         (add (* y (cos r2))
-                              (list '(mtimes simp) (* y (sin r2)) '$%i)))
+                         (cond ((eql (float (setq y (* 2.0 r2)))
+                                     (float (floor y)))
+                                (if (plusp r2)
+                                    (mul (%itopot (floor y))
+                                         (exptb (sqrt (- r1)) (floor y)))
+                                    (mul (%itopot (floor y))
+                                         (inv (exptb (sqrt (- r1))
+                                                     (- (floor y)))))))
+                               (t
+                                (setq y (expt r1 r2))
+                                (if (complexp y)
+                                    (add (realpart y)
+                                         (mul '$%i (imagpart y)))
+                                    y))))
                         (t
-                         (setq y (let ($numer $float $keepfloat $ratprint)
-                                   (power -1 r2)))
-                         (mul y (exptrl (- r1) r2)))))
+                         (mul (power -1 r2) (exptrl (- r1) r2)))))
                  ((eql (setq r2 (addk 0.0 r2)) (float (floor r2)))
                   (exptb r1 (floor r2)))
                  ((and (eql (setq y (* 2.0 r2)) (float (floor y)))
@@ -1449,11 +1508,13 @@
                 (list '(rat simp) 
                       (exptb (cadr r1) r2)
                       (exptb (caddr r1) r2)))))
-        ((and (floatp r1) (alike1 r2 '((rat) 1 2)))
+        ((and (floatp r1)
+              (alike1 r2 '((rat) 1 2)))
          (if (minusp r1)
              (list '(mtimes simp) (sqrt (- r1)) '$%i)
              (sqrt r1)))
-        ((and (floatp r1) (alike1 r2 '((rat) -1 2)))
+        ((and (floatp r1)
+              (alike1 r2 '((rat) -1 2)))
          (if (minusp r1)
              (list '(mtimes simp) (/ -1.0 (sqrt (- r1))) '$%i)
              (/ (sqrt r1))))
@@ -1475,14 +1536,86 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun exptb (a b)
-  (cond ((eql a (get '$%e '$numer))
-         (exp (float b)))
-        ((or (floatp a) (not (minusp b)))
-         (expt a b))
+(defun flatten (x)
+  (labels ((rec (x acc)
+             (cond ((null x) acc)
+                   ((atom x) (cons x acc))
+                   (t (rec (car x) (rec (cdr x) acc))))))
+    (rec x nil)))
+
+(defun inv-power (a b)
+  (do ((q 1 (1+ q))
+       (x 0))
+      ((> x b) nil)
+    (if (eql (setq x (expt a q)) b)
+        (return q))))
+
+(defun iroot (a n)
+  (if (< (integer-length a) n)
+      (list 1 (1- a))
+      (do ((x (expt 2 (1+ (truncate (integer-length a) n)))
+              (- x (truncate (+ n1 bk) n)))
+           (n1 (1- n))
+           (xn)
+           (bk))
+          (nil)
+        (cond ((<= (setq bk (- x (truncate a (setq xn (expt x n1))))) 0)
+               (return (list x (- a (* x xn)))))))))
+
+(defvar *in*  nil)
+(defvar *out* nil)
+
+(defun simpnrt (a n)
+  (prog (*in* *out* factors)
+    (if (minusp a)
+        (setq *in* (list -1)
+              a (get-small-factors (- a)))
+        (setq *in* (list 1)
+              a (get-small-factors a)))
+    (if (eql 1 (car a))
+        (setq a (flatten (cadr a)))
+        (setq a (flatten (cons (list (car a) 1) (cadr a)))))
+    (simpnrt1 a n)
+    (setq *out* (if *out* (muln *out* nil) 1))
+    (setq *in* (cond (*in*
+                      (setq *in* (muln *in* nil))
+                      (nrthk *in* n))
+                     (t 1)))
+    (return (mul *in* *out*))))
+
+(defun simpnrt1 (x n)
+  (do ((x x (cddr x))
+       (y))
+      ((null x))
+    (cond ((not (eql 1 (setq y (gcd (cadr x) n))))
+           (push (power (power (car x) (truncate (cadr x) y))
+                        (inv (truncate n y)))
+                 *out*))
+          ((and (eql 1 (cadr x))
+                (integerp (car x))
+                (plusp (car x))
+                (eql 0 (cadr (setq y (iroot (car x) n)))))
+           (push (car y) *out*))
+          (t
+           (unless (> n (abs (cadr x)))
+             (push (power (car x) (truncate (cadr x) n)) *out*))
+           (push (power (car x) (rem (cadr x) n)) *in*)))))
+
+(defun nrthk (a n)
+  (cond ((eql a 1) 1)
+        ((eql a -1)
+         (cond ((eql n 2) '$%i)
+               ((eq $domain '$real)
+                (if (evenp n)
+                    (power -1 (inv n))
+                    -1))
+               (t
+                (power -1 (inv n)))))
+        ((and $radexpand
+             (minusp a))
+         (mul (let ((exptrlsw nil)) (power (mul -1 a) (inv n)))
+              (nrthk -1 n)))
         (t
-         (setq b (expt a (- b)))
-         (make-rat 1 b))))
+         (power a (inv n)))))
 
 ;;; ----------------------------------------------------------------------------
-
