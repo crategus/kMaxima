@@ -23,6 +23,7 @@
 (defpackage :kmaxima
   (:nicknames :kmaxima)
   (:use :cl)
+  (:shadow float)
   (:export
     ;; General symbols
     #:$false
