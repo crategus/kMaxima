@@ -29,6 +29,14 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defmacro float (x &optional (y 1d0))
+  `(cl:float ,x ,y))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (setq *read-default-float-format* 'double-float))
+
+;;; ----------------------------------------------------------------------------
+
 (defmacro defun-prop (f arg &body body)
   `(setf (get ',(first f) ',(second f)) #'(lambda ,arg ,@body)))
 
