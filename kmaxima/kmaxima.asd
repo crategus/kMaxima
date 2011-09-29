@@ -36,6 +36,8 @@
                (:file "src/grind")
                (:file "src/display")
                (:file "src/msystem")
+               (:file "src/order")
                (:file "src/simplify")
-               (:file "src/mload")))
+               (:file "src/mload")
+               (:file "src/ifactor")))
 
