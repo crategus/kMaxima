@@ -13,6 +13,7 @@
 * Einf@"uhrung in die Vereinfachung::
 * Optionsvariablen der Vereinfachung::
 * Hilfsfunktionen der Vereinfachung::
+* Implementierung der Vereinfachung::
 * Funktionen und Variablen f@"ur die Vereinfachung::
 @end menu
 
@@ -94,7 +95,7 @@ negatives Vorzeichen vor einer Summe in die Summe herein multipliziert.
 
 @c -----------------------------------------------------------------------------
 @need 800
-@node Hilfsfunktionen der Vereinfachung, Funktionen und Variablen f@"ur die Vereinfachung, Optionsvariablen der Vereinfachung, Vereinfachung
+@node Hilfsfunktionen der Vereinfachung, Implementierung der Vereinfachung, Optionsvariablen der Vereinfachung, Vereinfachung
 @section Hilfsfunktionen der Vereinfachung
 @c -----------------------------------------------------------------------------
 
@@ -192,8 +193,6 @@ abgebrochen.
 * Funktionen f@"ur die Multiplikation::
 * Weitere arithmetische Funktionen::
 @end menu
-
-
 
 @c -----------------------------------------------------------------------------
 @node Funktionen f@"ur die Addition, Funktionen f@"ur die Multiplikation, Funktionen um den Vereinfacher aufzurufen, Funktionen um den Vereinfacher aufzurufen
@@ -624,7 +623,583 @@ Im Original Maxima hat diese Funktion den Namen @code{denom1}.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Funktionen und Variablen f@"ur die Vereinfachung, , Hilfsfunktionen der Vereinfachung, Vereinfachung
+@node Implementierung der Vereinfachung, Funktionen und Variablen f@"ur die Vereinfachung, Hilfsfunktionen der Vereinfachung, Vereinfachung
+@section Implementierung der Vereinfachung
+@c -----------------------------------------------------------------------------
+
+@menu
+* Hauptroutine der Vereinfachung::
+* Vereinfachung der Division::
+* Vereinfachung der Subtraktion::
+* Vereinfachung der Addition::
+* Vereinfachung der Multiplikation::
+* Vereinfachung der Exponentiation::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Hauptroutine der Vereinfachung, Vereinfachung der Division, Implementierung der Vereinfachung, Implementierung der Vereinfachung
+@subsection Hauptroutine der Vereinfachung
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{simplifya}
+@deffn {Funktion} simplifya x y
+
+Die Funktion @code{simplifya} ist die Hauptroutine f@"ur die Vereinfachung von
+Ausdr@"ucken.  Das Argument @var{x} ist der Ausdruck der zu vereinfachen ist.
+Das Argument @var{y} ist ein Schalter, der anzeigt, wie die Argumente des
+Hauptoperators zu vereinfachen sind.  Hat der Schalter @var{y} den Wert
+@code{t}, werden die Argumente bereits als vereinfacht angenommen, ansonsten
+werden die Argumente @emph{nicht} als vereinfacht angenommen.
+
+Die Funktion @code{simplifya} f@"uhrt nur einige spezielle Vereinfachungen
+direkt aus.  Die Hauptaufgabe der Funktion ist das Holen der Funktionen f@"ur
+die Vereinfachung von der Eigenschaftsliste des Hauptoperators des Ausdrucks,
+um den Ausdruck zu vereinfachen.
+
+Hat die Optionsvariable @mref{$simp} den Wert @code{nil}, wird die Vereinfachung
+vollst@"andig abgeschaltet.  In diesem Fall wird das Argument @var{x} sofort als
+Ergebnis zur@"uckgegeben.
+
+Mit Ausnahme des Symbols @code{$%e}, das die Eulersche Zahl repr@"asentiert, 
+werden Atome, das sind ganze Zahlen, Gleitkommazahlen und Symbole, sofort als
+Ergebnis zur@"uckgegeben.  Die Vereinfachung der Eulerschen Zahl @code{$%e}
+wird von den Optionsvariablen @mref{$%enumer} und @mref{$numer} kontrolliert.
+Haben beide Optionsvariablen den Wert @code{t}, dann wird das Symbol f@"ur
+die Eulersche Zahl durch den numerischen Gleitkommawert ersetzt.
+
+Ist das erste Element des Ausdrucks @var{x} keine Liste, liegt ein nicht
+g@"ultiger kMaxima-Ausdruck vor und @code{simplifya} bricht mit einer
+Fehlermeldung ab.
+
+Findet @code{simplifya} eine rationale Zahl, so wird die Funktion
+@mref{simp-rat} aufgerufen, die eine vereinfachte rationale Zahl oder
+eine Gleitkommazahl zur@"uckgibt, wenn die Optionsvariable @mref{$float} den
+Wert @code{t} hat.
+
+Hat der Hauptoperator des Ausdruck @var{x} bereits ein @code{simp}-Schalter,
+dann wird das @var{x} als Ergebnis zur@"uckgegeben, au@ss{}er wenn die globale
+Variable @mref{*dosimp*} den Wert @code{t} hat.  In diesem Fall wird die 
+Vereinfachung eines Ausdrucks erzwungen.  Diese Option wird angewendet, wenn
+ein Ausdruck vollst@"andig neu vereinfacht werden soll.
+
+Dann wird, wenn vorhanden, die Funktion f@"ur die Vereinfachung des Hauptoperators
+von der Lisp-Eigenschaftsliste geholt und diese Funktion mit dem Ausdruck
+@var{x} als erstem Argument und dem Schalter @var{y} als drittem Argument
+aufgerufen.  Die Funktionen f@"ur die Vereinfachung von Ausdr@"ucken haben immer
+drei Argumente.  Das zweite Argument wird dabei immer mit einem Dummy-Wert
+belegt, der zum Beispiel hier den Wert @code{1} hat.
+
+Wenn keine der oben angegebenen Aktionen durchgef@"uhrt wurden, wird zuletzt die
+Funktion @mref{simpargs} aufgerufen, die die Aufgabe hat, die Argumente
+des Operators zu vereinfachen.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun simplifya (x y)
+  (cond ((not $simp) x)
+        ((atom x)
+         (cond ((and $%enumer $numer (eq x '$%e))
+                (setq x (get '$%e '$numer)))
+               (t x)))
+        ((atom (car x))
+         (merror "simplifya: Found an illegal kMaxima expression."))
+        ((eq (caar x) 'rat) (simp-rat x 1 nil))
+        ((and (not *dosimp*) (member 'simp (cdar x) :test #'eq)) x)
+        (t
+         (let ((w (get (caar x) 'operators)))
+           (cond ((and w
+                       (not (member 'array (cdar x) :test #'eq)))
+                  (funcall w x 1 y))
+                 (t (simpargs x y)))))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{simpargs}
+@deffn {Funktion} simpargs x y
+
+Die Funktion @code{simpargs} wird von @mref{simplifya} aufgerufen, wenn
+keine Funktion f@"ur die Vereinfachung des Hauptoperators des Arguments @var{x}
+existiert.  In diesem Fall werden die Argumente des Operators von der 
+Funktion @code{simpargs} vereinfacht.
+
+@code{simpargs} wendet die Funktion @mref{simpcheck} auf die Argumente des
+Ausdrucks @var{x} an.  @code{simpcheck} ruft im wesentlichen die Funktion
+@mref{simplifya} auf, wobei die Funktion Einfluss auf die Vereinfachung der
+Eulerschen Zahl @code{$%e} hat.  @code{simpargs} ruft @code{simpcheck} nicht
+f@"ur die Operatoren @code{mlist} und @code{mequal} auf.  In diesem Fall wird
+die Funktion @code{simplifya} direkt aufgerufen.
+
+Zuletzt wird die Funktion @mref{eqtest} mit dem vereinfachten Ausdruck als
+Argument aufgerufen.  @code{eqtest} pr@"uft, ob ein neuer Ausdruck vorliegt
+und setzt gegebenenfalls ein @code{simp}-Schalter in den Ausdruck ein.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun simpargs (x y)
+  (if (and (member 'array (cdar x) :test #'eq)
+           (null (margs x)))
+      (merror "simplifya: Subscripted variable found with no subscripts."))
+  (eqtest (if y
+              x
+              (let ((flag (member (caar x) '(mlist mequal) :test #'eq)))
+                (cons (ncons (caar x))
+                      (mapcar #'(lambda (u)
+                                  (if flag
+                                      (simplifya u nil)
+                                      (simpcheck u nil)))
+                              (cdr x)))))
+          x))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@need 800
+@anchor{eqtest}
+@deffn {Funktion} eqtest x check
+
+Immer wenn ein Ausdruck vereinfacht wurde, wird die Funktion @code{eqtest}
+mit dem Ergebnis der Vereinfachung @var{x} als Argument und dem Ausdruck
+@var{check} vor der Vereinfachung aufgerufen.  Hat die Vereinfachung zu keinem
+neuen Ausdruck gef@"uhrt, wird der urspr@"ungliche Ausdruck zur@"uckgegeben.
+
+Weiterhin f@"ugt @code{eqtest} gegebenenfalls einen fehlenden
+@code{simp}-Schalter f@"ur den Hauptausdruck ein.
+
+@emph{Beispiele:}
+@verbatim
+* (eqtest '((mexpt) $a $b) nil)
+((MEXPT SIMP) $A $B)
+* (eqtest '((mexpt) $a ((mtimes) $x $y)) nil)
+((MEXPT SIMP) $A ((MTIMES) $X $Y))
+@end verbatim
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun eqtest (x check)
+  (cond ((or (atom x)
+             (eq (caar x) 'rat)
+             (member 'simp (cdar x) :test #'eq))
+         x)
+        ((and (eq (caar x) (caar check))
+              (equal (cdr x) (cdr check)))
+         (cond ((member 'simp (cdar check) :test #'eq)
+                check)
+               (t
+                (cons (cons (caar check)
+                            (if (cdar check)
+                                (cons 'simp (cdar check))
+                                '(simp)))
+                      (cdr check)))))
+        ((or (member 'array (cdar x) :test #'eq)
+             (and (eq (caar x) (caar check))
+                  (member 'array (cdar check) :test #'eq)))
+         (rplaca x (cons (caar x) '(simp array))))
+        (t
+         (rplaca x (cons (caar x) '(simp))))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Division, Vereinfachung der Subtraktion, Hauptroutine der Vereinfachung, Implementierung der Vereinfachung
+@subsection Vereinfachung der Division
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{simp-mquotient}
+@deffn {Funktion} simp-mquotient x y z
+
+Liest der Parser eine Division mit dem Operator @code{/}, dann wird dieser
+in die interne Darstellung @code{((mquotient) num den)} umgewandelt.  Die
+Argument @code{num} und @code{den} des Operators @code{mquotient} sind der
+jeweils der Z@"ahler und der Nenner der Division.
+
+Die Funktion @mref{simplifya} ruft f@"ur einen @code{mquotient}-Ausdruck
+die Funktion @code{simp-mquotient} auf, die den Ausdruck vereinfacht.  Das
+erste Argument @var{x} ist der zu vereinfachende @code{mquotient}-Ausdruck.
+Das zweite Argument @var{y} ist eine Dummy-Variable, die beim Aufruf mit
+irgendeinem Wert belegt werden kann.  Das dritte Argument @var{y} ist ein
+Schalter, der mit einem Wert @code{t} anzeigt, dass die Argumente @code{num}
+und @code{den} des @code{mquotient}-Ausdrucks als vereinfacht angenommen werden
+k@"onnen.  Hat das dritte Argument den Wert @code{nil} werden die Argumente
+@code{num} und @code{den} vereinfacht.
+
+Sind die Argumente @var{num} und @var{den} ganze Zahlen, wird eine rationale
+Zahl oder ganze Zahl als Ergebnis zur@"uckgegeben.  Ist eines der Argumente
+eine Gleitkommazahl wird eine Gleitkommazahl als Ergebnis zur@"uckgegeben.
+
+F@"ur alle anderen Argumente einschlie@ss{}lich dem Fall, dass der Nenner Null
+ist, wird ein Ausdruck in die Form @code{((mtimes) num ((mexpt) den -1))}
+umgewandelt und dann vereinfacht.
+
+@emph{Beispiele:}
+@example
+* (simp-mquotient '((mquotient) 2 3) 1 nil)
+((RAT SIMP) 2 3)
+* (simp-mquotient '((mquotient) 6 3) 1 nil)
+2
+* (simp-mquotient '((mquotient) 1.0 2) 1 nil)
+0.5
+* (simp-mquotient '((mquotient) $a $b) 1 nil)
+((MTIMES SIMP) $A ((MEXPT SIMP) $B -1))
+@end example
+
+@emph{Quelltext:}
+@lisp
+(setf (get 'mquotient 'operators) 'simp-mquotient)
+@end lisp
+@lisp
+@group
+(defun simp-mquotient (x y z)
+  (twoargcheck x)
+  (cond ((and (integerp (cadr x))
+              (integerp (caddr x))
+              (not (zerop (caddr x))))
+         (make-rat (cadr x) (caddr x)))
+        ((and (numberp (cadr x))
+              (numberp (caddr x))
+              (not (zerop (caddr x))))
+         (/ (cadr x) (caddr x)))
+        (t
+         (setq y (simplifya (cadr x) z))
+         (setq x (simplifya (list '(mexpt) (caddr x) -1) z))
+         (if (eql y 1)
+             x
+             (simplifya (list '(mtimes) y x) t)))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Subtraktion, Vereinfachung der Addition, Vereinfachung der Division, Implementierung der Vereinfachung
+@subsection Vereinfachung der Subtraktion
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{simp-mminus}
+@deffn {Funktion} simp-mminus x y z
+
+Die Funktion @code{simp-mminus} vereinfacht eine Subtraktion, die die Form
+@code{((minus) arg_1 arg_2 ...} hat.  @code{simp-mminus} wird von
+@code{simplifya} mit einem @code{mminus}-Ausdruck als erstem Argument @var{x}
+aufgerufen.  Das zweite Argument @var{y} ist eine Dummy-Variable und kann mit
+irgendeinem Wert belegt werden.  Das dritte Argument @var{z} ist ein Schalter,
+der mit dem Wert @code{t} anzeigt, dass die Argumente @code{arg_1},
+@code{arg_2}, @dots{} als vereinfacht angenommen werden k@"onnen.
+
+Die Vereinfachung eines @code{mminus}-Ausdrucks ist als Nary-Operator
+implementiert und akzeptiert eine beliebige Anzahl an Argumenten.  Hat der
+Ausdruck kein Argument wird als Ergebnis @code{0} zur@"uckgegeben.  Liegt
+ein Argument vor, wird dieses mit @code{-1} multipliziert und als Ergebnis
+zur@"uckgegeben.  Im Falle von zwei oder mehr Argumenten @var{arg_i} wird vom
+ersten Argument die Summe der restlichen Argumente abgezogen.
+
+@emph{Hinweis:}
+
+Der Operator @code{-} ist in den Routinen f@"ur die Anzeige als
+Pr@"afix-Operator implementiert.  Dies f@"uhrt zu einer fehlerhaften Anzeige
+von @code{mminus}-Ausdr@"ucken, die nicht vereinfacht sind.  Das ist ein
+Programmfehler, der durch eine neue Implementierung der Anzeige f@"ur
+@code{mminus}-Ausdr@"ucke korrigiert werden muss.
+
+@emph{Quelltext:}
+@lisp
+(setf (get 'mminus 'operators) 'simp-mminus)
+@end lisp
+@lisp
+@group
+(defun simp-mminus (x y z)
+  (cond ((null (cdr x)) 0)
+        ((null (cddr x))
+         (mul -1 (simplifya (cadr x) z)))
+        (t
+         (sub (simplifya (cadr x) z) (addn (cddr x) z)))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Addition, Vereinfachung der Multiplikation, Vereinfachung der Subtraktion, Implementierung der Vereinfachung
+@subsection Vereinfachung der Addition
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@anchor{simp-mplus}
+@deffn {Funktion} simp-mplus x w z
+
+@emph{Quelltext:}
+@lisp
+(setf (get 'mplus 'operators) 'simp-mplus)
+@end lisp
+@lisp
+@group
+(defun simp-mplus (x w z)
+  (prog (res check eqnflag)
+     (if (null (cdr x)) (return 0))
+     (setq check x)
+  start
+     (setq x (cdr x))
+     (if (null x) (go end))
+     (setq w (if z (car x) (simplifya (car x) nil)))
+  st1
+     (cond ((atom w) nil)
+           ((eq (caar w) 'mequal)
+            (setq eqnflag
+                  (if (not eqnflag)
+                      w
+                      (list (car eqnflag)
+                            (add (cadr eqnflag) (cadr w))
+                            (add (caddr eqnflag) (caddr w)))))
+            (go start)))
+     (setq res (pls w res))
+     (go start)
+  end
+     (setq res (eqtest (testp res) check))
+     (return (if eqnflag
+                 (list (car eqnflag)
+                       (add (cadr eqnflag) res)
+                       (add (caddr eqnflag) res))
+                 res))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{*plusflag*}
+@defvr {Globale Variable} *plusflag*
+Standardwert: @code{nil}
+
+Die globale Variable wird von den Funktionen @mref{pls} und @mref{plusin}
+genutzt, um anzeigen, dass ein verschachtelter @code{mplus}-Ausdruck
+vorliegt, der weiter zu vereinfachen ist.
+@end defvr
+
+@c -----------------------------------------------------------------------------
+@anchor{testp}
+@deffn {Funktion} testp x
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun testp (x)
+  (cond ((atom x) 0)
+        ((null (cddr x)) (cadr x))
+        ((zerop1 (cadr x))
+         (if (null (cdddr x))
+             (caddr x)
+             (rplacd x (cddr x))))
+        (t x)))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{pls}
+@deffn {Funktion} pls x out
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun pls (x out)
+  (prog (fm *plusflag*)
+     (if (mtimesp x) (setq x (testtneg x)))
+     (when (and $numer (atom x) (eq x '$%e))
+       (setq x (get '$%e '$numer)))
+     (cond ((null out)
+            (return
+              (cons '(mplus)
+                    (cond ((mnumberp x) (ncons x))
+                          ((not (mplusp x))
+                           (list 0 (cond ((atom x) x) (t (copy-list x)))))
+                          ((mnumberp (cadr x)) (copy-list (cdr x)))
+                          (t (cons 0 (copy-list (cdr x) )))))))
+           ((mnumberp x)
+            (return (cons '(mplus)
+                          (if (mnumberp (cadr out))
+                              (cons (addk (cadr out) x) (cddr out))
+                              (cons x (cdr out))))))
+           ((not (mplusp x)) (plusin x (cdr out)) (go end)))
+     (rplaca (cdr out)
+             (addk (if (mnumberp (cadr out)) (cadr out) 0)
+                   (cond ((mnumberp (cadr x)) (setq x (cdr x)) (car x))
+                         (t 0))))
+     (setq fm (cdr out))
+  start
+     (if (null (setq x (cdr x))) (go end))
+     (setq fm (plusin (car x) fm))
+     (go start)
+  end
+     (if (not *plusflag*) (return out))
+     (setq *plusflag* nil)
+  a  
+     (setq fm (cdr out))
+  loop
+     (when (mplusp (cadr fm))
+       (setq x (cadr fm))
+       (rplacd fm (cddr fm))
+       (pls x out)
+       (go a))
+     (setq fm (cdr fm))
+     (if (null (cdr fm)) (return out))
+     (go loop)))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@need 800
+@anchor{plusin}
+@deffn {Funktion} plusin x fm
+
+@emph{Quelltext:}
+@lisp
+(defun plusin (x fm)
+  (prog (x1 x2 flag check v w xnew a n m c)
+     (setq w 1)
+     (setq v 1)
+     (cond ((mtimesp x)
+            (setq check x)
+            (if (mnumberp (cadr x)) (setq w (cadr x) x (cddr x))
+                (setq x (cdr x))))
+           (t (setq x (ncons x))))
+     (setq x1 (if (null (cdr x)) (car x) (cons '(mtimes) x))
+           xnew (list* '(mtimes) w x))
+  start
+     (cond ((null (cdr fm)))
+           ((and (alike1 x1 (cadr fm)) (null (cdr x)))
+            (go equ))
+           ((and (or (and (mexptp (setq x2 (cadr fm)))
+                          (setq v 1))
+                     (and (mtimesp x2)
+                          (not (alike1 x1 x2))
+                          (null (cadddr x2))
+                          (integerp (setq v (cadr x2)))
+                          (mexptp (setq x2 (caddr x2)))))
+                 (integerp (setq a (cadr x2)))
+                 (mexptp x1)
+                 (equal a (cadr x1))
+                 (integerp (sub (caddr x2) (caddr x1))))
+            (setq n (if (and (mplusp (caddr x2))
+                             (mnumberp (cadr (caddr x2))))
+                        (cadr (caddr x2))
+                        (if (mnumberp (caddr x2))
+                            (caddr x2)
+                            0)))
+            (setq m (if (and (mplusp (caddr x1))
+                             (mnumberp (cadr (caddr x1))))
+                        (cadr (caddr x1))
+                        (if (mnumberp (caddr x1))
+                            (caddr x1)
+                            0)))
+            (setq c (sub (caddr x2) n))
+            (cond ((integerp n)
+                   (setq x1 (mul (addk (timesk v (exptb a n))
+                                       (timesk w (exptb a m)))
+                                 (power a c)))
+                   (go equt2))
+                  (t
+                   (multiple-value-bind (n1 d1)
+                       (truncate (num1 n) (denom1 n))
+                     (multiple-value-bind (n2 d2)
+                         (truncate (num1 m) (denom1 m))
+                       (cond ((equal d1 d2)
+                              (setq x1
+                                    (mul (addk (timesk v (exptb a n1))
+                                               (timesk w (exptb a n2)))
+                                         (power a
+                                                (add c
+                                                     (div d1 (denom1 n))))))
+                              (go equt2))
+                             ((minusp d2)
+                              (setq n1 (add n1 (div (sub d1 d2) (denom1 n))))
+                              (setq x1
+                                    (mul (addk (timesk v (exptb a n1))
+                                               (timesk w (exptb a n2)))
+                                         (power a
+                                                (add c
+                                                     (div d2 (denom1 n))))))
+                              (go equt2))
+                             ((minusp d1)
+                              (setq n2 (add n2 (div (sub d2 d1) (denom1 n))))
+                              (setq x1
+                                    (mul (addk (timesk v (exptb a n1))
+                                               (timesk w (exptb a n2)))
+                                         (power a 
+                                                (add c
+                                                     (div d1 (denom1 n))))))
+                              (go equt2))
+                             (t (merror "Internal error in simplus."))))))))
+           ((mtimesp (cadr fm))
+            (cond ((alike1 x1 (cadr fm))
+                   (go equt))
+                  ((and (mnumberp (cadadr fm)) (alike x (cddadr fm)))
+                   (setq flag t) ; found common factor
+                   (go equt))
+                  ((great xnew (cadr fm)) (go gr))))
+           ((great x1 (cadr fm)) (go gr)))
+     (setq xnew (eqtest (testt xnew) (or check '((foo)))))
+     (return (cdr (rplacd fm (cons xnew (cdr fm)))))
+  gr 
+     (setq fm (cdr fm))
+     (go start)
+  equ
+     (rplaca (cdr fm)
+             (if (equal w -1)
+                 (list* '(mtimes simp) 0 x)
+                 (if (mtimesp (setq x1 (muln (cons (addk 1 w) x) t)))
+                     (testtneg x1)
+                     x1)))
+  del
+     (cond ((not (mtimesp (cadr fm)))
+            (go check))
+           ((onep (cadadr fm))
+            (rplacd (cadr fm) (cddadr fm))
+            (return (cdr fm)))
+           ((not (zerop1 (cadadr fm)))
+            (return (cdr fm)))
+           ((and (or (not $listarith) (not $doallmxops))
+                 (mxorlistp (caddr (cadr fm))))
+            (return (rplacd fm 
+                            (cons (constmx 0 (caddr (cadr fm))) (cddr fm))))))
+     (when (mnumberp (car fm))
+       (rplaca fm (addk (car fm) (cadadr fm))))
+     (return (rplacd fm (cddr fm)))
+  equt
+     (setq x1 (muln (cons (addk w (if flag (cadadr fm) 1)) x) t))
+  equt2
+     (rplaca (cdr fm)
+             (if (zerop1 x1)
+                 (list* '(mtimes) x1 x)
+                 (if (mtimesp x1) (testtneg x1) x1)))
+     (if (not (mtimesp (cadr fm))) (go check))
+     (when (and (onep (cadadr fm)) flag (null (cdddr (cadr fm))))
+       (rplaca (cdr fm) (caddr (cadr fm))) (go check))
+     (go del)
+  check
+     (if (mplusp (cadr fm)) (setq *plusflag* t))
+     (return (cdr fm))))
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Multiplikation, Vereinfachung der Exponentiation, Vereinfachung der Addition, Implementierung der Vereinfachung
+@subsection Vereinfachung der Multiplikation
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Exponentiation, , Vereinfachung der Multiplikation, Implementierung der Vereinfachung
+@subsection Vereinfachung der Exponentiation
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@node Funktionen und Variablen f@"ur die Vereinfachung, , Implementierung der Vereinfachung, Vereinfachung
 @section Funktionen und Variablen f@"ur die Vereinfachung
 @c -----------------------------------------------------------------------------
 
@@ -647,12 +1222,12 @@ Im Original Maxima hat diese Funktion den Namen @code{denom1}.
 
 ;;; ----------------------------------------------------------------------------
 
-(defun addk (xx yy)
-  (cond ((eql xx 0) yy)
-        ((eql yy 0) xx)
-        ((and (numberp xx) (numberp yy)) (+ xx yy))
+(defun addk (x y)
+  (cond ((eql x 0) y)
+        ((eql y 0) x)
+        ((and (numberp x) (numberp y)) (+ x y))
         (t
-         (prog (g a b (x xx) (y yy))
+         (prog (g a b)
            (cond ((numberp x)
                   (cond ((floatp x) (return (+ x (rat-to-float y))))
                         (t (setq x (list '(rat) x 1)))))
@@ -662,15 +1237,11 @@ Im Original Maxima hat diese Funktion den Namen @code{denom1}.
            (setq g (gcd (caddr x) (caddr y)))
            (setq a (truncate (caddr x) g)
                  b (truncate (caddr y) g))
-           (setq g (timeskl (list '(rat) 1 g)
+           (return (timeskl (list '(rat) 1 g)
                             (list '(rat)
                                   (+ (* (cadr x) b)
                                      (* (cadr y) a))
-                                  (* a b))))
-           (return (cond ((numberp g) g)
-                         ((eql (caddr g) 1) (cadr g))
-                         ($float (rat-to-float g))
-                         (t g)))))))
+                                  (* a b))))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -717,368 +1288,8 @@ Im Original Maxima hat diese Funktion den Namen @code{denom1}.
       x))
 @end smalllisp
 
-@c -----------------------------------------------------------------------------
-@anchor{simplifya}
-@deffn {Funktion} simplifya x y
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun simplifya (x y)
-  (cond ((not $simp) x)
-        ((atom x)
-         (cond ((and $%enumer $numer (eq x '$%e))
-                (setq x (get '$%e '$numer)))
-               (t x)))
-        ((atom (car x))
-         (cond ((and (cdr x) (atom (cdr x)))
-                (merror "simplifya: Found a cons with an atomic cdr."))
-               (t
-                (cons (car x)
-                      (mapcar #'(lambda (x) (simplifya x y)) (cdr x))))))
-        ((eq (caar x) 'rat) (simp-rat x 1 nil))
-        ((and (not *dosimp*) (member 'simp (cdar x) :test #'eq)) x)
-        (t
-         (let ((w (get (caar x) 'operators)))
-           (cond ((and w
-                       (not (member 'array (cdar x) :test #'eq)))
-                  (funcall w x 1 y))
-                 (t (simpargs x y)))))))
-@end group
-@end lisp
-@end deffn
 
 @smalllisp
-(defun simpargs (x y)
-  (if (and (member 'array (cdar x) :test #'eq)
-           (null (margs x)))
-      (merror "simplifya: Subscripted variable found with no subscripts."))
-  (eqtest (if y
-              x
-              (let ((flag (member (caar x) '(mlist mequal) :test #'eq)))
-                (cons (ncons (caar x))
-                      (mapcar #'(lambda (u)
-                                  (if flag
-                                      (simplifya u nil)
-                                      (simpcheck u nil)))
-                              (cdr x)))))
-          x))
-
-(defun eqtest (x check)
-  (cond ((or (atom x)
-             (eq (caar x) 'rat)
-             (member 'simp (cdar x) :test #'eq))
-         x)
-        ((and (eq (caar x) (caar check))
-              (equal (cdr x) (cdr check)))
-         (cond ((member 'simp (cdar check) :test #'eq)
-                check)
-               (t
-                (cons (cons (caar check)
-                            (if (cdar check)
-                                (cons 'simp (cdar check))
-                                '(simp)))
-                      (cdr check)))))
-        ((or (member 'array (cdar x) :test #'eq)
-             (and (eq (caar x) (caar check))
-                  (member 'array (cdar check) :test #'eq)))
-         (rplaca x (cons (caar x) '(simp array))))
-        (t
-         (rplaca x (cons (caar x) '(simp))))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun simp-rat (x y z)
-  (declare (ignore y z))
-  (cond ((member 'simp (cdar x) :test #'eq)
-         (if $float
-             (rat-to-float x)
-             x))
-        (t (make-rat (cadr x) (caddr x)))))
-
-;;; ----------------------------------------------------------------------------
-
-(setf (get 'mquotient 'operators) 'simp-mquotient)
-
-(defun simp-mquotient (x y z)
-  (twoargcheck x)
-  (cond ((and (integerp (cadr x))
-              (integerp (caddr x))
-              (not (zerop (caddr x))))
-         (make-rat (cadr x) (caddr x)))
-        ((and (numberp (cadr x))
-              (numberp (caddr x))
-              (not (zerop (caddr x))))
-         (/ (cadr x) (caddr x)))
-        (t
-         (setq y (simplifya (cadr x) z))
-         (setq x (simplifya (list '(mexpt) (caddr x) -1) z))
-         (if (eql y 1)
-             x
-             (simplifya (list '(mtimes) y x) t)))))
-
-;;; ----------------------------------------------------------------------------
-
-(setf (get 'mminus 'operators) 'simp-mminus)
-
-(defun simp-mminus (x y z)
-  (cond ((null (cdr x)) 0)
-        ((null (cddr x))
-         (mul -1 (simplifya (cadr x) z)))
-        (t
-         (sub (simplifya (cadr x) z) (addn (cddr x) z)))))
-
-;;; ----------------------------------------------------------------------------
-
-(setf (get 'mplus 'operators) 'simp-mplus)
-
-(defun simp-mplus (x w z)
-  (prog (res check eqnflag)
-     (if (null (cdr x)) (return 0))
-     (setq check x)
-  start
-     (setq x (cdr x))
-     (if (null x) (go end))
-     (setq w (if z (car x) (simplifya (car x) nil)))
-  st1
-     (cond ((atom w) nil)
-           ((eq (caar w) 'mequal)
-            (setq eqnflag
-                  (if (not eqnflag)
-                      w
-                      (list (car eqnflag)
-                            (add (cadr eqnflag) (cadr w))
-                            (add (caddr eqnflag) (caddr w)))))
-            (go start)))
-     (setq res (pls w res))
-     (go start)
-  end
-     (setq res (eqtest (testp res) check))
-     (return (if eqnflag
-                 (list (car eqnflag)
-                       (add (cadr eqnflag) res)
-                       (add (caddr eqnflag) res))
-                 res))))
-
-;;; ----------------------------------------------------------------------------
-
-(defvar *plusflag* nil)
-
-(defun testp (x)
-  (cond ((atom x) 0)
-        ((null (cddr x)) (cadr x))
-        ((zerop1 (cadr x))
-         (if (null (cdddr x))
-             (caddr x)
-             (rplacd x (cddr x))))
-        (t x)))
-
-(defun pls (x out)
-  (prog (fm *plusflag*)
-     (if (mtimesp x) (setq x (testtneg x)))
-     (when (and $numer (atom x) (eq x '$%e))
-       (setq x (get '$%e '$numer)))
-     (cond ((null out)
-            (return
-              (cons '(mplus)
-                    (cond ((mnumberp x) (ncons x))
-                          ((not (mplusp x))
-                           (list 0 (cond ((atom x) x) (t (copy-list x)))))
-                          ((mnumberp (cadr x)) (copy-list (cdr x)))
-                          (t (cons 0 (copy-list (cdr x) )))))))
-           ((mnumberp x)
-            (return (cons '(mplus)
-                          (if (mnumberp (cadr out))
-                              (cons (addk (cadr out) x) (cddr out))
-                              (cons x (cdr out))))))
-           ((not (mplusp x)) (plusin x (cdr out)) (go end)))
-     (rplaca (cdr out)
-             (addk (if (mnumberp (cadr out)) (cadr out) 0)
-                   (cond ((mnumberp (cadr x)) (setq x (cdr x)) (car x))
-                         (t 0))))
-     (setq fm (cdr out))
-  start
-     (if (null (setq x (cdr x))) (go end))
-     (setq fm (plusin (car x) fm))
-     (go start)
-  end
-     (if (not *plusflag*) (return out))
-     (setq *plusflag* nil)
-  a  
-     (setq fm (cdr out))
-  loop
-     (when (mplusp (cadr fm))
-       (setq x (cadr fm))
-       (rplacd fm (cddr fm))
-       (pls x out)
-       (go a))
-     (setq fm (cdr fm))
-     (if (null (cdr fm)) (return out))
-     (go loop)))
-
-;;; ----------------------------------------------------------------------------
-
-(defun plusin (x fm)
-  (prog (x1 x2 flag check v w xnew a n m c)
-     (setq w 1)
-     (setq v 1)
-     (cond ((mtimesp x)
-            (setq check x)
-            (if (mnumberp (cadr x)) (setq w (cadr x) x (cddr x))
-                (setq x (cdr x))))
-           (t (setq x (ncons x))))
-     (setq x1 (if (null (cdr x)) (car x) (cons '(mtimes) x))
-           xnew (list* '(mtimes) w x))
-  start
-     (cond ((null (cdr fm)))
-           ((and (alike1 x1 (cadr fm)) (null (cdr x)))
-            (go equ))
-           ;; Implement the simplification of
-           ;;   v*a^(c+n)+w*a^(c+m) -> (v*a^n+w*a^m)*a^c
-           ;; where a, v, w, and (n-m) are integers.
-           ((and (or (and (mexptp (setq x2 (cadr fm)))
-                          (setq v 1))
-                     (and (mtimesp x2)
-                          (not (alike1 x1 x2))
-                          (null (cadddr x2))
-                          (integerp (setq v (cadr x2)))
-                          (mexptp (setq x2 (caddr x2)))))
-                 (integerp (setq a (cadr x2)))
-                 (mexptp x1)
-                 (equal a (cadr x1))
-                 (integerp (sub (caddr x2) (caddr x1))))
-            (setq n (if (and (mplusp (caddr x2))
-                             (mnumberp (cadr (caddr x2))))
-                        (cadr (caddr x2))
-                        (if (mnumberp (caddr x2))
-                            (caddr x2)
-                            0)))
-            (setq m (if (and (mplusp (caddr x1))
-                             (mnumberp (cadr (caddr x1))))
-                        (cadr (caddr x1))
-                        (if (mnumberp (caddr x1))
-                            (caddr x1)
-                            0)))
-            (setq c (sub (caddr x2) n))
-            (cond ((integerp n)
-                   ;; The simple case:
-                   ;; n and m are integers and the result is (v*a^n+w*a^m)*a^c.
-                   (setq x1 (mul (addk (timesk v (exptb a n))
-                                       (timesk w (exptb a m)))
-                                 (power a c)))
-                   (go equt2))
-                  (t
-                   ;; n and m are rational numbers: The difference n-m is an
-                   ;; integer. The rational numbers might be improper fractions.
-                   ;; The mixed numbers are: n = n1 + d1/r and m = n2 + d2/r,
-                   ;; where r is the common denominator. We have two cases:
-                   ;; I)  d1 = d2: e.g. 2^(1/3+c)+2^(4/3+c)
-                   ;;     The result is (v*a^n1+w*a^n2)*a^(c+d1/r)
-                   ;; II) d1 # d2: e.g. 2^(1/2+c)+2^(-1/2+c)
-                   ;;     In this case one of the exponents d1 or d2 must
-                   ;;     be negative. The negative exponent is factored out.
-                   ;;     This guarantees that the factor (v*a^n1+w*a^n2)
-                   ;;     is an integer. But the positive exponent has to be
-                   ;;     adjusted accordingly. E.g. when we factor out
-                   ;;     a^(d2/r) because d2 is negative, then we have to
-                   ;;     adjust the positive exponent to n1 -> n1+(d1-d2)/r.
-                   ;; Remark:
-                   ;; Part of the simplification is done in simptimes. E.g.
-                   ;; this algorithm simplifies the sum sqrt(2)+3*sqrt(2)
-                   ;; to 4*sqrt(2). In simptimes this is further simplified
-                   ;; to 2^(5/2).
-                   (multiple-value-bind (n1 d1)
-                       (truncate (num1 n) (denom1 n))
-                     (multiple-value-bind (n2 d2)
-                         (truncate (num1 m) (denom1 m))
-                       (cond ((equal d1 d2)
-                              ;; Case I: -> (v*a^n1+w*a^n2)*a^(c+d1/r)
-                              (setq x1
-                                    (mul (addk (timesk v (exptb a n1))
-                                               (timesk w (exptb a n2)))
-                                         (power a
-                                                (add c
-                                                     (div d1 (denom1 n))))))
-                              (go equt2))
-                             ((minusp d2)
-                              ;; Case II:: d2 is negative, adjust n1.
-                              (setq n1 (add n1 (div (sub d1 d2) (denom1 n))))
-                              (setq x1
-                                    (mul (addk (timesk v (exptb a n1))
-                                               (timesk w (exptb a n2)))
-                                         (power a
-                                                (add c
-                                                     (div d2 (denom1 n))))))
-                              (go equt2))
-                             ((minusp d1)
-                              ;; Case II: d1 is negative, adjust n2.
-                              (setq n2 (add n2 (div (sub d2 d1) (denom1 n))))
-                              (setq x1
-                                    (mul (addk (timesk v (exptb a n1))
-                                               (timesk w (exptb a n2)))
-                                         (power a 
-                                                (add c
-                                                     (div d1 (denom1 n))))))
-                              (go equt2))
-                             ;; This clause should never be reached.
-                             (t (merror "Internal error in simplus."))))))))
-           ((mtimesp (cadr fm))
-            (cond ((alike1 x1 (cadr fm))
-                   (go equt))
-                  ((and (mnumberp (cadadr fm)) (alike x (cddadr fm)))
-                   (setq flag t) ; found common factor
-                   (go equt))
-                  ((great xnew (cadr fm)) (go gr))))
-           ((great x1 (cadr fm)) (go gr)))
-     (setq xnew (eqtest (testt xnew) (or check '((foo)))))
-     (return (cdr (rplacd fm (cons xnew (cdr fm)))))
-  gr 
-     (setq fm (cdr fm))
-     (go start)
-  equ
-     (rplaca (cdr fm)
-             (if (equal w -1)
-                 (list* '(mtimes simp) 0 x)
-                 ;; Call muln to get a simplified product.
-                 (if (mtimesp (setq x1 (muln (cons (addk 1 w) x) t)))
-                     (testtneg x1)
-                     x1)))
-  del
-     (cond ((not (mtimesp (cadr fm)))
-            (go check))
-           ((onep (cadadr fm))
-            ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
-            (rplacd (cadr fm) (cddadr fm))
-            (return (cdr fm)))
-           ((not (zerop1 (cadadr fm)))
-            (return (cdr fm)))
-           ;; Handle the multiplication with a zero.
-           ((and (or (not $listarith) (not $doallmxops))
-                 (mxorlistp (caddr (cadr fm))))
-            (return (rplacd fm 
-                            (cons (constmx 0 (caddr (cadr fm))) (cddr fm))))))
-     ;; (cadadr fm) is zero. If the first term of fm is a number,
-     ;;  add it to preserve the type.
-     (when (mnumberp (car fm))
-       (rplaca fm (addk (car fm) (cadadr fm))))
-     (return (rplacd fm (cddr fm)))
-  equt
-     ;; Call muln to get a simplified product.
-     (setq x1 (muln (cons (addk w (if flag (cadadr fm) 1)) x) t))
-  equt2
-     (rplaca (cdr fm)
-             (if (zerop1 x1)
-                 (list* '(mtimes) x1 x)
-                 (if (mtimesp x1) (testtneg x1) x1)))
-     (if (not (mtimesp (cadr fm))) (go check))
-     (when (and (onep (cadadr fm)) flag (null (cdddr (cadr fm))))
-       ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
-       (rplaca (cdr fm) (caddr (cadr fm))) (go check))
-     (go del)
-  check
-     (if (mplusp (cadr fm)) (setq *plusflag* t)) ; A nested mplus expression
-     (return (cdr fm))))
-
 ;;; ----------------------------------------------------------------------------
 
 (setf (get 'mtimes 'operators) 'simp-mtimes)
