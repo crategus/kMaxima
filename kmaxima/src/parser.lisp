@@ -128,7 +128,7 @@
            (setq *parse-tyi* (cdr tem))
            (car tem)))))
 
-(defun parse-tyipeek ()
+(defun parse-tyi-peek ()
   (let ((tem *parse-tyi*))
     (cond ((null tem)
            (setq *parse-tyi*
@@ -214,33 +214,36 @@
 
 (defvar *scan-buffered-token* (list nil))
 
-(defun peek-one-token (&optional (eof-p nil) (eof nil))
+(defun peek-one-token (&optional (eof-p nil) (eof nil) &aux token)
   (cond ((car *scan-buffered-token*)
          (cdr *scan-buffered-token*))
         (t
-         (rplacd *scan-buffered-token* (scan-one-token eof-p eof))
-         (cdr (rplaca *scan-buffered-token* t)))))
+         (cond ((eq eof (setq token (scan-one-token eof-p eof)))
+                eof)
+               (t
+                (rplacd *scan-buffered-token* token)
+                (cdr (rplaca *scan-buffered-token* t)))))))
 
 (defun scan-one-token (&optional (eof-p nil) (eof nil) &aux test)
   (cond ((car *scan-buffered-token*)
          (rplaca *scan-buffered-token* nil)
          (cdr *scan-buffered-token*))
         ((scan-operator-token *maxima-operators*))
-        ((eql (setq test (parse-tyipeek)) *parse-stream-eof*)
+        ((eql (setq test (parse-tyi-peek)) *parse-stream-eof*)
          (parse-tyi)
          (if eof-p
              eof
              (merror "parser: end of file while scanning expression.")))
         ((eql test #\/ )
          (parse-tyi)
-         (cond ((char= (parse-tyipeek) #\* )
+         (cond ((char= (parse-tyi-peek) #\* )
                 (parse-tyi)
                 (gobble-comment)
                 (scan-one-token eof-p eof))
                (t '$/)))
         ((eql test #\. )
          (parse-tyi)
-         (if (digit-char-p (parse-tyipeek) 10)
+         (if (digit-char-p (parse-tyi-peek) 10)
              (scan-number-after-dot (list (list #\. ) nil))
              '|$.|))
         ((eql test #\" )
@@ -248,10 +251,10 @@
          (scan-string))
         ((eql test #\? )
          (parse-tyi)
-         (cond ((char= (parse-tyipeek) #\" )
+         (cond ((char= (parse-tyi-peek) #\" )
                 (parse-tyi)
                 (scan-string))
-               ((char= (parse-tyipeek) #\: )
+               ((char= (parse-tyi-peek) #\: )
                 (scan-keyword-token))
                (t (scan-lisp-token))))
         ((digit-char-p test 10)
@@ -264,19 +267,19 @@
   (prog (c depth)
     (setq depth 1)
   read
-    (setq c (parse-tyipeek))
+    (setq c (parse-tyi-peek))
     (parse-tyi)
     (if (= depth 0) (return t))
     (cond ((and (numberp c) (< c 0))
            (merror "parser: end of file in comment."))
           ((char= c #\* )
-           (cond ((char= (parse-tyipeek) #\/ )
+           (cond ((char= (parse-tyi-peek) #\/ )
                   (decf depth)
                   (parse-tyi)
                   (if (= depth 0) (return t))
                   (go read))))
           ((char= c #\/ )
-           (cond ((char= (parse-tyipeek) #\* )
+           (cond ((char= (parse-tyi-peek) #\* )
                   (incf depth) 
                   (parse-tyi)
                   (go read)))))
@@ -285,7 +288,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun scan-operator-token (obj)
-  (do ((ch (parse-tyipeek) (parse-tyipeek)))
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek)))
       ((not (member ch *whitespaces*)))
     (parse-tyi))
   (scan-operator-token-aux obj))
@@ -298,7 +301,7 @@
                       (if (eql (caar v) ch) (return (car v))))
                      ((eql (car v) ch)
                       (return v))))))
-    (let* ((ch (parse-tyipeek))
+    (let* ((ch (parse-tyi-peek))
            (lis (if (eql ch *parse-stream-eof*)
                     nil
                     (parser-assoc ch obj)))
@@ -314,7 +317,7 @@
             (setq result
                   (and (eql (car (cadr lis)) 'ans)
                        (or (not (alphabetp (cadr (exploden (cadadr lis)))))
-                           (member (parse-tyipeek) *whitespaces*))
+                           (member (parse-tyi-peek) *whitespaces*))
                        (cadr (cadr lis)))))
            (t
             (let ((res (and (eql (car (cadr lis)) 'ans) (cadadr lis)))
@@ -345,7 +348,7 @@
         (mread-synerr "Lisp keyword expected."))))
 
 (defun scan-token (flag)
-  (do ((ch (parse-tyipeek) (parse-tyipeek))
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek))
        (l () (cons ch l)))
       ((or (eql ch *parse-stream-eof*)
            (and flag
@@ -364,7 +367,7 @@
                             :fill-pointer 0 :adjustable t)))
     (when init
       (vector-push-extend init buf))
-    (do ((ch (parse-tyipeek) (parse-tyipeek)))
+    (do ((ch (parse-tyi-peek) (parse-tyi-peek)))
         ((cond ((eql ch *parse-stream-eof*))
                ((char= ch #\")
                 (parse-tyi) t))
@@ -384,7 +387,7 @@
   (read-from-string (coerce (apply #'append data) 'string)))
 
 (defun scan-digits (data continuation? continuation &optional exponent-p)
-  (do ((c (parse-tyipeek) (parse-tyipeek))
+  (do ((c (parse-tyi-peek) (parse-tyi-peek))
        (l () (cons c l)))
       ((not (and (characterp c) (digit-char-p c (max 10 *read-base*))))
        (cond ((member c continuation?)
@@ -399,8 +402,8 @@
     (parse-tyi)))
 
 (defun scan-number-exponent (data)
-  (push (list (if (or (char= (parse-tyipeek) #\+ )
-                      (char= (parse-tyipeek) #\- ))
+  (push (list (if (or (char= (parse-tyi-peek) #\+ )
+                      (char= (parse-tyi-peek) #\- ))
                   (parse-tyi)
                   #\+ ))
         data)
@@ -449,27 +452,22 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun nud-call (op)
-  (let ((tem (getprop op 'nud))
-        res)
-    (setq res
-          (if (null tem)
-              (if (operatorp op)
-                  (mread-synerr "~A is not a prefix operator" (mopstrip op))
-                  (cons '$any op))
-              (funcall tem op)))
-    res))
-
-(defun led-call (op l)
-  (let ((tem (getprop op 'led))
-        res)
-    (setq res
-          (if (null tem)
-              (mread-synerr "~A is not an infix operator" (mopstrip op))
-              (funcall tem op l)))
-    res))
-
-;;; ----------------------------------------------------------------------------
+(defun set-lbp-and-rbp (op lbp rbp)
+  (cond ((not (consp op))
+         (let ((existing-lbp (getprop op 'lbp))
+               (existing-rbp (getprop op 'rbp)))
+         (cond ((not lbp))
+               ((not existing-lbp)
+                (putprop op lbp 'lbp))
+               ((not (eql existing-lbp lbp))
+                (merror "Incompatible LBP's defined for operator ~a" op)))
+         (cond ((not rbp))
+               ((not existing-rbp)
+                (putprop op rbp 'rbp))
+               ((not (eql existing-rbp rbp))
+                (merror "Incompatible RBP's defined for operator ~a" op)))))
+        (t
+         (mapcar #'(lambda (x) (set-lbp-and-rbp x lbp rbp)) op))))
 
 (defmacro def-nud ((op . lbp-rbp) bvl . body)
   (let ((lbp (nth 0 lbp-rbp))
@@ -479,32 +477,44 @@
        ,(make-parser-fun-def op 'nud bvl body)
        (set-lbp-and-rbp ',op ',lbp ',rbp))))
 
-(defun set-lbp-and-rbp (op lbp rbp)
-  (cond
-    ((not (consp op))
-     (let ((existing-lbp (get op 'lbp))
-           (existing-rbp (get op 'rbp)))
-       (cond ((not lbp))
-             ((not existing-lbp)
-              (putprop op lbp 'lbp))
-             ((not (equal existing-lbp lbp))
-              (merror "Incompatible LBP's defined for this operator ~a" op)))
-       (cond ((not rbp))
-             ((not existing-rbp)
-              (putprop op rbp 'rbp))
-             ((not (equal existing-rbp rbp))
-              (merror "Incompatible RBP's defined for this operator ~a"
-                      op)))))
-    (t
-     (mapcar #'(lambda (x) (set-lbp-and-rbp x lbp rbp)) op))))
-
-(defmacro def-led((op . lbp-rbp) bvl . body)
+(defmacro def-led ((op . lbp-rbp) bvl . body)
   (let ((lbp (nth 0 lbp-rbp))
         (rbp (nth 1 lbp-rbp)))
     `(progn 
        'compile
        ,(make-parser-fun-def  op 'led bvl body)
        (set-lbp-and-rbp ',op ',lbp ',rbp))))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro def-lbp (op val) `(defprop ,op ,val lbp))
+(defmacro def-rbp (op val) `(defprop ,op ,val rbp))
+
+(defun lbp (op) (cond ((getprop op 'lbp)) (t 200)))
+(defun rbp (op) (cond ((getprop op 'rbp)) (t 200)))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro def-pos  (op pos) `(defprop ,op ,pos  pos))
+(defmacro def-rpos (op pos) `(defprop ,op ,pos rpos))
+(defmacro def-lpos (op pos) `(defprop ,op ,pos lpos))
+
+(defun lpos (op) (cond ((getprop op 'lpos)) (t '$any)))
+(defun rpos (op) (cond ((getprop op 'rpos)) (t '$any)))
+(defun pos  (op) (cond ((getprop op 'pos))  (t '$any)))
+
+(defprop $any    "untyped"   english)
+(defprop $clause "logical"   english)
+(defprop $expr   "algebraic" english)
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro def-match (op match) `(defprop ,op ,match match))
+
+(defmacro def-mheader (op header) `(defprop ,op ,header mheader))
+
+(defun mheader (op)
+  (or (getprop op 'mheader) (list op)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -554,83 +564,91 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun lbp (lex)
-  (cond ((getprop lex 'lbp)) (t 200)))
-
-(defmacro def-lbp (sym val)
-  `(defprop ,sym ,val lbp))
-
-(defun rbp (lex)
-  (cond ((getprop lex 'rbp)) (t 200)))
-
-(defmacro def-rbp (sym val) 
-  `(defprop ,sym ,val rbp))
-
-(defmacro def-match (x m) 
-  `(defprop ,x ,m match))
-
-;;; ----------------------------------------------------------------------------
-
-(defun lpos (op) (cond ((getprop op 'lpos)) (t '$any)))
-(defun rpos (op) (cond ((getprop op 'rpos)) (t '$any)))
-(defun pos  (op) (cond ((getprop op 'pos))  (t '$any)))
-
-(defmacro def-pos  (op pos) `(defprop ,op ,pos  pos))
-(defmacro def-rpos (op pos) `(defprop ,op ,pos rpos))
-(defmacro def-lpos (op pos) `(defprop ,op ,pos lpos))
-
-;;; ----------------------------------------------------------------------------
-
-(defun mheader (op)
-  (or (getprop op 'mheader) (list op)))
-
-(defmacro def-mheader (op header) `(defprop ,op ,header mheader))
-
-;;; ----------------------------------------------------------------------------
-
-(defprop $any    "untyped"   english)
-(defprop $clause "logical"   english)
-(defprop $expr   "algebraic" english)
-
-;;; ----------------------------------------------------------------------------
-
 (defmacro first-c () '(peek-one-token))
 (defmacro pop-c   () '(scan-one-token))
 
 ;;; ----------------------------------------------------------------------------
 
-(defun mread (&rest read-args)
-  (progn
+(defvar *debug-mread* t)
+
+(defun mread (stream &optional eof)
+  (let ((*parse-stream* stream)
+        (*mread-eof-obj* eof)
+        (*scan-buffered-token* (list nil))
+        (*parse-tyi* nil))
     (when *mread-prompt*
-      (and *parse-window*
-           (setf (car *parse-window*) nil
-                 *parse-window* (cdr *parse-window*)))
+      (when *parse-window*
+        (setf (car *parse-window*) nil
+              *parse-window* (cdr *parse-window*)))
       (princ *mread-prompt*)
       (force-output))
-    (apply 'mread-raw read-args)))
-
-(defun mread-raw (*parse-stream* &optional *mread-eof-obj*)
-  (let ((*scan-buffered-token* (list nil))
-        *parse-tyi*)
-    (if (eq *scan-buffered-token* (peek-one-token t *scan-buffered-token*))
+    (if (eq *mread-eof-obj* (peek-one-token t *mread-eof-obj*))
         *mread-eof-obj*
         (do ((labels ())
              (input (parse '$any 0) (parse '$any 0)))
             (nil)
-          (case (first-c)
+          (case (peek-one-token)
             ((|$;| |$$|
               )
-             (return (list (mheader (pop-c))
+             (return (list (mheader (scan-one-token))
                            (if labels
                                (cons (mheader '|$[| ) (nreverse labels)))
                            input)))
             ((|$&&|)
-             (pop-c)
+             (scan-one-token)
              (if (symbolp input)
                  (push input labels)
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
             (t
              (parse-bug-err 'mread-raw)))))))
+
+#+nil
+(defun mread-raw (stream eof)
+  (let ((*parse-stream* stream)
+        (*mread-eof-obj* eof)
+        (*scan-buffered-token* (list nil))
+        (*parse-tyi* nil))
+    (if (eq *scan-buffered-token* (peek-one-token t *scan-buffered-token*))
+        *mread-eof-obj*
+        (do ((labels ())
+             (input (parse '$any 0) (parse '$any 0)))
+            (nil)
+          (case (peek-one-token)
+            ((|$;| |$$|
+              )
+             (return (list (mheader (scan-one-token))
+                           (if labels
+                               (cons (mheader '|$[| ) (nreverse labels)))
+                           input)))
+            ((|$&&|)
+             (scan-one-token)
+             (if (symbolp input)
+                 (push input labels)
+                 (mread-synerr "Invalid && tag. Tag must be a symbol")))
+            (t
+             (parse-bug-err 'mread-raw)))))))
+
+;;; ----------------------------------------------------------------------------
+
+(defun nud-call (op)
+  (let ((tem (getprop op 'nud))
+        res)
+    (setq res
+          (if (null tem)
+              (if (operatorp op)
+                  (mread-synerr "~A is not a prefix operator" (mopstrip op))
+                  (cons '$any op))
+              (funcall tem op)))
+    res))
+
+(defun led-call (op l)
+  (let ((tem (getprop op 'led))
+        res)
+    (setq res
+          (if (null tem)
+              (mread-synerr "~A is not an infix operator" (mopstrip op))
+              (funcall tem op l)))
+    res))
 
 ;;; ----------------------------------------------------------------------------
 

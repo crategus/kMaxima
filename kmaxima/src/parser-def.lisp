@@ -101,7 +101,7 @@
          (tree nil))
         ((null arg) (list* () '(ans ()) tree))
       (if (atom (car arg))
-          (setq tree 
+          (setq tree
                 (add2cstr (car arg)
                           tree
                           (symbolconc '$
@@ -125,12 +125,10 @@
   
   (defun remopr (x)
     (or (and (symbolp x) (remprop x 'opr))
-        (and (stringp x) (remhash x opr-table))))
-)
+        (and (stringp x) (remhash x opr-table)))))
 
 (defun getopr (x)
-  (or (getopr0 x)
-      x))
+  (or (getopr0 x) x))
 
 (defun getop (x)
   (or (getprop x 'op) x))
@@ -147,8 +145,5 @@
         (msetq ":")      (mdefine ":=")  (mdefmacro "::=")
         (mquote "'")     (mlist "[")     (mset "::")
         (mfactorial "!") (mprogn "(")    (mcond "if")))
-
-(mapc #'(lambda (x) (putprop (car x) (cadr x) 'op))
-      '((mqapply $subvar) (bigfloat $bfloat)))
 
 ;;; ----------------------------------------------------------------------------
