@@ -28,19 +28,7 @@
     ;; General symbols
     #:$false
     #:$true
-    #:displayinput
     #:simp
-    
-    ;; parser.lisp
-    #:*parse-stream*
-    #:*parse-stream-eof*
-    #:*parse-tyi*
-    #:*scan-buffered-token*
-    #:mread
-    #:parse-tyi
-    #:parse-tyi-peek
-    #:peek-one-token
-    #:scan-one-token
     
     ;; nformat.lisp
     #:$powerdispflag
@@ -49,6 +37,7 @@
     #:$exptdispflag
     #:$sqrtdispflag
     #:$negsumdispflag
+    
     #:nformat
     #:nformat-all
     #:nformat-mplus
@@ -109,13 +98,19 @@
     #:mplus
     #:mquotient
     #:mtimes
+    #:parse-tyi
+    #:parse-tyipeek
+    #:peek-one-token
     #:putprop
     #:rat
+    #:scan-one-token
     #:tyi
     #:unparse-tyi
     
     #:%sqrt
     #:*alphabet*
+    #:*parse-stream*
+    #:*parse-stream-eof*
     
     ))
 
