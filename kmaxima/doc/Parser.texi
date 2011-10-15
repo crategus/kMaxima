@@ -22,17 +22,60 @@
 @section Einf@"uhrung in den Parser
 @c -----------------------------------------------------------------------------
 
-In @ref{Die Funktion maxima-toplevel-loop} wurde eine
+In @ref{Implementierung der Funktion maxima-toplevel-loop} wurde eine
 Lisp-@code{read}-@code{eval}-Schleife eingef@"uhrt, um Eingaben des Nutzers
 zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist durch die Funktion
 @code{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
 In diesem Kapitel wird nun der Parser implementiert.  Die Funktion @code{mread}
-ist die zentrale Funktion, die die Lisp-Funkion @code{read} ersetzen wird.
+ist die zentrale Funktion des Parsers, die die Lisp-Funkion @code{read} ersetzt.
 @code{mread} liest mathematische Ausdr@"ucke, Kommandos, Programme und setzt
 diese in kMaxima-Ausdr@"ucke um.  Die hier vorgestellten Funktionen entsprechen
 im wesentlichen dem Code des Originals Maxima.
 
+Die folgende Tabelle zeigt die Operatoren, die kMaxima zu Beginn kennt,
+den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
+
+@verbatim
+   Name   Symbole             Beispiel
+@end verbatim
+@verbatim
+   "+"    $+    mplus          a+b    ((mplus) $A $B)
+   "-"    $-    mminus         -a     ((mminus) $A)
+   "*"    $+    mtimes         a*b    ((mtimes) $A $B)
+   "^"    $^    mexpt          a^b    ((mexpt)  $A $B)
+   "<"    $<    mlessp         a<b    ((mlessp) $A $B)
+   "="    $=    mequal         a=b    ((mequal) $A $B)
+   ">"    $>    mgreaterp      a>b    ((mqreaterp) $A $B)
+   "("    $(    mprogn         (a,b)  ((mprogn) $A $B)
+   ")"    $)                       
+   "["    $[    mlist          [a,b]  ((mlist $A $B)
+   "]"    $]                       
+   ","    $,    $ev            a,b    (($ev) $A $B)
+   ":"    $:    msetq          a:b    ((msetq) $A $B)
+   "!"    $!    mfactorial     a!     ((mfactorial) $A)
+   "#"    $#    mnotequal      a#b    ((mnotequal) $A $B)
+   "'"    $'    mquote         'a     ((mquote) $A)
+   ";"    $;    displayinput                   
+   "$"    $$    nodisplayinput                   
+   "**"   $**   mexpt          a**b   ((mexpt) $A $B)
+   "^^"   $^^   mncexpt        a^^b   ((mncexpt) $A $B) 
+   ":="   $:=   mdefine        a:=b   ((mdefine) $A $B)
+   "::"   $::   mset           a::b   ((mset) $A $B)
+   "<="   $<=   mleqp          a<=b   ((mleqp) $A $B)
+   ">="   $>=   mgeqp          a>=b   ((mgeqp) $A $B)
+   "''"   $''   tritt in der Ausgabe nicht auf      
+   "::="  $::=  mdefmacro      a::=b  ((mdefmacro) $A $B)
+@end verbatim
+
+Im Unterschied zum Original Maxima sind die Operatoren @code{&}, @code{&&} und
+@code{!!} in kMaxima nicht definiert.  Der Operator @code{''} tritt
+in der Ausgabe nicht auf, da dieser vom Parser sofort angewendet wird.
+
+Zum Unterschied zwischen dem Namen und den Symbolen, die einen Operator
+bezeichnen siehe @ref{Namen der Operatoren}.
+
 @c -----------------------------------------------------------------------------
+@need 1000
 @node Vorbereitende Funktionen und Makros, Funktionen und Makros des Parsers, Einf@"uhrung in den Parser, Parser
 @section Vorbereitende Funktionen und Makros
 @c -----------------------------------------------------------------------------
@@ -42,6 +85,7 @@ im wesentlichen dem Code des Originals Maxima.
 * Liste der Operatoren::
 * Definition der Syntax des Parsers::
 * Fehlerbehandlung des Parsers::
+* Weitere Funktionen des Parsers::
 @end menu
 
 @c -----------------------------------------------------------------------------
@@ -49,38 +93,22 @@ im wesentlichen dem Code des Originals Maxima.
 @subsection Namen der Operatoren
 @c -----------------------------------------------------------------------------
 
-Der Name eines Operators ist eine Zeichenkette.  So hat der Operator f@"ur
-die Addition @code{+} die Zeichenkette @code{"+"} als Namen.  Intern wird der
-Additionsoperator durch das Symbol @code{mplus} repr@"asentiert.  Mit der
-Funktion @mref{getopr} wird der Name eines Operators als Zeichenkette
+Operatoren haben verschiedene Bezeichnungen in Maxima.  In der internen
+Darstellung eines Ausdrucks hat zum Beispiel der Operator f@"ur die Addition
+@code{+} das Symbol @code{mplus} als Bezeichnung.  Wird der Operator vom Parser
+eingelesen, wird er zun@"achst durch das Symbol @code{$+} repr@"asentiert.
+Zuletzt kennt Maxima noch die Zeichenkette @code{"+"}, die den Namen
+des Operators f@"ur die Addition repr@"asentiert.
+
+Mit der Funktion @mref{getopr} wird der Name eines Operators als Zeichenkette
 zur@"uckgegeben.  @code{(getopr 'mplus)} hat also das Ergebnis @code{"+"}.
 Umgekehrt gibt die Funktion @mref{getop} das interne Symbol zu einem Namen
 zur@"uck.  @code{(getop "+")} hat das Ergebnis @code{mplus}.  Die Namen der
 Operatoren werden zum Indikator @code{op} in der Eigenschaftsliste des
-dazugeh@"orenden Symbols abgelegt.  Da Zeichenketten keine Eigenschaftsliste
-haben, werden die Namen der Operatoren mit ihrem dazugeh@"orenden Symbol in eine
-Hash-Tabelle abgelegt, die lokal zu den Funktionen @code{getopr0}, @code{putopr}
-und @code{remopr} definiert ist.
-
-Der folgende Code initialisiert die Namen der kMaxima-Operatoren.  Die
-Zeichenketten werden mit der Funktion @mref{putprop} zum Indikator @code{op}
-auf der Eigenschaftsliste abgelegt.  Umgekehrt werden zu den internen Symbolen
-die Namen mit der Funktion @mref{putopr} in eine Hash-Tabelle abgelegt.
-
-@verbatim
-(mapc #'(lambda (x)
-          (putprop (car x) (cadr x) 'op)
-          (putopr (cadr x) (car x)))
-      '((mplus "+")      (mminus "-")    (mtimes "*")
-        (mexpt "**")     (mexpt "^")     (mnctimes ".")
-        (rat "/")        (mquotient "/") (mncexpt "^^")
-        (mequal "=")     (mgreaterp ">") (mlessp "<")
-        (mleqp "<=")     (mgeqp ">=")    (mnotequal "#")
-        (mand "and")     (mor "or")      (mnot "not")
-        (msetq ":")      (mdefine ":=")  (mdefmacro "::=")
-        (mquote "'")     (mlist "[")     (mset "::")
-        (mfactorial "!") (mprogn "(")    (mcond "if")))
-@end verbatim
+dazugeh@"orenden internen Symbols abgelegt.  Da Zeichenketten keine
+Eigenschaftsliste haben, werden die Namen der Operatoren mit ihrem
+dazugeh@"orenden internen Symbol in eine Hash-Tabelle abgelegt, die lokal zu
+den Funktionen @code{getopr0}, @code{putopr} und @code{remopr} definiert ist.
 
 Mit den folgenden Funktionen werden die Namen oder Symbole von Operatoren
 geholt, in die Eigenschaftsliste oder in eine Hash-Tabelle eingetragen oder
@@ -91,10 +119,10 @@ wieder entfernt.
 @deffn {Funktion} getopr0 x
 
 Die Funktion @code{getopr0} holt das interne Symbol, das einen Operator
-bezeichnet.  Das Argument @var{x} ist der Name des Operators.  Der Name ist eine
-eine Zeichenkette.  Die R@"uckgabe ist das interne Symbol, das den Operator
-bezeichnet, oder @code{nil}, wenn das Argument @var{x} keinen Operator
-bezeichnet.
+bezeichnet.  Das Argument @var{x} ist der Name des Operators, der als eine
+Zeichenkette angegeben werden muss.  Die R@"uckgabe ist das interne Symbol,
+das den Operator bezeichnet, oder @code{nil}, wenn das Argument @var{x} keinen
+Operator bezeichnet.
 
 @code{opr-table} ist eine zu den Funktionen @code{getopr0}, @code{putopr} und
 @code{remopr} lokale Hash-Tabelle, die zu den Namen der Operatoren die
@@ -145,11 +173,10 @@ Zeichenkette ist, das Symbol @var{y} in einer zu der Funktion lokalen
 Hash-Tabelle @code{opr-table} ab.  Die Funktion wird intern von kMaxima
 aufgerufen, um die Namen der vorhandenen kMaxima-Operatoren zu initialisieren.
 Definiert der Nutzer einen Operator, wird @code{putopr} von der Funktion
-@mref{op-setup} aufgerufen, um den Operator zu initialisieren.
+@mref{op-setup} aufgerufen, um den Namen des Operators zu initialisieren.
 
-Siehe die Funktionen @mref{getopr0} und @mrefcomma{getopr} um den Operator zu
-einem Namen zu holen, sowie die Funktion @mrefcomma{remopr} um einen Eintrag
-aus der Hash-Tabelle @code{opr-table} zu entfernen.
+Siehe auch die Funktionen @mrefcomma{getopr0} @mref{getopr} und
+@mrefdot{remopr}
 
 @emph{Quelltext:}
 @lisp
@@ -217,8 +244,8 @@ Wie die Funktion @mref{getopr0} holt die Funktion das interne Symbol, das einen
 Operator bezeichnet.  Das Argument @var{x} ist der Name des Operators.  Der Name
 ist eine eine Zeichenkette.  Die R@"uckgabe ist das interne Symbol, das den
 Operator bezeichnet.  Im Unterschied zu der Funktion @code{getopr0} wird das
-Argument @var{x} zur@"uckgegeben, wenn Argument @var{x} kein Operator vorhanden
-ist.
+Argument @var{x} zur@"uckgegeben, wenn zum Argument @var{x} kein Operator
+vorhanden ist.
 
 @emph{Quelltext:}
 @lisp
@@ -233,7 +260,7 @@ ist.
 @anchor{getop}
 @deffn {Funktion} getop x
 
-Die Funktion @code{getop} gibt den zu dem Symbol @var{x}, das einen Operator
+Die Funktion @code{getop} gibt zu dem Symbol @var{x}, das einen Operator
 bezeichnet, den dazugeh@"orenden Namen als eine Zeichenkette zur@"uck.
 
 Beispiel:
@@ -265,42 +292,6 @@ wie zum Beispiel das Zeichen "+" f@"ur die Addition.  Intern wird die Addition
 mit dem Operator @code{mplus} dargestellt.  Eine Eingabe wie zum Beispiel "a+b"
 wird vom Parser in den internen Ausdruck @code{((mplus) $A $B)} umgewandelt.
 
-Die folgende Tabelle zeigt die Operatoren, die kMaxima zu Beginn kennt, zeigt
-den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
-
-@verbatim
-   "+"    $+    mplus          a+b    ((mplus) $A $B)
-   "-"    $-    mminus         -a     ((mminus) $A)
-   "*"    $+    mtimes         a*b    ((mtimes) $A $B)
-   "^"    $^    mexpt          a^b    ((mexpt)  $A $B)
-   "<"    $<    mlessp         a<b    ((mlessp) $A $B)
-   "="    $=    mequal         a=b    ((mequal) $A $B)
-   ">"    $>    mgreaterp      a>b    ((mqreaterp) $A $B)
-   "("    $(    mprogn         (a,b)  ((mprogn) $A $B)
-   ")"    $)                       
-   "["    $[    mlist          [a,b]  ((mlist $A $B)
-   "]"    $]                       
-   ","    $,    $ev            a,b    (($ev) $A $B)
-   ":"    $:    msetq          a:b    ((msetq) $A $B)
-   "!"    $!    mfactorial     a!     ((mfactorial) $A)
-   "#"    $#    mnotequal      a#b    ((mnotequal) $A $B)
-   "'"    $'    mquote         'a     ((mquote) $A)
-   ";"    $;    displayinput                   
-   "$"    $$    nodisplayinput                   
-   "**"   $**   mexpt          a**b   ((mexpt) $A $B)
-   "^^"   $^^   mncexpt        a^^b   ((mncexpt) $A $B) 
-   ":="   $:=   mdefine        a:=b   ((mdefine) $A $B)
-   "::"   $::   mset           a::b   ((mset) $A $B)
-   "<="   $<=   mleqp          a<=b   ((mleqp) $A $B)
-   ">="   $>=   mgeqp          a>=b   ((mgeqp) $A $B)
-   "''"   $''   tritt in der Ausgabe nicht auf      
-   "::="  $::=  mdefmacro      a::=b  ((mdefmacro) $A $B)
-@end verbatim
-
-Im Unterschied zum Original Maxima sind aus der obigen Liste sind die Operatoren
-"&", "&&" und "!!" entfernt worden.  Der Operator "''" tritt in der Ausgabe
-nicht auf.  Der Operator wird sofort vom Parser angewendet.
-
 Die zu Beginn definierten Symbole sind in der globalen Variablen 
 @code{*symbols-defined*} enthalten.  Mit dem Makro @code{define-initial-symbols}
 wird eine globale Liste @code{*maxima-operators*} mit den Zeichen aufgebaut, die
@@ -309,17 +300,24 @@ interpretieren.
 
 Das folgende Makro @code{define-initial-symbols} wird mit einer Liste der 
 Operatoren aufgerufen, die definiert werden sollen.  Die Operatoren werden dabei
-als Symbole @"ubergeben, zum Beispiel als @code{'(|+| |-| ...)}.  Das Makro ruft
-die Funktion @code{define-initial-symbols*} auf und initialisiert die globalen
-Variablen @code{*symbols-defined*} und @code{*maxima-operators*}.
+als Symbole @"ubergeben, zum Beispiel als Liste @code{'(|+| |-| ...)}.  Das
+Makro ruft die Funktion @code{define-initial-symbols*} auf und initialisiert
+die globalen Variablen @code{*symbols-defined*} und @code{*maxima-operators*}.
 
 @c --- 29.09.2011 --------------------------------------------------------------
 @anchor{*symbols-defined*}
 @defvr {Globale Variable} *symbols-defined*
 Standardwert: @code{nil}
 
-Eine globale Liste mit den Symbolen, die als Operator definiert sind.  Die
-Liste wird von der Funktion @mref{define-initial-symbols*} initialisiert.
+Eine globale Liste mit den Symbolen, die vom Parser als Operator eingelesen
+werden.  Die Liste wird von der Funktion @mref{define-initial-symbols*}
+initialisiert.  Weiterhin wird diese Liste verwendet, um die globale
+Liste @mref{*maxima-operators*} zu initialisieren.
+
+@emph{Hinweis:}
+Nicht alle von kMaxima definierten Operatoren sind in der Liste
+@code{*symbols-defined*} enthalten.  So fehlen zum Beispiel die logischen
+Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
 
 @emph{Beispiel:}
 Nach dem Start von kMaxima enth@"alt @code{*symbols-defined*} die folgenden
@@ -338,12 +336,19 @@ Symbole.
 Standardwert: @code{nil}
 
 Die globale Variable @code{*maxima-operators*} ist eine verschachtelte Liste
-mit den Operatoren, die vom Parser erkannt werden.  Die Struktur der Liste 
-wird der Funktion @mref{cstrsetup} aufgebaut.
+mit den Operatoren, die der Parser als Operatoren einliest.  Die Struktur der
+Liste wird der Funktion @mref{cstrsetup} mit Hilfe der Symbole der Liste
+@mref{*symbols-defined*} aufgebaut.
+
+@emph{Hinweis:}
+Wie f@"ur die Liste @code{*symbols-defined*} gilt auch f@"ur
+@code{*maxima-operators*}, dass nicht alle von kMaxima definierten Operatoren
+in der Liste enthalten sind.  So fehlen zum Beispiel die logischen
+Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
 
 Beispiel:
 
-Nach dem Starten von Maxima hat @code{*maxima-operators*} den folgenden Wert.
+Nach dem Starten von kMaxima hat @code{*maxima-operators*} den folgenden Wert.
 
 @example
 * *maxima-operators*
@@ -357,7 +362,7 @@ Nach dem Starten von Maxima hat @code{*maxima-operators*} den folgenden Wert.
 @end example
 @end defvr
 
-@c -----------------------------------------------------------------------------
+@c --- 04.10.2011 --------------------------------------------------------------
 @anchor{define-initial-symbols}
 @deffn {Makro} define-initial-symbols &rest l
 
@@ -365,6 +370,9 @@ Das Makro @code{define-initial-symbols} wird beim Laden von kMaxima aufgerufen
 und initialisiert die globalen Variablen @mref{*symbols-defined*} sowie
 @mrefdot{*maxima-operators*}  Die eigentliche Initialisierung wird von der
 Funktion @mref{define-initial-symbols*} ausgef@"uhrt.
+
+@emph{Hinweis:}
+Die Wirkungsweise der @code{let}-Umgebung im Makro muss noch erarbeitet werden.
 
 @emph{Quelltext:}
 @lisp
@@ -406,17 +414,10 @@ f@"ur den Parser generiert.
 @anchor{cstrsetup}
 @deffn {Funktion} cstrsetup arg
 
-Die Funktion @code{cstrsetup} generiert die Liste mit den Zeichen f@"ur 
-den Parser.  Die Funktion verwendet die allgemeinen Hilfsfunktionen 
-@code{exploden}, @code{symbolconc} und @code{maybe-invert-string}.  Die
-Funktion @code{exploden} ist oben bereits erl@"autert.  Die Funktion 
-@code{symbolconc} akzeptiert als Argumente Symbole, Zahlen einschlie@ss{}lich 
-von Gleitkommazahlen und Zeichenketten und bildet aus den Argumenten ein Symbol,
-das in das aktuelle Paket geschrieben wird.  Zum Beispiel hat
-@code{(symbolconc "Sym" 3 'x)} das Ergebnis @code{|Sym3X|}.  Die Funktion
-@code{maybe-invert-string} sorgt daf@"ur, dass eine Zeichenkette entsprechend
-der Konvention f@"ur Lisp und Maxima-Symbole die entsprechende Gro@ss{}- und 
-Kleinschreibung aufweist.
+Die Funktion @code{cstrsetup} generiert die Liste mit den Zeichen die vom
+Parser als Operator eingelesen werden.  @code{cstrsetup} wird von der Funktion
+@mref{define-initial-symbols*} mit der Liste @mref{*symbols-defined*}@w{}
+als Argument aufgerufen und generiert die Liste @mrefdot{*maxima-operators*}
 
 @emph{Quelltext:}
 @lisp
@@ -425,6 +426,8 @@ Kleinschreibung aufweist.
   (labels ((add2cstr (x tree ans)
              (add2cstr1 (nconc (exploden x) (cons (list 'ans ans) nil)) 
                         tree))
+@end group
+@group
            (add2cstr1 (x tree)
              (cond ((null tree) x)
                    ((atom (car tree))
@@ -443,6 +446,8 @@ Kleinschreibung aufweist.
                    (t
                     (rplacd tree (add2cstr1 x (cdr tree)))
                     tree))))
+@end group
+@group
     (do ((arg arg (cdr arg))
          (tree nil))
         ((null arg) (list* () '(ans ()) tree))
@@ -463,11 +468,25 @@ Kleinschreibung aufweist.
 @anchor{define-symbol}
 @deffn {Funktion} define-symbol x
 
-Die Funktion @code{define-symbol} f@"ugt einen Operator der Liste
-@code{*symbols-defined*} der definierten Operatoren hinzu und aktualisiert die
-globale Variable @code{*maxima-operators*}.  Das Argument @code{x} ist eine
-Zeichenkette mit dem Namen des Operators.  Die R@"uckgabe ist ein Symbol, das
-den Operator bezeichnet.
+Die Funktion @code{define-symbol} f@"ugt der Liste @mref{*symbols-defined*}@w{}
+den Operator @var{x} hinzu und aktualisiert die globale Variable
+@mrefdot{*maxima-operators*}  Das Argument @code{x} ist eine Zeichenkette mit
+dem Namen des Operators.  Die R@"uckgabe ist ein Maxima-Symbol, das den Operator
+bezeichnet.
+
+@emph{Beispiel:}
+In diesem Beispiel wird ein Operator mit dem Namen @code{"grad"} definiert.
+Die R@"uckgabe ist das Symbol @code{$grad}.  W@"ahrend die Operatoren als
+Symbole in die Liste eingetragen sind, werden neue Operatoren mit ihrem Namen
+als eine Zeichenkette eingetragen.
+
+@example
+* (define-symbol "grad")
+$GRAD
+:INTERNAL
+(+ - * ^ < = > |(| |)| [ ] |,| |:| ! |#| |'| $ |;| ** ^^ |:=| |::| <= >= |''|
+   && |::=| "grad")
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -483,8 +502,10 @@ den Operator bezeichnet.
 @anchor{undefine-symbol}
 @deffn {Funktion} undefine-symbol opr
 
-Mit der Funktion @code{undefine-symbol} wird eine Operator von den Listen
-@code{*symbol-defined} und @code{*maxima-operators*} entfernt.
+Mit der Funktion @code{undefine-symbol} wird der Operator @var{opr} von den
+Listen @mref{*symbols-defined*} und @mref{*maxima-operators*} entfernt.  Das
+Argument @var{opr} ist der Name des Operators, der als eine Zeichenkette
+angegeben werden muss.
 
 @emph{Quelltext:}
 @lisp
@@ -500,12 +521,52 @@ Mit der Funktion @code{undefine-symbol} wird eine Operator von den Listen
 @subsection Definition der Syntax des Parsers
 @c -----------------------------------------------------------------------------
 
+@c --- 04.10.2011 --------------------------------------------------------------
+@anchor{led-propl}
+@anchor{nud-propl}
+@deffn  {Makro} led-propl
+@deffnx {Makro} nud-propl
 
+Die Makros expandieren zu @code{'(led)} oder @code{'(nud)}.  Sie werden nur
+von der Funktion @mref{make-parser-fun-def} gebraucht, die mit der Funktion
+@mref{symbolconc} die Makros aus den Symbolen @code{led}, @code{nud} und
+@code{propl} zusammensetzt und die Expansion des Makros als Argument an die
+Funktion @mref{inherit-propl} verwendet.
 
+@emph{Beispiel:}
+Das Beispiel zeigt die Expansion des Makros @code{led-propl}.
+
+@example
+* (macroexpand '(led-propl))
+'(LED)
+T
+@end example
+
+@emph{Quelltext:}
 @lisp
+@group
 (defmacro led-propl () ''(led))
 (defmacro nud-propl () ''(nud))
+@end group
+@end lisp
 
+@emph{Bemerkung:}
+Im Original Maxima werden diese Makros noch an weiteren Stellen verwendet.
+In kMaxima wurde jeweils die Expansion der Makros eingesetzt, um den Quelltext
+zu vereinfachen.
+@end deffn
+
+@c --- 04.10.2011 --------------------------------------------------------------
+@anchor{inherit-propl}
+@deffn {Funktion} inherit-propl op-to op-from getl
+
+@"Ubernimmt die Eigenschaft @var{getl} und den dazugeh@"origen Wert des
+Operators @var{op-from} und tr@"agt diese in die Liste des Operators
+@var{op-to} ein.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun inherit-propl (op-to op-from getl)
   (let ((propl (getpropl op-from getl)))
     (if propl
@@ -513,7 +574,53 @@ Mit der Funktion @code{undefine-symbol} wird eine Operator von den Listen
           (remprop op-to (car propl))
           (putprop op-to (cadr propl) (car propl)))
         (merror "has no ~a properties. ~a ~a" getl op-from 'wrng-type-arg))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 04.10.2011 --------------------------------------------------------------
+@anchor{make-parser-fun-def}
+@deffn {Funktion} make-parser-fun-def op p bvl body
+
+Die R@"uckgabe der Funktion @code{make-parser-fun-def} ist ein Makro, dass die
+Definition einer @code{led}-Funktion ist, wenn das Argument @var{p} das Symbol
+@code{led} ist und eine @code{nud}-Funktion, wenn das Argument @var{p} das
+Symbol @code{nud} ist.  Das Argument @var{op} ist der Operator, f@"ur den die
+@code{led}- oder @code{nud}-Funktion definiert werden soll.  Das Argument
+@code{bvl} ist eine Liste mit den Argumenten der zu definierenden Funktion.
+F@"ur eine @code{led}-Funktion ist @code{bvl} eine Liste mit zwei Argumenten
+und f@"ur eine @code{nud}-Funktion eine Liste mit genau einem Argument.
+
+Das Makro, das zur@"uckgegeben wird, ist selbst ein Makro mit der Definition
+@mref{defun-prop}.  Dieses expandiert in einen Ausdruck der die Funktion
+zum Indikator @var{p} auf die Eigenschaftsliste des Symbols @var{op} ablegt.
+
+@emph{Beispiel:}
+Das Beispiel zeigt die einzelnen Stufen der Expansion, wenn f@"ur den Operator
+@code{$^} eine @code{led-Funktion} definiert wird.
+
+@example
+* (make-parser-fun-def '$^ 'led '(op left) 'body)
+(DEF-LED-FUN $^ (OP LEFT) OP . BODY)
+
+* (macroexpand-1 (make-parser-fun-def '$^ 'led '(op left) 'body))
+(DEFUN-PROP ($^ LED)
+    (OP LEFT)
+  OP
+  . BODY)
+T
+
+* (macroexpand (make-parser-fun-def '$^ 'led '(op left) 'body))
+(LET* ((#:G629 '$^) (#:G630 'LED))
+  (MULTIPLE-VALUE-BIND (#:G632)
+      #'(LAMBDA (OP LEFT) OP . BODY)
+    (SB-KERNEL:%PUT #:G629 #:G630 #:G632)))
+T
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun make-parser-fun-def (op p bvl body)
   (if (not (consp op))
       `(,(symbolconc 'def- p '-fun) ,op ,bvl ,(car bvl) . ,body)
@@ -524,17 +631,19 @@ Mit der Funktion @code{undefine-symbol} wird eine Operator von den Listen
                                        ',(car op)
                                        (,(symbolconc p '-propl))))
                    (cdr op)))))
+@end group
 @end lisp
+@end deffn
 
 @c --- 02.10.2011 --------------------------------------------------------------
 @anchor{def-nud-equiv}
 @deffn {Makro} def-nud-equiv op equiv
 
 Das Makro legt zum Indikator @code{nud} die @code{nud}-Funktion, die mit dem
-Argument @var{equiv} übergeben wird, auf der Eigenschaftsliste des Symbols
+Argument @var{equiv} @"ubergeben wird, auf der Eigenschaftsliste des Symbols
 @var{op} ab.  Das Symbol @var{op} bezeichnet einen Operator wie er vom Parser
-eingelesen wird.  So liest der Parser zum Beispiel den Operator der Addition als
-@code{$+} ein.
+eingelesen wird.  So liest der Parser zum Beispiel den Operator der Addition
+als @code{$+} ein.
 
 Siehe auch das Makro @mrefcomma{def-led-equiv} um die @code{led}-Funktion auf
 der Eigenschaftsliste eines Operators abzulegen.
@@ -566,10 +675,10 @@ T
 @deffn {Makro} def-led-equiv op equiv
 
 Das Makro legt zum Indikator @code{led} die @code{led}-Funktion, die mit dem
-Argument @var{equiv} übergeben wird, auf der Eigenschaftsliste des Symbols
+Argument @var{equiv} @"ubergeben wird, auf der Eigenschaftsliste des Symbols
 @var{op} ab.  Das Symbol @var{op} bezeichnet einen Operator wie er vom Parser
-eingelesen wird.  So liest der Parser zum Beispiel den Operator der Addition als
-@code{$+} ein.
+eingelesen wird.  So liest der Parser zum Beispiel den Operator der Addition
+als @code{$+} ein.
 
 Siehe auch das Makro @mrefcomma{def-nud-equiv} um die @code{nud}-Funktion auf
 der Eigenschaftsliste eines Operators abzulegen.
@@ -605,9 +714,9 @@ Setzt den linksseitigen Vorrang @var{lbp} und den rechtsseitigen Vorrang
 @var{rbp} des Operators @var{op} auf der Eigenschaftsliste des Operators.
 Das Argument @var{op} kann auch eine Liste mit Operatoren sein.  In diesem Fall
 erhalten alle Operatoren der Liste die angegebenen links- und rechtsseitigen
-Vorränge.
+Vorr@"ange.
 
-Ist für den angegeben Operator @var{op} oder einer der Operatoren, falls eine
+Ist f@"ur den angegeben Operator @var{op} oder einer der Operatoren, falls eine
 Liste mit Operatoren angegeben wird, bereits ein links- oder rechtsseitiger
 Vorrang definiert, muss das entsprechende Argument @var{lbp} oder @var{rbp}
 den gleichen Wert haben.  Ansonsten bricht die Funktion mit einer Fehlermeldung
@@ -615,8 +724,9 @@ ab.
 
 Die Funktion @code{set-lbp-and-rbp} wird von den Makros @mref{def-nud} und
 @mref{def-led} genutzt, um jeweils die Definition einer @code{nud}- oder
-@code{led}-Funktion sowie die dazugehörenden Vorränge auf der Eigenschaftsliste
-abzulegen.  Ansonsten wird diese Funktion vom Parser nicht weiter genutzt.
+@code{led}-Funktion sowie die dazugeh@"orenden Vorr@"ange auf der
+Eigenschaftsliste abzulegen.  Ansonsten wird diese Funktion vom Parser nicht
+weiter genutzt.
 
 @emph{Beispiele:}
 Die folgenden Beispiele zeigen wie die Funktion verwendet werden kann.
@@ -629,7 +739,7 @@ NIL
 @end example
 
 @emph{Hinweis:}
-Für die Definition des links- und rechtsseitigen Vorrangs wird bei der
+F@"ur die Definition des links- und rechtsseitigen Vorrangs wird bei der
 Definition der Operatoren nicht die Funktion @code{set-lbp-and-rbp} genutzt,
 sondern die Makros @mref{def-rbp} und @mrefdot{def-lbp}
 
@@ -1551,7 +1661,7 @@ und als Ergebnis zur@"uckgegeben.
 @emph{Hinweis:}
 Der Originalcode hat einen Fehler.  Wird wiederholt mit der Funktion 
 @code{peek-one-token} versucht ein Token von einem Stream zu lesen, der kein
-weiteres Zeichen enthält, wird die globale Variable
+weiteres Zeichen enth@"alt, wird die globale Variable
 @mref{*scan-buffered-token*} auf den Wert @code{(t)} gesetzt.  Die Folge ist, 
 dass immer der Wert @code{nil} und nicht wie erwartet der Wert des Argumentes
 @var{eof} zur@"uckgegeben wird.  Es ist unklar, ob dieser Fehler Konsequenzen
@@ -1651,26 +1761,22 @@ verschachtelt sein.
 @lisp
 @group
 (defun gobble-comment ()
-  (prog (c depth)
-    (setq depth 1)
-  read
-    (setq c (parse-tyipeek))
-    (parse-tyi)
-    (if (= depth 0) (return t))
-    (cond ((and (numberp c) (< c 0))
-           (merror "parser: end of file in comment."))
-          ((char= c #\* )
-           (cond ((char= (parse-tyipeek) #\/ )
-                  (decf depth)
+  (do ((depth 1)
+       (ch (parse-tyi-peek) (parse-tyi-peek)))
+      ((eql 0 depth) t)
+    (cond ((eql ch *parse-stream-eof*)
+           (merror "Parser: end of file in comment."))
+          ((char= ch #\* )
+           (parse-tyi)
+           (cond ((char= (parse-tyi-peek) #\/ )
                   (parse-tyi)
-                  (if (= depth 0) (return t))
-                  (go read))))
-          ((char= c #\/ )
-           (cond ((char= (parse-tyipeek) #\* )
-                  (incf depth) 
+                  (decf depth))))
+          ((char= ch #\/ )
+           (parse-tyi)
+           (cond ((char= (parse-tyi-peek) #\*)
                   (parse-tyi)
-                  (go read)))))
-        (go read)))
+                  (incf depth))))
+          (t (parse-tyi)))))
 @end group
 @end lisp
 @end deffn
@@ -1947,21 +2053,6 @@ unless  parse-$do                             25   45        clause
 while   parse-$do                             25   45        clause
 @end verbatim
 
-@c -----------------------------------------------------------------------------
-@anchor{first-c}
-@anchor{pop-c}
-@deffn  {Makro} first-c
-@deffnx {Makro} pop-c
-
-@emph{Quelltext:}
-@lisp
-@group
-(defmacro first-c () '(peek-one-token))
-(defmacro pop-c   () '(scan-one-token))
-@end group
-@end lisp
-@end deffn
-
 @c --- 03.10.2011 --------------------------------------------------------------
 @anchor{mread}
 @deffn {Funktion} mread stream &optional eof
@@ -1970,110 +2061,70 @@ while   parse-$do                             25   45        clause
 von einem Stream @var{stream} ein. Das Argument @var{stream} kann die Eingabe
 von der Tastatur, aus einer Datei oder irgendeinem anderen Stream bezeichnen.
 Das Argument @var{eof} ist Optional und gibt das Zeichen an, mit dem
-signalisiert wird, das der Stream keine weitere Zeichen enthält.
+signalisiert wird, das der Stream keine weitere Zeichen enth@"alt.
+
+Die R@"uckgabe ist ein kMaxima-Ausdruck in der internen Darstellung.  Wird die
+Eingabe eines Ausdrucks mit @code{;} abgeschlossen, dann wird dem Ausdruck
+der Operator @code{displayinput} vorangestellt.  Damit wird der aufrufenden
+Funktion signalisiert, dass das Ergebnis ausgegeben werden soll.  Wird die
+Eingabe dagegen mit @code{$} abgeschlossen, dann wird dem eingelesenen Ausdruck
+der Operator @code{nodisplayinput} vorangestellt.
 
 Hat die globale Variable @mref{*mread-prompt*} einen von @code{nil}
 verschiedenen Wert, dann wird von der Tastatur eingelesen.  In diesem Fall wird
-überprüft, ob die globale Variable @mref{*parse-window*} initialisiert ist.
-Ist dies der Fall, dann wird das Symbol @code{nil} in die zirkuläre Liste
+@"uberpr@"uft, ob die globale Variable @mref{*parse-window*} initialisiert ist.
+Ist dies der Fall, dann wird das Symbol @code{nil} in die zirkul@"are Liste
 @code{*parse-window*} geschrieben, um die folgende Eingabe von der letzten
 Eingabe zu trennen.  Dann wird der Prompt @code{*mread-prompt*} ausgegeben.
 
-Zuletzt wird die Funktion @mref{mread-raw} mit den Argumenten @var{stream} und
-@var{eof} aufgerufen.  Die Funktion @code{mread-raw} startet das Einlesen der
-Token vom Stream.
+@emph{Beispiel:}
+
+@example
+a+b;
+((DISPLAYINPUT) NIL ((MPLUS) $A $B))
+* (mread *standard-input*)
+a+b$
+((NODISPLAYINPUT) NIL ((MPLUS) $A $B))
+@end example
 
 @emph{Quelltext:}
 @lisp
 @group
 (defun mread (stream &optional eof)
-  (declare (special *mread-prompt* *parse-window*))
-  (progn
+  (let ((*parse-stream* stream)
+        (*mread-eof-obj* eof)
+        (*scan-buffered-token* (list nil))
+        (*parse-tyi* nil))
     (when *mread-prompt*
       (when *parse-window*
         (setf (car *parse-window*) nil
               *parse-window* (cdr *parse-window*)))
       (princ *mread-prompt*)
       (force-output))
-    (mread-raw stream eof)))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{mread-raw}
-@deffn {Funktion} mread-raw *parse-stream* &optinal *mread-eof-obj*
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun mread-raw (*parse-stream* &optional *mread-eof-obj*)
-  (let ((*scan-buffered-token* (list nil))
-        *parse-tyi*)
-    (if (eq *scan-buffered-token* (peek-one-token t *scan-buffered-token*))
+    (if (eq *mread-eof-obj* (peek-one-token t *mread-eof-obj*))
         *mread-eof-obj*
         (do ((labels ())
              (input (parse '$any 0) (parse '$any 0)))
             (nil)
-          (case (first-c)
+          (case (peek-one-token)
             ((|$;| |$$|
               )
-             (return (list (mheader (pop-c))
+             (return (list (mheader (scan-one-token))
                            (if labels
                                (cons (mheader '|$[| ) (nreverse labels)))
                            input)))
             ((|$&&|)
-             (pop-c)
+             (scan-one-token)
              (if (symbolp input)
                  (push input labels)
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
             (t
-             (parse-bug-err 'mread-raw)))))))
+             (parse-bug-err 'mread)))))))
 @end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
-@anchor{nud-call}
-@deffn {Funktion} nud-call op
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun nud-call (op)
-  (let ((tem (getprop op 'nud))
-        res)
-    (setq res
-          (if (null tem)
-              (if (operatorp op)
-                  (mread-synerr "~A is not a prefix operator" (mopstrip op))
-                  (cons '$any op))
-              (funcall tem op)))
-    res))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{led-call}
-@deffn {Funktion} led-call op
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun led-call (op l)
-  (let ((tem (getprop op 'led))
-        res)
-    (setq res
-          (if (null tem)
-              (mread-synerr "~A is not an infix operator" (mopstrip op))
-              (funcall tem op l)))
-    res))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{parse}
 @deffn {Funktion} parse mode rbp
 
@@ -2081,96 +2132,137 @@ Token vom Stream.
 @lisp
 @group
 (defun parse (mode rbp)
-  (do ((left (nud-call (pop-c))         ; Envoke the null left denotation
-       (led-call (pop-c) left)))        ;  and keep calling LED ops as needed
-      ((>= rbp (lbp (first-c)))         ; Until next op lbp too low
-       (convert left mode))))           ;  in which case, return stuff seen
+  (labels ((led-call (op l)
+             (let ((tem (getprop op 'led))
+                   res)
+               (setq res
+                     (if (null tem)
+                         (mread-synerr "~A is not an infix operator"
+                                       (mopstrip op))
+                         (funcall tem op l)))
+               res))
+           (nud-call (op)
+             (let ((tem (getprop op 'nud))
+                   res)
+               (setq res
+                     (if (null tem)
+                         (if (operatorp op)
+                             (mread-synerr "~A is not a prefix operator"
+                                           (mopstrip op))
+                             (cons '$any op))
+                         (funcall tem op)))
+               res)))
+    (do ((left (nud-call (scan-one-token))
+               (led-call (scan-one-token) left)))
+        ((>= rbp (lbp (peek-one-token)))
+         (convert left mode)))))
 @end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{convert}
+@deffn {Funktion} convert item mode
+
+Ist ein Ausdruck vollst@"andig eingelesen, wird der Ausdruck als Argument
+@var{item} an die Funktion @code{convert} @"ubergegeben.  Die Funktion pr@"uft,
+ob der Ausdruck @var{item} die Wortart @code{mode} hat.  Ist dies der Fall wird
+der eingelesene Ausdruck zur@"uckgegeben.  Ansonsten wird ein Parser-Fehler
+generiert wird.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun convert (item mode)
+  (if (or (eq mode (car item))
+          (eq '$any mode)
+          (eq '$any (car item)))
+      (cdr item).
+      (mread-synerr "Found ~A expression where ~A expression expected"
+                    (getprop (car item) 'english)
+                    (getprop mode       'english))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{parse-prefix}
 @deffn {Funktion} parse-prefix op
+
+Das Argument @var{op} ist ein Prefix-Operator.  Die Funktion @code{parse-prefix}
+gibt eine Liste zur@"uck, die als erstes Element die Wortart des Operators
+@var{op} und als zweites Element das Symbol des Operators bzw. den Header
+enth@"alt.  Um das Argument des Operators zu holen, wird die Funktion
+@mref{parse} mit der Wortart des rechtsseitigen Arguments sowie des
+rechtsseitigen Vorrang aufgerufen.
 
 @emph{Quelltext:}
 @lisp
 @group
 (defun parse-prefix (op)
-  (list (pos op)                        ; Operator mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (parse (rpos op) (rbp op))))    ; Convert single argument for use
+  (list (pos op)
+        (mheader op)
+        (parse (rpos op) (rbp op))))
 @end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{parse-postfix}
 @deffn {Funktion} parse-postfix op l
+
+Das Argument @var{op} ist ein Postfix-Operator und @var{l} enth@"alt das auf
+der linken Seite des Operators eingelesene Argument.  Die Funktion
+@code{parse-postfix} gibt als Ergebnis eine Liste zur@"uck, die als erstes
+Element die Wortart des Operators @var{op} und als zweites Element das Symbol
+des Operators enth@"alt.  Das dritte Element ist die R@"uckgabe der Funktion
+@mref{convert} mit dem Argumenten @var{l} und der linksseitigen Wortart des
+Operators @var{op}, die mit der Funktion @mref{lpos} ermittelt wird.
 
 @emph{Quelltext:}
 @lisp
 @group
 (defun parse-postfix (op l)
-  (list (pos op)                        ; Operator's mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (convert l (lpos op))))         ; Convert single argument for use
+  (list (pos op)
+        (mheader op)
+        (convert l (lpos op))))
 @end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{parse-infix}
 @deffn {Funktion} parse-infix op l
+
+Das Argument @var{op} ist ein Infix-Operator und @var{l} enthält das auf der
+linken Seite des Operators eingelesene Argument.  Die Funktion
+@code{parse-infix} gibt als Ergebnis eine Liste zurück, die als erstes Element
+die Wortart des Operators @var{op} und als zweites Element das Symbol des
+Operators enthält.  Das dritte Element der Liste ist das Argument das auf der
+linken Seite des Operators eingelesen wurde.  Das vierte Element ist das
+rechte Argument des Infix-Operators, das mit der Funktion @mref{parse}@w{}
+eingelesen wird.  @code{parse} wird mit der rechtsseitigen Wortart und dem
+rechtsseitigen Vorrang des Operators @var{op} aufgerufen.
 
 @emph{Quelltext:}
 @lisp
 @group
 (defun parse-infix (op l)
-  (list (pos op)                        ; Operator's mode
-        (mheader op)                    ; Standard Macsyma expression header
-        (convert l (lpos op))           ; Convert arg1 for immediate use
-        (parse (rpos op) (rbp op))))    ; Look for an arg2
+  (list (pos op)
+        (mheader op)
+        (convert l (lpos op))
+        (parse (rpos op) (rbp op))))
 @end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
-@anchor{parse-nary}
-@deffn {Funktion} parse-nary op l
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun parse-nary (op l)
-  (list* (pos op)                           ; Operator's mode
-         (mheader op)                       ; Normal Macsyma operator header
-         (convert l (lpos op))              ; Check type-match of arg1 
-         (prsnary op (lpos op) (lbp op))))  ; Search for other args
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{parse-matchfix}
-@deffn {Funktion} parse-matchfix op
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun parse-matchfix (op)
-  (list* (pos op)                           ; Operator's mode
-         (mheader op)                       ; Normal Macsyma operator header
-         (prsmatch (and (symbolp op)
-                        (get op 'match))
-                   (lpos op))))             ; Search for matchfixed forms
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{parse-nofix}
 @deffn {Funktion} parse-nofix op
+
+Das Argument @var{op} ist ein Nofix-Operator.  Die R@"uckgabe der Funktion
+@code{parse-nofix} ist eine Liste mit der Wortart des Operators als erstes
+Element und dem Symbol des Operators als zweites Element.
 
 @emph{Quelltext:}
 @lisp
@@ -2181,7 +2273,32 @@ Token vom Stream.
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{parse-nary}
+@deffn {Funktion} parse-nary op l
+
+Das Argument @var{op} ist ein Nary-Operator, der eine beliebige Anzahl an
+Argumenten haben kann.  Das Argument @var{l} ist das auf der linken Seite
+des Operators eingelesene Argument.  Die Rückgabe ist eine Liste mit der
+Wortart des Operators als erstes Argument, dem Symbol des Operators als 
+zweites Argument und dem bisher eingelesenen Argument als drittes Argument.
+Mit der Funktion @mref{prsnary} werden die weiteren Argumente vom Parser
+eingelesenen.  Die Funktion wird mit dem Operator @var{op}, der linksseitigen
+Wortart und dem linksseitigen Vorrang des Operators @var{op} aufgerufen.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun parse-nary (op l)
+  (list* (pos op)
+         (mheader op)
+         (convert l (lpos op))
+         (prsnary op (lpos op) (lbp op))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 05.10.2011 --------------------------------------------------------------
 @anchor{prsnary}
 @deffn {Funktion} prsnary op mode rbp
 
@@ -2189,11 +2306,28 @@ Token vom Stream.
 @lisp
 @group
 (defun prsnary (op mode rbp)
-  (do ((nl (list (parse mode rbp))          ; Get at least one form
-           (cons (parse mode rbp) nl)))     ;  and keep getting forms
-      ((not (eq op (first-c)))              ; until a parse pops on a new op
-       (nreverse nl))                       ;  at which time return forms
-      (pop-c)))                             ; otherwise pop op
+  (do ((nl (list (parse mode rbp))
+           (cons (parse mode rbp) nl)))
+      ((not (eq op (peek-one-token)))
+       (nreverse nl))
+      (scan-one-token)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{parse-matchfix}
+@deffn {Funktion} parse-matchfix op
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun parse-matchfix (op)
+  (list* (pos op)
+         (mheader op)
+         (prsmatch (and (symbolp op)
+                        (getprop op 'match))
+                   (lpos op))))
 @end group
 @end lisp
 @end deffn
@@ -2206,36 +2340,17 @@ Token vom Stream.
 @lisp
 @group
 (defun prsmatch (match mode)
-  (cond ((eq match (first-c)) (pop-c) nil)
+  (cond ((eq match (peek-one-token)) (scan-one-token) nil)
         (t
          (do ((nl (list (parse mode 10))
                   (cons (parse mode 10) nl)))
-             ((eq match (first-c))
-              (pop-c)
+             ((eq match (peek-one-token))
+              (scan-one-token)
               (nreverse nl))
-           (if (eq '|$,| (first-c))
-               (pop-c)
+           (if (eq '|$,| (peek-one-token))
+               (scan-one-token)
                (mread-synerr "Missing ~A"
                              (mopstrip match)))))))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{convert}
-@deffn {Funktion} convert item mode
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun convert (item mode)
-  (if (or (eq mode (car item))                    ; If modes match exactly
-          (eq '$any mode)                         ;    or target is $ANY
-          (eq '$any (car item)))                  ;    or input is $ANY
-      (cdr item)                                  ;  then return expression
-      (mread-synerr "Found ~A expression where ~A expression expected"
-                    (get (car item) 'english)
-                    (get mode       'english))))
 @end group
 @end lisp
 @end deffn
@@ -2245,26 +2360,40 @@ Token vom Stream.
 @section Definition der Operatoren
 @c -----------------------------------------------------------------------------
 
-@verbatim
-(def-nud-equiv |$]| delim-err)
-(def-led-equiv |$]| erb-err)
-(def-lbp       |$]| 5)
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{$[}
+@anchor{$]}
+@defvr  {Operator} $[
+@defvrx {Operator} $]
 
+Die Operatoren f@"ur die Definition einer Liste.
+
+@emph{Beispiel:}
+
+@example
+* (caddr (mread *standard-input*))
+[a, b, c];
+((MLIST) $A $B $C)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-nud-equiv |$[| parse-matchfix)
 (def-match     |$[| |$]|)
 (def-lbp       |$[| 200)
-;No RBP
-(def-mheader   |$[| (mlist))
 (def-pos       |$[| $any)
 (def-lpos      |$[| $any)
-;No RPOS
+(def-mheader   |$[| (mlist))
+@end group
 
+@group
 (def-led (|$[| 200) (op left)
   (setq left (convert left '$any))
   (if (numberp left) (parse-err))
   (let ((header (if (atom left)
-                    (add-lineinfo (list (amperchk left) 'array))
-                    (add-lineinfo '(mqapply array))))
+                    (list (amperchk left) 'array)
+                    '(mqapply array)))
         (right (prsmatch '|$]| '$any)))
     (cond ((null right)
            (mread-synerr "No subscripts given"))
@@ -2273,39 +2402,127 @@ Token vom Stream.
            (cons '$any (getalias right)))
           (t
            (cons '$any (cons header (cons left right)))))))
+@end group
 
-(def-nud-equiv |$)| delim-err)
-(def-led-equiv |$)| erb-err)
-(def-lbp       |$)| 5)
+@group
+(def-nud-equiv |$]| delim-err)
+(def-led-equiv |$]| erb-err)
+(def-lbp       |$]| 5)
+@end group
+@end lisp
+@end defvr
 
-(def-mheader   |$(| (mprogn))
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{$(}
+@anchor{$)}
+@defvr  {Operator} $(
+@defvrx {Operator} $)
 
+Operatoren f@"ur die Definition einer Liste mit Argumenten oder einer
+Block-Anweisung.  Mit der @code{led}-Funktion des Operators @code{$(} wird
+die Liste der Argumente einer Funktion eingelesen.  Die @code{nud}-Funktion
+des Operators @code{$(} liest dagegen eine Block-Anweisung ein.
+
+@emph{Beispiel:}
+@example
+* (caddr (mread *standard-input*))
+f(a,b,c);
+(($F) $A $B $C)
+
+* (caddr (mread *standard-input*))
+(a,b,c);
+((MPROGN) $A $B $C)
+@end example
+
+@emph{Quelltext:}
+@lisp
+(def-mheader |$(| (mprogn))
+
+@group
 (def-nud (|$(| 200) (op)
   (let ((right) (hdr (mheader '|$(|)))
-    (cond ((eq '|$)| (first-c)) (parse-err))
+    (cond ((eq '|$)| (peek-one-token)) (parse-err))
           ((or (null (setq right (prsmatch '|$)| '$any)))
                (cdr right))
            (cons '$any (cons hdr right)))
           (t (cons '$any (car right))))))
+@end group
 
+@group
 (def-led (|$(| 200) (op left)
   (setq left (convert left '$any))
   (if (numberp left) (parse-err))
-  (let ((hdr (and (atom left)(mheader (amperchk left))))
+  (let ((hdr (and (atom left) (mheader (amperchk left))))
         (r (prsmatch '|$)| '$any)))
     (cons '$any
           (cond ((atom left)
                  (cons hdr r))
                 (t
                  (cons '(mqapply) (cons left r)))))))
+@end group
 
+@group
+(def-nud-equiv |$)| delim-err)
+(def-led-equiv |$)| erb-err)
+(def-lbp       |$)| 5)
+@end group
+@end lisp
+@end defvr
+
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{$'}
+@defvr {Operator} $'
+
+Definition des Quote-Operators.
+
+Die R@"uckgabe ist ein Ausdruck @code{((mquote) expr)}, wenn @code{expr} ein
+Atom, eine Liste oder eine Block-Anweisung ist.  Erh@"alt eine Funktion den
+Quote-Operator wie zum Beispiel in @code{'f(x)}, dann wird ein Ausdruck mit der
+Substantivform der Funktion zur@"uckgegeben.  Dies gilt auch f@"ur
+Array-Funktionen wie zum Beispiel @code{'f[a](x)}.  Siehe auch die Beispiele
+f@"ur die einzelnen F@"alle.
+
+@emph{Beispiele:}
+@example
+* (caddr (mread *standard-input*))
+'(expr);
+((MQUOTE) $EXPR)
+
+* (caddr (mread *standard-input*))
+'atom;
+((MQUOTE) $ATOM)
+
+* (caddr (mread *standard-input*))
+'[a,b,c];
+((MQUOTE) ((MLIST) $A $B $C))
+
+* (caddr (mread *standard-input*))
+'(a,b,c);
+((MQUOTE) ((MPROGN) $A $B $C))
+
+* (caddr (mread *standard-input*))
+'f(x);
+((%F) $X)
+
+* (caddr (mread *standard-input*))
+'(f(x));
+((MQUOTE) (($F) $X))
+
+* (caddr (mread *standard-input*))
+'f[a](x);
+((MQAPPLY) ((%F ARRAY) $A) $X)
+@end example
+
+@emph{Quelltext:}
+@lisp
 (def-mheader |$'| (mquote))
 
+@group
 (def-nud (|$'|) (op)
   (let (right)
-    (cond ((eq '|$(| (first-c))
+    (cond ((eq |$(| (peek-one-token))
            (list '$any (mheader '|$'|) (parse '$any 190)))
-          ((or (atom (setq right (parse '$any 190.)))
+          ((or (atom (setq right (parse '$any 190)))
                (member (caar right)
                        '(mquote mlist mprog mprogn lambda) :test #'eq))
            (list '$any (mheader '|$'|) right))
@@ -2318,15 +2535,52 @@ Token vom Stream.
                                       (cdaadr right))
                                 (cdadr right)))
                   (cons '$any right))))
-           (t 
-            (cons '$any (cons (cons ($nounify (caar right)) (cdar right))
-                              (cdr right)))))))
+           (t
+            (cons '$any
+                  (cons (cons ($nounify (caar right)) (cdar right))
+                        (cdr right)))))))
+@end group
+@end lisp
+@end defvr
 
+@c --- 05.10.2011 --------------------------------------------------------------
+@anchor{$''}
+@defvr {Operator} $'@w{}'
+
+Definition des Quote-Quote-Operators.
+
+Der Quote-Quote-Operator ist nicht im eingelesenen Ausdruck enthalten.  Wird
+der Operator auf einen Ausdruck angewendet, wird dieser sofort ausgewertet.
+Funktionen werden in ihre Verbform umgewandelt.
+
+@emph{Beispiele:}
+@example
+* (setq $a 99)
+99
+
+* (caddr (mread *standard-input*))
+''a;
+99
+
+* (caddr (mread *standard-input*))
+''f(x);
+(($F) $X)
+
+* (caddr (mread *standard-input*))
+''f[a](x);
+((MQAPPLY) (($F ARRAY) $A) $X)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-nud (|$''|) (op)
   (let (right)
     (cons '$any
-          (cond ((eq '|$(| (first-c)) (meval (parse '$any 190)))
-                ((atom (setq right (parse '$any 190))) (meval right))
+          (cond ((eq |$(| (peek-one-token))
+                 (meval (parse '$any 190)))
+                ((atom (setq right (parse '$any 190)))
+                 (meval right))
                 ((eq 'mqapply (caar right))
                  (rplaca (cdr right)
                          (cons (cons ($verbify (caaadr right))
@@ -2336,9 +2590,17 @@ Token vom Stream.
                 (t
                  (cons (cons ($verbify (caar right)) (cdar right))
                        (cdr right)))))))
-@end verbatim
+@end group
+@end lisp
+@end defvr
 
-@verbatim  
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$:}
+@defvr {Operator} $:
+
+@emph{Quelltext:}
+@lisp
+@group  
 (def-led-equiv |$:| parse-infix)
 (def-lbp       |$:| 180)
 (def-rbp       |$:|  20)
@@ -2346,7 +2608,17 @@ Token vom Stream.
 (def-rpos      |$:| $any)
 (def-lpos      |$:| $any)
 (def-mheader   |$:| (msetq))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$::}
+@defvr {Operator} $::
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$::| parse-infix)
 (def-lbp       |$::| 180)
 (def-rbp       |$::|  20)
@@ -2354,7 +2626,17 @@ Token vom Stream.
 (def-rpos      |$::| $any)
 (def-lpos      |$::| $any)
 (def-mheader   |$::| (mset))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$:=}
+@defvr {Operator} $:=
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$:=| parse-infix)
 (def-lbp       |$:=| 180)
 (def-rbp       |$:=|  20)
@@ -2362,7 +2644,17 @@ Token vom Stream.
 (def-rpos      |$:=| $any)
 (def-lpos      |$:=| $any)
 (def-mheader   |$:=| (mdefine))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$::=}
+@defvr {Operator} $::=
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$::=| parse-infix)
 (def-lbp       |$::=| 180)
 (def-rbp       |$::=|  20)
@@ -2370,7 +2662,17 @@ Token vom Stream.
 (def-rpos      |$::=| $any)
 (def-lpos      |$::=| $any)
 (def-mheader   |$::=| (mdefmacro))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$!}
+@defvr {Operator} $!
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$!| parse-postfix)
 (def-lbp       |$!| 160)
 ;No RBP
@@ -2378,23 +2680,26 @@ Token vom Stream.
 (def-lpos      |$!| $expr)
 ;No RPOS
 (def-mheader   |$!| (mfactorial))
+@end group
+@end lisp
+@end defvr
 
-(def-mheader   |$!!| ($genfact))
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$^}
+@defvr {Operator} $^
 
-(def-led (|$!!| 160.) (op left)
-  (list '$expr
-        (mheader '$!!)
-        (convert left '$expr)
-        (list (mheader '$/) (convert left '$expr) 2)
-        2))
-
+@emph{Quelltext:}
+@lisp
+@group
 (def-lbp       |$^| 140)
 (def-rbp       |$^| 139)
 (def-pos       |$^| $expr)
 (def-lpos      |$^| $expr)
 (def-rpos      |$^| $expr)
 (def-mheader   |$^| (mexpt))
+@end group
 
+@group
 (def-led ((|$^| |$^^|)) (op left)
   (cons '$expr
         (getalias (list (mheader op)
@@ -2405,16 +2710,36 @@ Token vom Stream.
           (let ((propval (get '$^ prop)))
             (if propval (putprop '$** propval prop))))
       '(lbp rbp pos rpos lpos mheader))
+@end group
 
 (inherit-propl  '$** '$^ (led-propl))
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$^^}
+@defvr {Operator} $^^
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-lbp       |$^^| 140)
 (def-rbp       |$^^| 139)
 (def-pos       |$^^| $expr)
 (def-lpos      |$^^| $expr)
 (def-rpos      |$^^| $expr)
 (def-mheader   |$^^| (mncexpt))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$.}
+@defvr {Operator} $.
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$.| parse-infix)
 (def-lbp       |$.| 130)
 (def-rbp       |$.| 129)
@@ -2422,7 +2747,17 @@ Token vom Stream.
 (def-lpos      |$.| $expr)
 (def-rpos      |$.| $expr)
 (def-mheader   |$.| (mnctimes))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$*}
+@defvr {Operator} $*
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$*| parse-nary)
 (def-lbp       |$*| 120)
 ;RBP not needed
@@ -2430,7 +2765,17 @@ Token vom Stream.
 ;RPOS not needed
 (def-lpos      |$*| $expr)
 (def-mheader   |$*| (mtimes))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$/}
+@defvr {Operator} $/
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv $/  parse-infix)
 (def-lbp       $/  120)
 (def-rbp       $/  120)
@@ -2438,7 +2783,17 @@ Token vom Stream.
 (def-rpos      $/  $expr)
 (def-lpos      $/  $expr)
 (def-mheader   $/  (mquotient))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$+}
+@defvr {Operator} $+
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-nud-equiv |$+| parse-prefix)
 (def-lbp       |$+| 100)
 (def-rbp       |$+| 134) ; Value increased from 100 to 134 (DK 02/2010).
@@ -2446,7 +2801,9 @@ Token vom Stream.
 (def-rpos      |$+| $expr)
 ;LPOS not needed
 (def-mheader   |$+| (mplus))
+@end group
 
+@group
 (def-led ((|$+| |$-|) 100) (op left)
   (setq left (convert left '$expr))
   (do ((nl (list (if (eq op '$-)
@@ -2457,7 +2814,17 @@ Token vom Stream.
       ((not (member (first-c) '($+ $-) :test #'eq))
        (list* '$expr (mheader '$+) (nreverse nl)))
     (if (eq (first-c) '$+) (pop-c))))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$-}
+@defvr {Operator} $-
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-nud-equiv |$-| parse-prefix)
 (def-lbp       |$-| 100)
 (def-rbp       |$-| 134)
@@ -2465,7 +2832,19 @@ Token vom Stream.
 (def-rpos      |$-| $expr)
 ;LPOS not needed
 (def-mheader   |$-| (mminus))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$=}
+@defvr {Operator} $=
+
+Definition des Operators f@"ur eine Gleichung.
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$=| parse-infix)
 (def-lbp       |$=| 80)
 (def-rbp       |$=| 80)
@@ -2473,7 +2852,37 @@ Token vom Stream.
 (def-rpos      |$=| $expr)
 (def-lpos      |$=| $expr)
 (def-mheader   |$=| (mequal))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$#}
+@defvr {Operator} $#
+
+Definition des Operators f@"ur eine Ungleichung.
+
+@emph{Quelltext:}
+@lisp
+@group
+(def-led-equiv  |$#| parse-infix)
+(def-lbp        |$#| 80)
+(def-rbp        |$#| 80)
+(def-pos        |$#| $clause)
+(def-rpos       |$#| $expr)
+(def-lpos       |$#| $expr)
+(def-mheader    |$#| (mnotequal))
+@end group
+@end lisp
+@end defvr
+
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$>}
+@defvr {Operator} $>
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$>| parse-infix)
 (def-lbp       |$>| 80)
 (def-rbp       |$>| 80)
@@ -2481,7 +2890,17 @@ Token vom Stream.
 (def-rpos      |$>| $expr)
 (def-lpos      |$>| $expr)
 (def-mheader   |$>| (mgreaterp))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$>=}
+@defvr {Operator} $>=
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$>=| parse-infix)
 (def-lbp       |$>=| 80)
 (def-rbp       |$>=| 80)
@@ -2489,7 +2908,17 @@ Token vom Stream.
 (def-rpos      |$>=| $expr)
 (def-lpos      |$>=| $expr)
 (def-mheader   |$>=| (mgeqp))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$<}
+@defvr {Operator} $<
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$<| parse-infix)
 (def-lbp       |$<| 80)
 (def-rbp       |$<| 80)
@@ -2497,7 +2926,17 @@ Token vom Stream.
 (def-rpos      |$<| $expr)
 (def-lpos      |$<| $expr)
 (def-mheader   |$<| (mlessp))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$<=}
+@defvr {Operator} $<=
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$<=| parse-infix)
 (def-lbp       |$<=| 80)
 (def-rbp       |$<=| 80)
@@ -2505,7 +2944,17 @@ Token vom Stream.
 (def-rpos      |$<=| $expr)
 (def-lpos      |$<=| $expr)
 (def-mheader   |$<=| (mleqp))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$not}
+@defvr {Operator} $not
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-nud-equiv $not parse-prefix)
 ;LBP not needed
 (def-rbp       $not 70)
@@ -2513,7 +2962,17 @@ Token vom Stream.
 (def-rpos      $not $clause)
 (def-lpos      $not $clause)
 (def-mheader   $not (mnot))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$and}
+@defvr {Operator} $and
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv $and parse-nary)
 (def-lbp       $and 65)
 ;RBP not needed
@@ -2521,64 +2980,124 @@ Token vom Stream.
 ;RPOS not needed
 (def-lpos      $and $clause)
 (def-mheader   $and (mand))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$or}
+@defvr {Operator} $or
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv $or parse-nary)
 (def-lbp       $or 60)
-;RBP not needed
 (def-pos       $or $clause)
-;RPOS not needed
 (def-lpos      $or $clause)
 (def-mheader   $or (mor))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$,}
+@defvr {Operator} $,
+
+Der Komma-Operator trennt die Elemente einer Liste.
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-led-equiv |$,| parse-nary)
 (def-lbp       |$,| 10)
-;RBP not needed
 (def-pos       |$,| $any)
-;RPOS not needed
 (def-lpos      |$,| $any)
 (def-mheader   |$,| ($ev))
+@end group
+@end lisp
+@end defvr
 
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$if}
+@defvr  {Operator} $if
+@defvrx {Operator} $then
+@defvrx {Operator} $else
+@defvrx {Operator} $elseif
+
+Operatoren f@"ur die Definition von Programmverzweigungen.
+
+@emph{Quelltext:}
+@lisp
+@group
+(def-rbp     $if 45)
+(def-pos     $if $any)
+(def-rpos    $if $clause)
+(def-mheader $if (mcond))
+@end group
+
+@group
+(def-nud ($if) (op)
+  (list* (pos op)
+         (mheader op)
+         (parse-condition op)))
+@end group
+
+@group
+(defun parse-condition (op)
+  (list* (parse (rpos op) (rbp op))
+         (if (eq (peek-one-token) '$then)
+             (parse '$any (rbp (scan-one-token)))
+             (mread-synerr "Missing `then'"))
+         (case (peek-one-token)
+           (($else)   (list t (parse '$any (rbp (scan-one-token)))))
+           (($elseif) (parse-condition (scan-one-token)))
+           (t
+            (list t '$false)))))
+@end group
+
+@group
 (def-nud-equiv $then delim-err)
 (def-lbp $then 5)
 (def-rbp $then 25)
+@end group
 
+@group
 (def-nud-equiv $else delim-err)
 (def-lbp $else 5)
 (def-rbp $else 25)
+@end group
 
+@group
 (def-nud-equiv $elseif delim-err)
 (def-lbp  $elseif 5)
 (def-rbp  $elseif 45)
 (def-pos  $elseif $any)
 (def-rpos $elseif $clause)
+@end group
+@end lisp
+@end defvr
 
-;No LBP - Default as high as possible
-(def-rbp     $if 45)
-(def-pos     $if $any)
-(def-rpos    $if $clause)
-;No LPOS
-(def-mheader $if (mcond))
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$do}
+@defvr  {Operator} $do
+@defvrx {Operator} $for
+@defvrx {Operator} $from
+@defvrx {Operator} $in
+@defvrx {Operator} $step
+@defvrx {Operator} $next
+@defvrx {Operator} $thru
+@defvrx {Operator} $unless
+@defvrx {Operator} $while
 
-(def-nud ($if) (op)
-  (list* (pos op)
-         (mheader op)
-         (parse-condition op)))
+Operatoren f@"ur die Definition von Programmschleifen.
 
-(defun parse-condition (op)
-  (list* (parse (rpos op) (rbp op))
-         (if (eq (first-c) '$then)
-             (parse '$any (rbp (pop-c)))
-             (mread-synerr "Missing `then'"))
-         (case (first-c)
-           (($else)   (list t (parse '$any (rbp (pop-c)))))
-           (($elseif) (parse-condition (pop-c)))
-           (t ; Note: $false instead of () makes DISPLA suppress display!
-            (list t '$false)))))
-
+@emph{Quelltext:}
+@lisp
 (defmacro make-mdo () '(list (list 'mdo) nil nil nil nil nil nil nil))
 
+@group
 (defmacro mdo-op (x)     `(car (car ,x)))
-
 (defmacro mdo-for (x)    `(second ,x))
 (defmacro mdo-from (x)   `(third ,x))
 (defmacro mdo-step (x)   `(fourth ,x))
@@ -2586,12 +3105,23 @@ Token vom Stream.
 (defmacro mdo-thru (x)   `(sixth ,x))
 (defmacro mdo-unless (x) `(seventh ,x))
 (defmacro mdo-body (x)   `(eighth ,x))
+@end group
 
-(def-mheader $do (mdo))
+@group
+(def-nud-equiv $do     parse-$do)
+(def-nud-equiv $for    parse-$do)
+(def-nud-equiv $from   parse-$do)
+(def-nud-equiv $step   parse-$do)
+(def-nud-equiv $next   parse-$do)
+(def-nud-equiv $thru   parse-$do)
+(def-nud-equiv $unless parse-$do)
+(def-nud-equiv $while  parse-$do)
+@end group
 
+@group
 (defun parse-$do (lex &aux (left (make-mdo)))
   (setf (car left) (mheader 'mdo))
-  (do ((op lex (pop-c))  (active-bitmask 0))
+  (do ((op lex (scan-one-token))  (active-bitmask 0))
       (nil)
     (if (eq op '|$:|) (setq op '$from))
     (setq active-bitmask (collision-check '$do active-bitmask op))
@@ -2606,32 +3136,27 @@ Token vom Stream.
         ($next (setf (mdo-next left) data))
         ($thru (setf (mdo-thru left) data))
         (($unless $while)
-               (if (eq op '$while)
-                   (setq data (list (mheader '$not) data)))
-               (setf (mdo-unless left)
-                     (if (null (mdo-unless left))
-                         data
-                         (list (mheader '$or) data (mdo-unless left)))))
+         (if (eq op '$while)
+             (setq data (list (mheader '$not) data)))
+         (setf (mdo-unless left)
+               (if (null (mdo-unless left))
+                   data
+                   (list (mheader '$or) data (mdo-unless left)))))
         (t (parse-bug-err '$do))))))
+@end group
 
-(def-lbp $for    25)
-(def-lbp $from   25)
-(def-lbp $step   25)
-(def-lbp $next   25)
-(def-lbp $thru   25)
-(def-lbp $unless 25)
-(def-lbp $while  25)
-(def-lbp $do     25)
+@group
+(def-lbp $do      25)
+(def-lbp $for     25)
+(def-lbp $from    25)
+(def-lbp $step    25)
+(def-lbp $next    25)
+(def-lbp $thru    25)
+(def-lbp $unless  25)
+(def-lbp $while   25)
+@end group
 
-(def-nud-equiv $for    parse-$do)
-(def-nud-equiv $from   parse-$do)
-(def-nud-equiv $step   parse-$do)
-(def-nud-equiv $next   parse-$do)
-(def-nud-equiv $thru   parse-$do)
-(def-nud-equiv $unless parse-$do)
-(def-nud-equiv $while  parse-$do)
-(def-nud-equiv $do     parse-$do)
-
+@group
 (def-rbp $do      25)
 (def-rbp $for    200)
 (def-rbp $from    95)
@@ -2641,7 +3166,9 @@ Token vom Stream.
 (def-rbp $thru    95)
 (def-rbp $unless  45)
 (def-rbp $while   45)
+@end group
 
+@group
 (def-rpos $do     $any)
 (def-rpos $for    $any)
 (def-rpos $from   $any)
@@ -2650,7 +3177,11 @@ Token vom Stream.
 (def-rpos $thru   $expr)
 (def-rpos $unless $clause)
 (def-rpos $while  $clause)
+@end group
 
+(def-mheader $do (mdo))
+
+@group
 (def-collisions $do
   ($do     . ())
   ($for    . ($for))
@@ -2661,28 +3192,87 @@ Token vom Stream.
   ($thru   . ($in $thru)) ;$IN didn't used to get checked for
   ($unless . ())
   ($while  . ()))
+@end group
+@end lisp
+@end defvr
 
-(def-mheader   |$$| (nodisplayinput))
-(def-nud-equiv |$$| premterm-err)
-(def-lbp       |$$| -1)
-;No RBP, POS, RPOS, RBP, or MHEADER
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$;}
+@defvr {Operator} $;
 
+Der Operator @code{$;} beendet die Eingabe eines Ausdrucks.  Dem eingelesenen
+Ausdruck wird @code{displayinput} vorangestellt.  Damit wird kMaxima mitgeteilt,
+dass der Ausdruck auf der Ausgabe angezeigt werden soll.
+
+Siehe auch den Operator @mrefdot{$$}
+
+@emph{Beispiel:}
+@example
+* (mread *standard-input*)
+a;
+((DISPLAYINPUT) NIL $A)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (def-mheader   |$;| (displayinput))
 (def-nud-equiv |$;| premterm-err)
 (def-lbp       |$;| -1)
-;No RBP, POS, RPOS, RBP, or MHEADER
+@end group
+@end lisp
+@end defvr
 
-(def-nud-equiv  |$&&| delim-err)
-(def-lbp        |$&&| -1)
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$$}
+@defvr {Operator} $$
 
-(def-led-equiv  |$#| parse-infix)
-(def-lbp        |$#| 80)
-(def-rbp        |$#| 80)
-(def-pos        |$#| $clause)
-(def-rpos       |$#| $expr)
-(def-lpos       |$#| $expr)
-(def-mheader    |$#| (mnotequal))
-@end verbatim
+Der Operator @code{$$} beendet die Eingabe eines Ausdrucks.  Dem eingelesenen
+Ausdruck wird @code{nodisplayinput} vorangestellt.  Damit wird kMaxima
+mitgeteilt, dass der Ausdruck nicht angezeigt werden soll.
+
+Siehe auch den Operator @mrefdot{$;}
+
+@emph{Beispiel:}
+@example
+* (mread *standard-input*)
+a$
+((NODISPLAYINPUT) NIL $A)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(def-mheader   |$$| (nodisplayinput))
+(def-nud-equiv |$$| premterm-err)
+(def-lbp       |$$| -1)
+@end group
+@end lisp
+@end defvr
+
+@c --- 06.10.2011 --------------------------------------------------------------
+@anchor{$&&}
+@defvr {Operator} $&&
+
+Definition des Operators f@"ur eine Marke.  Der Operator @code{$&&} erlaubt die
+Syntax @code{label && a+b;}, wobei in diesem Beispiel @code{label} eine Marke
+ist.
+
+@emph{Beispiel:}
+@example
+* (mread *standard-input*)
+label && a+b;
+((DISPLAYINPUT) ((MLIST) $LABEL) ((MPLUS) $A $B))
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(def-nud-equiv |$&&| delim-err)
+(def-lbp       |$&&| -1)
+@end group
+@end lisp
+@end defvr
 
 @c -----------------------------------------------------------------------------
 @need 800
