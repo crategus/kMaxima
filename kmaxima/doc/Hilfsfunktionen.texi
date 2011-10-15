@@ -240,14 +240,27 @@ SYMBOL
 NIL
 @end example
 
-@findex symbolconc
+@c --- 04.10.2011 --------------------------------------------------------------
+@anchor{symbolconc}
+@deffn {Funktion} symbolconc &rest syms
 
-Zuletzt eine Funktion, die Zahlen, Symbole, Zeichenketten und sonstige
-Argumente in ein Symbol umwandelt.  Die Funktion akzeptiert eine
+Ist eine Funktion, die Zahlen, Symbole, Zeichenketten und sonstige
+Argumente zu einem Symbol zusammensetzt.  Die Funktion akzeptiert eine
 beliebige Anzahl an Argumenten.  Das Symbol wird dem aktuellen Package
 hinzugef@"ugt.
 
-@verbatim
+@emph{Beispiel:}
+Zahlen, Symbole und Zeichenketten werden zu einem Symbol zusammengesetzt.
+
+@example
+* (symbolconc 1 'a "string" '+ 10.0)
+|1Astring+10.0|
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun symbolconc (&rest syms)
   (intern (apply #'concatenate 'string
                  (mapcar #'(lambda (sym)
@@ -259,16 +272,9 @@ hinzugef@"ugt.
                                     (symbol-name sym))
                                    (t sym)))
                          syms))))
-@end verbatim
-
-@b{Beispiele:} Zahlen, Symbole und Zeichenketten werden zu einem Symbol
-zusammengesetzt.
-
-@example
-* (symbolconc 1 'a "string" '+ 10.0)
-|1Astring+10.0|
-NIL
-@end example
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Alias und Reversealias, Verb- und Substantivform, Zerlegung von Symbolen und Zeichenketten in Listen, Hilfsfunktionen
