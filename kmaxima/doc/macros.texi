@@ -90,6 +90,7 @@
 @iftex
 @hyphenation{
    Ban-ners
+   be-zeich-net
    Dar-stel-lung
    End-los-schlei-fe
    ex-ter-ne
