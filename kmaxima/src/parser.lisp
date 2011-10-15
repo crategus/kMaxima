@@ -263,6 +263,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
+#+nil
 (defun gobble-comment ()
   (prog (c depth)
     (setq depth 1)
@@ -284,6 +285,24 @@
                   (parse-tyi)
                   (go read)))))
         (go read)))
+
+(defun gobble-comment ()
+  (do ((depth 1)
+       (ch (parse-tyi-peek) (parse-tyi-peek)))
+      ((eql 0 depth) t)
+    (cond ((eql ch *parse-stream-eof*)
+           (merror "Parser: end of file in comment."))
+          ((char= ch #\* )
+           (parse-tyi)
+           (cond ((char= (parse-tyi-peek) #\/ )
+                  (parse-tyi)
+                  (decf depth))))
+          ((char= ch #\/ )
+           (parse-tyi)
+           (cond ((char= (parse-tyi-peek) #\*)
+                  (parse-tyi)
+                  (incf depth))))
+          (t (parse-tyi)))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -564,13 +583,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmacro first-c () '(peek-one-token))
-(defmacro pop-c   () '(scan-one-token))
-
-;;; ----------------------------------------------------------------------------
-
-(defvar *debug-mread* t)
-
 (defun mread (stream &optional eof)
   (let ((*parse-stream* stream)
         (*mread-eof-obj* eof)
@@ -600,140 +612,106 @@
                  (push input labels)
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
             (t
-             (parse-bug-err 'mread-raw)))))))
-
-#+nil
-(defun mread-raw (stream eof)
-  (let ((*parse-stream* stream)
-        (*mread-eof-obj* eof)
-        (*scan-buffered-token* (list nil))
-        (*parse-tyi* nil))
-    (if (eq *scan-buffered-token* (peek-one-token t *scan-buffered-token*))
-        *mread-eof-obj*
-        (do ((labels ())
-             (input (parse '$any 0) (parse '$any 0)))
-            (nil)
-          (case (peek-one-token)
-            ((|$;| |$$|
-              )
-             (return (list (mheader (scan-one-token))
-                           (if labels
-                               (cons (mheader '|$[| ) (nreverse labels)))
-                           input)))
-            ((|$&&|)
-             (scan-one-token)
-             (if (symbolp input)
-                 (push input labels)
-                 (mread-synerr "Invalid && tag. Tag must be a symbol")))
-            (t
-             (parse-bug-err 'mread-raw)))))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun nud-call (op)
-  (let ((tem (getprop op 'nud))
-        res)
-    (setq res
-          (if (null tem)
-              (if (operatorp op)
-                  (mread-synerr "~A is not a prefix operator" (mopstrip op))
-                  (cons '$any op))
-              (funcall tem op)))
-    res))
-
-(defun led-call (op l)
-  (let ((tem (getprop op 'led))
-        res)
-    (setq res
-          (if (null tem)
-              (mread-synerr "~A is not an infix operator" (mopstrip op))
-              (funcall tem op l)))
-    res))
+             (parse-bug-err 'mread)))))))
 
 ;;; ----------------------------------------------------------------------------
 
 (defun parse (mode rbp)
-  (do ((left (nud-call (pop-c))            ; Envoke the null left denotation
-             (led-call (pop-c) left)))     ;  and keep calling LED ops as needed
-      ((>= rbp (lbp (first-c)))            ; Until next op lbp too low
-       (convert left mode))))              ;  in which case, return stuff seen
+  (labels ((led-call (op l)
+             (let ((tem (getprop op 'led))
+                   res)
+               (setq res
+                     (if (null tem)
+                         (mread-synerr "~A is not an infix operator"
+                                       (mopstrip op))
+                         (funcall tem op l)))
+               res))
+           (nud-call (op)
+             (let ((tem (getprop op 'nud))
+                   res)
+               (setq res
+                     (if (null tem)
+                         (if (operatorp op)
+                             (mread-synerr "~A is not a prefix operator"
+                                           (mopstrip op))
+                             (cons '$any op))
+                         (funcall tem op)))
+               res)))
+    (do ((left (nud-call (scan-one-token))
+               (led-call (scan-one-token) left)))
+        ((>= rbp (lbp (peek-one-token)))
+         (convert left mode)))))
+
+(defun convert (item mode)
+  (if (or (eq mode (car item))
+          (eq '$any mode)
+          (eq '$any (car item)))
+      (cdr item)
+      (mread-synerr "Found ~A expression where ~A expression expected"
+                    (getprop (car item) 'english)
+                    (getprop mode       'english))))
 
 (defun parse-prefix (op)
-  (list (pos op)                           ; Operator mode
-        (mheader op)                       ; Standard Macsyma expression header
-        (parse (rpos op) (rbp op))))       ; Convert single argument for use
+  (list (pos op)
+        (mheader op)
+        (parse (rpos op) (rbp op))))
 
 (defun parse-postfix (op l)
-  (list (pos op)                           ; Operator's mode
-        (mheader op)                       ; Standard Macsyma expression header
-        (convert l (lpos op))))            ; Convert single argument for use
+  (list (pos op)
+        (mheader op)
+        (convert l (lpos op))))
 
 (defun parse-infix (op l)
-  (list (pos op)                           ; Operator's mode
-        (mheader op)                       ; Standard Macsyma expression header
-        (convert l (lpos op))              ; Convert arg1 for immediate use
-        (parse (rpos op) (rbp op))))       ; Look for an arg2 
-
-(defun parse-nary (op l)
-  (list* (pos op)                          ; Operator's mode
-         (mheader op)                      ; Normal Macsyma operator header
-         (convert l (lpos op))             ; Check type-match of arg1 
-         (prsnary op (lpos op) (lbp op)))) ; Search for other args
-
-(defun parse-matchfix (op)
-  (list* (pos op)                          ; Operator's mode
-         (mheader op)                      ; Normal Macsyma operator header
-         (prsmatch (and (symbolp op)
-                        (get op 'match))
-                   (lpos op))))            ; Search for matchfixed forms
+  (list (pos op)
+        (mheader op)
+        (convert l (lpos op))
+        (parse (rpos op) (rbp op))))
 
 (defun parse-nofix (op)
   (list (pos op)
         (mheader op)))
 
-(defun prsnary (op mode rbp)
-  (do ((nl (list (parse mode rbp))         ; Get at least one form
-           (cons (parse mode rbp) nl)))    ;  and keep getting forms
-      ((not (eq op (first-c)))             ; until a parse pops on a new op
-       (nreverse nl))                      ;  at which time return forms
-      (pop-c)))                            ; otherwise pop op
+(defun parse-nary (op l)
+  (list* (pos op)
+         (mheader op)
+         (convert l (lpos op))
+         (prsnary op (lpos op) (lbp op))))
 
-(defun prsmatch (match mode)                      ; Parse for matchfix char
-  (cond ((eq match (first-c)) (pop-c) nil)        ; If immediate match, ()
-        (t                                        ; Else, ...
-         (do ((nl (list (parse mode 10))          ;  Get first element
-                  (cons (parse mode 10) nl)))     ;   and Keep adding elements
-             ((eq match (first-c))                ;  Until we hit the match.
-              (pop-c)                             ;   Throw away match.
-              (nreverse nl))                      ;   Put result back in order
-           (if (eq '|$,| (first-c))               ;  If not end, look for ","
-               (pop-c)                            ;   and pop it if it's there
-               (mread-synerr "Missing ~A"         ;   or give an error message.
+(defun prsnary (op mode rbp)
+  (do ((nl (list (parse mode rbp))
+           (cons (parse mode rbp) nl)))
+      ((not (eq op (peek-one-token)))
+       (nreverse nl))
+      (scan-one-token)))
+
+(defun parse-matchfix (op)
+  (list* (pos op)
+         (mheader op)
+         (prsmatch (and (symbolp op)
+                        (getprop op 'match))
+                   (lpos op))))
+
+(defun prsmatch (match mode)
+  (cond ((eq match (peek-one-token)) (scan-one-token) nil)
+        (t
+         (do ((nl (list (parse mode 10))
+                  (cons (parse mode 10) nl)))
+             ((eq match (peek-one-token))
+              (scan-one-token)
+              (nreverse nl))
+           (if (eq '|$,| (peek-one-token))
+               (scan-one-token)
+               (mread-synerr "Missing ~A"
                              (mopstrip match)))))))
 
-(defun convert (item mode)
-  (if (or (eq mode (car item))                    ; If modes match exactly
-          (eq '$any mode)                         ;    or target is $ANY
-          (eq '$any (car item)))                  ;    or input is $ANY
-      (cdr item)                                  ;  then return expression
-      (mread-synerr "Found ~A expression where ~A expression expected"
-                    (get (car item) 'english)
-                    (get mode       'english))))
-
 ;;; ----------------------------------------------------------------------------
-
-(def-nud-equiv |$]| parse-delim-err)
-(def-led-equiv |$]| parse-erb-err)
-(def-lbp       |$]| 5)
 
 (def-nud-equiv |$[| parse-matchfix)
 (def-match     |$[| |$]|)
 (def-lbp       |$[| 200)
-;No RBP
 (def-mheader   |$[| (mlist))
 (def-pos       |$[| $any)
 (def-lpos      |$[| $any)
-;No RPOS
 
 (def-led (|$[| 200) (op left)
   (setq left (convert left '$any))
@@ -750,17 +728,17 @@
           (t
            (cons '$any (cons header (cons left right)))))))
 
+(def-nud-equiv |$]| parse-delim-err)
+(def-led-equiv |$]| parse-erb-err)
+(def-lbp       |$]| 5)
+
 ;;; ----------------------------------------------------------------------------
 
-(def-nud-equiv |$)| parse-delim-err)
-(def-led-equiv |$)| parse-erb-err)
-(def-lbp       |$)| 5)
-
-(def-mheader   |$(| (mprogn))
+(def-mheader |$(| (mprogn))
 
 (def-nud (|$(| 200) (op)
   (let ((right) (hdr (mheader '|$(|)))
-    (cond ((eq '|$)| (first-c)) (parse-err))
+    (cond ((eq '|$)| (peek-one-token)) (parse-err))
           ((or (null (setq right (prsmatch '|$)| '$any)))
                (cdr right))
            (cons '$any (cons hdr right)))
@@ -769,7 +747,7 @@
 (def-led (|$(| 200) (op left)
   (setq left (convert left '$any))
   (if (numberp left) (parse-err))
-  (let ((hdr (and (atom left)(mheader (amperchk left))))
+  (let ((hdr (and (atom left) (mheader (amperchk left))))
         (r (prsmatch '|$)| '$any)))
     (cons '$any
           (cond ((atom left)
@@ -777,15 +755,19 @@
                 (t
                  (cons '(mqapply) (cons left r)))))))
 
+(def-nud-equiv |$)| parse-delim-err)
+(def-led-equiv |$)| parse-erb-err)
+(def-lbp       |$)| 5)
+
 ;;; ----------------------------------------------------------------------------
 
 (def-mheader |$'| (mquote))
 
 (def-nud (|$'|) (op)
   (let (right)
-    (cond ((eq '|$(| (first-c))
+    (cond ((eq |$(| (peek-one-token))
            (list '$any (mheader '|$'|) (parse '$any 190)))
-          ((or (atom (setq right (parse '$any 190.)))
+          ((or (atom (setq right (parse '$any 190)))
                (member (caar right)
                        '(mquote mlist mprog mprogn lambda) :test #'eq))
            (list '$any (mheader '|$'|) right))
@@ -798,15 +780,18 @@
                                       (cdaadr right))
                                 (cdadr right)))
                   (cons '$any right))))
-           (t 
-            (cons '$any (cons (cons ($nounify (caar right)) (cdar right))
-                              (cdr right)))))))
+           (t
+            (cons '$any
+                  (cons (cons ($nounify (caar right)) (cdar right))
+                        (cdr right)))))))
 
 (def-nud (|$''|) (op)
   (let (right)
     (cons '$any
-          (cond ((eq '|$(| (first-c)) (meval (parse '$any 190)))
-                ((atom (setq right (parse '$any 190))) (meval right))
+          (cond ((eq |$(| (peek-one-token))
+                 (meval (parse '$any 190)))
+                ((atom (setq right (parse '$any 190)))
+                 (meval right))
                 ((eq 'mqapply (caar right))
                  (rplaca (cdr right)
                          (cons (cons ($verbify (caaadr right))
@@ -816,7 +801,7 @@
                 (t
                  (cons (cons ($verbify (caar right)) (cdar right))
                        (cdr right)))))))
-  
+
 ;;; ----------------------------------------------------------------------------
 
 (def-led-equiv |$:| parse-infix)
@@ -850,6 +835,8 @@
 (def-rpos      |$::=| $any)
 (def-lpos      |$::=| $any)
 (def-mheader   |$::=| (mdefmacro))
+
+;;; ----------------------------------------------------------------------------
 
 (def-led-equiv |$!| parse-postfix)
 (def-lbp       |$!| 160)
@@ -934,9 +921,9 @@
                      (parse '$expr 100))
                  left)
            (cons (parse '$expr 100) nl)))
-      ((not (member (first-c) '($+ $-) :test #'eq))
+      ((not (member (peek-one-token) '($+ $-) :test #'eq))
        (list* '$expr (mheader '$+) (nreverse nl)))
-    (if (eq (first-c) '$+) (pop-c))))
+    (if (eq (peek-one-token) '$+) (scan-one-token))))
 
 (def-nud-equiv |$-| parse-prefix)
 (def-lbp       |$-| 100)
@@ -946,6 +933,8 @@
 ;LPOS not needed
 (def-mheader   |$-| (mminus))
 
+;;; ----------------------------------------------------------------------------
+
 (def-led-equiv |$=| parse-infix)
 (def-lbp       |$=| 80)
 (def-rbp       |$=| 80)
@@ -953,6 +942,16 @@
 (def-rpos      |$=| $expr)
 (def-lpos      |$=| $expr)
 (def-mheader   |$=| (mequal))
+
+(def-led-equiv |$#| parse-infix)
+(def-lbp       |$#| 80)
+(def-rbp       |$#| 80)
+(def-pos       |$#| $clause)
+(def-rpos      |$#| $expr)
+(def-lpos      |$#| $expr)
+(def-mheader   |$#| (mnotequal))
+
+;;; ----------------------------------------------------------------------------
 
 (def-led-equiv |$>| parse-infix)
 (def-lbp       |$>| 80)
@@ -1046,12 +1045,12 @@
 
 (defun parse-condition (op)
   (list* (parse (rpos op) (rbp op))
-         (if (eq (first-c) '$then)
-             (parse '$any (rbp (pop-c)))
+         (if (eq (peek-one-token) '$then)
+             (parse '$any (rbp (scan-one-token)))
              (mread-synerr "Missing `then'"))
-         (case (first-c)
-           (($else)   (list t (parse '$any (rbp (pop-c)))))
-           (($elseif) (parse-condition (pop-c)))
+         (case (peek-one-token)
+           (($else)   (list t (parse '$any (rbp (scan-one-token)))))
+           (($elseif) (parse-condition (scan-one-token)))
            (t ; Note: $false instead of () makes DISPLA suppress display!
             (list t '$false)))))
 
@@ -1060,7 +1059,6 @@
 (defmacro make-mdo () '(list (list 'mdo) nil nil nil nil nil nil nil))
 
 (defmacro mdo-op (x)     `(car (car ,x)))
-
 (defmacro mdo-for (x)    `(second ,x))
 (defmacro mdo-from (x)   `(third ,x))
 (defmacro mdo-step (x)   `(fourth ,x))
@@ -1071,11 +1069,18 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(def-mheader $do (mdo))
+(def-nud-equiv $for    parse-$do)
+(def-nud-equiv $from   parse-$do)
+(def-nud-equiv $step   parse-$do)
+(def-nud-equiv $next   parse-$do)
+(def-nud-equiv $thru   parse-$do)
+(def-nud-equiv $unless parse-$do)
+(def-nud-equiv $while  parse-$do)
+(def-nud-equiv $do     parse-$do)
 
 (defun parse-$do (lex &aux (left (make-mdo)))
   (setf (car left) (mheader 'mdo))
-  (do ((op lex (pop-c))  (active-bitmask 0))
+  (do ((op lex (scan-one-token))  (active-bitmask 0))
       (nil)
     (if (eq op '|$:|) (setq op '$from))
     (setq active-bitmask (collision-check '$do active-bitmask op))
@@ -1090,31 +1095,22 @@
         ($next (setf (mdo-next left) data))
         ($thru (setf (mdo-thru left) data))
         (($unless $while)
-               (if (eq op '$while)
-                   (setq data (list (mheader '$not) data)))
-               (setf (mdo-unless left)
-                     (if (null (mdo-unless left))
-                         data
-                         (list (mheader '$or) data (mdo-unless left)))))
+         (if (eq op '$while)
+             (setq data (list (mheader '$not) data)))
+         (setf (mdo-unless left)
+               (if (null (mdo-unless left))
+                   data
+                   (list (mheader '$or) data (mdo-unless left)))))
         (t (parse-bug-err '$do))))))
 
-(def-lbp $for    25)
-(def-lbp $from   25)
-(def-lbp $step   25)
-(def-lbp $next   25)
-(def-lbp $thru   25)
-(def-lbp $unless 25)
-(def-lbp $while  25)
-(def-lbp $do     25)
-
-(def-nud-equiv $for    parse-$do)
-(def-nud-equiv $from   parse-$do)
-(def-nud-equiv $step   parse-$do)
-(def-nud-equiv $next   parse-$do)
-(def-nud-equiv $thru   parse-$do)
-(def-nud-equiv $unless parse-$do)
-(def-nud-equiv $while  parse-$do)
-(def-nud-equiv $do     parse-$do)
+(def-lbp $for     25)
+(def-lbp $from    25)
+(def-lbp $step    25)
+(def-lbp $next    25)
+(def-lbp $thru    25)
+(def-lbp $unless  25)
+(def-lbp $while   25)
+(def-lbp $do      25)
 
 (def-rbp $do      25)
 (def-rbp $for    200)
@@ -1135,6 +1131,8 @@
 (def-rpos $unless $clause)
 (def-rpos $while  $clause)
 
+(def-mheader $do (mdo))
+
 (def-collisions $do
   ($do     . ())
   ($for    . ($for))
@@ -1142,30 +1140,22 @@
   ($in     . ($in $from $step $next))
   ($step   . ($in       $step $next))
   ($next   . ($in	$step $next))
-  ($thru   . ($in $thru)) ;$IN didn't used to get checked for
+  ($thru   . ($in $thru))
   ($unless . ())
   ($while  . ()))
 
-(def-mheader   |$$| (nodisplayinput))
-(def-nud-equiv |$$| parse-premterm-err)
-(def-lbp       |$$| -1)
-;No RBP, POS, RPOS, RBP, or MHEADER
+;;; ----------------------------------------------------------------------------
 
 (def-mheader   |$;| (displayinput))
 (def-nud-equiv |$;| parse-premterm-err)
 (def-lbp       |$;| -1)
-;No RBP, POS, RPOS, RBP, or MHEADER
 
-(def-nud-equiv  |$&&| parse-delim-err)
-(def-lbp        |$&&| -1)
+(def-mheader   |$$| (nodisplayinput))
+(def-nud-equiv |$$| parse-premterm-err)
+(def-lbp       |$$| -1)
 
-(def-led-equiv  |$#| parse-infix)
-(def-lbp        |$#| 80)
-(def-rbp        |$#| 80)
-(def-pos        |$#| $clause)
-(def-rpos       |$#| $expr)
-(def-lpos       |$#| $expr)
-(def-mheader    |$#| (mnotequal))
+(def-nud-equiv |$&&| parse-delim-err)
+(def-lbp       |$&&| -1)
 
 ;;; ----------------------------------------------------------------------------
 
