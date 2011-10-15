@@ -36,6 +36,11 @@
     #:*parse-stream-eof*
     #:*parse-tyi*
     #:*scan-buffered-token*
+    #:gobble-comment
+    #:tyi
+    #:parse-tyi
+    #:parse-tyi-peek
+    #:unparse-tyi
     #:mread
     #:peek-one-token
     #:scan-one-token
@@ -107,12 +112,8 @@
     #:mplus
     #:mquotient
     #:mtimes
-    #:parse-tyi
-    #:parse-tyipeek
     #:putprop
     #:rat
-    #:tyi
-    #:unparse-tyi
     
     #:%sqrt
     #:*alphabet*
