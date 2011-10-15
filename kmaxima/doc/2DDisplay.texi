@@ -258,7 +258,8 @@ Standardwert: @code{nil}
 @emph{Quelltext:}
 @lisp
 @group
-(defmacro displa-def (op dim-function &rest rest &aux l-dissym r-dissym lbp rbp)
+(defmacro displa-def (op dim-function &rest rest
+                                      &aux l-dissym r-dissym lbp rbp)
   (dolist (x rest)
     (cond ((typep x 'string)
            (if l-dissym (setq r-dissym x) (setq l-dissym x)))
@@ -732,7 +733,8 @@ Standardwert: @code{'dimension-list}
 (defun dimension-paren (form result)
   (setq result
         (cons #\) (dimension form
-                             (cons #\( result) 'mparen 'mparen 1 (1+ *right*))))
+                             (cons #\( result)
+                             'mparen 'mparen 1 (1+ *right*))))
   (incf *width* 2)
   result)
 @end group
@@ -777,7 +779,8 @@ Standardwert: @code{'dimension-list}
                   (let ((atom-context 'dimension-array))
                     (dimension dummy result *lop* 'mfunction nil 0))))
     (cond ((not (checkfit (setq *width* (+ w *width*))))
-           (return (dimension-function (cons '(subscript) (cons dummy (cdr x)))
+           (return (dimension-function (cons '(subscript) 
+                                             (cons dummy (cdr x)))
                                        result)))
           ((and (atom (car bas))
                 (char= #\ (car bas)))
@@ -1166,7 +1169,8 @@ werden folgenderma@ss{}en initialisert:
                     (setq result
                           (funcall helper
                                    (car l)
-                                   result (caar form) (caar form) (caar form) w)
+                                   result 
+                                   (caar form) (caar form) (caar form) w)
                           w (+ w *width*)
                           h (max h *height*)
                           d (max d *depth*)))))
@@ -1231,7 +1235,8 @@ werden folgenderma@ss{}en initialisert:
     (let ((*level* *linel*)) (checkbreak result w))
     (setq dummy (list 0 0))
     (setq result
-          (dimension (caddr form) (cons dummy result) 'mlabel *rop* w *right*))
+          (dimension (caddr form) 
+                     (cons dummy result) 'mlabel *rop* w *right*))
     (cond ((and (not $leftjust) (= 0 *bkptout*))
            (rplaca dummy (max 0 (- (truncate (- *linel* *width*) 2) w)))
            (setq *width* (+ (car dummy) *width*))))
@@ -1276,6 +1281,8 @@ werden folgenderma@ss{}en initialisert:
           w *width*
           h *height*
           d *depth*)
+@end group
+@group
     (cond ((and (not (atom (cadr form)))
                 (member 'array (cdaadr form) :test #'eq))
            (prog (sub (w2 0) (h2 0) (d2 0))
@@ -1286,7 +1293,8 @@ werden folgenderma@ss{}en initialisert:
                    w2 *width*
                    h2 *height*
                    d2 *depth*)
-             (setq bas (dimension (mop (cadr form)) result *lop* 'mexpt nil 0))
+             (setq bas (dimension (mop (cadr form))
+                                  result *lop* 'mexpt nil 0))
              (when (not (checkfit (+ *width* (max w w2))))
                (setq result
                      (dimension-function (cons '($expt) (cdr form)) result))
@@ -1315,7 +1323,8 @@ werden folgenderma@ss{}en initialisert:
            (setq bas (dimension (cadr form) result *lop* 'mexpt nil 0)
                  *width* (+ w *width*))
            (if (not (checkfit *width*))
-               (return (dimension-function (cons '($expt) (cdr form)) result)))
+               (return (dimension-function (cons '($expt) (cdr form))
+                                           result)))
            (if (eql #\) (car bas))
                (setq result (cons (list* 0 (1+ d) exp) bas)
                      *height* (max (+ 1 h d) *height*))
@@ -1377,7 +1386,8 @@ werden folgenderma@ss{}en initialisert:
           ((null (cdddr form))
            (setq dummy `(#\space (d-integralsign) . ,result) w 2 h 3 d 2))
           (t
-           (setq dummy (dimension (cadr (cdddr form)) nil 'mparen 'mparen nil 0)
+           (setq dummy (dimension (cadr (cdddr form))
+                                  nil 'mparen 'mparen nil 0)
                  w *width* h *height* d *depth*)
            (setq dummy2 (dimension (cadddr form) nil 'mparen 'mparen nil 0))
            (if (not (checkfit (+ 2 (max w *width*))))
@@ -1504,7 +1514,8 @@ werden folgenderma@ss{}en initialisert:
                  h1 *height*
                  d1 *depth*)
            (setq result
-                 (dimension form (cons #\space result) '%deriv *rop* w1 *right*)
+                 (dimension form 
+                            (cons #\space result) '%deriv *rop* w1 *right*)
                  *width* (+ 1 w1 *width*)
                  *height* (max h1 *height*)
                  *depth* (max d1 *depth*))
@@ -1611,11 +1622,13 @@ werden folgenderma@ss{}en initialisert:
           h (max h *height*)
           d (max d *depth*))
     (or lsum
-        (setq dummy (dimension (cadr (cdddr form)) nil 'mparen 'mparen nil 0)))
+        (setq dummy (dimension (cadr (cdddr form))
+                               nil 'mparen 'mparen nil 0)))
     (unless (checkfit (max w *width*))
       (return (dimension-function form result)))
     (setq dummy2 
-          (cons (cons (- sw) (cons (- (+ sd h)) dummy2)) (cons d-form result)))
+          (cons (cons (- sw) (cons (- (+ sd h)) dummy2))
+                (cons d-form result)))
     (cond ((> *width* sw)
            (setq sw 0))
           (t
@@ -1752,6 +1765,8 @@ werden folgenderma@ss{}en initialisert:
                        (dimension (cadr form) result 'mdo 'mparen 4 *right*))
                  w (+ 4 *width*) h *height* d *depth*
                  brkflag t)))
+@end group
+@group
     (cond ((or (null (caddr form))
                (equal 1 (caddr form))))
           (t
@@ -1760,6 +1775,8 @@ werden folgenderma@ss{}en initialisert:
                  (cons #\space
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
+@end group
+@group
     (setq form (cdddr form))
     (cond ((equal 1 (car form)))
           ((not (null (car form)))
@@ -1774,6 +1791,8 @@ werden folgenderma@ss{}en initialisert:
                  (cons #\space
                        (dimension (cadr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
+@end group
+@group
     (cond ((not (null (caddr form)))
            (push-string "thru " result)
            (setq result
@@ -1781,6 +1800,8 @@ werden folgenderma@ss{}en initialisert:
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*)
                  brkflag t)))
+@end group
+@group
     (cond ((not (null (cadddr form)))
            (cond ((and (not (atom (cadddr form)))
                        (eq (caar (cadddr form)) 'mnot))
@@ -1800,6 +1821,8 @@ werden folgenderma@ss{}en initialisert:
                                          result 'mdo 'mparen (+ 8 w) 0))
                         w (+ 8 w *width*) h (max h *height*)
                         d (max d *depth*))))))
+@end group
+@group
     (if brkflag (checkbreak result w))
     (push-string "do " result)
     (setq result
@@ -1952,7 +1975,8 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
       (rplaca (cdar d) (- (truncate (- (car c) (caar d)) 2) w))
       (setq w (truncate (+ (car c) (caar d)) 2))
       (rplaca d (cdar d)))
-    (setq result (cons (list (+ 2 (- (car c) w)) 0) (nreconc (car d) result))))
+    (setq result
+          (cons (list (+ 2 (- (car c) w)) 0) (nreconc (car d) result))))
   (setq *width* (+ 2 *width*))
   (update-heights *height* *depth*)
   (rplaca (car result) (1- (caar result)))
@@ -2050,7 +2074,8 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
                      (cons 0
                            (cons (1- *height*)
                                  (cond ((< w *width*)
-                                        (cons `(d-hbar ,(- *width* w) ,ch) nl))
+                                        (cons `(d-hbar ,(- *width* w) ,ch)
+                                                       nl))
                                        (t nl)))))
                   (setq nl (cons (car l) nl)
                         w (1+ w)))
