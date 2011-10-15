@@ -74,6 +74,16 @@
       (assert-equal nil  (peek-one-token t nil))
       (assert-equal 'EOF (peek-one-token t 'EOF)))))
 
+(define-test gobble-comment
+  (with-input-from-string (stream "/* /***/ 100 */100")
+    (let ((*parse-stream* stream)
+          (*scan-buffered-token* (list nil))
+          (*parse-tyi* nil))
+      (assert-eql #\/ (parse-tyi))
+      (assert-eql #\* (parse-tyi))
+      (assert-eql t (gobble-comment))
+      (assert-eql 100 (scan-one-token)))))
+
 (define-test mread
   (with-input-from-string (stream "1+2; 3*4; 5;")
     ;; We read three expressions from the stream with mread.
@@ -85,4 +95,5 @@
     (assert-equal (mread stream) nil)
     (assert-equal (mread stream 'EOF) 'EOF)
     (assert-equal (mread stream '(nil)) '(nil))
-    (assert-equal (mread stream nil) nil)))
+    (assert-equal (mread stream nil) nil)
+    ))
