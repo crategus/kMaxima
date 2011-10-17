@@ -1580,6 +1580,7 @@ in den Puffer @mref{*parse-tyi*} zur@"uckgeschrieben.
 @end deffn
 
 @c -----------------------------------------------------------------------------
+@need 800
 @node Einlesen der Token, Parsen der Eingabe, Einlesen von Zeichen, Funktionen und Makros des Parsers
 @subsection Einlesen der Token
 @c -----------------------------------------------------------------------------
@@ -1605,29 +1606,29 @@ unterscheidet die folgenden Token:
 @item Operator
 Operatoren sind zum Beispiel die Zeichen f@"ur die Addition "+" oder
 Multiplikation "*".  Operatoren werden von der Funktion
-@code{scan-command-token} eingelesen.  Die Operatoren die von dieser Funktion
-behandelt werden, sind in der Liste @code{*maxima-operators*} enthalten.
+@mref{scan-operator-token} eingelesen.  Die Operatoren die von dieser Funktion
+behandelt werden, sind in der Liste @mref{*maxima-operators*} enthalten.
 
 @item Zahlen
 kMaxima liest ganze Zahlen oder Gleitkommazahlen mit den Funktionen
-@code{scan-number-before-dot}, @code{scan-number-after-dot}, 
-@code{scan-number-exponent} und @code{scan-number-rest} ein.  Weitere
-Funktionen sind @code{scan-digits} und @code{make-number}.
+@mrefcomma{scan-number-before-dot} @mrefcomma{scan-number-after-dot}@w{}
+@mref{scan-number-exponent} und @mref{scan-number-rest} ein.  Weitere
+Funktionen sind @mref{scan-digits} und @mrefdot{make-number}
 
 @item Zeichenkette
-Zeichenketten werden von den Funktionen @code{scan-string} eingelesen.
+Zeichenketten werden von den Funktionen @mref{scan-string} eingelesen.
 
 @item kMaxima Token
-Liest einen Maxima-Bezeichner mit der Funktion @code{scan-maxima-token} ein.
+Liest einen Maxima-Bezeichner mit der Funktion @mref{scan-maxima-token} ein.
 Maxima-Bezeichner erhalten einen @code{$}-Zeichen als Pr@"afix.
 
 @item Lisp Token
-Lisp-Bezeichner werden von der Funktion @code{scan-lisp-token} eingelesen.  Im
+Lisp-Bezeichner werden von der Funktion @mref{scan-lisp-token} eingelesen.  Im
 Unterschied zu kMaxima Token erhalten Lisp Token keinen Pr@"afix.
 
 @item Lisp Keyword
 Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
-@code{scan-keyword-token} eingelesen.
+@mref{scan-keyword-token} eingelesen.
 @end table
 
 @c -----------------------------------------------------------------------------
@@ -1714,21 +1715,21 @@ wird die Funktion aufgerufen, um einen kMaxima-Bezeichner vom Stream zu lesen.
          (rplaca *scan-buffered-token* nil)
          (cdr *scan-buffered-token*))
         ((scan-operator-token *maxima-operators*))
-        ((eql (setq test (parse-tyipeek)) *parse-stream-eof*)
+        ((eql (setq test (parse-tyi-peek)) *parse-stream-eof*)
          (parse-tyi)
          (if eof-p
              eof
              (merror "parser: end of file while scanning expression.")))
         ((eql test #\/ )
          (parse-tyi)
-         (cond ((char= (parse-tyipeek) #\* )
+         (cond ((char= (parse-tyi-peek) #\* )
                 (parse-tyi)
                 (gobble-comment)
                 (scan-one-token eof-p eof))
                (t '$/)))
         ((eql test #\. )
          (parse-tyi)
-         (if (digit-char-p (parse-tyipeek) 10)
+         (if (digit-char-p (parse-tyi-peek) 10)
              (scan-number-after-dot (list (list #\. ) nil))
              '|$.|))
         ((eql test #\" )
@@ -1736,10 +1737,10 @@ wird die Funktion aufgerufen, um einen kMaxima-Bezeichner vom Stream zu lesen.
          (scan-string))
         ((eql test #\? )
          (parse-tyi)
-         (cond ((char= (parse-tyipeek) #\" )
+         (cond ((char= (parse-tyi-peek) #\" )
                 (parse-tyi)
                 (scan-string))
-               ((char= (parse-tyipeek) #\: )
+               ((char= (parse-tyi-peek) #\: )
                 (scan-keyword-token))
                (t (scan-lisp-token))))
         ((digit-char-p test 10)
@@ -1786,15 +1787,59 @@ verschachtelt sein.
 @subsubsection Einlesen von Operatoren
 @c -----------------------------------------------------------------------------
 
-@verbatim
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{*whitespaces*}
+@defvr {Globale Variable} *whitespaces*
+Standardwert: @code{(#\tab #\space #\linefeed #\return #\page #\newline)}
+
+Liste mit Zeichen, die vom Parser als Whitespace-Zeichen gelesen werden.
+@end defvr
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-operator-token}
+@deffn {Funktion} scan-operator-token obj
+
+Wird von der Funktion @mref{scan-one-token} aufgerufen, um zu pr@"ufen, ob
+das n@"achste Token ein Operator ist, der in der Liste @code{obj} enthalten ist.
+Als Argument wird die Liste der kMaxima-Operatoren @mref{*maxima-operators*}@w{}
+von der Funktion @code{scan-one-token} @"ubergeben.  Die Funktion liest
+Whitespace-Zeichen vom Stream und ruft dann die Funktion
+@mref{scan-operator-token-aux} auf, die die eigentliche Aufgabe hat, ein
+eventuell vorhandenen Operator vom Stream zu lesen.
+
+Siehe die globale Variable @mref{*whitespaces*} f@"ur die Liste von Zeichen,
+die von kMaxima als Whitespace-Zeichen betrachtet werden.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-operator-token (obj)
-  (do ((ch (parse-tyipeek) (parse-tyipeek)))
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek)))
       ((not (member ch *whitespaces*)))
     (parse-tyi))
   (scan-operator-token-aux obj))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@verbatim
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-operator-token-aux}
+@deffn {Funktion} scan-operator-token-aux obj
+
+Wird von der Funktion @mref{scan-operator-token} aufgerufen, um einen
+eventuell auf dem Stream vorhandenen Operator einzulesen.  Das Argument
+@code{obj} ist eine Liste mit kMaxima-Operatoren.  Die Funktion wird mit der
+Liste @mref{*maxima-operators*} oder rekursiv mit einem Teil dieser Liste
+aufgerufen.  Ist kein Operator auf dem Stream vorhandenen oder hat der Stream
+keine weiteren Zeichen, wird als Ergebnis der Wert @code{nil} zur@"uckgegeben.
+
+Wird ein Operator vom Stream gelesen, dann ist die R@"uckgabe der Funktion
+ein kMaxima-Bezeichner f@"ur den Operator.  Zum Beispiel hat der Operator
+@code{+} den kMaxima-Bezeichner @code{$+}.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-operator-token-aux (obj)
   (labels ((parser-assoc (ch lis)
              (do ((v lis (cdr v)))
@@ -1803,7 +1848,7 @@ verschachtelt sein.
                       (if (eql (caar v) ch) (return (car v))))
                      ((eql (car v) ch)
                       (return v))))))
-    (let* ((ch (parse-tyipeek))
+    (let* ((ch (parse-tyi-peek))
            (lis (if (eql ch *parse-stream-eof*)
                     nil
                     (parser-assoc ch obj)))
@@ -1812,101 +1857,208 @@ verschachtelt sein.
         ((null lis) nil)
         (t
          (parse-tyi)
-         (cond 
+         (cond
            ((atom (cadr lis))
             (setq result (scan-operator-token-aux (list (cdr lis)))))
            ((null (cddr lis))
             (setq result
                   (and (eql (car (cadr lis)) 'ans)
                        (or (not (alphabetp (cadr (exploden (cadadr lis)))))
-                           (member (parse-tyipeek) *whitespaces*))
+                           (member (parse-tyi-peek) *whitespaces*))
                        (cadr (cadr lis)))))
            (t
             (let ((res (and (eql (car (cadr lis)) 'ans) (cadadr lis)))
                   (token (scan-operator-token-aux (cddr lis))))
-              (setq result 
-                    (or token 
+              (setq result
+                    (or token
                         res
                         (scan-operator-token-aux (list (cadr lis))))))))
          (or result (unparse-tyi ch))
          result)))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Einlesen von Bezeichnern, Einlesen von Zeichenketten, Einlesen von Operatoren, Einlesen der Token
 @subsubsection Einlesen von Bezeichnern
 @c -----------------------------------------------------------------------------
 
-@verbatim
+@c ---  15.10.2011 -------------------------------------------------------------
+@anchor{scan-maxima-token}
+@deffn {Funktion} scan-maxima-token
+
+Lese ein kMaxima-Token vom Stream.  Die R@"uckgabe ist ein Symbol mit den
+Zeichen, die vom Stream gelesen wurden, denen ein @code{$}-Zeichen vorangestellt
+wird.
+
+Die Zeichen werden mit der Funktion @mref{scan-token} vom Stream gelesen.
+@code{scan-token} gibt eine Liste mit den eingelesenen Zeichen zur@"uck.  Der
+Liste wird das @code{$}-Zeichen vorangestellt.  Mit der Funktion
+@mref{implode} wird die Liste der Zeichen in ein internes kMaxima-Symbol
+umgewandelt und mit der Funktion @mref{getalias} gepr@"uft, ob zu dem Symbol
+ein Alias-Name vorliegt.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-maxima-token ()
   (getalias (implode (cons '#\$ (scan-token t)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-lisp-token}
+@deffn {Funktion} scan-lisp-token
+
+Lese ein Lisp-Token vom Stream.  Ein Lisp-Symbol beginnt mit einem
+@code{?}-Zeichen.  
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-lisp-token ()
   (let ((charlist (scan-token nil)))
     (if charlist
         (implode charlist)
         (mread-synerr "Lisp symbol expected."))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-keyword-token}
+@deffn {Funktion} scan-keyword-token
+
+Lese ein Lisp-Schl@"usselwort vom Stream.  Das Schl@"usselwort beginnt mit
+einem @code{?}-Zeichen, dem ein @code{:}-Zeichen folgt.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-keyword-token ()
   (let ((charlist (cdr (scan-token nil))))
     (if charlist
         (let ((*package* (find-package :keyword)))
           (implode charlist))
         (mread-synerr "Lisp keyword expected."))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-token}
+@deffn {Funktion} scan-token flag
+
+Lese ein kMaxima-, Lisp- oder Keyword-Token vom Stream.  Hat das Argument
+@code{flag} den Wert @code{t}, dann wird ein kMaxima-Token vom Stream gelesen,
+ansonsten wird ein Lisp-Token vom Stream gelesen.
+
+Die Funktion wird von den Funktionen @mrefcomma{scan-maxima-token}@w{}
+@mref{scan-lisp-token} und @mref{scan-keyword-token} aufgerufen.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-token (flag)
-  (do ((c (parse-tyipeek) (parse-tyipeek))
-       (l () (cons c l)))
-      ((and flag
-            (not (or (digit-char-p c (max 10 *read-base*))
-                     (alphabetp c)
-                     (char= c #\\ ))))
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek))
+       (l () (cons ch l)))
+      ((or (eql ch *parse-stream-eof*)
+           (and flag
+                (not (or (digit-char-p ch (max 10 *read-base*))
+                         (alphabetp ch)
+                         (char= ch #\\ )))))
        (nreverse (or l (list (parse-tyi)))))
     (when (char= (parse-tyi) #\\ )
-      (setq c (parse-tyi)))
+      (setq ch (parse-tyi)))
     (setq flag t)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Einlesen von Zeichenketten, Einlesen von Zahlen, Einlesen von Bezeichnern, Einlesen der Token
 @subsubsection Einlesen von Zeichenketten
 @c -----------------------------------------------------------------------------
 
-@verbatim
-(defun scan-string (&optional init)
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-string}
+@deffn {Funktion} scan-string
+
+Lese eine Zeichenkette vom Stream.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun scan-string ()
   (let ((buf (make-array 50 :element-type '#.(array-element-type "a")
                             :fill-pointer 0 :adjustable t)))
-    (when init
-      (vector-push-extend init buf))
-    (do ((ch (parse-tyipeek) (parse-tyipeek)))
+    (do ((ch (parse-tyi-peek) (parse-tyi-peek)))
         ((cond ((eql ch *parse-stream-eof*))
                ((char= ch #\")
                 (parse-tyi) t))
          (copy-seq buf))
       (if (char= (parse-tyi) #\\ )
           (setq ch (parse-tyi)))
-          (vector-push-extend ch buf))))
-@end verbatim
+      (vector-push-extend ch buf))))
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Einlesen von Zahlen, , Einlesen von Zeichenketten, Einlesen der Token
 @subsubsection Einlesen von Zahlen
 @c -----------------------------------------------------------------------------
 
-@verbatim
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{+flonum-exponent-marker+}
+@defvr {Konstante} +flonum-exponent-marker+
+Standardwert: @code{#\D}
+
+Enth@"alt das Zeichen, das von kMaxima als das Exponent-Zeichen verwendet wird.
+@end defvr
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{*exponent-chars*}
+@defvr {Globale Variable} *exponent-chars*
+Standardwert: @code{(#\E #\e #\F #\f #\B #\b #\D #\d #\S #\s )}
+
+Enth@"alt Liste der Zeichen, die von kMaxima als ein Zeichen f@"ur den
+Exponenten erkannt werden.
+@end defvr
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{make-number}
+@deffn {Funktion} make-number data
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun make-number (data)
   (setq data (nreverse data))
   (let ((marker (car (nth 3 data))))
-    (unless (eql marker flonum-exponent-marker)
+    (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L ))
-        (setf (nth 3 data) (list flonum-exponent-marker)))))
+        (setf (nth 3 data) (list +flonum-exponent-marker+)))))
   (read-from-string (coerce (apply #'append data) 'string)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-digits}
+@deffn {Funktion} scan-digits data continuation? continuation &optional exponent-p
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-digits (data continuation? continuation &optional exponent-p)
-  (do ((c (parse-tyipeek) (parse-tyipeek))
-       (l () (cons c l)))
-      ((not (and (characterp c) (digit-char-p c (max 10 *read-base*))))
-       (cond ((member c continuation?)
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek))
+       (l () (cons ch l)))
+      ((not (and (characterp ch)
+                 (digit-char-p ch (max 10 *read-base*))))
+       (cond ((member ch continuation?)
               (funcall continuation
                        (list* (list (char-upcase (parse-tyi)))
                               (nreverse l)
@@ -1916,31 +2068,73 @@ verschachtelt sein.
              (t
               (make-number (cons (nreverse l) data)))))
     (parse-tyi)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-number-exponent}
+@deffn {Funktion} scan-number-exponent data
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-number-exponent (data)
-  (push (list (if (or (char= (parse-tyipeek) #\+ )
-                      (char= (parse-tyipeek) #\- ))
+  (push (list (if (or (char= (parse-tyi-peek) #\+ )
+                      (char= (parse-tyi-peek) #\- ))
                   (parse-tyi)
                   #\+ ))
         data)
   (scan-digits data nil nil t))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-number-rest}
+@deffn {Funktion} scan-number-rest data
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-number-rest (data)
-  (let ((c (caar data)))
-    (cond ((member c '(#\.))
+  (let ((ch (caar data)))
+    (cond ((member ch '(#\.))
            (scan-number-after-dot data))
-          ((member c *exponent-chars*)
+          ((member ch *exponent-chars*)
            (setf data (push (list #\. ) (rest data)))
            (push (list #\0 ) data)
-           (push (list c ) data)
+           (push (list ch ) data)
            (scan-number-exponent data)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-number-before-dot}
+@deffn {Funktion} scan-number-before-dot data
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-number-before-dot (data)
   (scan-digits data (push #\. *exponent-chars*) #'scan-number-rest))
+@end group
+@end lisp
+@end deffn
 
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{scan-number-after-dot}
+@deffn {Funktion} scan-number-after-dot data
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun scan-number-after-dot (data)
   (scan-digits data *exponent-chars* #'scan-number-exponent))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Parsen der Eingabe, , Einlesen der Token, Funktionen und Makros des Parsers
@@ -2053,6 +2247,24 @@ unless  parse-$do                             25   45        clause
 while   parse-$do                             25   45        clause
 @end verbatim
 
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{*mread-prompt*}
+@defvr {Globale Variable} *mread-prompt*
+Standardwert: @code{nil}
+
+Der Prompt der Funktion @mrefdot{mread} Hat @code{*mread-prompt*} einen von
+@code{nil} verschiedenen Wert, erwartet @code{mread} die Eingabe von der
+Tastatur.
+@end defvr
+
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{*mread-eof-obj*}
+@defvr {Globale Variable} *mread-eof-obj*
+Standardwert: @code{nil}
+
+Wird von der Funktion @mref{mread} an einen Wert gebunden.
+@end defvr
+
 @c --- 03.10.2011 --------------------------------------------------------------
 @anchor{mread}
 @deffn {Funktion} mread stream &optional eof
@@ -2124,9 +2336,25 @@ a+b$
 @end lisp
 @end deffn
 
-@c --- 05.10.2011 --------------------------------------------------------------
+@c --- 16.10.2011 --------------------------------------------------------------
 @anchor{parse}
 @deffn {Funktion} parse mode rbp
+
+Die Funktion @code{parse} wird von @mref{mread} aufgerufen, um die Token vom
+Stream zu lesen.  @code{mread} ruft @code{parse} mit den Argumenten @code{$any}
+f@"ur @var{mode} und @code{0} f@"ur @var{rbp} auf.  Wird @code{parse} rekursiv
+von den Funktionen des Parsers aufgerufen, enth@"alt das Argument @var{mode}
+die erwartete Wortart und das Argument @var{rbp} den aktuellen rechtsseitigen
+Vorrang.
+
+Wird ein Operator eingelesen, dann wird die entsprechende @code{led}- oder
+@code{nud}-Funktion von den lokalen Funktionen @code{led-call} oder
+@code{nud-call} geholt und aufgerufen.
+
+Das Einlesen vom Stream wird abgebrochen, wenn der letzte rechtsseitige Vorrang
+gr@"o@ss{}er oder gleich dem linksseitigen Vorrang des n@"achsten Operators auf
+dem Stream ist.  Die Operatoren @code{;}, @code{$} und @code{&&} haben einen
+negativen linksseitigen Vorrang von @code{-1} und beenden die Eingabe immer.
 
 @emph{Quelltext:}
 @lisp
@@ -2177,7 +2405,7 @@ generiert wird.
   (if (or (eq mode (car item))
           (eq '$any mode)
           (eq '$any (car item)))
-      (cdr item).
+      (cdr item)
       (mread-synerr "Found ~A expression where ~A expression expected"
                     (getprop (car item) 'english)
                     (getprop mode       'english))))
@@ -2234,11 +2462,11 @@ Operators @var{op}, die mit der Funktion @mref{lpos} ermittelt wird.
 @anchor{parse-infix}
 @deffn {Funktion} parse-infix op l
 
-Das Argument @var{op} ist ein Infix-Operator und @var{l} enthält das auf der
+Das Argument @var{op} ist ein Infix-Operator und @var{l} enth@"alt das auf der
 linken Seite des Operators eingelesene Argument.  Die Funktion
-@code{parse-infix} gibt als Ergebnis eine Liste zurück, die als erstes Element
+@code{parse-infix} gibt als Ergebnis eine Liste zur@"uck, die als erstes Element
 die Wortart des Operators @var{op} und als zweites Element das Symbol des
-Operators enthält.  Das dritte Element der Liste ist das Argument das auf der
+Operators enth@"alt.  Das dritte Element der Liste ist das Argument das auf der
 linken Seite des Operators eingelesen wurde.  Das vierte Element ist das
 rechte Argument des Infix-Operators, das mit der Funktion @mref{parse}@w{}
 eingelesen wird.  @code{parse} wird mit der rechtsseitigen Wortart und dem
@@ -2268,7 +2496,8 @@ Element und dem Symbol des Operators als zweites Element.
 @lisp
 @group
 (defun parse-nofix (op)
-  (list (pos op) (mheader op)))
+  (list (pos op)
+        (mheader op)))
 @end group
 @end lisp
 @end deffn
@@ -2279,7 +2508,7 @@ Element und dem Symbol des Operators als zweites Element.
 
 Das Argument @var{op} ist ein Nary-Operator, der eine beliebige Anzahl an
 Argumenten haben kann.  Das Argument @var{l} ist das auf der linken Seite
-des Operators eingelesene Argument.  Die Rückgabe ist eine Liste mit der
+des Operators eingelesene Argument.  Die R@"uckgabe ist eine Liste mit der
 Wortart des Operators als erstes Argument, dem Symbol des Operators als 
 zweites Argument und dem bisher eingelesenen Argument als drittes Argument.
 Mit der Funktion @mref{prsnary} werden die weiteren Argumente vom Parser
@@ -2298,9 +2527,19 @@ Wortart und dem linksseitigen Vorrang des Operators @var{op} aufgerufen.
 @end lisp
 @end deffn
 
-@c --- 05.10.2011 --------------------------------------------------------------
+@c --- 16.10.2011 --------------------------------------------------------------
 @anchor{prsnary}
 @deffn {Funktion} prsnary op mode rbp
+
+Wird von der Funktion @mref{parse-nary} aufgerufen, um alle verbleibenden
+rechtsseitigen Argumente des Operators @var{op} vom Stream zu lesen.  Die
+Argumente m@"ussen die Wortart @var{mode} haben.  Das Argument @var{rbp}
+ist der rechtsseitige Vorrang des zuletzt gelesenen Operators.
+
+@emph{Hinweis:}
+
+In kMaxima und im Original Maxima wird die Funktion nur von der Funktion
+@code{parse-nary}.  Die Funktion k@"onnte daher lokal definiert werden.
 
 @emph{Quelltext:}
 @lisp
@@ -2319,15 +2558,18 @@ Wortart und dem linksseitigen Vorrang des Operators @var{op} aufgerufen.
 @anchor{parse-matchfix}
 @deffn {Funktion} parse-matchfix op
 
+Das Argument @var{op} ist ein Matchfix-Operator.  Es wird eine Liste
+zur@"uckgegeben, deren erstes Element die Wortart des Matchfix-Operators ist.
+Das zweite Argument ist der Header des Operators.  Mit der Funktion
+@mref{prsmatch} werden sodann die Operanden des Operators geholt.
+
 @emph{Quelltext:}
 @lisp
 @group
 (defun parse-matchfix (op)
   (list* (pos op)
          (mheader op)
-         (prsmatch (and (symbolp op)
-                        (getprop op 'match))
-                   (lpos op))))
+         (prsmatch (getprop op 'match) (lpos op))))
 @end group
 @end lisp
 @end deffn
@@ -2335,6 +2577,16 @@ Wortart und dem linksseitigen Vorrang des Operators @var{op} aufgerufen.
 @c -----------------------------------------------------------------------------
 @anchor{prsmatch}
 @deffn {Funktion} prsmatch match mode
+
+Lese die rechtsseitigen Argumente eines Matchfix-Operators vom Stream.  Die
+Argumente sind mit Kommata voneinander getrennt.
+
+@emph{Hinweis:}
+
+Der rechtsseitige Vorrang jedes Matchfix-Operators wird hier immer mit dem
+Wert @code{10} definiert.  Dies k@"onnte vermieden werden, wenn der
+f@"ur einen Matchfix-Operator, wir f@"ur andere Operator auch, ein
+rechtsseitiger Vorrang definiert wird.
 
 @emph{Quelltext:}
 @lisp
@@ -2598,6 +2850,8 @@ Funktionen werden in ihre Verbform umgewandelt.
 @anchor{$:}
 @defvr {Operator} $:
 
+Definition des Operators f@"ur die Zuweisung.
+
 @emph{Quelltext:}
 @lisp
 @group  
@@ -2675,10 +2929,8 @@ Funktionen werden in ihre Verbform umgewandelt.
 @group
 (def-led-equiv |$!| parse-postfix)
 (def-lbp       |$!| 160)
-;No RBP
 (def-pos       |$!| $expr)
 (def-lpos      |$!| $expr)
-;No RPOS
 (def-mheader   |$!| (mfactorial))
 @end group
 @end lisp
@@ -2760,9 +3012,7 @@ Funktionen werden in ihre Verbform umgewandelt.
 @group
 (def-led-equiv |$*| parse-nary)
 (def-lbp       |$*| 120)
-;RBP not needed
 (def-pos       |$*| $expr)
-;RPOS not needed
 (def-lpos      |$*| $expr)
 (def-mheader   |$*| (mtimes))
 @end group
@@ -2796,10 +3046,9 @@ Funktionen werden in ihre Verbform umgewandelt.
 @group
 (def-nud-equiv |$+| parse-prefix)
 (def-lbp       |$+| 100)
-(def-rbp       |$+| 134) ; Value increased from 100 to 134 (DK 02/2010).
+(def-rbp       |$+| 134)
 (def-pos       |$+| $expr)
 (def-rpos      |$+| $expr)
-;LPOS not needed
 (def-mheader   |$+| (mplus))
 @end group
 
@@ -2830,7 +3079,6 @@ Funktionen werden in ihre Verbform umgewandelt.
 (def-rbp       |$-| 134)
 (def-pos       |$-| $expr)
 (def-rpos      |$-| $expr)
-;LPOS not needed
 (def-mheader   |$-| (mminus))
 @end group
 @end lisp
@@ -2956,7 +3204,6 @@ Definition des Operators f@"ur eine Ungleichung.
 @lisp
 @group
 (def-nud-equiv $not parse-prefix)
-;LBP not needed
 (def-rbp       $not 70)
 (def-pos       $not $clause)
 (def-rpos      $not $clause)
@@ -2975,9 +3222,7 @@ Definition des Operators f@"ur eine Ungleichung.
 @group
 (def-led-equiv $and parse-nary)
 (def-lbp       $and 65)
-;RBP not needed
 (def-pos       $and $clause)
-;RPOS not needed
 (def-lpos      $and $clause)
 (def-mheader   $and (mand))
 @end group
@@ -3378,6 +3623,57 @@ label && a+b;
 @anchor{def-operator}
 @deffn {Funktion} def-operator op pos lbp lpos rbp rpos sp1 sp2 parse-data grind-fn dim-fn match
 
+Die Funktion @code{def-operator} wird von den Funktionen @mrefcomma{$prefix}@w{}
+@mrefcomma{$postfix} @mrefcomma{$infix} @mrefcomma{$nary} @mref{$matchfix} und
+@mref{$nofix} aufgerufen, um einen nutzerdefinierten Operator zu definieren.
+Die Argumente werden von den genannten Funktionen mit geeigneten Standardwerten
+belegt und haben die folgende Bedeutung:
+
+@table @code
+@item op
+Der Bezeichner des neuen Operators, der ein Symbol oder eine Zeichenkette sein
+kann.
+
+@item pos 
+Die Wortart der R@"uckgabe des Operators.
+
+@item lbp
+Der linksseitige Vorrang des Operators.
+
+@item lpos
+Die Wortart des linksseitigen Argumentes des Operators.
+
+@item rbp
+Der rechtsseitige Vorrang des Operators.
+
+@item rpos
+Die Wortart des rechtsseitigen Argumentes des Operators.
+
+@item sp1
+Hat @code{sp1} einen von @code{nil} verschiedenen Wert, wird dem Operator in
+der Anzeige ein Leerzeichen vorangestellt.
+
+@item sp2
+Hat @code{sp2} einen von @code{nil} verschiedenen Wert, wird dem Operator in
+der Anzeige ein Leerzeichen nachgestellt.
+
+@item parse-data
+Eine Liste deren @code{car} entweder @code{led} oder @code{nud} ist und deren
+@code{cdr} die entsprechende @code{led-} oder @code{nud}-Funktion bezeichnet.
+
+@item grind-fn
+Eine Funktion, die den Operator und seine Operanden f@"ur die lineare Anzeige
+formatiert.
+
+@item dim-fn
+Eine Funktion, die den Operator und seine Operanden f@"ur die zweidimensionale
+Anzeige formatiert.
+
+@item match
+Wenn @code{op} ein @code{$matchfix}-Operator ist, bezeichnet @code{match} das
+Symbol, mit dem die Eingabe beendet wird.
+@end table
+
 @emph{Quelltext:}
 @lisp
 @group
@@ -3432,7 +3728,7 @@ Die globale Variable @code{*mopl*} enth@"alt die Namen der internen Operatoren,
 die vom Nutzer modifiziert wurden.  Operatoren, die in dieser Liste enthalten
 sind, werden nicht gel@"oscht.
 
-Siehe die Funktion @mref{op-setup}, die die Namen von internen Operatoren
+Siehe die Funktion @mrefcomma{op-setup} die die Namen von internen Operatoren
 in die Liste @code{*mopl*} schreibt.
 @end defvr
 
@@ -3457,6 +3753,7 @@ Operator zu definieren oder die Definition eines vorhandenen Operators zu
 modifizieren.
 
 @emph{Seiteneffekte:}
+
 @code{op-setup} modifiziert die globalen Variablen @code{$props} und
 @code{*mopl*}.
 
