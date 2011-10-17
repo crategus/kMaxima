@@ -65,14 +65,6 @@
   (and (symbolp sym)
        (get sym indic)))
 
-(defun getpropl (sym indicator-list)
-  (cond ((symbolp sym)
-         (setq sym (symbol-plist sym))
-         (loop for tail on sym by #'cddr
-               when (member (car tail) indicator-list :test #'eq)
-               do (return tail)))
-        (t (return-from getpropl nil))))
-
 ;;; ----------------------------------------------------------------------------
 
 (defun mfunctionp (x)
