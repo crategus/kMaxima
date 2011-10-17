@@ -47,7 +47,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defconstant flonum-exponent-marker #\D)
+(defconstant +flonum-exponent-marker+ #\D)
 
 (defvar *whitespaces* '(#\tab #\space #\linefeed #\return #\page #\newline))
 (defvar *exponent-chars* '(#\E #\e #\F #\f #\B #\b #\D #\d #\S #\s ))
@@ -263,29 +263,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-#+nil
-(defun gobble-comment ()
-  (prog (c depth)
-    (setq depth 1)
-  read
-    (setq c (parse-tyi-peek))
-    (parse-tyi)
-    (if (= depth 0) (return t))
-    (cond ((and (numberp c) (< c 0))
-           (merror "parser: end of file in comment."))
-          ((char= c #\* )
-           (cond ((char= (parse-tyi-peek) #\/ )
-                  (decf depth)
-                  (parse-tyi)
-                  (if (= depth 0) (return t))
-                  (go read))))
-          ((char= c #\/ )
-           (cond ((char= (parse-tyi-peek) #\* )
-                  (incf depth) 
-                  (parse-tyi)
-                  (go read)))))
-        (go read)))
-
 (defun gobble-comment ()
   (do ((depth 1)
        (ch (parse-tyi-peek) (parse-tyi-peek)))
@@ -381,11 +358,9 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun scan-string (&optional init)
+(defun scan-string ()
   (let ((buf (make-array 50 :element-type '#.(array-element-type "a")
                             :fill-pointer 0 :adjustable t)))
-    (when init
-      (vector-push-extend init buf))
     (do ((ch (parse-tyi-peek) (parse-tyi-peek)))
         ((cond ((eql ch *parse-stream-eof*))
                ((char= ch #\")
@@ -393,23 +368,24 @@
          (copy-seq buf))
       (if (char= (parse-tyi) #\\ )
           (setq ch (parse-tyi)))
-          (vector-push-extend ch buf))))
+      (vector-push-extend ch buf))))
 
 ;;; ----------------------------------------------------------------------------
 
 (defun make-number (data)
   (setq data (nreverse data))
   (let ((marker (car (nth 3 data))))
-    (unless (eql marker flonum-exponent-marker)
+    (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L ))
-        (setf (nth 3 data) (list flonum-exponent-marker)))))
+        (setf (nth 3 data) (list +flonum-exponent-marker+)))))
   (read-from-string (coerce (apply #'append data) 'string)))
 
 (defun scan-digits (data continuation? continuation &optional exponent-p)
-  (do ((c (parse-tyi-peek) (parse-tyi-peek))
-       (l () (cons c l)))
-      ((not (and (characterp c) (digit-char-p c (max 10 *read-base*))))
-       (cond ((member c continuation?)
+  (do ((ch (parse-tyi-peek) (parse-tyi-peek))
+       (l () (cons ch l)))
+      ((not (and (characterp ch)
+                 (digit-char-p ch (max 10 *read-base*))))
+       (cond ((member ch continuation?)
               (funcall continuation
                        (list* (list (char-upcase (parse-tyi)))
                               (nreverse l)
@@ -429,13 +405,13 @@
   (scan-digits data nil nil t))
 
 (defun scan-number-rest (data)
-  (let ((c (caar data)))
-    (cond ((member c '(#\.))
+  (let ((ch (caar data)))
+    (cond ((member ch '(#\.))
            (scan-number-after-dot data))
-          ((member c *exponent-chars*)
+          ((member ch *exponent-chars*)
            (setf data (push (list #\. ) (rest data)))
            (push (list #\0 ) data)
-           (push (list c ) data)
+           (push (list ch ) data)
            (scan-number-exponent data)))))
 
 (defun scan-number-before-dot (data)
@@ -687,9 +663,7 @@
 (defun parse-matchfix (op)
   (list* (pos op)
          (mheader op)
-         (prsmatch (and (symbolp op)
-                        (getprop op 'match))
-                   (lpos op))))
+         (prsmatch (getprop op 'match) (lpos op))))
 
 (defun prsmatch (match mode)
   (cond ((eq match (peek-one-token)) (scan-one-token) nil)
@@ -1069,15 +1043,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(def-nud-equiv $for    parse-$do)
-(def-nud-equiv $from   parse-$do)
-(def-nud-equiv $step   parse-$do)
-(def-nud-equiv $next   parse-$do)
-(def-nud-equiv $thru   parse-$do)
-(def-nud-equiv $unless parse-$do)
-(def-nud-equiv $while  parse-$do)
-(def-nud-equiv $do     parse-$do)
-
 (defun parse-$do (lex &aux (left (make-mdo)))
   (setf (car left) (mheader 'mdo))
   (do ((op lex (scan-one-token))  (active-bitmask 0))
@@ -1102,6 +1067,15 @@
                    data
                    (list (mheader '$or) data (mdo-unless left)))))
         (t (parse-bug-err '$do))))))
+
+(def-nud-equiv $for    parse-$do)
+(def-nud-equiv $from   parse-$do)
+(def-nud-equiv $step   parse-$do)
+(def-nud-equiv $next   parse-$do)
+(def-nud-equiv $thru   parse-$do)
+(def-nud-equiv $unless parse-$do)
+(def-nud-equiv $while  parse-$do)
+(def-nud-equiv $do     parse-$do)
 
 (def-lbp $for     25)
 (def-lbp $from    25)
