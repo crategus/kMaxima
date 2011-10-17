@@ -74,7 +74,7 @@ Umwandlung von rationalen Zahlen in Gleitkommazahlen.
 @end defvr
 
 @c -----------------------------------------------------------------------------
-@anchor{$%enummer}
+@anchor{$%enumer}
 @defvr {Optionsvariable} $%enumer
 Standardwert: @code{nil}
 
@@ -641,6 +641,17 @@ Im Original Maxima hat diese Funktion den Namen @code{denom1}.
 @subsection Hauptroutine der Vereinfachung
 @c -----------------------------------------------------------------------------
 
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{*dosimp*}
+@defvr {Globale Variable} *dosimp*
+Standardwert: @code{nil}
+
+Hat die globale Variable @code{*dosimp*} den Wert @code{t}, dann wird die
+Vereinfachung eines Ausdrucks von der Routine @mref{simplifya} auch dann
+ausgef@"uhrt, wenn der Ausdruck bereits vereinfacht wurde und ein
+@code{simp}-Schalter aufweist.
+@end defvr
+
 @c -----------------------------------------------------------------------------
 @anchor{simplifya}
 @deffn {Funktion} simplifya x y
@@ -758,8 +769,45 @@ und setzt gegebenenfalls ein @code{simp}-Schalter in den Ausdruck ein.
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
-@need 800
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{simpcheck}
+@deffn {Funktion} simpcheck form flag
+
+Das Argument @var{form} ist ein kMaxima-Ausdruck, der von der Funktion
+@mref{simplifya} vereinfacht wird, wenn das Argument @var{flag} den Wert
+@code{nil} hat.  Ansonsten wird der Ausdruck selbst zur@"uckgegeben.
+
+Zus@"atzlich wird die Optionsvariable @mref{$%enumer} an den Wert der
+Optionsvariablen @mref{$numer} gebunden, wenn der Ausdruck @var{form}
+vereinfacht wird. Dies bewirkt die Vereinfachung der Konstanten @code{$%e}
+zu ihrem numerischen Wert, wenn @code{$numer} den Wert @code{t} hat.
+
+@emph{Beispiele:}
+
+Die folgenden Beispiele zeigen die Vereinfachung der Konstanten @code{$%e}.
+
+@example
+* (let (($numer t)) (simpcheck '$%e nil))
+2.718281828459045
+* (let (($numer nil)) (simpcheck '$%e nil))
+$%E
+* (let (($numer t)) (simpcheck '$%e t))
+$%E
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun simpcheck (form flag)
+  (cond (flag form)
+        (t
+         (let (($%enumer $numer))
+           (simplifya form nil)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 16.10.2011 --------------------------------------------------------------
 @anchor{eqtest}
 @deffn {Funktion} eqtest x check
 
@@ -1188,40 +1236,21 @@ vorliegt, der weiter zu vereinfachen ist.
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
-@node Vereinfachung der Multiplikation, Vereinfachung der Exponentiation, Vereinfachung der Addition, Implementierung der Vereinfachung
-@subsection Vereinfachung der Multiplikation
-@c -----------------------------------------------------------------------------
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{addk}
+@deffn {Funktion} addk x y
 
-@c -----------------------------------------------------------------------------
-@node Vereinfachung der Exponentiation, , Vereinfachung der Multiplikation, Implementierung der Vereinfachung
-@subsection Vereinfachung der Exponentiation
-@c -----------------------------------------------------------------------------
+Die Argumente @var{x} und @var{y} m@"ussen ganze Zahlen, rationale Zahlen oder
+Gleitkommazahlen sein.  Die R@"uckgabe ist das Ergebnis der Addition der
+Zahlen.  Wenn notwendig werden die Argumente in den erforderlichen Typ
+umgewandelt, um die Addition auszuf@"uhren.  So wird eine rationale Zahl
+von der Funktion @mref{rat-to-float} in eine Gleitkommazahl umgewandelt, wenn
+die andere Zahl eine Gleitkommazahl ist.  F@"ur die Addition von zwei rationalen
+Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
 
-@c -----------------------------------------------------------------------------
-@node Funktionen und Variablen f@"ur die Vereinfachung, , Implementierung der Vereinfachung, Vereinfachung
-@section Funktionen und Variablen f@"ur die Vereinfachung
-@c -----------------------------------------------------------------------------
-
-@smalllisp
-(defvar *dosimp* nil)
-
-;;; ----------------------------------------------------------------------------
-
-(setf (get '$%e '$numer)
-      2.7182818284590452353602874713526624977572470936999595749669676277)
-
-(setf (get '$%pi '$numer)
-      3.1415926535897932384626433832795028841971693993751058209749445923)
-
-(setf (get '$%phi '$numer)
-      1.6180339887498948482045868343656381177203091798057628621354486227)
-
-(setf (get '$%gamma '$numer)
-      0.5772156649015328606065120900824024310421593359399235988057672348)
-
-;;; ----------------------------------------------------------------------------
-
+@emph{Quelltext:}
+@lisp
+@group
 (defun addk (x y)
   (cond ((eql x 0) y)
         ((eql y 0) x)
@@ -1229,6 +1258,7 @@ vorliegt, der weiter zu vereinfachen ist.
         (t
          (prog (g a b)
            (cond ((numberp x)
+
                   (cond ((floatp x) (return (+ x (rat-to-float y))))
                         (t (setq x (list '(rat) x 1)))))
                  ((numberp y)
@@ -1242,9 +1272,22 @@ vorliegt, der weiter zu vereinfachen ist.
                                   (+ (* (cadr x) b)
                                      (* (cadr y) a))
                                   (* a b))))))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Multiplikation, Vereinfachung der Exponentiation, Vereinfachung der Addition, Implementierung der Vereinfachung
+@subsection Vereinfachung der Multiplikation
+@c -----------------------------------------------------------------------------
 
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{timesk}
+@deffn {Funktion} timesk x y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun timesk (x y)
   (cond ((eql x 1) y)
         ((eql y 1) x)
@@ -1252,7 +1295,17 @@ vorliegt, der weiter zu vereinfachen ist.
         ((floatp x) (* x (rat-to-float y)))
         ((floatp y) (* y (rat-to-float x)))
         (t (timeskl x y))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{timeskl}
+@deffn {Funktion} timeskl x y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun timeskl (x y)
   (prog (u v g)
      (setq u (make-rat (rat-num x) (rat-den y)))
@@ -1268,14 +1321,34 @@ vorliegt, der weiter zu vereinfachen ist.
                    ((eql (caddr g) 1) (cadr g))
                    ($float (rat-to-float g))
                    (t g)))))
+@end group
+@end lisp
+@end deffn
 
+@c -----------------------------------------------------------------------------
+@node Vereinfachung der Exponentiation, , Vereinfachung der Multiplikation, Implementierung der Vereinfachung
+@subsection Vereinfachung der Exponentiation
+@c -----------------------------------------------------------------------------
+
+@c -----------------------------------------------------------------------------
+@node Funktionen und Variablen f@"ur die Vereinfachung, , Implementierung der Vereinfachung, Vereinfachung
+@section Funktionen und Variablen f@"ur die Vereinfachung
+@c -----------------------------------------------------------------------------
+
+@smalllisp
 ;;; ----------------------------------------------------------------------------
 
-(defun simpcheck (e flag)
-  (cond (flag e)
-        (t
-         (let (($%enumer $numer))
-           (simplifya e nil)))))
+(setf (get '$%e '$numer)
+      2.7182818284590452353602874713526624977572470936999595749669676277)
+
+(setf (get '$%pi '$numer)
+      3.1415926535897932384626433832795028841971693993751058209749445923)
+
+(setf (get '$%phi '$numer)
+      1.6180339887498948482045868343656381177203091798057628621354486227)
+
+(setf (get '$%gamma '$numer)
+      0.5772156649015328606065120900824024310421593359399235988057672348)
 
 ;;; ----------------------------------------------------------------------------
 
