@@ -84,6 +84,49 @@
       (assert-eql t (gobble-comment))
       (assert-eql 100 (scan-one-token)))))
 
+(define-test scan-operator-token
+  (with-input-from-string (stream "+ - * ** ^ ^^ < <= = > >= ( ) [ ] ,
+                                   : := :: ::= ! # ' '' $ ; &&")
+    (let ((*parse-stream* stream)
+          (*scan-buffered-token* (list nil))
+          (*parse-tyi* nil))
+      (assert-eq '$+     (scan-operator-token *maxima-operators*))
+      (assert-eq '$-     (scan-operator-token *maxima-operators*))
+      (assert-eq '$*     (scan-operator-token *maxima-operators*))
+      (assert-eq '$**    (scan-operator-token *maxima-operators*))
+      (assert-eq '$^     (scan-operator-token *maxima-operators*))
+      (assert-eq '$^^    (scan-operator-token *maxima-operators*))
+      (assert-eq '$<     (scan-operator-token *maxima-operators*))
+      (assert-eq '$<=    (scan-operator-token *maxima-operators*))
+      (assert-eq '$=     (scan-operator-token *maxima-operators*))
+      (assert-eq '$>     (scan-operator-token *maxima-operators*))
+      (assert-eq '$>=    (scan-operator-token *maxima-operators*))
+      (assert-eq '|$(|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$)|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$[|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$]|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$,|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$:|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$:=|  (scan-operator-token *maxima-operators*))
+      (assert-eq '|$::|  (scan-operator-token *maxima-operators*))
+      (assert-eq '|$::=| (scan-operator-token *maxima-operators*))
+      (assert-eq '|$!|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$#|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$'|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$''|  (scan-operator-token *maxima-operators*))
+      (assert-eq '|$$|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$;|   (scan-operator-token *maxima-operators*))
+      (assert-eq '|$&&|  (scan-operator-token *maxima-operators*))
+      (assert-eq nil     (scan-operator-token *maxima-operators*))
+      )))
+  
+(define-test scan-string
+  (with-input-from-string (stream " "STRING" ")
+    (let ((*parse-stream* stream)
+          (*scan-buffered-token* (list nil))
+          (*parse-tyi* nil))
+
+
 (define-test mread
   (with-input-from-string (stream "1+2; 3*4; 5;")
     ;; We read three expressions from the stream with mread.
