@@ -92,7 +92,9 @@
    Ban-ners
    be-zeich-net
    Dar-stel-lung
+   Ei-gen-schafts-lis-te
    End-los-schlei-fe
+   Ent-wurf
    ex-ter-ne
    ge-schrie-be-ner
    kon-trol-liert
@@ -102,6 +104,7 @@
    Ver-ein-fach-ung
    vor-an-ge-stell-tes
    Wur-zel-funk-tion
+   Zei-chen-ket-te
  }
 @end iftex
 
