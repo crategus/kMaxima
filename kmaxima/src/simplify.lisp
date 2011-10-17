@@ -236,11 +236,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun simpcheck (e flag)
-  (cond (flag e)
+(defun simpcheck (form flag)
+  (cond (flag form)
         (t
          (let (($%enumer $numer))
-           (simplifya e nil)))))
+           (simplifya form nil)))))
 
 ;;; ----------------------------------------------------------------------------
 
