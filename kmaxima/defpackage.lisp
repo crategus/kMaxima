@@ -32,6 +32,13 @@
     #:simp
     
     ;; parser.lisp
+    #:$+     #:$-      #:$*    #:$**   #:$^    #:$^^
+    #:$<     #:$<=     #:$=    #:$>    #:$>=   #:|$(|
+    #:|$)|   #:|$[|    #:|$]|  #:|$,|  #:|$:|  #:|$:=|
+    #:|$::|  #:|$::=|  #:|$!|  #:|$#|  #:|$'|  #:|$''|
+    #:|$$|   #:|$;|    #:|$&|  #:|$&&|
+    
+    #:*maxima-operators*
     #:*parse-stream*
     #:*parse-stream-eof*
     #:*parse-tyi*
@@ -44,6 +51,8 @@
     #:mread
     #:peek-one-token
     #:scan-one-token
+    #:scan-operator-token
+    #:scan-string
     
     ;; nformat.lisp
     #:$powerdispflag
