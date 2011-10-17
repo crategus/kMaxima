@@ -4,12 +4,14 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 16.04.2011
-@c Revision : 10.08.2011
+@c Revision : 17.10.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @menu
+* Allgemeine Makros::
+* Funktionen f@"ur die Eigenschaftsliste::
 * Konvertierung zwischen Gross- und Kleinschreibung::
 * Zerlegung von Symbolen und Zeichenketten in Listen::
 * Alias und Reversealias::
@@ -19,7 +21,210 @@
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Hilfsfunktionen, Hilfsfunktionen
+@node Allgemeine Makros, Funktionen f@"ur die Eigenschaftsliste, Hilfsfunktionen, Hilfsfunktionen
+@section Allgemeine Makros
+@c -----------------------------------------------------------------------------
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{defun-prop}
+@deffn {Makro} defun-prop f arg &body body
+
+Das Makro generiert den Code, um die Definition einer Funktion auf der
+Eigenschaftsliste eines Symbols abzulegen.
+
+Das Argument @var{f} ist eine Liste mit zwei Elementen.  Das erste Element
+ist ein Symbol, das die Funktion bezeichnet.  Das zweite Element ist ein
+Symbol, das den Indikator bezeichnet, zu dem die Funktionsdefinition auf
+der Eigenschaftsliste abgelegt wird.  @var{arg} ist eine Liste mit den
+Argumenten der Funktionsdefinition @var{body}.
+
+@emph{Beispiel:}
+
+Das Beispiel zeigt die Definition einer Funktion @code{$f}.  Die Funktion hat
+die Argumente @code{x} und @code{y}.  Die Definition der Funktion wird zum
+Indikator @code{func} auf der Eigenschaftsliste abgelegt.
+
+@example
+* (macroexpand-1 '(defun-prop ($f func) (x y) (+ x y)))
+(SETF (GET '$F 'FUNC) #'(LAMBDA (X Y) (+ X Y)))
+T
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro defun-prop (f arg &body body)
+  `(setf (get ',(first f) ',(second f)) #'(lambda ,arg ,@@body)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{defmspec}
+@deffn {Makro} defmspec function . rest
+
+Das Makro @code{defmspec} legt die Definition einer Funktion zum Indikator
+@code{mspec} auf der Eigenschaftsliste ab.  Das Makro generiert einen
+Ausdruck mit dem Makro @mrefcomma{defun-prop} das die Definition auf der
+Eigenschaftsliste ablegt.
+
+@emph{Beispiel:}
+
+@example
+* (macroexpand-1 '(defmspec f(x y) (+ x y)))
+(PROGN
+ (DEFUN-PROP (F MSPEC)
+     (X Y)
+   (+ X Y)))
+T
+@end example
+
+@example
+* (defmspec f(x y) (+ x y))
+#<FUNCTION (LAMBDA (X Y)) @{AF8A7BD@}>
+* (symbol-plist 'f)
+(MSPEC #<FUNCTION (LAMBDA #) @{AF8A7BD@}>)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro defmspec (function . rest)
+  `(progn
+     (defun-prop (,function mspec) ,@@rest)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{*variable-initial-values*}
+@defvr {Globale Variable} *variable-initial-values*
+Standardwert: @code{#<HASH-TABLE :TEST EQL :COUNT 0 @{AF946F1@}>}
+
+Hash-Tabelle mit allen Variablen und deren Anfangswert, die mit dem Makro
+@mref{defmvar} definiert sind.  kMaxima nutzt die Eintr@"age in diese
+Hash-Tabelle, um Optionsvariablen auf ihren Anfangswert zur@"uckzusetzen.
+@end defvr
+
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{defmvar}
+@deffn {Makro} defmvar var &rest val-and-doc
+
+Definiert eine globale Variable @var{var}.  Das Argument @var{val-and-doc}
+enth@"alt den Wert der Variablen sowie gegebenenfalls eine Zeichenkette f@"ur
+die Dokumentation.  Der Wert der Variablen wird in die Hash-Tabelle
+@mref{*variable-initial-values*} eingetragen, wenn noch nicht vorhanden.
+
+@emph{Beispiel:}
+
+@example
+* (macroexpand '(defmvar x 100))
+(PROGN
+ (UNLESS (GETHASH 'X *VARIABLE-INITIAL-VALUES*)
+   (SETF (GETHASH 'X *VARIABLE-INITIAL-VALUES*) 100))
+ (DEFVAR X 100))
+T
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro defmvar (var &rest val-and-doc)
+  (cond ((> (length val-and-doc) 2)
+         (setq val-and-doc (list (car val-and-doc) (second val-and-doc)))))
+  `(progn
+     (unless (gethash ',var *variable-initial-values*)
+       (setf (gethash ',var *variable-initial-values*) ,(first val-and-doc)))
+     (defvar ,var ,@@val-and-doc)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 16.10.2011 --------------------------------------------------------------
+@anchor{errset}
+@defvr {Globale Variable} errset
+Standardwert: @code{nil}
+@end defvr
+
+
+@lisp
+(defmacro errset (&rest l)
+  `(handler-case (list ,(car l))
+     (error (e) (when errset (error e)))))
+@end lisp
+
+@lisp
+(defmacro while (cond &rest body)
+  `(do ()
+       ((not ,cond))
+     ,@@body))
+@end lisp
+
+@verbatim
+(defvar ^w nil)
+(defvar ttyoff '^w)
+
+(defmacro float (x &optional (y 1d0))
+  `(cl:float ,x ,y))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (setq *read-default-float-format* 'double-float))
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Allgemeine Makros, Hilfsfunktionen
+@section Funktionen f@"ur die Eigenschaftsliste
+@c -----------------------------------------------------------------------------
+
+Die Lisp-Eigenschaftsliste wird von kMaxima h@"aufig genutzt, um Eigenschaften
+f@"ur Lisp-Symbole abzulegen.  Diese Eigenschaften k@"onnen Werte und Funktionen
+sein.  Die Eigenschaftsliste erlaubt einen Programmierstil, der objektorientiert
+ist, ohne dass Mechanismen gebraucht werden, wie sie in anderen
+Programmiersprachen notwendig sind.
+
+Um eine einheitliche Syntax zu erm@"oglichen, werden f@"ur das Setzen eines
+Wertes die Funktion @code{putprop} und das Makro @code{defprop} definiert.
+Im Unterschied zur Funktion @code{putprop} wertet das Makro @code{defprop}
+die Argumente nicht aus.  Das erlaubt eine bequemere Schreibweise, da auf
+das Voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
+die Argumente Symbole sind.  Mit der Funktion @code{getprop} kann eine
+Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
+@code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
+ein Symbol ist.  Ist dies nicht der Fall ist die R@"uckgabe @code{nil}.
+
+@verbatim
+(defun putprop (sym val indic)
+  (and (symbolp sym)
+       (setf (get sym indic) val)))
+
+(defmacro defprop (sym val indic)
+  `(putprop ',sym ',val ',indic))
+
+(defun getprop (sym indic)
+  (and (symbolp sym)
+       (get sym indic)))
+@end verbatim
+
+Bereits an dieser Stelle ist zus@"atzlich die Funktion @code{getpropl}
+eingef@"uhrt.  @code{getpropl} ist eine Verallgemeinerung der Funktion
+@code{getprop}, die auch eine Liste als zweites Argument akzeptiert und eine
+Liste zur@"uckgibt, deren erstes Element der Indikator ist, zu dem der erste
+Eintrag auf der Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der
+Liste sind die folgenden Eintr@"age der Eigenschaftsliste.
+
+@need 800
+@verbatim
+(defun getpropl (sym indicator-list)
+  (cond ((symbolp sym)
+         (setq sym (symbol-plist sym))
+         (loop for tail on sym by #'cddr
+               when (member (car tail) indicator-list :test #'eq)
+               do (return tail)))
+        (t (return-from getpropl nil))))
+@end verbatim
+
+@c -----------------------------------------------------------------------------
+@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Funktionen f@"ur die Eigenschaftsliste, Hilfsfunktionen
 @section Konvertierung zwischen Gro@ss{}- und Kleinschreibung
 @c -----------------------------------------------------------------------------
 
@@ -29,27 +234,22 @@ ein gro@ss{} geschriebener Lisp-Bezeichner entspricht.  Umgekehrt entspricht
 einem gro@ss{} geschriebenen kMaxima-Bezeichner ein klein geschriebener
 Lisp-Bezeichner.  Bezeichner in gemischter Gro@ss{}- und Kleinschreibung werden
 nicht konvertiert.  Diese Konventionen werden von den Funktionen
-@code{print-invert-case}, @code{maybe-invert-string} und
-@code{intern-invert-case} implementiert.
+@mrefcomma{print-invert-case} @mref{maybe-invert-string} und
+@mref{intern-invert-case} implementiert.
 
-@findex print-invert-case
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{print-invert-case}
+@deffn {Funktion} print-invert-case sym
 
 Die folgende Implementierung der Funktion @code{print-invert-case} h@"angt vom
 verwendeten Lisp ab.  Hier wird die Implementierung f@"ur SBCL gezeigt.  Das
 Argument @code{sym} muss ein Symbol sein.  Die R@"uckgabe der Funktion ist 
 eine Zeichenkette.
 
-@verbatim
-(let ((local-table (copy-readtable nil)))
-  (setf (readtable-case local-table) :invert)
-  (defun print-invert-case (sym)
-    (let ((*readtable* local-table)
-          (*print-case* :upcase))
-      (princ-to-string sym))))
-@end verbatim
+@emph{Beispiele:}
 
-@b{Beispiele:} Die Beispiele zeigen die Konvertierung f@"ur klein- und
-gro@ss{}geschriebene Symbole sowie Symbole in gemischter Schreibweise.
+Die Beispiele zeigen die Konvertierung f@"ur klein- und gro@ss{}geschriebene
+Symbole sowie Symbole in gemischter Schreibweise.
 
 @example
 * (print-invert-case '|abc|)
@@ -60,14 +260,45 @@ gro@ss{}geschriebene Symbole sowie Symbole in gemischter Schreibweise.
 "aBc"
 @end example
 
-@findex maybe-invert-string
+@emph{Quelltext:}
+@lisp
+@group
+(let ((local-table (copy-readtable nil)))
+  (setf (readtable-case local-table) :invert)
+  (defun print-invert-case (sym)
+    (let ((*readtable* local-table)
+          (*print-case* :upcase))
+      (princ-to-string sym))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{maybe-invert-string}
+@deffn {Funktion} maybe-invert-string str
 
 Die Funktion @code{maybe-invert-string} hat dieselbe Aufgabe wie die Funktion
-@code{print-invert-case}.  Die Funktion @code{maybe-invert-string} erwartet
+@mrefdot{print-invert-case}  Die Funktion @code{maybe-invert-string} erwartet
 jedoch eine Zeichenkette @code{str} als Argument.  Die R@"uckgabe ist wieder
 eine Zeichenkette.
 
-@verbatim
+@emph{Beispiele:}
+
+Dieselben Beispiele wie oben.  Das Argument muss eine Zeichenkette sein.
+Die R@"uckgabe ist eine Zeichenkette.
+
+@example
+* (maybe-invert-string "abc")
+"ABC"
+* (maybe-invert-string "ABC")
+"abc"
+* (maybe-invert-string "aBc")
+"aBc"
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun maybe-invert-string (str)
   (let ((all-upper t)
         (all-lower t)
@@ -84,35 +315,23 @@ eine Zeichenkette.
            (string-upcase str))
           (t
            str))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@b{Beispiele:} Dieselben Beispiele wie oben.  Das Argument muss eine
-Zeichenkette sein.  Die R@"uckgabe ist eine Zeichenkette.
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{intern-invert-case}
+@deffn {Funktion} intern-invert-case str
 
-@example
-* (maybe-invert-string "abc")
-"ABC"
-* (maybe-invert-string "ABC")
-"abc"
-* (maybe-invert-string "aBc")
-"aBc"
-@end example
+Die Funktion @code{intern-invert-case} erwartet eine Zeichenkette @code{str}
+als Argument.  Die Funktion ruft die Funktion @mref{maybe-invert-string} auf.
+Im Unterschied zur Funktion @code{maybe-invert-case} ist die R@"uckgabe ein
+Symbol, das in das Package @code{:kmaxima} geschrieben wird.
 
-@findex intern-invert-case
+@emph{Beispiele:}
 
-Zuletzt wird die Funktion @code{intern-invert-case} eingef@"uhrt.  Diese
-erwartet wieder eine Zeichenkette @code{str} als Argument.  Die Funktion ruft
-die Funktion @code{maybe-invert-case} auf.  Im Unterschied zur Funktion
-@code{maybe-invert-case} ist die R@"uckgabe ein Symbol, das in das Package
-@code{:kmaxima} geschrieben wird.
-
-@verbatim
-(defun intern-invert-case (str)
-  (intern (maybe-invert-string str) :kmaxima))
-@end verbatim
-
-@b{Beispiele:} Zeichenketten werden in ein Symbol umgewandelt und in das
-Package @code{:kmaxima} geschrieben.
+Zeichenketten werden in ein Symbol umgewandelt und in das Package
+@code{:kmaxima} geschrieben.
 
 @example
 * (intern-invert-case "abc")
@@ -123,25 +342,29 @@ ABC
 :INTERNAL
 @end example
 
+@emph{Quelltext:}
+@lisp
+@group
+(defun intern-invert-case (str)
+  (intern (maybe-invert-string str) :kmaxima))
+@end group
+@end lisp
+@end deffn
+
 @c -----------------------------------------------------------------------------
 @node Zerlegung von Symbolen und Zeichenketten in Listen, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Hilfsfunktionen
 @section Zerlegung von Symbolen und Zeichenketten in Listen
 @c -----------------------------------------------------------------------------
 
-@findex exploden
-
 H@"aufig werden Zahlen, Symbole oder Zeichenketten als eine Liste ihrer
-Zeichen ben@"otigt.  Dies wird von der Funktion @code{exploden} geleistet.
+Zeichen ben@"otigt.  Dies wird von der Funktion @mref{exploden} geleistet.
 Die Funktion enth@"alt Algorithmen f@"ur die Zerlegung von Symbolen, 
 Gleitkommazahlen und ganzen Zahlen.  Alle anderen Argumente der Funktion
 @code{exploden} werden mit der Funktion @code{format} in eine Zeichenkette
 umgewandelt und dann in eine Liste zerlegt.
 
-@vindex $fpprintprec
-@vindex *maxfpprintprec*
-
 Die Umwandlung von Gleitkommazahlen in die Liste der Zeichen wird von den 
-Variablen @code{$fpprintprec} und @code{*maxfpprintprec*} kontrolliert.  Der
+Variablen @mref{$fpprintprec} und @mref{*maxfpprintprec*} kontrolliert.  Der
 Nutzer legt mit der Optionsvariablen @code{$fpprintprec} die Anzahl der
 Stellen einer Gleitkommazahl fest.  Die globale Variable @code{*maxfpprintprec*}
 enth@"alt die maximale Anzahl der Stellen einer Gleitkommazahl.  Hat die
@@ -152,13 +375,47 @@ eine Zeichenkette die Anzahl der Stellen in @code{*maxfpprintprec*} verwendet.
 Im Unterschied zum Original Maxima ist die Umwandlung von gro@ss{}en
 Gleitkommazahlen nicht implementiert.
 
-@verbatim
-(defmvar $fpprintprec 0)
-(defvar *maxfpprintprec* (ceiling (log (expt 2 (float-digits 1.0d0)) 10.0)))
-@end verbatim
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{$fpprintprec}
+@defvr {Globale Variable} $fpprintprec
+Standardwert: @code{0}
 
-@need 800
-@verbatim
+Anzahl der Stellen einer Gleitkommazahl.  Ist der Wert @code{0}, dann wird
+die maximale Anzahl an Stellen benutzt, die in der Variablen 
+@mref{*maxfpprintprec*} abgelegt ist.
+@end defvr
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{*maxfpprintprec*}
+@defvr {Globale Variable} *maxfpprintprec*
+Standardwert: @code{(ceiling (log (expt 2 (float-digits 1.0d0)) 10.0))}
+
+Maximale Anzahl an Stellen f@"ur die Anzeige einer Gleitkommazahl.
+@end defvr
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{exploden}
+@deffn {Funktion} exploden sym
+
+@emph{Beispiele:}
+
+Umwandlung von ganzen Zahlen, Gleitkommazahlen, Symbolen und Zeichenketten in
+eine Liste von Zeichen.
+
+@example
+* (exploden 123)
+(#\1 #\2 #\3)
+* (exploden 123.45)
+(#\1 #\2 #\3 #\. #\4 #\5)
+* (exploden 'symbol)
+(#\s #\y #\m #\b #\o #\l)
+* (exploden "String")
+(#\S #\t #\r #\i #\n #\g)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun exploden (sym)
   (declare (special *maxfpprintprec* $fpprintprec))
   (let (str)
@@ -182,6 +439,8 @@ Gleitkommazahlen nicht implementiert.
                       (values "~ve" (+ 5 printprec))))
                (setq str (format nil form width sym)))
              (setq str (string-trim " " str))))
+@end group
+@group
           ((integerp sym)
            (let ((leading-digit (if (> *print-base* 10) #\0 )))
              (setq str (format nil "~A" sym))
@@ -190,40 +449,29 @@ Gleitkommazahlen nicht implementiert.
                       (not (digit-char-p (car str) 10)))
                  (setq str (cons leading-digit str)))
              (return-from exploden str)))
+@end group
+@group
           (t (setq str (format nil "~A" sym))))
     (coerce str 'list)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@b{Beispiele:} Umwandlung von ganzen Zahlen, Gleitkommazahlen, Symbolen und
-Zeichenketten in eine Liste von Zeichen.
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{implode}
+@deffn {Funktion} implode lis
 
-@example
-* (exploden 123)
-(#\1 #\2 #\3)
-* (exploden 123.45)
-(#\1 #\2 #\3 #\. #\4 #\5)
-* (exploden 'symbol)
-(#\s #\y #\m #\b #\o #\l)
-* (exploden "String")
-(#\S #\t #\r #\i #\n #\g)
-@end example
-
-@findex implode
-
-Die Funktion @code{implode} leistet die zu der Funktion @code{exploden}
+Die Funktion @code{implode} leistet die zu der Funktion @mref{exploden}@w{}
 umgekehrte Aufgabe.  Eine Liste mit Zeichen wird zu einem Symbol
-zusammengesetzt, das mit der Funktion @code{intern-invert-case} in das Package
+zusammengesetzt, das mit der Funktion @mref{intern-invert-case} in das Package
 @code{:kmaxima} geschrieben wird.  Gegen@"uber der Originalfunktion in Maxima
 ist diese Implementation erheblich vereinfacht und akzeptiert nur Listen aus
 Zeichen.
 
-@verbatim
-(defun implode (lis)
-  (intern-invert-case (coerce lis 'string)))
-@end verbatim
+@emph{Beispiele:}
 
-@b{Beispiele:} Listen aus Zeichen werden in ein Symbol umgewandelt und in das
-Package @code{:kmaxima} geschrieben.
+Listen aus Zeichen werden in ein Symbol umgewandelt und in das Package
+@code{:kmaxima} geschrieben.
 
 @example
 * (implode '(#\1 #\2 #\3))
@@ -240,6 +488,15 @@ SYMBOL
 NIL
 @end example
 
+@emph{Quelltext:}
+@lisp
+@group
+(defun implode (lis)
+  (intern-invert-case (coerce lis 'string)))
+@end group
+@end lisp
+@end deffn
+
 @c --- 04.10.2011 --------------------------------------------------------------
 @anchor{symbolconc}
 @deffn {Funktion} symbolconc &rest syms
@@ -250,6 +507,7 @@ beliebige Anzahl an Argumenten.  Das Symbol wird dem aktuellen Package
 hinzugef@"ugt.
 
 @emph{Beispiel:}
+
 Zahlen, Symbole und Zeichenketten werden zu einem Symbol zusammengesetzt.
 
 @example
@@ -281,7 +539,19 @@ NIL
 @section Alias und Reversealias
 @c -----------------------------------------------------------------------------
 
-@findex getalias
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{$aliases}
+@defvr {Globale Variable} $aliases
+Standardwert: @code{((mlist simp))}
+
+Liste der Symbole, die mit der Funktion @mref{$alias} einen Alias-Namen
+erhalten haben.
+@end defvr
+
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{getalias}
+@deffn {Funktion} getalias
 
 Der Parser liest Symbole von der Eingabe.  Einem Symbole kann ein
 Alias-Name zugeordnet werden.  Der Alias-Name wird zum Indikator @code{alias}
@@ -293,21 +563,8 @@ den Alias @code{nil} f@"ur das Symbol @code{$false} zu nutzen, da die
 Funkion @code{getprop} in diesem Fall den R@"uckgabewert @code{nil} hat, was
 ein signalisieren w@"urde, dass kein Alias gefunden wurde.
 
-@verbatim
-(defun getalias (x)
-  (cond ((getprop x 'alias))
-        ((eq x '$false) nil)
-        (t x)))
-@end verbatim
+@emph{Beispiele:}
 
-F@"ur das Symbol @code{$true} legen wir @code{T} zum Indikator @code{alias} auf
-der Eigenschaftsliste ab.
-
-@verbatim
-(defprop $true T alias)
-@end verbatim
-
-@b{Beispiel:}
 Wenn kMaxima die Zeichenfolge @code{sin} von der Eingabe liest, wird diese
 zun@"achst als ein Maxima-Token interpretiert und in die interne Darstellung
 @code{$sin} umgewandelt.  @code{$sin} steht nun f@"ur die Sinusfunktion, die
@@ -332,25 +589,30 @@ T
 NIL
 @end example
 
-@findex amperchk
+@emph{Quelltext:}
+@lisp
+@group
+(defun getalias (x)
+  (cond ((getprop x 'alias))
+        ((eq x '$false) nil)
+        (t x)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{amperchk}
+@deffn {Funktion} amperchk name
 
 Die Funktion @code{amperchk} akzeptiert Symbole und Zeichenketten als Argument.
 Ein Symbol wird sofort zur@"uckgegeben.  Ist das Argument eine Zeichenkette wird
-mit der Funktion @code{getopr} gepr@"uft, ob zu dieser Zeichenkette ein Symbol
+mit der Funktion @mref{getopr} gepr@"uft, ob zu dieser Zeichenkette ein Symbol
 vorhanden ist, dass einen Operator bezeichnet.  Ist dies nicht der Fall, wird
 die Zeichenkette zu einem Maxima-Symbol umgewandelt.  Das ist ein Lisp-Symbol
-dem ein Dollarzeichen vorangestellt wird.  Die Funktion @code{getopr} und
-verwandte Funktionen werden sp@"ater erl@"autert.
+dem ein Dollarzeichen vorangestellt wird.
 
-@verbatim
-(defun amperchk (name)
-  (cond ((symbolp name) name)
-        ((stringp name)
-         (getalias (or (getopr0 name)
-                       (implode (cons #\$ (coerce name 'list))))))))
-@end verbatim
+@emph{Beispiel:}
 
-@b{Beispiel:}
 Die Zeichenkette "+" ist der Name des Operators f@"ur die Addition.  Das Symbol
 das die Addition bezeichnet ist @code{mplus}.  Die Zeichenkette "f" wird in
 ein Maxima-Symbol @code{$f} umgewandelt.
@@ -362,9 +624,21 @@ MPLUS
 $F
 @end example
 
-@vindex $aliases
-@findex $alias
-@findex alias
+@emph{Quelltext:}
+@lisp
+@group
+(defun amperchk (name)
+  (cond ((symbolp name) name)
+        ((stringp name)
+         (getalias (or (getopr0 name)
+                       (implode (cons #\$ (coerce name 'list))))))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{$alias}
+@deffn {Funktion} $alias form
 
 Die Nutzerfunktion @code{$alias} definiert einen Alias-Namen f@"ur ein Symbol.
 Der Alias-Name ist wieder ein Symbol.  Hat ein Symbol einen Alias-Namen wird
@@ -377,40 +651,16 @@ Eintrag @code{'reversealias} haben, durch diesen ersetzt.  Symbole, die einen
 Alias-Namen erhalten, werden in die Informationsliste @code{$aliases}
 eingetragen.
 
-@verbatim
-(defmvar $aliases '((mlist simp)))
+@emph{Beispiel:}
 
-(defmspec $alias (form)
-  (if (oddp (length (setq form (cdr form))))
-      (merror "alias: takes an even number of arguments."))
-  (do ((l nil (cons (alias (pop form) (pop form)) l)))
-      ((null form)
-       `((mlist simp),@(nreverse l)))))
-
-(defun alias (x y)
-  (unless (and (symbolp x) (symbolp y))
-    (merror "alias: the arguments must be symbolic names: found ~M and ~M"
-            x y))
-  (cond ((eq x y) y)
-        ((get x 'reversealias)
-         (if (not (eq x y))
-             (merror "alias: ~M already is aliased." x)))
-        (t
-         (putprop x y 'alias)
-         (putprop y x 'reversealias)
-         (add2lnc y $aliases)
-         y)))
-@end verbatim
-
-@b{Beispiel:} Die imagin@"are Einheit wird von kMaxima als @code{%i}
-dargestellt.  Bevorzugt der Nutzer die Darstellung @code{I}, kann er @code{I}
-als den Alias-Namen f@"ur @code{%i} definieren.  Liest der Parser einen Ausdruck
-wie @code{2*I}, dann wird das Symbol @code{|$I|} durch das Symbol @code{$%I}
-ersetzt, das intern die imagin@"are Einheit repr@"asentiert.  Das Symbol
-@code{$%I} hat den Eintrag @code{'reversealias} auf der Eigenschaftsliste.  Wird
-der Ausdruck @code{'((mtimes) 2 $%i)} ausgegeben, dann wird das Symbol
-@code{$%i} f@"ur die Anzeige durch das vom Nutzer definierte Symbol @code{|$I|}
-ersetzt.
+Die imagin@"are Einheit wird von kMaxima als @code{%i} dargestellt.  Bevorzugt
+der Nutzer die Darstellung @code{I}, kann er @code{I} als den Alias-Namen f@"ur
+@code{%i} definieren.  Liest der Parser einen Ausdruck wie @code{2*I}, dann wird
+das Symbol @code{|$I|} durch das Symbol @code{$%I} ersetzt, das intern die
+imagin@"are Einheit repr@"asentiert.  Das Symbol @code{$%I} hat den Eintrag
+@code{'reversealias} auf der Eigenschaftsliste.  Wird der Ausdruck
+@code{'((mtimes) 2 $%i)} ausgegeben, dann wird das Symbol @code{$%i} f@"ur die
+Anzeige durch das vom Nutzer definierte Symbol @code{|$I|} ersetzt.
 
 @example
 (%i1) alias(I, %i);
@@ -427,12 +677,50 @@ ersetzt.
 (REVERSEALIAS |$i| ASSIGN NEVERSET)
 @end example
 
-@need 900
-HIER FEHLT EINE ERLAEUTERUNG DER FUNKTION REMALIAS
+@emph{Quelltext:}
+@lisp
+@group
+(defmspec $alias (form)
+  (if (oddp (length (setq form (cdr form))))
+      (merror "alias: takes an even number of arguments."))
+  (do ((l nil (cons (alias (pop form) (pop form)) l)))
+      ((null form)
+       `((mlist simp),@@(nreverse l)))))
+@end group
+@end lisp
+@end deffn
 
-@findex remalias
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{alias}
+@deffn {Funktion} alias x y
 
-@verbatim
+@emph{Quelltext:}
+@lisp
+@group
+(defun alias (x y)
+  (unless (and (symbolp x) (symbolp y))
+    (merror "alias: the arguments must be symbolic names: found ~M and ~M"
+            x y))
+  (cond ((eq x y) y)
+        ((get x 'reversealias)
+         (if (not (eq x y))
+             (merror "alias: ~M already is aliased." x)))
+        (t
+         (putprop x y 'alias)
+         (putprop y x 'reversealias)
+         (add2lnc y $aliases)
+         y)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 15.10.2011 --------------------------------------------------------------
+@anchor{remalias}
+@deffn {Funktion} remalias x &optional remp
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun remalias (x &optional remp)
   (let ((y (and (or remp
                     (member x (cdr $aliases) :test #'equal))
@@ -446,7 +734,9 @@ HIER FEHLT EINE ERLAEUTERUNG DER FUNKTION REMALIAS
            (remprop x 'noun)
            (setf $aliases (delete x $aliases :count 1 :test #'eq))
            (remprop (setq x y) 'alias) (remprop x 'verb) x))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Verb- und Substantivform, Vergleiche Ausdr@"ucke, Alias und Reversealias, Hilfsfunktionen
