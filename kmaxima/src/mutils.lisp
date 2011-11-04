@@ -43,6 +43,9 @@
 (defun fixnump (n)
   (typep n 'fixnum))
 
+(defun  bignump (x)
+  (typep x 'bignum))
+
 ;;; ----------------------------------------------------------------------------
 
 (defvar *alphabet* (list #\_ #\%))
@@ -55,34 +58,54 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun mminusp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'mminus)))
+  
 
 (defun mplusp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'mplus)))
 
 (defun mtimesp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'mtimes)))
 
 (defun mexptp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'mexpt)))
 
 (defun mlistp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'mlist)))
 
-(defun op-equalp (e &rest op)
-  (and (consp e)
-       (consp (car e))
-       (some #'(lambda (s) (equal (caar e) s)) op)))
+(defun marrayp (x)
+  (and (consp x)
+       (consp (car x))
+       (member 'array (cdar x) :test #'eq)
+       t))
+
+(defun moperatorp (x op)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) op)))
+
+;;; ----------------------------------------------------------------------------
+
+(defun trigp (func)
+  (member func
+          '(%sin %cos %tan %csc %sec %cot %sinh %cosh %tanh %csch %sech %coth)
+          :test #'eq))
+
+(defun arcp (func)
+  (member func
+          '(%asin %acos %atan %acsc %asec %acot %asinh %acosh %atanh %acsch
+                  %asech %acoth)
+          :test #'eq))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -100,52 +123,49 @@
 
 (defun mnumberp (x)
   (or (numberp x)
-      (and (not (atom x))
-           (not (atom (car x)))
-           (member (caar x) '(rat bigfloat)))))
+      (and (consp x)
+           (consp (car x))
+           (member (caar x) '(rat bigfloat))
+           t)))
 
 (defun ratnump (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'rat)))
 
-(defun $bfloatp (x)
-  (and (not (atom x))
-       (not (atom (car x)))
+(defun bigfloatp (x)
+  (and (consp x)
+       (consp (car x))
        (eq (caar x) 'bigfloat)))
 
 (defun zerop1 (x)
-  (or (and (integerp x) (= 0 x))
-      (and (floatp x) (= 0.0 x))
-      (and ($bfloatp x) (= 0 (second x)))))
+  (or (and (numberp x)
+           (zerop x))
+      (and (bigfloatp x)
+           (zerop (second x)))))
+
+(defun onep (x)
+  (zerop (- x 1)))
 
 (defun onep1 (x)
-  (or (and (integerp x) (= 1 x))
-      (and (floatp x) (= 1.0 x))
-      (and ($bfloatp x) (zerop1 (sub x 1)))))
+  (or (and (numberp x)
+           (zerop (- x 1)))
+      (and (bigfloatp x)
+           (zerop (second (sub x 1))))))
 
 (defun mnegativep (x)
   (cond ((realp x) (minusp x))
-        ((ratnump x) (minusp (rat-num x)))))
-
-(defun maxima-constantp (x)
-  (or (numberp x)
-;      (and (symbolp x) (kindp x '$constant))
-      ))
-
-(defun constant (x)
-  (cond ;((symbolp x) (kindp x '$constant))
-        ;(($subvarp x)
-        ; (and (kindp (caar x) '$constant)
-        ;      (do ((x (cdr x) (cdr x)))
-        ;          ((null x) t)
-        ;        (if (not ($constantp (car x))) (return nil)))))
-        (t nil)))
+        ((ratnump x) (minusp (rat-num x)))
+        ((bigfloatp x) (minusp (cadr x)))))
 
 ;;; ----------------------------------------------------------------------------
 
-(defmacro ncons (x)
-  `(cons ,x nil))
+(defun decl-constant (x)
+  (getprop x '$constant))
+
+(defun mconstantp (x)
+  (or (numberp x)
+      (decl-constant x)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -160,11 +180,11 @@
   (and (symbolp sym)
        (get sym indic)))
 
-(defun getpropl (sym indicator-list)
+(defun getpropl (sym indicl)
   (cond ((symbolp sym)
          (setq sym (symbol-plist sym))
          (loop for tail on sym by #'cddr
-               when (member (car tail) indicator-list :test #'eq)
+               when (member (car tail) indicl :test #'eq)
                do (return tail)))
         (t (return-from getpropl nil))))
 
@@ -219,10 +239,25 @@
           (t (setq str (format nil "~A" sym))))
     (coerce str 'list)))
 
+(defun explodec (symb)
+  (loop for v in (coerce (print-invert-case symb) 'list)
+        collect (intern (string v))))
+
 ;;; ----------------------------------------------------------------------------
 
 (defun implode (lis)
   (intern-invert-case (coerce lis 'string)))
+
+(defun make-maxima-symbol (lis)
+  (loop for v in lis
+     when (symbolp v)
+     collecting (char (symbol-name v) 0) into tem
+     else
+     when (characterp v)
+     collecting v into tem
+     else do (merror "make-maxima-symbol: Internal error in.")
+     finally
+     (return (make-symbol (maybe-invert-string (coerce tem 'string))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -249,20 +284,16 @@
 
 (defun maybe-invert-string (str)
   (let ((all-upper t)
-        (all-lower t)
-        (len (length str)))
-    (dotimes (i len)
+        (all-lower t))
+    (dotimes (i (length str))
       (let ((ch (char str i)))
         (when (both-case-p ch)
           (if (upper-case-p ch)
               (setq all-lower nil)
               (setq all-upper nil)))))
-    (cond (all-upper
-            (string-downcase str))
-          (all-lower
-           (string-upcase str))
-          (t
-           str))))
+    (cond (all-upper (string-downcase str))
+          (all-lower (string-upcase str))
+          (t str))))
 
 (defun intern-invert-case (str)
   (intern (maybe-invert-string str) :kmaxima))
@@ -373,10 +404,7 @@
   (labels ((memqarr (ll)
              (if (member 'array ll :test #'eq) t)))
     (cond ((eq x y))
-          ((atom x)
-           (cond ((arrayp x)
-                  (and (arrayp y) (lisp-array-alike1 x y)))
-                 (t (equal x y))))
+          ((atom x) (equal x y))
           ((atom y) nil)
           (t
            (and (not (atom (car x)))
@@ -385,19 +413,12 @@
                 (eq (memqarr (cdar x)) (memqarr (cdar y)))
                 (alike (cdr x) (cdr y)))))))
 
-(defun lisp-array-alike1 (x y)
-  (and (equal (array-dimensions x) (array-dimensions y))
-       (progn
-         (dotimes (i (array-total-size x))
-           (if (not (alike1 (row-major-aref x i) (row-major-aref y i)))
-               (return-from lisp-array-alike1 nil)))
-         t)))
-
 (defun alike (x y)
   (do ((x x (cdr x))
        (y y (cdr y)))
       ((atom x) (equal x y))
-    (if (or (atom y) (not (alike1 (car x) (car y))))
+    (if (or (atom y)
+            (not (alike1 (car x) (car y))))
         (return nil))))
 
 (defun memalike (x l)
@@ -411,7 +432,7 @@
   (cond ((alike1 expr var) nil)
         ((atom expr) t)
         (t
-         (and (listp (car expr))
+         (and (consp (car expr))
               (free (caar expr) var)
               (freel (cdr expr) var)))))
 
@@ -419,6 +440,19 @@
   (do ((l l (cdr l)))
       ((null l) t)
     (when (not (free (car l) var)) (return nil))))
+
+;;; ----------------------------------------------------------------------------
+
+(defun recur-apply (fun form)
+  (cond ((eq (caar form) 'bigfloat) form)
+        (t
+         (let ((newargs (mapcar fun (cdr form))))
+           (if (alike newargs (cdr form))
+               form
+               (simplifya (cons (cons (caar form)
+                                      (member 'array (cdar form) :test #'eq))
+                                newargs)
+                          nil))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -433,16 +467,5 @@
                  (format t "~&~15A          ~A" symbol (get symbol indic)))
                 ))
           (return))))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun $sconcat (&rest x)
-  (let ((ans ""))
-    (dolist (v x)
-      (setq ans (concatenate 'string ans
-                             (cond ((stringp v) v)
-                                   (t
-                                    (coerce (mstring v) 'string))))))
-    ans))
 
 ;;; ----------------------------------------------------------------------------
