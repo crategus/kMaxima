@@ -119,13 +119,6 @@
       (assert-eq '|$&&|  (scan-operator-token *maxima-operators*))
       (assert-eq nil     (scan-operator-token *maxima-operators*))
       )))
-  
-(define-test scan-string
-  (with-input-from-string (stream " "STRING" ")
-    (let ((*parse-stream* stream)
-          (*scan-buffered-token* (list nil))
-          (*parse-tyi* nil))
-
 
 (define-test mread
   (with-input-from-string (stream "1+2; 3*4; 5;")
