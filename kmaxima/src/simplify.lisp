@@ -362,38 +362,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(setf (get 'mplus 'operators) 'simp-mplus)
-
-(defun simp-mplus (x w z)
-  (prog (res check eqnflag)
-     (if (null (cdr x)) (return 0))
-     (setq check x)
-  start
-     (setq x (cdr x))
-     (if (null x) (go end))
-     (setq w (if z (car x) (simplifya (car x) nil)))
-  st1
-     (cond ((atom w) nil)
-           ((eq (caar w) 'mequal)
-            (setq eqnflag
-                  (if (not eqnflag)
-                      w
-                      (list (car eqnflag)
-                            (add (cadr eqnflag) (cadr w))
-                            (add (caddr eqnflag) (caddr w)))))
-            (go start)))
-     (setq res (pls w res))
-     (go start)
-  end
-     (setq res (eqtest (testp res) check))
-     (return (if eqnflag
-                 (list (car eqnflag)
-                       (add (cadr eqnflag) res)
-                       (add (caddr eqnflag) res))
-                 res))))
-
-;;; ----------------------------------------------------------------------------
-
 (defvar *plusflag* nil)
 
 (defun testp (x)
@@ -405,48 +373,86 @@
              (rplacd x (cddr x))))
         (t x)))
 
+;;; ----------------------------------------------------------------------------
+
+(setf (get 'mplus 'operators) 'simp-mplus)
+
+(defun simp-mplus (x w z)
+  (prog (res check eqnflag)
+    (if (null (cdr x)) (return 0))
+    (setq check x)
+  start
+    (setq x (cdr x))
+    (if (null x) (go end))
+    (setq w (if z (car x) (simplifya (car x) nil)))
+  st1
+    (cond ((atom w) nil)
+          ((eq (caar w) 'mequal)
+           (setq eqnflag
+                 (if (not eqnflag)
+                     w
+                     (list (car eqnflag)
+                           (add (cadr eqnflag) (cadr w))
+                           (add (caddr eqnflag) (caddr w)))))
+           (go start)))
+    (setq res (pls w res))
+    (go start)
+  end
+    (setq res (eqtest (testp res) check))
+    (return (if eqnflag
+                (list (car eqnflag)
+                      (add (cadr eqnflag) res)
+                      (add (caddr eqnflag) res))
+                res))))
+
+;;; ----------------------------------------------------------------------------
+
 (defun pls (x out)
   (prog (fm *plusflag*)
-     (if (mtimesp x) (setq x (testtneg x)))
-     (when (and $numer (atom x) (eq x '$%e))
-       (setq x (get '$%e '$numer)))
-     (cond ((null out)
-            (return
-              (cons '(mplus)
-                    (cond ((mnumberp x) (ncons x))
-                          ((not (mplusp x))
-                           (list 0 (cond ((atom x) x) (t (copy-list x)))))
-                          ((mnumberp (cadr x)) (copy-list (cdr x)))
-                          (t (cons 0 (copy-list (cdr x) )))))))
-           ((mnumberp x)
-            (return (cons '(mplus)
-                          (if (mnumberp (cadr out))
-                              (cons (addk (cadr out) x) (cddr out))
-                              (cons x (cdr out))))))
-           ((not (mplusp x)) (plusin x (cdr out)) (go end)))
-     (rplaca (cdr out)
-             (addk (if (mnumberp (cadr out)) (cadr out) 0)
-                   (cond ((mnumberp (cadr x)) (setq x (cdr x)) (car x))
-                         (t 0))))
-     (setq fm (cdr out))
+    (if (mtimesp x) (setq x (testtneg x)))
+    (when (and $numer (atom x) (eq x '$%e))
+      (setq x (get '$%e '$numer)))
+    (cond ((null out)
+           (return
+             (cons '(mplus)
+                   (cond ((mnumberp x) (ncons x))
+                         ((not (mplusp x))
+                          (list 0 (if (atom x) x (copy-list x))))
+                         ((mnumberp (cadr x)) (copy-list (cdr x)))
+                         (t (cons 0 (copy-list (cdr x) )))))))
+          ((mnumberp x)
+           (return (cons '(mplus)
+                         (if (mnumberp (cadr out))
+                             (cons (addk (cadr out) x) (cddr out))
+                             (cons x (cdr out))))))
+          ((not (mplusp x)) 
+           (plusin x (cdr out))
+           (go end)))
+    (rplaca (cdr out)
+            (addk (if (mnumberp (cadr out)) (cadr out) 0)
+                  (cond ((mnumberp (cadr x))
+                         (setq x (cdr x))
+                         (car x))
+                        (t 0))))
+    (setq fm (cdr out))
   start
-     (if (null (setq x (cdr x))) (go end))
-     (setq fm (plusin (car x) fm))
-     (go start)
+    (if (null (setq x (cdr x))) (go end))
+    (setq fm (plusin (car x) fm))
+    (go start)
   end
-     (if (not *plusflag*) (return out))
-     (setq *plusflag* nil)
+    (if (not *plusflag*) (return out))
+    (setq *plusflag* nil)
   a  
-     (setq fm (cdr out))
+    (setq fm (cdr out))
   loop
-     (when (mplusp (cadr fm))
-       (setq x (cadr fm))
-       (rplacd fm (cddr fm))
-       (pls x out)
-       (go a))
-     (setq fm (cdr fm))
-     (if (null (cdr fm)) (return out))
-     (go loop)))
+    (when (mplusp (cadr fm))
+      (setq x (cadr fm))
+      (rplacd fm (cddr fm))
+      (pls x out)
+      (go a))
+    (setq fm (cdr fm))
+    (if (null (cdr fm)) (return out))
+    (go loop)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -456,18 +462,17 @@
      (setq v 1)
      (cond ((mtimesp x)
             (setq check x)
-            (if (mnumberp (cadr x)) (setq w (cadr x) x (cddr x))
+            (if (mnumberp (cadr x))
+                (setq w (cadr x) x (cddr x))
                 (setq x (cdr x))))
            (t (setq x (ncons x))))
      (setq x1 (if (null (cdr x)) (car x) (cons '(mtimes) x))
            xnew (list* '(mtimes) w x))
   start
      (cond ((null (cdr fm)))
-           ((and (alike1 x1 (cadr fm)) (null (cdr x)))
+           ((and (alike1 x1 (cadr fm))
+                 (null (cdr x)))
             (go equ))
-           ;; Implement the simplification of
-           ;;   v*a^(c+n)+w*a^(c+m) -> (v*a^n+w*a^m)*a^c
-           ;; where a, v, w, and (n-m) are integers.
            ((and (or (and (mexptp (setq x2 (cadr fm)))
                           (setq v 1))
                      (and (mtimesp x2)
@@ -493,38 +498,16 @@
                             0)))
             (setq c (sub (caddr x2) n))
             (cond ((integerp n)
-                   ;; The simple case:
-                   ;; n and m are integers and the result is (v*a^n+w*a^m)*a^c.
                    (setq x1 (mul (addk (timesk v (exptb a n))
                                        (timesk w (exptb a m)))
                                  (power a c)))
                    (go equt2))
                   (t
-                   ;; n and m are rational numbers: The difference n-m is an
-                   ;; integer. The rational numbers might be improper fractions.
-                   ;; The mixed numbers are: n = n1 + d1/r and m = n2 + d2/r,
-                   ;; where r is the common denominator. We have two cases:
-                   ;; I)  d1 = d2: e.g. 2^(1/3+c)+2^(4/3+c)
-                   ;;     The result is (v*a^n1+w*a^n2)*a^(c+d1/r)
-                   ;; II) d1 # d2: e.g. 2^(1/2+c)+2^(-1/2+c)
-                   ;;     In this case one of the exponents d1 or d2 must
-                   ;;     be negative. The negative exponent is factored out.
-                   ;;     This guarantees that the factor (v*a^n1+w*a^n2)
-                   ;;     is an integer. But the positive exponent has to be
-                   ;;     adjusted accordingly. E.g. when we factor out
-                   ;;     a^(d2/r) because d2 is negative, then we have to
-                   ;;     adjust the positive exponent to n1 -> n1+(d1-d2)/r.
-                   ;; Remark:
-                   ;; Part of the simplification is done in simptimes. E.g.
-                   ;; this algorithm simplifies the sum sqrt(2)+3*sqrt(2)
-                   ;; to 4*sqrt(2). In simptimes this is further simplified
-                   ;; to 2^(5/2).
                    (multiple-value-bind (n1 d1)
                        (truncate (rat-num n) (rat-den n))
                      (multiple-value-bind (n2 d2)
                          (truncate (rat-num m) (rat-den m))
                        (cond ((eql d1 d2)
-                              ;; Case I: -> (v*a^n1+w*a^n2)*a^(c+d1/r)
                               (setq x1
                                     (mul (addk (timesk v (exptb a n1))
                                                (timesk w (exptb a n2)))
@@ -533,7 +516,6 @@
                                                      (div d1 (rat-den n))))))
                               (go equt2))
                              ((minusp d2)
-                              ;; Case II:: d2 is negative, adjust n1.
                               (setq n1 (add n1 (div (sub d1 d2) (rat-den n))))
                               (setq x1
                                     (mul (addk (timesk v (exptb a n1))
@@ -543,7 +525,6 @@
                                                      (div d2 (rat-den n))))))
                               (go equt2))
                              ((minusp d1)
-                              ;; Case II: d1 is negative, adjust n2.
                               (setq n2 (add n2 (div (sub d2 d1) (rat-den n))))
                               (setq x1
                                     (mul (addk (timesk v (exptb a n1))
@@ -552,13 +533,12 @@
                                                 (add c
                                                      (div d1 (rat-den n))))))
                               (go equt2))
-                             ;; This clause should never be reached.
                              (t (merror "Internal error in simplus."))))))))
            ((mtimesp (cadr fm))
             (cond ((alike1 x1 (cadr fm))
                    (go equt))
                   ((and (mnumberp (cadadr fm)) (alike x (cddadr fm)))
-                   (setq flag t) ; found common factor
+                   (setq flag t)
                    (go equt))
                   ((great xnew (cadr fm)) (go gr))))
            ((great x1 (cadr fm)) (go gr)))
@@ -571,7 +551,6 @@
      (rplaca (cdr fm)
              (if (eql w -1)
                  (list* '(mtimes simp) 0 x)
-                 ;; Call muln to get a simplified product.
                  (if (mtimesp (setq x1 (muln (cons (addk 1 w) x) t)))
                      (testtneg x1)
                      x1)))
@@ -579,23 +558,18 @@
      (cond ((not (mtimesp (cadr fm)))
             (go check))
            ((eql 1 (cadadr fm))
-            ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
             (rplacd (cadr fm) (cddadr fm))
             (return (cdr fm)))
            ((not (zerop1 (cadadr fm)))
             (return (cdr fm)))
-           ;; Handle the multiplication with a zero.
            ((and (or (not $listarith) (not $doallmxops))
                  (mxorlistp (caddr (cadr fm))))
             (return (rplacd fm 
                             (cons (constmx 0 (caddr (cadr fm))) (cddr fm))))))
-     ;; (cadadr fm) is zero. If the first term of fm is a number,
-     ;;  add it to preserve the type.
      (when (mnumberp (car fm))
        (rplaca fm (addk (car fm) (cadadr fm))))
      (return (rplacd fm (cddr fm)))
   equt
-     ;; Call muln to get a simplified product.
      (setq x1 (muln (cons (addk w (if flag (cadadr fm) 1)) x) t))
   equt2
      (rplaca (cdr fm)
@@ -604,11 +578,10 @@
                  (if (mtimesp x1) (testtneg x1) x1)))
      (if (not (mtimesp (cadr fm))) (go check))
      (when (and (eql 1 (cadadr fm)) flag (null (cdddr (cadr fm))))
-       ;; Do this simplification for an integer 1, not for 1.0 and 1.0b0
        (rplaca (cdr fm) (caddr (cadr fm))) (go check))
      (go del)
   check
-     (if (mplusp (cadr fm)) (setq *plusflag* t)) ; A nested mplus expression
+     (if (mplusp (cadr fm)) (setq *plusflag* t))
      (return (cdr fm))))
 
 ;;; ----------------------------------------------------------------------------
@@ -778,7 +751,7 @@
                                  (setq w (cadr x)
                                        fm y)
                                  (go start))))
-                         ((maxima-constantp (car x))
+                         ((mconstantp (car x))
                           (go const))
                          ((onep1 w)
                           (cond ((mtimesp (car x))
@@ -913,8 +886,8 @@
                    (setq w (cadr x))
                    (go start))
                   
-                  ((or (maxima-constantp (car x))
-                       (maxima-constantp (cadadr fm)))
+                  ((or (mconstantp (car x))
+                       (mconstantp (cadadr fm)))
                    (if (great temp (cadr fm))
                        (go gr)))
                   ((great (car x) (cadadr fm))
@@ -940,7 +913,7 @@
             (setq temp (power (car x) (cadr x)))
             (setq w (cadr x))
             (go start))
-           ((maxima-constantp (car x))
+           ((mconstantp (car x))
             (when (great temp (cadr fm))
               (go gr)))
            ((great (car x) (cadr fm))
@@ -1003,7 +976,7 @@
               ;; The rational doesn't contain any (simple) powers of
               ;; the exponential term.  We're done.
               (return (cdr (rplacd fm (cons temp (cdr fm)))))))
-           ((and (maxima-constantp (car x))
+           ((and (mconstantp (car x))
                  (do ((l (cdr fm) (cdr l)))
                      ((null (cdr l)))
                    (when (and (mexptp (cadr l))
@@ -1054,7 +1027,7 @@
             (go del))
            ((and (mnumberp (car x)) (mnumberp w))
             (return (rplaca (cdr fm) (exptrl (car x) w))))
-           ((maxima-constantp (car x))
+           ((mconstantp (car x))
             (go const)))
   spcheck
      (setq z (list '(mexpt) (car x) w))
@@ -1095,329 +1068,318 @@
 
 (defun simp-mexpt (x y z)
   (prog (gr pot check res rulesw w mlpgr mlppot)
-     (setq check x)
-     (when z
-       (setq gr (cadr x) pot (caddr x))
-       (go cont))
-     (twoargcheck x)
-     (setq gr (simplifya (cadr x) nil))
-     (setq pot (let (($%enumer $numer)) (simplifya (caddr x) nil)))
+    (setq check x)
+    (if z
+        (setq gr  (cadr x)
+              pot (caddr x))
+        (progn
+          (twoargcheck x)
+          (setq gr (simplifya (cadr x) nil))
+          (setq pot (let (($%enumer $numer)) (simplifya (caddr x) nil)))))
   cont
-     (cond ((onep1 pot) (go atgr))
-           ((or (zerop1 pot) (onep1 gr)) (go retno))
-           ((zerop1 gr)
-            (cond ((mnumberp pot)
-                   (if (mnegativep pot)
-                       (merror "expt: Undefined: 0 to a negative exponent.")
-                       (return (cond ((or (floatp gr) (floatp pot)) 0.0)
-                                     (t 0)))))
-                  ((or (member (setq z ($csign pot)) '($neg $nz))
-                       (and *zexptsimp? (eq ($asksign pot) '$neg)))
-                   ;; A negative exponent. Maxima error.
-                   (cond ((not *errorsw*)
-                          (merror "expt: undefined: 0 to a negative exponent."))
-                         (t (throw 'errorsw t))))
-                  ((and (member z '($complex $imaginary))
-                        ;; A complex exponent. Look at the sign of the realpart.
-                        (member (setq z ($sign ($realpart pot))) 
-                                '($neg $nz $zero)))
-                   (cond ((not *errorsw*)
-                          (merror "expt: undefined: 0 to a complex exponent."))
-                         (t (throw 'errorsw t))))
-                  ((and *zexptsimp? (eq ($asksign pot) '$zero))
-                   (cond ((not *errorsw*)
-                          (merror "expt: undefined: 0^0"))
-                         (t (throw 'errorsw t))))
-                  ((not (member z '($pos $pz)))
-                   ;; The sign of realpart(pot) is not known. We can not return
-                   ;; an unsimplified 0^a expression, because timesin can not
-                   ;; handle it. We return ZERO. That is the old behavior.
-                   ;; Look for the imaginary symbol to be consistent with 
-                   ;; old code.
-                   (cond ((not (free pot '$%i))
-                          (cond ((not *errorsw*)
-                                 (merror "expt: undefined: 0 to a complex exponent."))
-                                (t (throw 'errorsw t))))
-                         (t
-                          ;; Return ZERO and not an unsimplified expression.
-                          (return (zerores gr pot)))))
-                  (t (return (zerores gr pot)))))
-           ((and (mnumberp gr)
-                 (mnumberp pot)
-                 (or (not (ratnump gr)) (not (ratnump pot))))
-            (return (eqtest (exptrl gr pot) check)))
-           ;; Check for numerical evaluation of the sqrt.
-           ((and (alike1 pot '((rat) 1 2))
-                 (or (setq res (flonum-eval '%sqrt gr))
-                     (and (not (member 'simp (car x) :test #'eq))
-                          (setq res (big-float-eval '%sqrt gr)))))
-            (return res))
-           ((eq gr '$%i)
-            (return (%itopot pot)))
-           ((and (realp gr) (minusp gr) (mevenp pot))
-            (setq gr (- gr))
-            (go cont))
-           ((and (realp gr) (minusp gr) (moddp pot))
-            (return (mul2 -1 (power (- gr) pot))))
-           ((and (eql gr -1) (maxima-integerp pot) (mminusp pot))
-            (setq pot (neg pot))
-            (go cont))
-           ((and (eql gr -1)
-                 (maxima-integerp pot)
-                 (mtimesp pot)
-                 (= (length pot) 3)
-                 (fixnump (cadr pot))
-                 (oddp (cadr pot))
-                 (maxima-integerp (caddr pot)))
-            (setq pot (caddr pot))
-            (go cont))
-           ((atom gr) (go atgr))
-           ((and (eq (caar gr) 'mabs)
-                 (evnump pot)
-                 (or (and (eq $domain '$real) (not (decl-complexp (cadr gr))))
-                     (and (eq $domain '$complex) (decl-realp (cadr gr)))))
-            (return (power (cadr gr) pot)))
-           ((and (eq (caar gr) 'mabs)
-                 (integerp pot)
-                 (oddp pot)
-                 (not (eql pot -1))
-                 (or (and (eq $domain '$real) (not (decl-complexp (cadr gr))))
-                     (and (eq $domain '$complex) (decl-realp (cadr gr)))))
-            ;; abs(x)^(2*n+1) -> abs(x)*x^(2*n), n an integer number
-            (if (plusp pot)
-                (return (mul (power (cadr gr) (add pot -1))
-                             gr))
-                (return (mul (power (cadr gr) (add pot 1))
-                             (inv gr)))))
-           ((eq (caar gr) 'mequal)
-            (return (eqtest (list (ncons (caar gr))
-                                  (power (cadr gr) pot)
-                                  (power (caddr gr) pot))
-                            gr)))
-           ((symbolp pot) (go opp))
-           ((eq (caar gr) 'mexpt) (go e1))
-           ((and (eq (caar gr) '%sum)
-                 $sumexpand
-                 (integerp pot)
-                 (signp g pot)
-                 (< pot $maxposex))
-            (return (do ((i (1- pot) (1- i))
-                         (an gr (simptimes (list '(mtimes) an gr) 1 t)))
-                        ((signp e i) an))))
-           ((eql pot -1) 
-            (return (eqtest (testt (tms gr pot nil)) check)))
-           ((fixnump pot)
-            (return (eqtest (cond ((and (mplusp gr)
-                                        (not (or (> pot $expop)
-                                                 (> (- pot) $expon))))
-                                   (expandexpt gr pot))
-                                  (t (simplifya (tms gr pot nil) t)))
-                            check))))
-     
-  opp
-     (cond ((eq (caar gr) 'mexpt) (go e1))
-           ((eq (caar gr) 'rat)
-            (return (mul2 (power (cadr gr) pot)
-                          (power (caddr gr) (mul2 -1 pot)))))
-           ((not (eq (caar gr) 'mtimes)) (go up))
-           ((or (eq $radexpand '$all) (and $radexpand (simplexpon pot)))
-            (setq res (list 1))
-            (go start))
-           ((and (or (not (numberp (cadr gr)))
-                     (eql (cadr gr) -1))
-                 (eql -1 ($num gr)) ; only for -1
-                 ;; Do not simplify for a complex base.
-                 (not (member ($csign gr) '($complex $imaginary)))
-                 (and (eq $domain '$real) $radexpand))
-            ;; (-1/x)^a -> 1/(-x)^a for x negative
-            ;; For all other cases (-1)^a/x^a
-            (if (eq ($csign (setq w ($denom gr))) '$neg)
-                (return (inv (power (neg w) pot)))
-                (return (div (power -1 pot)
-                             (power w pot)))))
-           ((or (eq $domain '$complex) (not $radexpand)) (go up)))
-     (return (do ((l (cdr gr) (cdr l)) (res (ncons 1)) (rad))
-                 ((null l)
-                  (cond ((equal res '(1))
-                         (eqtest (list '(mexpt) gr pot) check))
-                        ((null rad) 
-                         (testt (cons '(mtimes simp) res)))
+    (cond ((onep1 pot) (go atgr))
+          ((or (zerop1 pot) (onep1 gr)) (return (exptrl gr pot)))
+          ((zerop1 gr)
+           (cond ((mnumberp pot)
+                  (if (mnegativep pot)
+                      (merror "expt: Undefined: 0 to a negative exponent.")
+                      (return (cond ((or (floatp gr) (floatp pot)) 0.0)
+                                    (t 0)))))
+                 ((or (member (setq z ($csign pot)) '($neg $nz))
+                      (and *zexptsimp? (eq ($asksign pot) '$neg)))
+                  ;; A negative exponent. Maxima error.
+                  (cond ((not *errorsw*)
+                         (merror "expt: undefined: 0 to a negative exponent."))
+                        (t (throw 'errorsw t))))
+                 ((and (member z '($complex $imaginary))
+                       ;; A complex exponent. Look at the sign of the realpart.
+                       (member (setq z ($sign ($realpart pot))) 
+                               '($neg $nz $zero)))
+                  (cond ((not *errorsw*)
+                         (merror "expt: undefined: 0 to a complex exponent."))
+                        (t (throw 'errorsw t))))
+                 ((and *zexptsimp? (eq ($asksign pot) '$zero))
+                  (cond ((not *errorsw*)
+                         (merror "expt: undefined: 0^0"))
+                        (t (throw 'errorsw t))))
+                 ((not (member z '($pos $pz)))
+                  ;; The sign of realpart(pot) is not known. We can not return
+                  ;; an unsimplified 0^a expression, because timesin can not
+                  ;; handle it. We return ZERO. That is the old behavior.
+                  ;; Look for the imaginary symbol to be consistent with 
+                  ;; old code.
+                  (cond ((not (free pot '$%i))
+                         (cond ((not *errorsw*)
+                                (merror "expt: undefined: 0 to a complex exponent."))
+                               (t (throw 'errorsw t))))
                         (t
-                         (setq rad (power* ; RADEXPAND=()?
-                                     (cons '(mtimes) (nreverse rad)) pot))
-                         (cond ((not (onep1 rad))
-                                (setq rad
-                                      (testt (tms rad 1 (cons '(mtimes) res))))
-                                (cond (rulesw
-                                       (setq rulesw nil res (cdr rad))))))
-                         (eqtest (testt (cons '(mtimes) res)) check))))
-               ;; Check with $csign to be more complete. This prevents wrong 
-               ;; simplifications like sqrt(-z^2)->%i*sqrt(z^2) for z complex.
-               (setq z ($csign (car l)))
-               (if (member z '($complex $imaginary))
-                   (setq z '$pnz)) ; if appears complex, unknown sign
-               (setq w (cond ((member z '($neg $nz) :test #'eq)
-                              (setq rad (cons -1 rad))
-                              (mult -1 (car l)))
-                             (t (car l))))
-               (cond ((onep1 w))
-                     ((alike1 w gr) (return (list '(mexpt simp) gr pot)))
-                     ((member z '($pn $pnz) :test #'eq)
-                      (setq rad (cons w rad)))
-                     (t
-                      (setq w (testt (tms (simplifya (list '(mexpt) w pot) t)
-                                          1 (cons '(mtimes) res))))))
-               (cond (rulesw (setq rulesw nil res (cdr w))))))
-     
+                         ;; Return ZERO and not an unsimplified expression.
+                         (return (zerores gr pot)))))
+                 (t (return (zerores gr pot)))))
+          ((and (mnumberp gr)
+                (mnumberp pot)
+                (or (not (ratnump gr)) (not (ratnump pot))))
+           (return (eqtest (exptrl gr pot) check)))
+          ;; Check for numerical evaluation of the sqrt.
+          ((and (alike1 pot '((rat) 1 2))
+                (or (setq res (flonum-eval '%sqrt gr))
+                    (and (not (member 'simp (car x) :test #'eq))
+                         (setq res (big-float-eval '%sqrt gr)))))
+           (return res))
+          ((eq gr '$%i)
+           (return (%itopot pot)))
+          ((and (realp gr) (minusp gr) (mevenp pot))
+           (setq gr (- gr))
+           (go cont))
+          ((and (realp gr) (minusp gr) (moddp pot))
+           (return (mul2 -1 (power (- gr) pot))))
+          ((and (eql gr -1) (maxima-integerp pot) (mminusp pot))
+           (setq pot (neg pot))
+           (go cont))
+          ((and (eql gr -1)
+                (maxima-integerp pot)
+                (mtimesp pot)
+                (= (length pot) 3)
+                (fixnump (cadr pot))
+                (oddp (cadr pot))
+                (maxima-integerp (caddr pot)))
+           (setq pot (caddr pot))
+           (go cont))
+          ((atom gr) (go atgr))
+          ((and (eq (caar gr) 'mabs)
+                (evnump pot)
+                (or (and (eq $domain '$real) (not (decl-complexp (cadr gr))))
+                    (and (eq $domain '$complex) (decl-realp (cadr gr)))))
+           (return (power (cadr gr) pot)))
+          ((and (eq (caar gr) 'mabs)
+                (integerp pot)
+                (oddp pot)
+                (not (eql pot -1))
+                (or (and (eq $domain '$real) (not (decl-complexp (cadr gr))))
+                    (and (eq $domain '$complex) (decl-realp (cadr gr)))))
+           ;; abs(x)^(2*n+1) -> abs(x)*x^(2*n), n an integer number
+           (if (plusp pot)
+               (return (mul (power (cadr gr) (add pot -1))
+                            gr))
+               (return (mul (power (cadr gr) (add pot 1))
+                            (inv gr)))))
+          ((eq (caar gr) 'mequal)
+           (return (eqtest (list (ncons (caar gr))
+                                 (power (cadr gr) pot)
+                                 (power (caddr gr) pot))
+                           gr)))
+          ((symbolp pot) (go opp))
+          ((eq (caar gr) 'mexpt) (go e1))
+          ((and (eq (caar gr) '%sum)
+                $sumexpand
+                (integerp pot)
+                (signp g pot)
+                (< pot $maxposex))
+           (return (do ((i (1- pot) (1- i))
+                        (an gr (simptimes (list '(mtimes) an gr) 1 t)))
+                       ((signp e i) an))))
+          ((eql pot -1) 
+           (return (eqtest (testt (tms gr pot nil)) check)))
+          ((fixnump pot)
+           (return (eqtest (cond ((and (mplusp gr)
+                                       (not (or (> pot $expop)
+                                                (> (- pot) $expon))))
+                                  (expandexpt gr pot))
+                                 (t (simplifya (tms gr pot nil) t)))
+                           check))))
+  opp
+    (cond ((eq (caar gr) 'mexpt) (go e1))
+          ((eq (caar gr) 'rat)
+           (return (mul2 (power (cadr gr) pot)
+                         (power (caddr gr) (mul2 -1 pot)))))
+          ((not (eq (caar gr) 'mtimes)) (go up))
+          ((or (eq $radexpand '$all) (and $radexpand (simplexpon pot)))
+           (setq res (list 1))
+           (go start))
+          ((and (or (not (numberp (cadr gr)))
+                    (eql (cadr gr) -1))
+                (eql -1 ($num gr)) ; only for -1
+                ;; Do not simplify for a complex base.
+                (not (member ($csign gr) '($complex $imaginary)))
+                (and (eq $domain '$real) $radexpand))
+           ;; (-1/x)^a -> 1/(-x)^a for x negative
+           ;; For all other cases (-1)^a/x^a
+           (if (eq ($csign (setq w ($denom gr))) '$neg)
+               (return (inv (power (neg w) pot)))
+               (return (div (power -1 pot)
+                            (power w pot)))))
+          ((or (eq $domain '$complex) (not $radexpand)) (go up)))
+    (return (do ((l (cdr gr) (cdr l)) (res (ncons 1)) (rad))
+                ((null l)
+                 (cond ((equal res '(1))
+                        (eqtest (list '(mexpt) gr pot) check))
+                       ((null rad) 
+                        (testt (cons '(mtimes simp) res)))
+                       (t
+                        (setq rad (power* ; RADEXPAND=()?
+                                    (cons '(mtimes) (nreverse rad)) pot))
+                        (cond ((not (onep1 rad))
+                               (setq rad
+                                     (testt (tms rad 1 (cons '(mtimes) res))))
+                               (cond (rulesw
+                                      (setq rulesw nil res (cdr rad))))))
+                        (eqtest (testt (cons '(mtimes) res)) check))))
+              ;; Check with $csign to be more complete. This prevents wrong 
+              ;; simplifications like sqrt(-z^2)->%i*sqrt(z^2) for z complex.
+              (setq z ($csign (car l)))
+              (if (member z '($complex $imaginary))
+                  (setq z '$pnz)) ; if appears complex, unknown sign
+              (setq w (cond ((member z '($neg $nz) :test #'eq)
+                             (setq rad (cons -1 rad))
+                             (mult -1 (car l)))
+                            (t (car l))))
+              (cond ((onep1 w))
+                    ((alike1 w gr) (return (list '(mexpt simp) gr pot)))
+                    ((member z '($pn $pnz) :test #'eq)
+                     (setq rad (cons w rad)))
+                    (t
+                     (setq w (testt (tms (simplifya (list '(mexpt) w pot) t)
+                                         1 (cons '(mtimes) res))))))
+              (cond (rulesw (setq rulesw nil res (cdr w))))))
   start
-     (cond ((and (cdr res) (onep1 (car res)) (ratnump (cadr res)))
-            (setq res (cdr res))))
-     (cond ((null (setq gr (cdr gr)))
-            (return (eqtest (testt (cons '(mtimes) res)) check)))
-           ((mexptp (car gr))
-            (setq y (list (caar gr) (cadar gr) (mult (caddar gr) pot))))
-           ((eq (car gr) '$%i)
-            (setq y (%itopot pot)))
-           ((mnumberp (car gr))
-            (setq y (list '(mexpt) (car gr) pot)))
-           (t (setq y (list '(mexpt simp) (car gr) pot))))
-     (setq w (testt (tms (simplifya y t) 1 (cons '(mtimes) res))))
-     (cond (rulesw (setq rulesw nil res (cdr w))))
-     (go start)
-     
-  retno
-     (return (exptrl gr pot))
-     
+    (cond ((and (cdr res) (onep1 (car res)) (ratnump (cadr res)))
+           (setq res (cdr res))))
+    (cond ((null (setq gr (cdr gr)))
+           (return (eqtest (testt (cons '(mtimes) res)) check)))
+          ((mexptp (car gr))
+           (setq y (list (caar gr) (cadar gr) (mult (caddar gr) pot))))
+          ((eq (car gr) '$%i)
+           (setq y (%itopot pot)))
+          ((mnumberp (car gr))
+           (setq y (list '(mexpt) (car gr) pot)))
+          (t (setq y (list '(mexpt simp) (car gr) pot))))
+    (setq w (testt (tms (simplifya y t) 1 (cons '(mtimes) res))))
+    (cond (rulesw (setq rulesw nil res (cdr w))))
+    (go start)
   atgr
-     (cond ((zerop1 pot) (go retno))
-           ((onep1 pot)
-            (let ((y (getprop gr '$numer)))
-              (if (and y (floatp y) (or $numer (not (eql pot 1))))
-                  ;; A numeric constant like %e, %pi, ... and 
-                  ;; exponent is a float or bigfloat value.
-                  (return (if (and (member gr *builtin-numeric-constants*)
-                                   (equal pot bigfloatone))
-                              ;; Return a bigfloat value.
-                              ($bfloat gr)
-                              ;; Return a float value.
-                              y))
-                  ;; In all other cases exptrl simplifies accordingly.
-                  (return (exptrl gr pot)))))
-           ((eq gr '$%e)
-            ;; Numerically evaluate if the power is a flonum.
-            (when $%emode
-              (let ((val (flonum-eval '%exp pot)))
-                (when val
-                  (return val)))
-              ;; Numerically evaluate if the power is a (complex)
-              ;; big-float.  (This is basically the guts of
-              ;; big-float-eval, but we can't use big-float-eval.)
-              (when (and (not (member 'simp (car x) :test #'eq))
-                         (complex-number-p pot 'bigfloat-or-number-p))
-                (let ((x ($realpart pot))
-                      (y ($imagpart pot)))
-                  (cond ((and ($bfloatp x) (like 0 y))
-                         (return ($bfloat `((mexpt simp) $%e ,pot))))
-                        ((or ($bfloatp x) ($bfloatp y))
-                         (let ((z (add ($bfloat x) (mul '$%i ($bfloat y)))))
-                           (setq z ($rectform `((mexpt simp) $%e ,z)))
-                           (return ($bfloat z))))))))
-            (cond ((and $logsimp (among '%log pot)) (return (%etolog pot)))
-                  ((and $demoivre (setq z (demoivre pot))) (return z))
-                  ((and $%emode
-                        (among '$%i pot)
-                        (among '$%pi pot)
-                        ;; Exponent contains %i and %pi and %emode is TRUE:
-                        ;; Check simplification of exp(%i*%pi*p/q*x)
-                        (setq z (%especial pot)))
-                   (return z))
-                  (($taylorp (third x))
-                   ;; taylorize %e^taylor(...)
-                   (return ($taylor x)))))
-           (t
-            (let ((y (get gr '$numer)))
-              ;; Check for a numeric constant.
-              (and y
-                   (floatp y)
-                   (or (floatp pot)
-                       ;; The exponent is a bigfloat. Convert base to bigfloat.
-                       (and ($bfloatp pot)
-                            (member gr *builtin-numeric-constants*)
-                            (setq y ($bfloat gr)))
-                       (and $numer (integerp pot)))
-                   (return (exptrl y pot))))))
-
+    (cond ((zerop1 pot)
+           (return (exptrl gr pot)))
+          ((onep1 pot)
+           (let ((y (getprop gr '$numer)))
+             (if (and y
+                      (floatp y)
+                      (or $numer
+                          (not (eql pot 1))))
+                 (return y)
+                 (return (exptrl gr pot)))))
+          ((eq gr '$%e)
+           ;; Numerically evaluate if the power is a flonum.
+           (when $%emode
+             (let ((val (flonum-eval '%exp pot)))
+               (when val
+                 (return val)))
+             ;; Numerically evaluate if the power is a (complex)
+             ;; big-float.  (This is basically the guts of
+             ;; big-float-eval, but we can't use big-float-eval.)
+             (when (and (not (member 'simp (car x) :test #'eq))
+                        (complex-number-p pot 'bigfloat-or-number-p))
+               (let ((x ($realpart pot))
+                     (y ($imagpart pot)))
+                 (cond ((and (bigfloatp x) (like 0 y))
+                        (return ($bfloat `((mexpt simp) $%e ,pot))))
+                       ((or (bigfloatp x) (bigfloatp y))
+                        (let ((z (add ($bfloat x) (mul '$%i ($bfloat y)))))
+                          (setq z ($rectform `((mexpt simp) $%e ,z)))
+                          (return ($bfloat z))))))))
+           (cond ((and $logsimp (among '%log pot)) (return (%etolog pot)))
+                 ((and $demoivre (setq z (demoivre pot))) (return z))
+                 ((and $%emode
+                       (among '$%i pot)
+                       (among '$%pi pot)
+                       ;; Exponent contains %i and %pi and %emode is TRUE:
+                       ;; Check simplification of exp(%i*%pi*p/q*x)
+                       (setq z (%especial pot)))
+                  (return z))
+                 (($taylorp (third x))
+                  ;; taylorize %e^taylor(...)
+                  (return ($taylor x)))))
+          (t
+           (let ((y (get gr '$numer)))
+             ;; Check for a numeric constant.
+             (and y
+                  (floatp y)
+                  (or (floatp pot)
+                      ;; The exponent is a bigfloat. Convert base to bigfloat.
+                      (and (bigfloatp pot)
+                           (member gr *builtin-numeric-constants*)
+                           (setq y ($bfloat gr)))
+                      (and $numer (integerp pot)))
+                  (return (exptrl y pot))))))
   up 
-     (return (eqtest (list '(mexpt) gr pot) check))
-
+    (return (eqtest (list '(mexpt) gr pot) check))
   matrix
-     (cond ((zerop1 pot)
-            (cond ((mxorlistp1 gr) (return (constmx (addk 1 pot) gr)))
-                  (t (go retno))))
-           ((onep1 pot) (return gr))
-           ((or $doallmxops $doscmxops $domxexpt)
-            (cond ((or (and mlpgr
-                            (or (not ($listp gr)) $listarith)
-                            (scalar-or-constant-p pot $assumescalar))
-                       (and $domxexpt
-                            mlppot
-                            (or (not ($listp pot)) $listarith)
-                            (scalar-or-constant-p gr $assumescalar)))
-                   (return (simplifya (outermap1 'mexpt gr pot) t)))
-                  (t (go up))))
-           ((and $domxmxops (member pot '(-1 -1.0) :test #'equal))
-            (return (simplifya (outermap1 'mexpt gr pot) t)))
-           (t (go up)))
+    (cond ((zerop1 pot)
+           (cond ((mxorlistp1 gr) (return (constmx (addk 1 pot) gr)))
+                 (t (return (exptrl gr pot)))))
+          ((onep1 pot) (return gr))
+          ((or $doallmxops $doscmxops $domxexpt)
+           (cond ((or (and mlpgr
+                           (or (not ($listp gr)) $listarith)
+                           (scalar-or-constant-p pot $assumescalar))
+                      (and $domxexpt
+                           mlppot
+                           (or (not ($listp pot)) $listarith)
+                           (scalar-or-constant-p gr $assumescalar)))
+                  (return (simplifya (outermap1 'mexpt gr pot) t)))
+                 (t (go up))))
+          ((and $domxmxops (member pot '(-1 -1.0) :test #'equal))
+           (return (simplifya (outermap1 'mexpt gr pot) t)))
+          (t (go up)))
   e1 
-     ;; At this point we have an expression: (z^a)^b with gr = z^a and pot = b
-     (cond ((or (eq $radexpand '$all)
-                ;; b is an integer or an odd rational
-                (simplexpon pot)
-                (and (eq $domain '$complex)
-                     (not (member ($csign (caddr gr)) '($complex $imaginary)))
-                         ;; z >= 0 and a not a complex
-                     (or (member ($csign (cadr gr)) '($pos $pz $zero))
-                         ;; -1 < a <= 1
-                         (and (mnumberp (caddr gr))
-                              (eq ($sign (sub 1 (take '(mabs) (caddr gr))))
-                                  '$pos))))
-                (and (eq $domain '$real)
-                     (member ($csign (cadr gr)) '($pos $pz $zero)))
-                ;; (1/z)^a -> 1/z^a when z a constant complex
-                (and (eql (caddr gr) -1)
-                     (or (and $radexpand
-                              (eq $domain '$real))
-                         (and (eq ($csign (cadr gr)) '$complex)
-                              ($constantp (cadr gr)))))
-                ;; This does (1/z)^a -> 1/z^a. This is in general wrong.
-                ;; We switch this type of simplification on, when
-                ;; $ratsimpexpons is T. E.g. radcan sets this flag to T.
-                ;; radcan hangs for expressions like sqrt(1/(1+x)) without
-                ;; this simplification.
-                (and $ratsimpexpons
-                     (eql (caddr gr) -1))
-                (and $radexpand
-                     (eq $domain '$real)
-                     (odnump (caddr gr))))
-            ;; Simplify (z^a)^b -> z^(a*b)
-            (setq pot (mul pot (caddr gr))
-                  gr (cadr gr)))
-           ((and (eq $domain '$real)
-                 (free gr '$%i)
-                 $radexpand
-                 (not (decl-complexp (cadr gr)))
-                 (evnump (caddr gr)))
-            ;; Simplify (x^a)^b -> abs(x)^(a*b)
-            (setq pot (mul pot (caddr gr))
-                  gr (radmabs (cadr gr))))
-           ((and $radexpand
-                 (eq $domain '$real)
-                 (mminusp (caddr gr)))
-            ;; Simplify (1/z^a)^b -> 1/(z^a)^b
-            (setq pot (neg pot)
-                  gr (power (cadr gr) (neg (caddr gr)))))
-           (t (go up)))
-     (go cont)))
+    ;; At this point we have an expression: (z^a)^b with gr = z^a and pot = b
+    (cond ((or (eq $radexpand '$all)
+               ;; b is an integer or an odd rational
+               (simplexpon pot)
+               (and (eq $domain '$complex)
+                    (not (member ($csign (caddr gr)) '($complex $imaginary)))
+                        ;; z >= 0 and a not a complex
+                    (or (member ($csign (cadr gr)) '($pos $pz $zero))
+                        ;; -1 < a <= 1
+                        (and (mnumberp (caddr gr))
+                             (eq ($sign (sub 1 (take '(mabs) (caddr gr))))
+                                 '$pos))))
+               (and (eq $domain '$real)
+                    (member ($csign (cadr gr)) '($pos $pz $zero)))
+               ;; (1/z)^a -> 1/z^a when z a constant complex
+               (and (eql (caddr gr) -1)
+                    (or (and $radexpand
+                             (eq $domain '$real))
+                        (and (eq ($csign (cadr gr)) '$complex)
+                             ($constantp (cadr gr)))))
+               ;; This does (1/z)^a -> 1/z^a. This is in general wrong.
+               ;; We switch this type of simplification on, when
+               ;; $ratsimpexpons is T. E.g. radcan sets this flag to T.
+               ;; radcan hangs for expressions like sqrt(1/(1+x)) without
+               ;; this simplification.
+               (and $ratsimpexpons
+                    (eql (caddr gr) -1))
+               (and $radexpand
+                    (eq $domain '$real)
+                    (odnump (caddr gr))))
+           ;; Simplify (z^a)^b -> z^(a*b)
+           (setq pot (mul pot (caddr gr))
+                 gr (cadr gr)))
+          ((and (eq $domain '$real)
+                (free gr '$%i)
+                $radexpand
+                (not (decl-complexp (cadr gr)))
+                (evnump (caddr gr)))
+           ;; Simplify (x^a)^b -> abs(x)^(a*b)
+           (setq pot (mul pot (caddr gr))
+                 gr (radmabs (cadr gr))))
+          ((and $radexpand
+                (eq $domain '$real)
+                (mminusp (caddr gr)))
+           ;; Simplify (1/z^a)^b -> 1/(z^a)^b
+           (setq pot (neg pot)
+                 gr (power (cadr gr) (neg (caddr gr)))))
+          (t (go up)))
+    (go cont)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1446,10 +1408,11 @@
          (cond ((mnumberp r1) (addk 0.0 r1))
                (t (list '(mexpt simp) r1 1.0))))
         ((zerop1 r1)
-         (cond ((or (zerop1 r2) (mnegativep r2))
-                (if (not *errorsw*)
-                    (merror "expt: undefined: ~a" (list '(mexpt) r1 r2))
-                    (throw 'errorsw t)))
+         (cond ((or (zerop1 r2)
+                    (mnegativep r2))
+                (if *errorsw*
+                    (throw 'errorsw t)
+                    (merror "expt: undefined: ~a" (list '(mexpt) r1 r2))))
                (t (zerores r1 r2))))
         ((or (zerop1 r2) (onep1 r1))
          (cond ((or (floatp r1) (floatp r2)) 1.0)
