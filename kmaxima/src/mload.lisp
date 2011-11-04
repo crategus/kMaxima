@@ -29,7 +29,7 @@
 (defmvar $file_search_maxima '((mlist simp)))
 (defmvar $file_search_demo   '((mlist simp)))
 
-(defmvar $file_search_tests 
+(defmvar $file_search_tests
          '((mlist simp)
            "/home/dieter/Lisp/kMaxima/kmaxima/tests/###.{mac,mc}"))
 
@@ -39,7 +39,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun split-string (string  bag &optional (start 0) &aux all pos v l)
+(defun split-string (string bag &optional (start 0) &aux all pos v l)
   (declare (fixnum start) (type string string))
   (loop for i from start below (length string)
         do 
@@ -64,9 +64,9 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun list-variable-bindings (expr &optional str &aux tem)
-  (loop for v in(cdr ($listofvars  expr))
+  (loop for v in (cdr ($listofvars  expr))
     when (member v $values :test #'equal)
-    collecting (setq tem`((mequal) ,v ,(meval* v)))
+    collecting (setq tem `((mequal) ,v ,(meval* v)))
     and
     do (cond (str (format str ",")(mgrind tem str)))))
 
@@ -109,7 +109,7 @@
 
 (defun $file_search (name &optional paths)
   (if (and (symbolp name)
-           (member (char (symbol-name name) 0) '(#\$)))
+           (member (char (symbol-name name) 0) '(#\$) ))
       (setq name (subseq (print-invert-case name) 1)))
   (if (symbolp name)
       (setf name (string name)))
@@ -123,36 +123,38 @@
                         (cdr $file_search_demo)))))
   (unless (mlistp paths)
     (merror "file_search: The argument `paths' must be a list."))
-  (new-file-search (string name) (cdr paths)))
+  (file-search (string name) (cdr paths)))
 
-(defun new-file-search (name template)
+(defun file-search (name template)
   (cond ((probe-file name))
-        ((atom template)
+        ((and (not (null template))
+              (atom template))
          (let ((lis (loop for w in (split-string template "{}")
                           when (null (position #\, w))
                           collect w
                           else
                           collect (split-string w ","))))
-           (new-file-search1 name "" lis)))
+           (file-search1 name "" lis)))
         (t
          (let ((temp nil))
            (loop for v in template
-                 when (setq temp (new-file-search name v))
+                 when (setq temp (file-search name v))
                  do (return temp))))))
 
-(defun new-file-search1 (name begin lis)
+(defun file-search1 (name begin lis)
   (cond ((null lis)
          (let ((file (namestring ($filename_merge begin name))))
            (if (probe-file file) file nil)))
         ((atom (car lis))
-         (new-file-search1 name
+         (file-search1 name
                            (if begin
-                               ($sconcat begin (car lis)) (car lis))
+                               (concatenate 'string begin (car lis))
+                               (car lis))
                            (cdr lis)))
         (t
          (loop for v in (car lis) with tem
                when (setq tem
-                          (new-file-search1 name begin (cons v (cdr lis))))
+                          (file-search1 name begin (cons v (cdr lis))))
                do (return tem)))))
 
 ;;; ----------------------------------------------------------------------------
@@ -451,8 +453,8 @@
 (defun approx-alike (f g)
   (cond ((floatp f) (and (floatp g) ($float_approx_equal f g)))
         ((atom f) (and (atom g) (equal f g)))
-        ((op-equalp f 'lambda)
-         (and (op-equalp g 'lambda)
+        ((moperatorp f 'lambda)
+         (and (moperatorp g 'lambda)
               (approx-alike-list (mapcar #'(lambda (s) (simplifya s nil))
                                          (margs f))
                                  (mapcar #'(lambda (s) (simplifya s nil))
@@ -461,7 +463,7 @@
          (and (arrayp g) (approx-alike ($listarray f) ($listarray g))))
         ((hash-table-p f)
          (and (hash-table-p g) (approx-alike ($listarray f) ($listarray g))))
-        ((op-equalp f 'mquote)
+        ((moperatorp f 'mquote)
          (approx-alike (second f) g))
         ((and (consp f)
               (consp (car f))
