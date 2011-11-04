@@ -24,25 +24,36 @@
 
 (in-package :kmaxima)
 
-(defvar ^w nil)
-(defvar ttyoff '^w)
-
 ;;; ----------------------------------------------------------------------------
-
-(defmacro float (x &optional (y 1d0))
-  `(cl:float ,x ,y))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (setq *read-default-float-format* 'double-float))
 
 ;;; ----------------------------------------------------------------------------
 
+(defmacro ncons (x)
+  `(cons ,x nil))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro float (x &optional (y 1d0))
+  `(cl:float ,x ,y))
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro while (cond &rest body)
+  `(do ()
+       ((not ,cond))
+     ,@body))
+
+;;; ----------------------------------------------------------------------------
+
 (defmacro defun-prop (f arg &body body)
   `(setf (get ',(first f) ',(second f)) #'(lambda ,arg ,@body)))
 
-(defmacro defmspec (function . rest)
+(defmacro defmspec (func . rest)
   `(progn
-     (defun-prop (,function mspec) ,@rest)))
+     (defun-prop (,func mspec) ,@rest)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -66,9 +77,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmacro while (cond &rest body)
-  `(do ()
-       ((not ,cond))
-     ,@body))
+(defmacro take (operator &rest args)
+  `(simplifya (list ,operator ,@args) t))
 
 ;;; ----------------------------------------------------------------------------
