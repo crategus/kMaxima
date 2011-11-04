@@ -69,6 +69,7 @@ END-INFO-DIR-ENTRY
 * 2D-Anzeige::
 * Hauptschleife::
 * Vereinfachung::
+* Grosse Gleitkommazahlen::
 * kmaxima.lisp::
 * Quelltext::
 * Index der Funktionen und Variablen::
@@ -102,11 +103,15 @@ END-INFO-DIR-ENTRY
 @chapter Hauptschleife
 @include Hauptschleife.texi
 
-@node Vereinfachung, kmaxima.lisp, Hauptschleife, Top
+@node Vereinfachung, Grosse Gleitkommazahlen, Hauptschleife, Top
 @chapter Vereinfachung
 @include Vereinfachung.texi
 
-@node kmaxima.lisp, Quelltext, Vereinfachung, Top
+@node Grosse Gleitkommazahlen, kmaxima.lisp, Vereinfachung, Top
+@chapter Gro@ss{}e Gleitkommazahlen
+@include Bigfloat.texi
+
+@node kmaxima.lisp, Quelltext, Grosse Gleitkommazahlen, Top
 @appendix kmaxima.lisp
 @include Quelltext1.texi
 

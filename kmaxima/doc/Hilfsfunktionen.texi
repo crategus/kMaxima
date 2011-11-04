@@ -4,13 +4,14 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 16.04.2011
-@c Revision : 17.10.2011
+@c Revision : 28.10.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @menu
 * Allgemeine Makros::
+* Testfunktionen f@"ur kMaxima-Ausdr@"ucke::
 * Funktionen f@"ur die Eigenschaftsliste::
 * Konvertierung zwischen Gross- und Kleinschreibung::
 * Zerlegung von Symbolen und Zeichenketten in Listen::
@@ -21,33 +22,108 @@
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Allgemeine Makros, Funktionen f@"ur die Eigenschaftsliste, Hilfsfunktionen, Hilfsfunktionen
+@node Allgemeine Makros, Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Hilfsfunktionen, Hilfsfunktionen
 @section Allgemeine Makros
 @c -----------------------------------------------------------------------------
+
+@c --- 20.10.2011 --------------------------------------------------------------
+@anchor{ncons}
+@deffn {Makro} ncons x
+
+Das Makro @code{ncons} ist eine Abk@"urzung, um das Argument @var{x} zum
+einzigen Element einer Liste zu machen.
+
+@emph{Beispiel:}
+@example
+* (ncons 'a)
+(A)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro ncons (x)
+  `(cons ,x nil))
+@end group
+@end lisp
+@end deffn
+
+@c --- 20.10.2011 --------------------------------------------------------------
+@anchor{float}
+@deffn {Makro} float x &optional (y 1d0)
+
+Das Makro @code{float} @"uberschreibt die entsprechende Lisp-Funktion, so dass
+eine Zahl standardm@"a@ss{}ig zu einer Gleitkommazahl mit doppelter Genauigkeit
+konvertiert wird.  Zus@"atzlich wird in kMaxima die globale Lisp-Variable
+@code{*read-default-float-format*} auf den Wert @code{double-float} gesetzt.
+
+@emph{Beispiel:}
+
+@example
+* (type-of (float 1))
+DOUBLE-FLOAT
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro float (x &optional (y 1d0))
+  `(cl:float ,x ,y))
+@end group
+@end lisp
+@end deffn
+
+@c --- 20.10.2011 --------------------------------------------------------------
+@anchor{while}
+@deffn {Makro} while cond &rest body
+
+Das Makro implementiert eine @code{while}-Schleife.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro while (cond &rest body)
+  `(do ()
+       ((not ,cond))
+     ,@@body))
+@end group
+@end lisp
+@end deffn
 
 @c --- 15.10.2011 --------------------------------------------------------------
 @anchor{defun-prop}
 @deffn {Makro} defun-prop f arg &body body
 
-Das Makro generiert den Code, um die Definition einer Funktion auf der
-Eigenschaftsliste eines Symbols abzulegen.
+Das Makro @code{defun-prop} generiert den Code, um die Definition einer Funktion
+auf der Eigenschaftsliste eines Symbols abzulegen.
 
 Das Argument @var{f} ist eine Liste mit zwei Elementen.  Das erste Element
 ist ein Symbol, das die Funktion bezeichnet.  Das zweite Element ist ein
-Symbol, das den Indikator bezeichnet, zu dem die Funktionsdefinition auf
-der Eigenschaftsliste abgelegt wird.  @var{arg} ist eine Liste mit den
+Symbol, das den Indikator bezeichnet, zu dem die Funktionsdefinition @var{body}
+auf der Eigenschaftsliste abgelegt wird.  @var{arg} ist eine Liste mit den
 Argumenten der Funktionsdefinition @var{body}.
+
+Siehe auch das Makro @mrefcomma{defmspec} mit dem kMaxima-Spezialformen
+definiert werden.  Weiterhin werden mit den Makros @mref{def-led-fun} und
+@mref{def-nud-fun} Funktionen definiert, die die @code{led}- und
+@code{nud}-Funktionen auf der Eigenschaftsliste eines Operators abgelegen.
 
 @emph{Beispiel:}
 
-Das Beispiel zeigt die Definition einer Funktion @code{$f}.  Die Funktion hat
-die Argumente @code{x} und @code{y}.  Die Definition der Funktion wird zum
-Indikator @code{func} auf der Eigenschaftsliste abgelegt.
+Das Beispiel zeigt die Definition und die Anwendung einer Funktion @code{f}.
+Die Funktion hat die Argumente @code{x} und @code{y}.  Die Definition der
+Funktion wird zum Indikator @code{func} auf der Eigenschaftsliste abgelegt.
 
 @example
-* (macroexpand-1 '(defun-prop ($f func) (x y) (+ x y)))
-(SETF (GET '$F 'FUNC) #'(LAMBDA (X Y) (+ X Y)))
+* (macroexpand-1 '(defun-prop (f func) (x y) (+ x y)))
+(SETF (GET 'F 'FUNC) #'(LAMBDA (X Y) (+ X Y)))
 T
+
+* (defun-prop (f func) (x y) (+ x y))
+#<FUNCTION (LAMBDA (X Y)) @{B595DBD@}>
+
+* (apply (get 'f 'func) '(2 3))
+5
 @end example
 
 @emph{Quelltext:}
@@ -64,9 +140,13 @@ T
 @deffn {Makro} defmspec function . rest
 
 Das Makro @code{defmspec} legt die Definition einer Funktion zum Indikator
-@code{mspec} auf der Eigenschaftsliste ab.  Das Makro generiert einen
-Ausdruck mit dem Makro @mrefcomma{defun-prop} das die Definition auf der
-Eigenschaftsliste ablegt.
+@code{mspec} auf der Eigenschaftsliste ab.  Dazu generiert das Makro einen
+Ausdruck mit dem Makro @mrefdot{defun-prop}
+
+kMaxima-Spezialformen sind Nutzerfunktionen, die ihre Argumente nicht auswerten.
+Der Evaluator @mref{meval} erkennt Symbole, die eine kMaxima-Spezialform
+repr@"asentieren und wendet die Funktion an, die auf der Eigenschaftsliste
+abgelegt ist.
 
 @emph{Beispiel:}
 
@@ -89,9 +169,9 @@ T
 @emph{Quelltext:}
 @lisp
 @group
-(defmacro defmspec (function . rest)
+(defmacro defmspec (func . rest)
   `(progn
-     (defun-prop (,function mspec) ,@@rest)))
+     (defun-prop (,func mspec) ,@@rest)))
 @end group
 @end lisp
 @end deffn
@@ -101,19 +181,26 @@ T
 @defvr {Globale Variable} *variable-initial-values*
 Standardwert: @code{#<HASH-TABLE :TEST EQL :COUNT 0 @{AF946F1@}>}
 
-Hash-Tabelle mit allen Variablen und deren Anfangswert, die mit dem Makro
-@mref{defmvar} definiert sind.  kMaxima nutzt die Eintr@"age in diese
-Hash-Tabelle, um Optionsvariablen auf ihren Anfangswert zur@"uckzusetzen.
+Hash-Tabelle mit allen Variablen und deren Anfangswerte, die mit dem Makro
+@mref{defmvar} definiert sind.  kMaxima nutzt die Eintr@"age der
+Hash-Tabelle, wenn Optionsvariablen mit der Funktion @mref{$reset} auf ihren
+Anfangswert zur@"uckgesetzt werden.
 @end defvr
 
 @c --- 16.10.2011 --------------------------------------------------------------
 @anchor{defmvar}
 @deffn {Makro} defmvar var &rest val-and-doc
 
-Definiert eine globale Variable @var{var}.  Das Argument @var{val-and-doc}
-enth@"alt den Wert der Variablen sowie gegebenenfalls eine Zeichenkette f@"ur
-die Dokumentation.  Der Wert der Variablen wird in die Hash-Tabelle
-@mref{*variable-initial-values*} eingetragen, wenn noch nicht vorhanden.
+Definiert eine globale Variable @var{var}, deren Wert, wenn noch nicht
+vorhanden, in die Hash-Tabelle @mref{*variable-initial-values*} eingetragen
+wird.  Das Argument @var{val-and-doc} enth@"alt den Wert der Variablen sowie
+gegebenenfalls eine Zeichenkette f@"ur die Dokumentation.
+
+Mit der Nutzerfunktion @mref{$reset} k@"onnen Variablen, die mit @code{defmvar}
+definiert wurden, auf ihren Anfangswert zur@"uckgesetzt werden.  Wird das
+Argument @var{val-and-doc} nicht angegeben, dann wird die Variable mit dem Wert
+@code{nil} initialisiert.  Die Variable wird im Unterschied zu einer Definition
+mit @code{defvar} also immer an einen Wert gebunden.
 
 @emph{Beispiel:}
 
@@ -141,38 +228,447 @@ T
 @end deffn
 
 @c --- 16.10.2011 --------------------------------------------------------------
-@anchor{errset}
+@anchor{errset_variable}
 @defvr {Globale Variable} errset
 Standardwert: @code{nil}
+
+Hat @code{errset} den Wert @code{t}, wird in einer mit dem Makro
+@mref{errset} definierten Umgebung bei Auftreten eines Fehlers das Programm
+durch Aufruf der @code{Lisp}-Funktion @code{error} abgebrochen.
 @end defvr
 
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{errset}
+@deffn {Makro} errset &rest l
 
+Mit dem Makro @code{errset} wird eine Umgebung definiert, die Fehler abf@"angt,
+wenn das Argument @var{l} ausgewertet wird.  Hat die Variable
+@mxref{errset_variable, errset} den Wert @code{nil}, bricht die Ausf@"uhrung des
+Programms bei einem Fehler nicht ab und der R@"uckgabewert ist @code{nil}.  Kann
+das Argument erfolgreich ausgewertet werden, wird das Ergebnis als Element einer
+Liste zur@"uckgegeben.  Hat die Variable @code{errset} dagegen den Wert
+@code{t}, bricht die Ausf@"uhrung von kMaxima mit dem Aufruf der Lisp-Funktion
+@code{error} ab.
+
+@emph{Beispiele:}
+@example
+* (let ((errset nil)) (errset (/ 1 2)))
+(1/2)
+
+* (let ((errset nil)) (errset (/ 1 0)))
+NIL
+
+* (let ((errset t)) (errset (/ 1 0)))
+; in: LAMBDA NIL
+;     (/ 1 0)
+; 
+; caught STYLE-WARNING:
+;   Lisp error during constant folding:
+;   arithmetic error DIVISION-BY-ZERO signalled
+;   Operation was SB-KERNEL::DIVISION, operands (1 0).
+; 
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+
+debugger invoked on a DIVISION-BY-ZERO in thread #<THREAD
+                                                   "initial thread" RUNNING
+                                                   @{AA8A979@}>:
+  arithmetic error DIVISION-BY-ZERO signalled
+Operation was SB-KERNEL::DIVISION, operands (1 0).
+
+Type HELP for debugger help, or (SB-EXT:QUIT) to exit from SBCL.
+
+restarts (invokable by number or by possibly-abbreviated name):
+  0: [ABORT] Exit debugger, returning to top level.
+
+((LAMBDA ()))
+@end example
+
+@emph{Quelltext:}
 @lisp
+@group
 (defmacro errset (&rest l)
   `(handler-case (list ,(car l))
      (error (e) (when errset (error e)))))
+@end group
 @end lisp
-
-@lisp
-(defmacro while (cond &rest body)
-  `(do ()
-       ((not ,cond))
-     ,@@body))
-@end lisp
-
-@verbatim
-(defvar ^w nil)
-(defvar ttyoff '^w)
-
-(defmacro float (x &optional (y 1d0))
-  `(cl:float ,x ,y))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (setq *read-default-float-format* 'double-float))
-@end verbatim
+@end deffn
 
 @c -----------------------------------------------------------------------------
-@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Allgemeine Makros, Hilfsfunktionen
+@node Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Funktionen f@"ur die Eigenschaftsliste, Allgemeine Makros, Hilfsfunktionen
+@section Testfunktionen f@"ur kMaxima-Ausdr@"ucke
+@c -----------------------------------------------------------------------------
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mminusp}
+@deffn {Funktion} mminusp x
+
+Pr@"uft, ob das Argument @var{x} ein @code{mminus}-Ausdruck ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mminusp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'mminus)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mplusp}
+@deffn {Funktion} mplusp x
+
+Pr@"uft, ob das Argument @var{x} ein @code{mplusp}-Ausdruck ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mplusp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'mplus)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mtimesp}
+@deffn {Funktion} mtimesp x
+
+Pr@"uft, ob das Argument @var{x} ein @code{mtimes}-Ausdruck ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mtimesp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'mtimes)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mexptp}
+@deffn {Funktion} mexptp x
+
+Pr@"uft, ob das Argument @var{x} ein @code{mexpt}-Ausdruck ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mexptp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'mexpt)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mlistp}
+@deffn {Funktion} mlistp x
+
+Pr@"uft, ob das Argument @var{x} ein @code{mlistp}-Ausdruck ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mlistp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'mlist)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{marrayp}
+@deffn {Funktion} marrayp x
+
+Pr@"uft, ob das Argument @var{x} eine indizierte Variable ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun marrayp (x)
+  (and (consp x)
+       (consp (car x))
+       (member 'array (cdar x) :test #'eq)
+       t))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{moperatorp}
+@deffn {Funktion} moperatorp x op
+
+Die R@"uckgabe ist @code{t}, wenn der Operator @var{op} der Hauptoperator des
+Ausdrucks @var{x} ist.
+
+@emph{Beispiele:}
+@example
+* (moperatorp '((mplus) $a $b) 'mplus)
+T
+
+* (moperatorp '((mplus) $a $b) 'mtimes)
+NIL
+
+* (moperatorp '((mplus) ((mtimes) 2 $a) $b) 'mtimes)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun moperatorp (x op)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) op)))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+
+Im Original Maxima gibt es eine Funktion @code{op-equalp}, die eine beliebige
+Anzahl an Operatoren als Argument akzeptiert und mit der Lisp-Funktion
+@code{equal} testet.  Die hier definierte Funktion kopiert die Syntax anderer
+Testfunktionen wie @mref{mplusp} oder @mrefdot{mexptp}
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mop}
+@deffn {Funktion} mop form
+
+Gebe die Argumente des Hauptoperators des Ausdrucks @var{form} zur@"uck.  Die
+Funktion @code{mop} pr@"uft dabei, ob ein @code{mqapply}-Ausdruck vorliegt.
+
+Siehe auch die Funktion @mrefdot{margs}
+
+@emph{Beispiel:}
+@example
+* (mop '((mplus) a b))
+MPLUS
+* (mop '((mqapply) ((f array) x) a b))
+((F ARRAY) X)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{margs}
+@deffn {Funktion} margs form
+
+Gebe die Argumente des Hauptoperators zur@"uck.  Die Funktion @code{margs}
+pr@"uft dabei, ob ein @code{mqapply}-Ausdruck vorliegt.
+
+Siehe auch die Funktion @mrefdot{mop}
+
+@emph{Beispiele:}
+@example
+* (margs '((mplus) a b))
+(A B)
+* (margs '((mqapply) ((f array) x) a b))
+(A B)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{mnumberp}
+@deffn {Funktion} mnumberp x
+
+Testet, ob das Argument @var{x} eine kMaxima-Zahl ist.  kMaxima-Zahlen sind
+ganze Zahlen, Gleitkommazahlen sowie rationale Zahlen und gro@ss{}e
+Gleitkommazahlen.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mnumberp (x)
+  (or (numberp x)
+      (and (consp x)
+           (consp (car x))
+           (member (caar x) '(rat bigfloat))
+           t)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{ratnump}
+@deffn {Funktion} ratnump x
+
+Testet, ob das Argument @var{x} eine rationale Zahl ist.  Rationale Zahlen
+werden nicht als eine Lisp-Zahl, sondern als ein Ausdruck mit dem Operator
+@code{rat} dargestellt.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun ratnump (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'rat)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{bigfloatp}
+@deffn {Funktion} bigfloatp x
+
+Testet, ob das Argument @var{x} eine gro@ss{} Gleitkommazahl ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun bigfloatp (x)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) 'bigfloat)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{zerop1}
+@deffn {Funktion} zerop1 x
+
+Testet, ob das Argument @var{x} Null ist.  Im Unterschied zur Lisp-Funktion
+@code{zerop}, werden auch gro@ss{}e Gleitkommazahlen auf den Wert Null getestet.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun zerop1 (x)
+  (or (and (numberp x)
+           (zerop x))
+      (and (bigfloatp x)
+           (zerop (second x)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{onep}
+@deffn {Funktion} onep x
+
+Testet, ob das Argument @var{x} eine Lisp-Zahl mit dem Wert Eins ist.
+@code{onep} ist vergleichbar mit der Lisp-Funktion @code{zerop}.
+
+Siehe auch die Funktionen @mref{onep1} und @mrefdot{zerop1}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun onep (x)
+  (zerop (- x 1)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{onep1}
+@deffn {Funktion} onep1 x
+
+Testet, ob das Argument @var{x} eine Zahl mit dem Wert Eins ist.  Im Unterschied
+zur Funktion @mref{onep} werden auch gro@ss{}e Gleitkommazahlen auf den Wert
+Eins getestet.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun onep1 (x)
+  (or (and (numberp x)
+           (zerop (- x 1)))
+      (and (bigfloatp x)
+           (zerop (second (sub x 1))))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 23.10.2011 --------------------------------------------------------------
+@anchor{mnegativep}
+@deffn {Funktion} mnegativep x
+
+Testet, ob das Argument @var{x} eine negative Zahl ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mnegativep (x)
+  (cond ((realp x) (minusp x))
+        ((ratnump x) (minusp (rat-num x)))
+        ((bigfloatp x) (minusp (cadr x)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{decl-constant}
+@deffn {Funktion} decl-constant x
+
+Testet, ob das Argument @var{x}, als ein konstantes Symbol deklariert ist.
+
+Siehe auch die Funktion @mrefdot{mconstantp}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun decl-constant (x)
+  (getprop x '$constant))
+@end group
+@end lisp
+@end deffn
+
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{mconstantp}
+@deffn {Funktion} mconstantp x
+
+Testet, ob das Argument @var{x} eine Lisp-Zahl oder ein Symbol ist, das als
+konstant deklariert ist.
+
+Siehe auch @mref{decl-constant}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mconstantp (x)
+  (or (numberp x)
+      (decl-constant x)))
+@end group
+@end lisp
+
+@emph{Hinweis:}
+
+Das Original Maxima hat die Funktion @code{maxima-constantp}, die mit dieser
+Funktion vergleichbar ist.
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Hilfsfunktionen
 @section Funktionen f@"ur die Eigenschaftsliste
 @c -----------------------------------------------------------------------------
 
@@ -192,36 +688,113 @@ Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
 @code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
 ein Symbol ist.  Ist dies nicht der Fall ist die R@"uckgabe @code{nil}.
 
-@verbatim
+@c --- 21.11.2011 --------------------------------------------------------------
+@anchor{putprop}
+@deffn {Funktion} putprop sym val indic
+
+Die Funktion @code{putprop} legt den Wert @var{val} zum Indikator @var{indic}
+auf der Eigenschaftsliste des Symbols @var{sym} ab.  Die Funktion testet, ob
+das Argument @var{sym} ein Symbol ist.  Ist @var{sym} kein Symbol, wird der Wert
+@code{nil} zur@"uckgegeben.
+
+Siehe auch die Funktionen @mrefcomma{defprop} @mref{getprop} und
+@mrefdot{getpropl}
+
+@emph{Beispiele}:
+@example
+* (putprop 'sym 999 'val)
+999
+* (get 'sym 'val)
+999
+* (putprop 999 999 999)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun putprop (sym val indic)
   (and (symbolp sym)
        (setf (get sym indic) val)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{defprop}
+@deffn {Makro} defprop sym val indic
+
+Das Makro @code{defprop} ruft die Funktion @mref{putprop} auf, um den Wert
+@var{val} zum Indikator @var{indic} auf der Eigenschaftsliste des Symbols
+@var{sym} abzulegen.  Im Unterschied zur Funktion @mref{putprop} wertet das
+Makro @code{defprop} ihre Argument nicht aus, so dass Symbole nicht quotiert
+werden m@"ussen.  
+
+Siehe auch die Funktion @mref{getprop} und @mrefdot{getpropl}
+
+@emph{Quelltext:}
+@lisp
+@group
 (defmacro defprop (sym val indic)
   `(putprop ',sym ',val ',indic))
+@end group
+@end lisp
+@end deffn
 
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{getprop}
+@deffn {Funktion} getprop sym indic
+
+Die Funktion @code{getprop} holt den Wert zum Indikator @var{indic} von der
+Eigenschaftsliste des Symbols @var{indic}.  Die Funktion testet zum Unterschied
+der Lisp-Funktion @code{get}, ob das Argument @var{sym} ein Symbol ist und gibt
+den Wert @code{nil} zur@"uck, wenn dies nicht der Fall ist.  Auch wird
+@code{nil} zur@"uckgegeben, wenn kein Wert zum Indikator @var{indic} auf der
+Eigenschaftsliste abgelegt ist.
+
+@emph{Quelltext:}
+@example
+* (putprop 'sym 999 'val)
+999
+* (getprop 'sym 'val)
+999
+* (getprop 999 'val)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun getprop (sym indic)
   (and (symbolp sym)
        (get sym indic)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-Bereits an dieser Stelle ist zus@"atzlich die Funktion @code{getpropl}
-eingef@"uhrt.  @code{getpropl} ist eine Verallgemeinerung der Funktion
-@code{getprop}, die auch eine Liste als zweites Argument akzeptiert und eine
-Liste zur@"uckgibt, deren erstes Element der Indikator ist, zu dem der erste
-Eintrag auf der Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der
-Liste sind die folgenden Eintr@"age der Eigenschaftsliste.
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{getpropl}
+@deffn {Funktion} getpropl sym indicl
 
-@need 800
-@verbatim
-(defun getpropl (sym indicator-list)
+@code{getpropl} ist eine Verallgemeinerung der Funktion @mrefcomma{getprop}@w{}
+die auch eine Liste als zweites Argument akzeptiert und eine Liste zur@"uckgibt,
+deren erstes Element der Indikator ist, zu dem der erste Eintrag auf der
+Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der Liste sind die
+folgenden Eintr@"age der Eigenschaftsliste.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun getpropl (sym indicl)
   (cond ((symbolp sym)
          (setq sym (symbol-plist sym))
          (loop for tail on sym by #'cddr
-               when (member (car tail) indicator-list :test #'eq)
+               when (member (car tail) indicl :test #'eq)
                do (return tail)))
         (t (return-from getpropl nil))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Funktionen f@"ur die Eigenschaftsliste, Hilfsfunktionen
@@ -301,20 +874,16 @@ Die R@"uckgabe ist eine Zeichenkette.
 @group
 (defun maybe-invert-string (str)
   (let ((all-upper t)
-        (all-lower t)
-        (len (length str)))
-    (dotimes (i len)
+        (all-lower t))
+    (dotimes (i (length str))
       (let ((ch (char str i)))
         (when (both-case-p ch)
           (if (upper-case-p ch)
               (setq all-lower nil)
               (setq all-upper nil)))))
-    (cond (all-upper
-            (string-downcase str))
-          (all-lower
-           (string-upcase str))
-          (t
-           str))))
+    (cond (all-upper (string-downcase str))
+          (all-lower (string-upcase str))
+          (t str))))
 @end group
 @end lisp
 @end deffn
@@ -325,7 +894,7 @@ Die R@"uckgabe ist eine Zeichenkette.
 
 Die Funktion @code{intern-invert-case} erwartet eine Zeichenkette @code{str}
 als Argument.  Die Funktion ruft die Funktion @mref{maybe-invert-string} auf.
-Im Unterschied zur Funktion @code{maybe-invert-case} ist die R@"uckgabe ein
+Im Unterschied zur Funktion @code{maybe-invert-string} ist die R@"uckgabe ein
 Symbol, das in das Package @code{:kmaxima} geschrieben wird.
 
 @emph{Beispiele:}
@@ -373,7 +942,7 @@ gr@"o@ss{}er als die maximal Anzahl an Stellen, wird f@"ur die Umwandlung in
 eine Zeichenkette die Anzahl der Stellen in @code{*maxfpprintprec*} verwendet.
 
 Im Unterschied zum Original Maxima ist die Umwandlung von gro@ss{}en
-Gleitkommazahlen nicht implementiert.
+Gleitkommazahlen noch nicht implementiert.
 
 @c --- 15.10.2011 --------------------------------------------------------------
 @anchor{$fpprintprec}
@@ -390,17 +959,20 @@ die maximale Anzahl an Stellen benutzt, die in der Variablen
 @defvr {Globale Variable} *maxfpprintprec*
 Standardwert: @code{(ceiling (log (expt 2 (float-digits 1.0d0)) 10.0))}
 
-Maximale Anzahl an Stellen f@"ur die Anzeige einer Gleitkommazahl.
+Maximale Anzahl an Stellen f@"ur die Anzeige einer Gleitkommazahl.  F@"ur SBCL
+und einer 32-Bit Implementation hat @code{*maxfpprintprec*} den Wert @code{16}.
 @end defvr
 
 @c --- 15.10.2011 --------------------------------------------------------------
 @anchor{exploden}
 @deffn {Funktion} exploden sym
 
-@emph{Beispiele:}
-
 Umwandlung von ganzen Zahlen, Gleitkommazahlen, Symbolen und Zeichenketten in
-eine Liste von Zeichen.
+eine Liste von Zeichen.  @code{exploden} ruft f@"ur die Umwandlung von Symbolen
+die Funktion @mref{print-invert-case}, die die Konventionen der
+Klein- und Gro@ss{}schreibung von Symbolen implementiert.
+
+@emph{Beispiele:}
 
 @example
 * (exploden 123)
@@ -743,9 +1315,6 @@ Anzeige durch das vom Nutzer definierte Symbol @code{|$I|} ersetzt.
 @section Verb- und Substantivform
 @c -----------------------------------------------------------------------------
 
-@findex $nounify
-@findex $verbify
-
 Die Funktionen @code{$nounify} und @code{$verbify} implementieren den
 Mechanismus der Verb- und Substantivformen von Symbolen.  Die Verbform eines
 Symbols ist ein Symbol dem ein Dollarzeichen vorangestellt ist.  Die 
@@ -753,18 +1322,22 @@ Substantivform ist ein Symbol dem ein Prozentzeichen vorangestellt ist.  Zum
 Beispiel hat die Sinusfunktion die Verbform @code{$sin} und die Substantivform
 @code{%sin}.
 
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{$nounifiy}
+@deffn {Funktion} $nounify x
+
 Die Funktion @code{$nounify} ist als eine Maxima-Nutzerfunktion implementiert,
-die als Argument ein Symbol oder eine Zeichenkette akzeptiert.  Die R@"uckgabe
-ist das Symbol in der Substantivform.  Zun@"achst wird mit der Funktion 
-@code{amperchk} ein String in ein Maxima-Symbol umgewandelt.  Das ist ein
-Symbol mit einem vorangestelltem Dollarzeichen.  Ausnahme sind Zeichenketten,
-die der Name eines Operators sind.  Zum Beispiel ist die Zeichenkette @code{"+"}
-der Name des Additionsoperators @code{+}.  In diesem Fall wird die Zeichenkette
-durch das Symbol f@"ur den Operator ersetzt, was f@"ur die Addition das Symbol
-@code{mplus} ist.
+die als Argument @var{x} ein Symbol oder eine Zeichenkette akzeptiert.  Die
+R@"uckgabe ist das Symbol in der Substantivform.  Zun@"achst wird mit der
+Funktion @code{amperchk} ein String in ein Maxima-Symbol umgewandelt.  Das ist
+ein Symbol mit einem vorangestelltem Dollarzeichen.  Ausnahme sind
+Zeichenketten, die der Name eines Operators sind.  Zum Beispiel ist die
+Zeichenkette @code{"+"} der Name des Additionsoperators @code{+}.  In diesem
+Fall wird die Zeichenkette durch das Symbol f@"ur den Operator ersetzt, was
+f@"ur die Addition das Symbol @code{mplus} ist.
 
 Nun pr@"uft die Routine mit @code{getprop x 'verb}, ob das Symbol bereits eine
-Substantivform hat, die auf der Eigenschaftsliste der Verform des Symbols
+Substantivform hat, die auf der Eigenschaftsliste der Verbform des Symbols
 abgelegt ist.  Als n@"achstes wird mit @code{getprop 'x 'noun} gepr@"uft, ob
 das Symbol als eine Substantivform deklariert ist.  Treffen die beiden
 vorhergehenden Tests nicht zu, wird das zur Verbform geh@"orende Symbol in der
@@ -772,24 +1345,8 @@ Substantivform erzeugt und die Verb- und Substantivformen werden auf der
 Eigenschaftsliste abgelegt.  Ist das Argument bereits ein Symbol in der
 Substantivform, wird dieses zur@"uckgegeben.
 
-@verbatim
-(defun $nounify (x)
-  (if (not (or (symbolp x) (stringp x)))
-      (merror "nounify: argument must be a symbol or a string."))
-  (setq x (amperchk x))
-  (cond ((getprop x 'verb))
-        ((getprop x 'noun) x)
-        (t
-         (let* ((y (exploden x))
-                (u (eql (car y) #\$)))
-           (cond ((or u (not (eql (car y) #\%)))
-                  (setq y (implode (cons #\% (if u (cdr y) y))))
-                  (putprop y x 'noun)
-                  (putprop x y 'verb))
-                 (t x))))))
-@end verbatim
+@emph{Beispiele:}
 
-@b{Beispiele:}
 @code{$nounify} wird mit der Zeichenkette @code{"sin"} aufgerufen.  Die
 R@"uckgabe ist das Symbol @code{%sin}, das die Substantivform bezeichnet.  Auf
 der Eigenschaftsliste wird zum Symbol @code{$sin} in der Verbform zum
@@ -819,27 +1376,39 @@ zur@"uckgegeben
 (NOUN $COS)
 @end example
 
-Die Funktion @code{$verbify} gibt das zu einem Symbol oder einer Zeichenkette
-geh@"orende Symbol in der Verbform zur@"uck.  F@"ur den Fall, dass das Argument 
-ein Symbol in der Substantivform ist, wird die Funktion @code{$nounify}
-mit der Verbform des Argumentes aufgerufen, um die Verb- und
-Substantivformen in die Eigenschaftsliste einzutragen.
-
-@verbatim
-(defun $verbify (x)
+@emph{Quelltext:}
+@lisp
+@group
+(defun $nounify (x)
   (if (not (or (symbolp x) (stringp x)))
-      (merror "verbify: argument must be a symbol or a string."))
+      (merror "nounify: argument must be a symbol or a string."))
   (setq x (amperchk x))
-  (cond ((getprop x 'noun))
-        ((eq x '||) x)
-        ((and (char= (char (symbol-name x) 0) #\%)
-              (prog2
-                ($nounify (implode (cons #\$ (cdr (exploden x)))))
-                (getprop x 'noun))))
-        (t x)))
-@end verbatim
+  (cond ((getprop x 'verb))
+        ((getprop x 'noun) x)
+        (t
+         (let* ((y (exploden x))
+                (u (eql (car y) #\$)))
+           (cond ((or u (not (eql (car y) #\%)))
+                  (setq y (implode (cons #\% (if u (cdr y) y))))
+                  (putprop y x 'noun)
+                  (putprop x y 'verb))
+                 (t x))))))
+@end group
+@end lisp
+@end deffn
 
-@b{Beispiele:}
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{$verbify}
+@deffn {Funktion} $verbify x
+
+Die Funktion @code{$verbify} gibt das zu einem Symbol oder einer Zeichenkette
+geh@"orende Symbol @var{x} in der Verbform zur@"uck.  F@"ur den Fall, dass das
+Argument ein Symbol in der Substantivform ist, wird die Funktion @mref{$nounify}
+mit der Verbform des Argumentes aufgerufen, um die Verb- und Substantivformen
+in die Eigenschaftsliste einzutragen.
+
+@emph{Beispiele:}
+
 Wird die Funktion @code{$verbify} mit einer Zeichenkette aufgerufen, wird das
 entsprechende Maxima-Symbol mit einem vorangestelltem Dollarzeichen 
 zur@"uckgegeben.  Es werden keine Eintragungen in die Eigenschaftsliste
@@ -862,40 +1431,62 @@ $TAN
 (VERB %TAN)
 @end example
 
-@findex maxima-symbol-p
-@findex stripdollar
-
-Zuletzt werden die beiden Funktionen @code{maxima-symbol-p} und
-@code{stripdollar} definiert.  Die Funktion @code{maxima-symbol-p} testet, ob
-ein Symbol oder eine Zeichenkette einen kMaxima-Bezeichner repr@"asentiert, also
-ob das Symbol oder die Zeichenkette als erstes Zeichen @code{%} oder @code{$}
-hat.  Die Funktion @code{stripdollar} entfernt das Zeichen @code{%} oder
-@code{$} von einem kMaxima-Bezeichner.
-
-@verbatim
-(defun maxima-symbol-p (sym)
-  (if (or (symbolp sym)
-          (stringp sym))
-      (car (member (char (string sym) 0) '(#\$ #\%)))))
-
-(defun stripdollar (x)
-  (cond ((numberp x) x)
-        ((null x) 'false)
-        ((eq x t) 'true) 
-        ((maxima-symbol-p x)
-         (intern (subseq (string x) 1)))
+@emph{Quelltext:}
+@lisp
+@group
+(defun $verbify (x)
+  (if (not (or (symbolp x) (stringp x)))
+      (merror "verbify: argument must be a symbol or a string."))
+  (setq x (amperchk x))
+  (cond ((getprop x 'noun))
+        ((eq x '||) x)
+        ((and (char= (char (symbol-name x) 0) #\%)
+              (prog2
+                ($nounify (implode (cons #\$ (cdr (exploden x)))))
+                (getprop x 'noun))))
         (t x)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@b{Beispiele:} Zahlen sind keine kMaxima-Bezeichner.  Die Symbole
-@code{'$float}, @code{'%sin} und die Zeichenkette @code{"$sin"} sind 
-kMaxima-Bezeichner.
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{maxima-symbol-p}
+@deffn {Funktion} maxima-symbol-p sym
+
+Die Funktion @code{maxima-symbol-p} testet, ob ein Symbol oder eine Zeichenkette
+einen kMaxima-Bezeichner repr@"asentiert, also ob das Symbol oder die
+Zeichenkette als erstes Zeichen @code{%} oder @code{$} hat.
+
+@emph{Beispiele:}
 
 @example
 * (maxima-symbol-p 100)
 NIL
 * (maxima-symbol-p '$float)
 #\$
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun maxima-symbol-p (sym)
+  (if (or (symbolp sym)
+          (stringp sym))
+      (car (member (char (string sym) 0) '(#\$ #\%)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{stripdollar}
+@deffn {Funktion} stripdollar x
+
+Die Funktion @code{stripdollar} entfernt das Zeichen @code{%} oder
+@code{$} von einem kMaxima-Bezeichner.
+
+@emph{Beispiele:}
+
+@example
 * (stripdollar '$float)
 FLOAT
 :INHERITED
@@ -906,6 +1497,20 @@ SIN
 |sin|
 NIL
 @end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun stripdollar (x)
+  (cond ((numberp x) x)
+        ((null x) 'false)
+        ((eq x t) 'true) 
+        ((maxima-symbol-p x)
+         (intern (subseq (string x) 1)))
+        (t x)))
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
 @node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen und Variablen, Verb- und Substantivform, Hilfsfunktionen
@@ -924,34 +1529,34 @@ Die folgenden Funktionen testen, ob zwei kMaxima-Ausdr@"ucke @"aquivalent sind.
 Die Attribute der Operatoren werden ignoriert.  Die Funktion @code{alike1} wird
 aufgerufen, um zwei kMaxima-Ausdr@"ucke auf @"Aquivalenz zu testen.  Die
 Funktion @code{alike} vergleicht die Listen mit den Argumenten der Ausdr@"ucke.
-Bereits hier ist der Fall implementiert, dass Lisp-Arrays miteinander 
-zu vergleichen sind.  Hierzu wird die Funktion @code{lisp-array-alike1}
-aufgerufen.
 
 @c --- 10.08.2011 --------------------------------------------------------------
 @anchor{alike1}
 @deffn {Funktion} alike1 x y
 
 Die Funktion @code{alike1} testet, ob die beiden Argumente @var{x} und @var{y}
-@"aquivalent sind.  Die Argumente sind beliebige kMaxima-Ausdr@"ucke.  Sind die
-Argumente @"aquivalent ist die R@"uckgabe @code{t} und ansonsten @code{nil}.
-Die Argumente werden auf syntaktische @"Aquivalenz gepr@"uft.  Daher k@"onnen 
-mathematisch @"aquivalente Ausdr@"ucke gegen@"uber einem Test mit der Funktion
-@code{alike1} voneinander verschieden sein.  Nicht ber@"ucksichtigt werden beim
-Vergleich auf @"Aquivalenz die Attribute der Operatoren.  Daher sind zum
-Beispiel @code{((mplus simp) $a $b)} und @code{((mplus) $a $b)} @"aquivalent.
+@"aquivalente Ausdr@"ucke sind.  Die Argumente sind beliebige
+kMaxima-Ausdr@"ucke.  Sind die Argumente @"aquivalent ist die R@"uckgabe
+@code{t} und ansonsten @code{nil}.  Die Argumente werden auf syntaktische
+@"Aquivalenz gepr@"uft.  Daher k@"onnen mathematisch @"aquivalente Ausdr@"ucke
+gegen@"uber einem Test mit der Funktion @code{alike1} voneinander verschieden
+sein.  Nicht ber@"ucksichtigt werden beim Vergleich auf @"Aquivalenz die
+Attribute der Operatoren.  Daher sind zum Beispiel @code{((mplus simp) $a $b)}
+und @code{((mplus) $a $b)} @"aquivalent.
 
 Siehe auch die Funktion @mrefcomma{alike} um Listen miteinander zu vergleichen
 und @mrefcomma{memalike} um zu pr@"ufen, ob ein Element in einer Liste enthalten
 ist.
 
 @emph{Beispiel:}
+
 Das Beispiel zeigt den Vergleich von zwei Ausdr@"ucken, die beide die Addition
 @code{a+b} repr@"asentieren.
 
-@mexample{
+@example
 * (alike1 '((mplus) $a $b) '((mplus simp) $a $b))
-T}
+T
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -960,10 +1565,7 @@ T}
   (labels ((memqarr (ll)
              (if (member 'array ll :test #'eq) t)))
     (cond ((eq x y))
-          ((atom x)
-           (cond ((arrayp x)
-                  (and (arrayp y) (lisp-array-alike1 x y)))
-                 (t (equal x y))))
+          ((atom x) (equal x y))
           ((atom y) nil)
           (t
            (and (not (atom (car x)))
@@ -971,29 +1573,6 @@ T}
                 (eq (caar x) (caar y))
                 (eq (memqarr (cdar x)) (memqarr (cdar y)))
                 (alike (cdr x) (cdr y)))))))
-@end group
-@end lisp
-@end deffn
-
-@c --- 10.08.2011 --------------------------------------------------------------
-@anchor{lisp-array-alike1}
-@deffn {Funktion} lisp-array-alike1 x y
-
-Die Funktion @code{lisp-array-alike1} testet, ob die Argumente @var{x} und
-@var{y} zwei gleiche Lisp-Arrays sind.  Ist dies der Fall, ist das Ergebnis
-@code{t} und ansonsten @code{nil}.  Die Argumente m@"ussen Lisp-Arrays sein.
-@code{lisp-array-alike1} wird von der Funktion @mref{alike1} aufgerufen.
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun lisp-array-alike1 (x y)
-  (and (equal (array-dimensions x) (array-dimensions y))
-       (progn
-         (dotimes (i (array-total-size x))
-           (if (not (alike1 (row-major-aref x i) (row-major-aref y i)))
-               (return-from lisp-array-alike1 nil)))
-         t)))
 @end group
 @end lisp
 @end deffn
@@ -1015,7 +1594,8 @@ eines kMaxima-Ausdrucks.
   (do ((x x (cdr x))
        (y y (cdr y)))
       ((atom x) (equal x y))
-    (if (or (atom y) (not (alike1 (car x) (car y))))
+    (if (or (atom y)
+            (not (alike1 (car x) (car y))))
         (return nil))))
 @end group
 @end lisp
@@ -1048,6 +1628,60 @@ NIL
   (do ((l l (cdr l)))
       ((null l))
     (when (alike1 x (car l)) (return l))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{free}
+@deffn {Funktion} free expr var
+
+Testet, ob der Ausdruck @var{expr} frei von dem Argument @var{var} ist.  Das
+Argument @var{var} kann ein Symbol oder ein beliebiger kMaxima-Ausdruck sein.
+
+Siehe auch die Funktion @mrefdot{freel}
+
+@emph{Beispiele:}
+@example
+* (free '((mplus) $a ((mtimes) 2 $b)) 'mplus)
+NIL
+* (free '((mplus) $a ((mtimes) 2 $b)) '((mtimes) 2 $b))
+NIL
+* (free '((mplus) $a ((mtimes) 2 $b)) '((mexpt) 2 $b))
+T
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun free (expr var)
+  (cond ((alike1 expr var) nil)
+        ((atom expr) t)
+        (t
+         (and (consp (car expr))
+              (free (caar expr) var)
+              (freel (cdr expr) var)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 29.10.2011 --------------------------------------------------------------
+@anchor{freel}
+@deffn {Funktion} freel l var
+
+Testet, ob die Elemente der Liste @var{l} frei von dem Argument @var{var} sind.
+Das Argument @var{var} kann ein Symbol oder ein beliebiger kMaxima-Ausdruck
+sein.
+
+Siehe auch die Funktion @mrefdot{free}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun freel (l var)
+  (do ((l l (cdr l)))
+      ((null l) t)
+    (when (not (free (car l) var)) (return nil))))
 @end group
 @end lisp
 @end deffn
@@ -1205,24 +1839,6 @@ sind.
 @end group
 @end lisp
 @end deffn
-
-@verbatim
-(defun mminusp (x)
-  (and (not (atom x)) (eq (caar x) 'mminus)))
-@end verbatim
-
-@verbatim
-(defun mlistp (x)
-  (and (not (atom x)) (not (atom (car x))) (eq (caar x) 'mlist)))
-@end verbatim
-
-@verbatim
-(defvar errset nil)
-
-(defmacro errset (&rest l)
-  `(handler-case (list ,(car l))
-     (error (e) (when errset (error e)))))
-@end verbatim
 
 @c --- End of file Hilfsfunktionen.texi ----------------------------------------
 
