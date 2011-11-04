@@ -75,6 +75,10 @@
 
 (defvar *mratp*   nil)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar ^w nil)
+  (defvar ttyoff '^w))
+
 ;;; ----------------------------------------------------------------------------
 
 (defmacro push-string (str sym)
