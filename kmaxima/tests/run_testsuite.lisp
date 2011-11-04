@@ -11,5 +11,6 @@
 (load "tests/rtest_parser.lisp")
 (load "tests/rtest_nformat.lisp")
 (load "tests/rtest_display.lisp")
+(load "tests/rtest_float.lisp")
 
 (run-all-tests :kmaxima-tests)
