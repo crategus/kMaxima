@@ -42,35 +42,126 @@ an Genauigkeit f@"uhren kann.
 @defvr {Globale Variable} $bftorat
 Standardwert: @code{nil}
 
-Die Optionsvariable `bftorat' kontrolliert die Umwandlung von großen
-Gleitkommazahlen in rationale Zahlen.  Hat `bftorat' den Wert `true', wird die
-Genauigkeit der Umwandlung von der Optionsvariablen `ratepsilon'  kontrolliert.
-In diesem Fall ist das Ergebnis der Umwandlung eine relativ kleine rationale
-Zahl.  Hat dagegen `bftorat' den Wert `false', wird die große Gleitkommazahl
-exakt durch die rationale Zahl repräsentiert.
+Die Optionsvariable @code{bftorat} kontrolliert die Umwandlung von gro@ss{}en
+Gleitkommazahlen in rationale Zahlen mit der Funktion @mrefdot{bigfloat2rat}.
+Hat @code{bftorat} den Wert @code{false}, wird die Genauigkeit der Umwandlung
+von der Optionsvariablen @mref{$ratepsilon}  kontrolliert.  Hat dagegen 
+@code{bftorat} den Wert @code{true}, wird die gro@ss{}e Gleitkommazahl
+exakt durch die rationale Zahl repr@"asentiert.
 @end defvr
 
-(defmvar $bftorat nil)
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{$bftrunc}
+@defvr {Optionsvariable} $bftrunc
+Standardwert: @code{t}
+@end defvr
 
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{$fpprintprec}
+@defvr {Optionsvariable} $fpprintprec
+Standardwert: @code{0}
 
-@smalllisp
-(defmvar $bftrunc t)
-(defmvar $fpprintprec 0)
-(defmvar $maxfpprintprec (ceiling (log (expt 2 (float-digits 1.0)) 10.0)))
-(defmvar $fpprec $maxfpprintprec)
+Anzahl der Stellen einer Gleitkommazahl.  Ist der Wert @code{0}, dann wird
+die maximale Anzahl an Stellen benutzt, die in der Variablen 
+@mref{$maxfpprintprec} abgelegt ist.
+@end defvr
 
-(defmvar bigfloatzero '((bigfloat simp 56) 0 0))
-(defmvar bigfloatone  '((bigfloat simp 56) #.(expt 2 55) 1))
-(defmvar bfhalf       '((bigfloat simp 56) #.(expt 2 55) 0))
-(defmvar bfmhalf      '((bigfloat simp 56) #.(- (expt 2 55)) 0))
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{$maxfpprintprec}
+@defvr {Optionsvariable} $maxfpprintprec
+Standardwert: @code{(ceiling (log (expt 2 (float-digits 1.0)) 10.0)))}
 
-;;; ----------------------------------------------------------------------------
+Maximale Anzahl an Stellen f@"ur die Anzeige einer Gleitkommazahl.  F@"ur SBCL
+und einer 32-Bit Implementation hat @code{*maxfpprintprec*} den Wert @code{16}.
+@end defvr
 
-(defvar fpprec)
-(defvar *m)
-(defvar *cancelled)
-(defvar *decfp nil)
-@end smalllisp
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{$ratprint}
+@defvr {Optionsvariable} $ratprint
+Standardwert: @code{t}
+@end defvr
+
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{$keepfloat}
+@defvr {Optionsvariable} $keepfloat
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{$ratepsilon}
+@defvr {Optionsvariable} $ratepsilon
+Standardwert: @code{2.0d-15}
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{$fpprec}
+@defvr {Optionsvariable} $fpprec
+Standardwert: @code{(ceiling (log (expt 2 (float-digits 1.0)) 10.0)))}
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{bigfloatzero}
+@defvr {Globale Variable} bigfloatzero
+Standardwert: @code{'((bigfloat simp 56) 0 0))}
+
+Repr@"asentiert den Wert Null in einer Darstellung als gro@ss{}e Gleitkommazahl.
+Der Standardwert wird mit einer Genauigkeit f@"ur @mref{$fpprec} von @code{16}
+initialisiert.
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{bigfloatone}
+@defvr {Globale Variable} bigfloatone
+Standardwert: @code{'((bigfloat simp 56) #.(expt 2 55) 1))}
+
+Repr@"asentiert den Wert Eins in einer Darstellung als gro@ss{}e Gleitkommazahl.
+Der Standardwert wird mit einer Genauigkeit f@"ur @mref{$fpprec} von @code{16}
+initialisiert.
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{bfhalf}
+@defvr {Globale Variable} bfhalf
+Standardwert: @code{'((bigfloat simp 56) #.(expt 2 55) 0))}
+
+Repr@"asentiert den Wert @code{1/2} in einer Darstellung als gro@ss{}e
+Gleitkommazahl.  Der Standardwert wird mit einer Genauigkeit f@"ur
+@mref{$fpprec} von @code{16} initialisiert.
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{bfmhalf}
+@defvr {Globale Variable} bfmhalf
+Standardwert: @code{'((bigfloat simp 56) #.(- (expt 2 55)) 0))}
+
+Repr@"asentiert den Wert @code{-1/2} in einer Darstellung als gro@ss{}e
+Gleitkommazahl.  Der Standardwert wird mit einer Genauigkeit f@"ur
+@mref{$fpprec} von @code{16} initialisiert.
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{fpprec}
+@defvr {Globale Variable} fpprec
+Standardwert: keiner
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{*m}
+@defvr {Globale Variable} *m
+Standardwert: keiner
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{*cancelled}
+@defvr {Globale Variable} *cancelled
+Standardwert: keiner
+@end defvr
+
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{*decfp}
+@defvr {Globale Variable} *decfp
+Standardwert: keiner
+@end defvr
 
 @c -----------------------------------------------------------------------------
 @node Funktionen f@"ur grosse Gleitkommazahlen, , Globale Variablen f@"ur grosse Gleitkommazahlen, Grosse Gleitkommazahlen
@@ -78,14 +169,6 @@ exakt durch die rationale Zahl repräsentiert.
 @c -----------------------------------------------------------------------------
 
 @smalllisp
-
-
-;;; ----------------------------------------------------------------------------
-
-
-
-;;; ----------------------------------------------------------------------------
-
 (defprop %cot %tan recip)
 (defprop %tan %cot recip)
 (defprop %csc %sin recip)
@@ -99,14 +182,58 @@ exakt durch die rationale Zahl repräsentiert.
 (defprop %sinh %csch recip)
 (defprop %sech %cosh recip)
 (defprop %sech %cosh recip)
+@end smalllisp
 
-;;; ----------------------------------------------------------------------------
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{hipart}
+@deffn {Funktion} hipart x n
 
-(defun hipart (x nn)
-  (if (bignump nn)
+Für eine ganze Zahl vom Typ @code{fixnum} wird die Funktion @mref{haipart}@w{}
+aufgerufen, die @var{n} Bits der Zahl @var{x} zurück gibt.  Ist @var{n} positiv
+werden die oberen Bits und ansonsten die unteren Bits zurückgegeben.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun hipart (x n)
+  (if (bignump n)
       (abs x)
-      (haipart x nn)))
+      (haipart x n)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{haipart}
+@deffn {Funktion} haipart x n
+
+Das Argument @var{x} ist die Mantisse einer großen Gleitkommazahl.  Mit dem
+Argument @var{n} wird angegeben, wie viele Stellen der Mantisse zurückgeben
+werden sollen.  Ist @var{n} eine positive ganze Zahl werden die oberen
+Stellen zurückgegeben und für einen negativen Wert die unteren Stellen.
+
+@emph{Beispiele:}
+@example
+* (let ((*print-base* 2) (*print-radix* t)) (princ (haipart 29 1)))
+#b1
+1
+* (let ((*print-base* 2) (*print-radix* t)) (princ (haipart 29 2)))
+#b11
+3
+* (let ((*print-base* 2) (*print-radix* t)) (princ (haipart 29 3)))
+#b111
+7
+* (let ((*print-base* 2) (*print-radix* t)) (princ (haipart 29 4)))
+#b1110
+14
+* (let ((*print-base* 2) (*print-radix* t)) (princ (haipart 29 5)))
+#b11101
+29
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun haipart (x n)
   (let ((x (abs x)))
     (if (< n 0)
@@ -114,22 +241,43 @@ exakt durch die rationale Zahl repräsentiert.
             x
             (logand x (1- (ash 1 (- n)))))
         (ash x (min (- n (integer-length x)) 0)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 04.11.2011 --------------------------------------------------------------
+@anchor{fpprec1}
+@deffn {Funktion} fpprec1 assign-var q
 
+@code{fpprec1} ist eine @code{assign}-Funktion der Optionsvariablen
+@mrefdot{$fpprec}  Immer wenn der Optionsvariablen @code{$fpprec} ein neuer
+Wert zugewiesen wird, erhält auch die globale Variable @mref{fpprec} einen
+neuen Wert.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defprop $fpprec fpprec1 assign)
+@end group
 
+@group
 (defun fpprec1 (assign-var q)
   (declare (ignore assign-var))
-  (if (or (not (fixnump q)) (< q 1))
-      (merror "fpprec: value must be a positive integer; found: ~M" q))
-  (setq fpprec (+ 2 (integer-length (expt 10 q)))
-        bigfloatone ($bfloat 1)
-        bigfloatzero ($bfloat 0)
-        bfhalf (list (car bigfloatone) (cadr bigfloatone) 0)
-        bfmhalf (list (car bigfloatone) (- (cadr bigfloatone)) 0))
-  q)
+  (if (or (not (fixnump q))
+          (< q 1))
+      (merror "fpprec: value must be a positive integer; found: ~M" q)
+      (progn
+        (setq fpprec (+ 2 (integer-length (expt 10 q)))
+              bigfloatone ($bfloat 1)
+              bigfloatzero ($bfloat 0)
+              bfhalf (list (car bigfloatone) (cadr bigfloatone) 0)
+              bfmhalf (list (car bigfloatone) (- (cadr bigfloatone)) 0))
+        q)))
+@end group
+@end lisp
+@end deffn
 
+@smalllisp
 ;;; ----------------------------------------------------------------------------
 
 (defun dim-bigfloat (form result)
