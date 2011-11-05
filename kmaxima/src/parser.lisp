@@ -372,13 +372,50 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defmvar $fast_bfloat_conversion t)
+(defmvar $fast_bfloat_threshold 100000)
+(defvar *fast-bfloat-extra-bits* 0)
+
+(defun cl-rat-to-maxima (x)
+  (if (integerp x)
+      x
+      (list '(rat simp) (numerator x) (denominator x))))
+
 (defun make-number (data)
   (setq data (nreverse data))
   (let ((marker (car (nth 3 data))))
     (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L ))
         (setf (nth 3 data) (list +flonum-exponent-marker+)))))
-  (read-from-string (coerce (apply #'append data) 'string)))
+  (if (not (equal (nth 3 data) '(#\B)))
+      (read-from-string (coerce (apply #'append data) 'string))
+      (let ((int-part (read-from-string
+                        (coerce (or (first data) '(#\0)) 'string)))
+            (frac-part (read-from-string
+                         (coerce (or (third data) '(#\0)) 'string)))
+            (frac-len (length (third data)))
+            (exp-sign (first (fifth data)))
+            (expo (read-from-string (coerce (sixth data) 'string))))
+        (if (and $fast_bfloat_conversion
+                 (> (abs expo) $fast_bfloat_threshold))
+            (let* ((extra-prec (+ *fast-bfloat-extra-bits*
+                                  (ceiling (log expo 2d0))))
+                   (fpprec (+ fpprec extra-prec))
+                   (mant (+ (* int-part (expt 10 frac-len)) frac-part))
+                   (bf-mant (bcons (intofp mant)))
+                   (p (power (bcons (intofp 10))
+                             (- (if (char= exp-sign #\- )
+                                    (- expo)
+                                    expo)
+                                frac-len)))
+                   (result (mul bf-mant p)))
+              (let ((fpprec (- fpprec extra-prec)))
+                (check-bigfloat result)))
+            (let ((ratio (* (+ int-part (* frac-part (expt 10 (- frac-len))))
+                            (expt 10 (if (char= exp-sign #\- )
+                                         (- expo)
+                                         expo)))))
+              ($bfloat (cl-rat-to-maxima ratio)))))))
 
 (defun scan-digits (data continuation? continuation &optional exponent-p)
   (do ((ch (parse-tyi-peek) (parse-tyi-peek))
@@ -739,7 +776,7 @@
 
 (def-nud (|$'|) (op)
   (let (right)
-    (cond ((eq |$(| (peek-one-token))
+    (cond ((eq '|$(| (peek-one-token))
            (list '$any (mheader '|$'|) (parse '$any 190)))
           ((or (atom (setq right (parse '$any 190)))
                (member (caar right)
@@ -762,7 +799,7 @@
 (def-nud (|$''|) (op)
   (let (right)
     (cons '$any
-          (cond ((eq |$(| (peek-one-token))
+          (cond ((eq '|$(| (peek-one-token))
                  (meval (parse '$any 190)))
                 ((atom (setq right (parse '$any 190)))
                  (meval right))
@@ -814,15 +851,13 @@
 
 (def-led-equiv |$!| parse-postfix)
 (def-lbp       |$!| 160)
-;No RBP
 (def-pos       |$!| $expr)
 (def-lpos      |$!| $expr)
-;No RPOS
 (def-mheader   |$!| (mfactorial))
 
 (def-mheader   |$!!| ($genfact))
 
-(def-led (|$!!| 160.) (op left)
+(def-led (|$!!| 160) (op left)
   (list '$expr
         (mheader '$!!)
         (convert left '$expr)
@@ -842,7 +877,7 @@
                         (convert left (lpos op))
                         (parse (rpos op) (rbp op))))))
 
-(mapc #'(lambda (prop) ; Make $** like $^
+(mapc #'(lambda (prop)
           (let ((propval (get '$^ prop)))
             (if propval (putprop '$** propval prop))))
       '(lbp rbp pos rpos lpos mheader))
