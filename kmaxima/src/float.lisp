@@ -26,8 +26,9 @@
 (in-package :kmaxima)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-    (defconstant +machine-fixnum-precision+
-                 (integer-length most-positive-fixnum)))
+  (defconstant +machine-fixnum-precision+
+               (integer-length most-positive-fixnum))
+  (defconstant +machine-mantissa-precision+ (float-digits 1.0)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -41,6 +42,11 @@
 (defmvar bigfloatone  '((bigfloat simp 56) #.(expt 2 55) 1))
 (defmvar bfhalf       '((bigfloat simp 56) #.(expt 2 55) 0))
 (defmvar bfmhalf      '((bigfloat simp 56) #.(- (expt 2 55)) 0))
+
+(defmvar $ratprint t)
+(defmvar $keepfloat nil)
+
+(defmvar $ratepsilon 2.0d-15)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -67,10 +73,10 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun hipart (x nn)
-  (if (bignump nn)
+(defun hipart (x n)
+  (if (bignump n)
       (abs x)
-      (haipart x nn)))
+      (haipart x n)))
 
 (defun haipart (x n)
   (let ((x (abs x)))
@@ -86,21 +92,30 @@
 
 (defun fpprec1 (assign-var q)
   (declare (ignore assign-var))
-  (if (or (not (fixnump q)) (< q 1))
-      (merror "fpprec: value must be a positive integer; found: ~M" q))
-  (setq fpprec (+ 2 (integer-length (expt 10 q)))
-        bigfloatone ($bfloat 1)
-        bigfloatzero ($bfloat 0)
-        bfhalf (list (car bigfloatone) (cadr bigfloatone) 0)
-        bfmhalf (list (car bigfloatone) (- (cadr bigfloatone)) 0))
-  q)
+  (if (or (not (fixnump q))
+          (< q 1))
+      (merror "fpprec: value must be a positive integer; found: ~M" q)
+      (progn
+        (setq fpprec (+ 2 (integer-length (expt 10 q)))
+              bigfloatone ($bfloat 1)
+              bigfloatzero ($bfloat 0)
+              bfhalf (list (car bigfloatone) (cadr bigfloatone) 0)
+              bfmhalf (list (car bigfloatone) (- (cadr bigfloatone)) 0))
+        q)))
 
 ;;; ----------------------------------------------------------------------------
 
-(defun dim-bigfloat (form result)
-  (let (($lispdisp nil))
-    (dimension-atom (make-maxima-symbol (fpformat form)) result)))
+(defprop bigfloat msize-bigfloat grind)
 
+(defun msize-bigfloat (x l r)
+  (msz (fpformat x) l r))
+
+(defun dim-bigfloat (form result)
+  (declare (special $lispdispflag))
+  (let (($lispdispflag nil))
+    (dimension-string (fpformat form) result)))
+
+#+nil
 (defun fpformat (l)
   (if (not (member 'simp (cdar l) :test #'eq))
       (setq l (cons (cons (caar l) (cons 'simp (cdar l))) (cdr l))))
@@ -158,6 +173,65 @@
                   (ncons '|b|)
                   (explodec (1- (cadr l))))))))
 
+(defun fpformat (l)
+  (if (not (member 'simp (cdar l) :test #'eq))
+      (setq l (cons (cons (caar l) (cons 'simp (cdar l))) (cdr l))))
+  (cond ((eql (cadr l) 0)
+         (if (not (eql (caddr l) 0))
+             (merror "fpformat: detected an incorrect form of 0.0b0: ~M, ~M~%"
+                    (cadr l) (caddr l)))
+         (list #\0 #\. #\0 #\b #\0))
+        (t
+         (let ((extradigs (floor (1+ (/ (integer-length (caddr l))
+                                        #.(/ (log 10.0) (log 2.0))))))
+               (*m 1)
+               (*cancelled 0))
+           (setq l
+                 (let ((*decfp t)
+                       (fpprec (+ extradigs (decimalsin (- (caddar l) 2))))
+                       (of (caddar l))
+                       (l (cdr l))
+                       (expon nil))
+                   (setq expon (- (cadr l) of))
+                   (setq l (if (minusp expon)
+                               (fpquotient (intofp (car l))
+                                           (fpintexpt 2 (- expon) of))
+                               (fptimes* (intofp (car l))
+                                         (fpintexpt 2 expon of))))
+                   (incf fpprec (- extradigs))
+                   (list (fpround (car l)) (+ (- extradigs) *m (cadr l))))))
+         (let ((*print-base* 10)
+               *print-radix*
+               (l1 nil))
+           (setq l1 (if (not $bftrunc)
+                        (coerce (print-invert-case (car l)) 'list)
+                        (do ((l (nreverse
+                                  (coerce (print-invert-case (car l)) 'list))
+                                (cdr l)))
+                            ((not (eql #\0 (car l))) (nreverse l)))))
+           (nconc (ncons (car l1))
+                  (ncons #\. )
+                  (or (and (cdr l1)
+                           (cond ((or (zerop $fpprintprec)
+                                      (not (< $fpprintprec $fpprec))
+                                      (null (cddr l1)))
+                                  (cdr l1))
+                                 (t
+                                  (setq l1 (cdr l1))
+                                  (do ((i $fpprintprec (1- i))
+                                       (l2))
+                                      ((or (< i 2) (null l1))
+                                       (cond ((not $bftrunc) (nreverse l2))
+                                             (t
+                                              (do ((l3 l2 (cdr l3)))
+                                                  ((not (eql #\0 (car l3)))
+                                                   (nreverse l3))))))
+                                    (setq l2 (cons (car l1) l2)
+                                          l1 (cdr l1))))))
+                      (ncons #\0))
+                  (ncons #\b)
+                  (coerce (print-invert-case (1- (cadr l))) 'list))))))
+
 (defun decimalsin (x)
   (do ((i (truncate (* 59 x) 196) (1+ i)))
       (nil)
@@ -193,10 +267,10 @@
   (declare (special $ratprint))
   (setq x (check-bigfloat x))
   (let (($float2bf t)
-        (exp nil)
+        (rat nil)
         (y nil)
         (sign nil))
-    (setq exp (cond ((minusp (cadr x))
+    (setq rat (cond ((minusp (cadr x))
                      (setq sign t
                            y (fpration1 (cons (car x) (fpabs (cdr x)))))
                      (rplaca y (* -1 (car y))))
@@ -204,17 +278,17 @@
     (when $ratprint
       (princ "`rat' replaced ")
       (when sign (princ "-"))
-      (princ (maknam (fpformat (cons (car x) (fpabs (cdr x))))))
+      (princ (coerce (fpformat (cons (car x) (fpabs (cdr x)))) 'string))
       (princ " by ")
-      (princ (car exp))
+      (princ (car rat))
       (write-char #\/)
-      (princ (cdr exp))
+      (princ (cdr rat))
       (princ " = ")
-      (setq x ($bfloat (list '(rat simp) (car exp) (cdr exp))))
+      (setq x ($bfloat (list '(rat simp) (car rat) (cdr rat))))
       (when sign (princ "-"))
-      (princ (maknam (fpformat (cons (car x) (fpabs (cdr x))))))
+      (princ (coerce (fpformat (cons (car x) (fpabs (cdr x)))) 'string))
       (terpri))
-    exp))
+    rat))
 
 (defun fpration1 (x)
   (let ((fprateps (cdr ($bfloat (if $bftorat
@@ -278,7 +352,7 @@
   (when (float-inf-p x)
     (merror "bfloat: attempted conversion of floating-point infinity.~%"))
   (unless $float2bf
-    (mtell "bfloat: converting float ~S to bigfloat.~%" x))
+    (format t "bfloat: converting float ~S to bigfloat.~%" x))
   (if (zerop x)
       (list 0 0)
       (multiple-value-bind (frac exp sign)
@@ -291,18 +365,14 @@
   (let ((precision (caddar l))
         (mantissa (cadr l))
         (exponent (caddr l))
-        (fpprec machine-mantissa-precision)
+        (fpprec +machine-mantissa-precision+)
         (*m 0))
     (setq mantissa
-          (/ (fpround mantissa) (expt 2.0 machine-mantissa-precision)))
-    (let ((e (+ exponent (- precision) *m machine-mantissa-precision)))
+          (/ (fpround mantissa) (expt 2.0 +machine-mantissa-precision+)))
+    (let ((e (+ exponent (- precision) *m +machine-mantissa-precision+)))
       (if (>= e 1025)
           (merror "float: floating point overflow converting ~:M" l)
           (scale-float mantissa e)))))
-
-(defun fixfloat (x)
-  (let (($ratepsilon (expt 2.0 (- machine-mantissa-precision))))
-    (maxima-rationalize x)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -319,7 +389,7 @@
         (t (list (fpround l) (+ *m fpprec)))))
 
 (defun fpround (l &aux (*print-base* 10) *print-radix*)
-  (prog ()
+  (prog (adjust)
      (cond
        ((null *decfp)
         (setq *m (- (integer-length l) fpprec))
@@ -408,20 +478,6 @@
            (ratbigfloat (cdr x)))
           ((setq y (getprop (caar x) 'floatprog))
            (funcall y (mapcar #'$bfloat (cdr x))))
-          ((or (trigp (caar x))
-               (arcp (caar x)))
-           (setq y ($bfloat (cadr x)))
-           (if (bigfloatp y)
-               (cond ((arcp (caar x))
-                      (setq y ($bfloat (logarc (caar x) y)))
-                      (if (free y '$%i)
-                          y
-                          (let ($ratprint) (fparcsimp ($rectform y)))))
-                     ((member (caar x) '(%cot %sec %csc) :test #'eq)
-                      (invertbigfloat
-                        ($bfloat (list (ncons (getprop (caar x) 'recip)) y))))
-                     (t ($bfloat (exponentialize (caar x) y))))
-               (subst0 (list (ncons (caar x)) y) x)))
           (t (recur-apply #'$bfloat x)))))
 
 ;;; ----------------------------------------------------------------------------
