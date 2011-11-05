@@ -456,6 +456,21 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun $float (e)
+  (cond ((numberp e) (float e))
+        ((and (symbolp e) (getprop e '$numer)))
+        ((or (atom e) (member 'array (cdar e) :test #'eq)) e)
+        ((eq (caar e) 'rat) (rat2float e))
+        ((eq (caar e) 'bigfloat) (fp2flo e))
+        ((member (caar e) '(mexpt mncexpt) :test #'eq)
+         (let ((res (recur-apply #'$float e)))
+           (if (floatp res)
+               res
+               (list (ncons (caar e)) ($float (cadr e)) (caddr e)))))
+        (t (recur-apply #'$float e))))
+
+;;; ----------------------------------------------------------------------------
+
 (defun show-symbols (&optional indic)
   (with-package-iterator (next-symbol (list-all-packages) :internal :external)
     (loop
