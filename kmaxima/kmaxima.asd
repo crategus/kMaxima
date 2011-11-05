@@ -37,7 +37,6 @@
                (:file "src/display")
                (:file "src/msystem")
                (:file "src/float")
-               (:file "src/order")
                (:file "src/simplify")
                (:file "src/mload")
                (:file "src/ifactor")))
