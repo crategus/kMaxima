@@ -933,7 +933,7 @@ Gleitkommazahlen und ganzen Zahlen.  Alle anderen Argumente der Funktion
 umgewandelt und dann in eine Liste zerlegt.
 
 Die Umwandlung von Gleitkommazahlen in die Liste der Zeichen wird von den 
-Variablen @mref{$fpprintprec} und @mref{*maxfpprintprec*} kontrolliert.  Der
+Variablen @mref{$fpprintprec} und @mref{$maxfpprintprec} kontrolliert.  Der
 Nutzer legt mit der Optionsvariablen @code{$fpprintprec} die Anzahl der
 Stellen einer Gleitkommazahl fest.  Die globale Variable @code{*maxfpprintprec*}
 enth@"alt die maximale Anzahl der Stellen einer Gleitkommazahl.  Hat die
@@ -943,25 +943,6 @@ eine Zeichenkette die Anzahl der Stellen in @code{*maxfpprintprec*} verwendet.
 
 Im Unterschied zum Original Maxima ist die Umwandlung von gro@ss{}en
 Gleitkommazahlen noch nicht implementiert.
-
-@c --- 15.10.2011 --------------------------------------------------------------
-@anchor{$fpprintprec}
-@defvr {Globale Variable} $fpprintprec
-Standardwert: @code{0}
-
-Anzahl der Stellen einer Gleitkommazahl.  Ist der Wert @code{0}, dann wird
-die maximale Anzahl an Stellen benutzt, die in der Variablen 
-@mref{*maxfpprintprec*} abgelegt ist.
-@end defvr
-
-@c --- 15.10.2011 --------------------------------------------------------------
-@anchor{*maxfpprintprec*}
-@defvr {Globale Variable} *maxfpprintprec*
-Standardwert: @code{(ceiling (log (expt 2 (float-digits 1.0d0)) 10.0))}
-
-Maximale Anzahl an Stellen f@"ur die Anzeige einer Gleitkommazahl.  F@"ur SBCL
-und einer 32-Bit Implementation hat @code{*maxfpprintprec*} den Wert @code{16}.
-@end defvr
 
 @c --- 15.10.2011 --------------------------------------------------------------
 @anchor{exploden}
