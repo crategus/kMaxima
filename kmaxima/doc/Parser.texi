@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 03.10.2011
+@c Revision : 05.11.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -2028,9 +2028,60 @@ Enth@"alt Liste der Zeichen, die von kMaxima als ein Zeichen f@"ur den
 Exponenten erkannt werden.
 @end defvr
 
-@c --- 15.10.2011 --------------------------------------------------------------
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{$fast_bfloat_conversion}
+@defvr {Optionsvariable} $fast_bfloat_conversion
+Standardwert: @code{t}
+@end defvr
+
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{$fast_bfloat_threshold}
+@defvr {Optionsvariable} $fast_bfloat_threshold
+Standardwert: @code{100000}
+@end defvr
+
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{*fast-bfloat-extra-bits*}
+@defvr {Optionsvariable} *fast-bfloat-extra-bits*
+Standardwert: @code{0}
+@end defvr
+
+@c --- 05.11.2011 --------------------------------------------------------------
+@anchor{cl-rat-to-maxima}
+@deffn {Funktion} cl-rat-to-maxima x
+
+Wandelt das Argument @var{x} rationale Zahlen von einem Lisp-Format in das
+kMaxima-Format um.  Das Argument @var{x} kann auch eine ganze Zahl sein, die
+unverändert zurückgegeben wird.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun cl-rat-to-maxima (x)
+  (if (integerp x)
+      x
+      (list '(rat simp) (numerator x) (denominator x))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 05.11.2011 --------------------------------------------------------------
 @anchor{make-number}
 @deffn {Funktion} make-number data
+
+Das Argument @var{data} ist eine Liste mit den Zeichen der Zahl, die der
+Parser eingelesen hat. Die Liste @var{data} enthält Teillisten mit den Teil
+der Zahl vor einem Komma, dem Teil nach einem Komma und dem Exponenten der
+Zahl. Die einzelnen Elemente einer Zahl sind in einer umgekehrten Reihenfolge
+im Argument @var{data} enthalten.  Den Aufbau der Liste zeigt das folgende
+Beispiel:
+
+@example
+12.45e34 ->  '((#\4 #\5) (#\+) (#\E) (#\3 #\4) (#\.) (#\1 #\2))
+@end example
+
+Die Rückgabe ist eine Zahl in der internen Darstellung von kMaxima.  Diese sind
+ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
 
 @emph{Quelltext:}
 @lisp
@@ -2041,7 +2092,35 @@ Exponenten erkannt werden.
     (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L ))
         (setf (nth 3 data) (list +flonum-exponent-marker+)))))
-  (read-from-string (coerce (apply #'append data) 'string)))
+  (if (not (equal (nth 3 data) '(#\B)))
+      (read-from-string (coerce (apply #'append data) 'string))
+      (let ((int-part (read-from-string
+                        (coerce (or (first data) '(#\0)) 'string)))
+            (frac-part (read-from-string
+                         (coerce (or (third data) '(#\0)) 'string)))
+            (frac-len (length (third data)))
+            (exp-sign (first (fifth data)))
+            (expo (read-from-string (coerce (sixth data) 'string))))
+        (if (and $fast_bfloat_conversion
+                 (> (abs expo) $fast_bfloat_threshold))
+            (let* ((extra-prec (+ *fast-bfloat-extra-bits*
+                                  (ceiling (log expo 2d0))))
+                   (fpprec (+ fpprec extra-prec))
+                   (mant (+ (* int-part (expt 10 frac-len)) frac-part))
+                   (bf-mant (bcons (intofp mant)))
+                   (p (power (bcons (intofp 10))
+                             (- (if (char= exp-sign #\- )
+                                    (- expo)
+                                    expo)
+                                frac-len)))
+                   (result (mul bf-mant p)))
+              (let ((fpprec (- fpprec extra-prec)))
+                (check-bigfloat result)))
+            (let ((ratio (* (+ int-part (* frac-part (expt 10 (- frac-len))))
+                            (expt 10 (if (char= exp-sign #\-)
+                                         (- expo)
+                                         expo)))))
+              ($bfloat (cl-rat-to-maxima ratio)))))))
 @end group
 @end lisp
 @end deffn
@@ -2772,7 +2851,7 @@ f@"ur die einzelnen F@"alle.
 @group
 (def-nud (|$'|) (op)
   (let (right)
-    (cond ((eq |$(| (peek-one-token))
+    (cond ((eq '|$(| (peek-one-token))
            (list '$any (mheader '|$'|) (parse '$any 190)))
           ((or (atom (setq right (parse '$any 190)))
                (member (caar right)
@@ -2829,7 +2908,7 @@ Funktionen werden in ihre Verbform umgewandelt.
 (def-nud (|$''|) (op)
   (let (right)
     (cons '$any
-          (cond ((eq |$(| (peek-one-token))
+          (cond ((eq '|$(| (peek-one-token))
                  (meval (parse '$any 190)))
                 ((atom (setq right (parse '$any 190)))
                  (meval right))
