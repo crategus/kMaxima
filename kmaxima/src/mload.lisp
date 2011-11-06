@@ -451,7 +451,12 @@
   (approx-alike (simplifya f nil) (simplifya g nil)))
 
 (defun approx-alike (f g)
-  (cond ((floatp f) (and (floatp g) ($float_approx_equal f g)))
+  (cond ((floatp f)
+         (and (floatp g)
+              ($float_approx_equal f g)))
+        ((bigfloatp f)
+         (and (bigfloatp g)
+              ($bfloat_approx_equal f g)))
         ((atom f) (and (atom g) (equal f g)))
         ((moperatorp f 'lambda)
          (and (moperatorp g 'lambda)
@@ -498,5 +503,24 @@
                    (expt 2
                          (- (second (multiple-value-list (decode-float b)))
                             1)))))))
+
+(defun $bfloat_approx_equal (a b)
+  (setq a (if (bigfloatp a) a ($bfloat a)))
+  (setq b (if (bigfloatp b) b ($bfloat b)))
+  (let ((m) (bits))
+    (and (bigfloatp a)
+         (bigfloatp b)
+         (setq bits (min (third (first a)) (third (first b))))
+         (setq m (mul 32
+                      (expt 2 (- bits))
+                      (min (expt 2 (- (car (last a)) 1))
+                           (expt 2 (- (car (last b)) 1)))))
+         (setq m (if (rationalp m)
+                     (div (numerator m) (denominator m))
+                     m))
+         (setq m (fpdifference (cdr ($bfloat m))
+                               (fpabs (fpdifference (cdr a) (cdr b)))))
+         (or (eql (car m) 0)
+             (fpposp m)))))
 
 ;;; ----------------------------------------------------------------------------
