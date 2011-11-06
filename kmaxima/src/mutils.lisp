@@ -158,6 +158,12 @@
         ((ratnump x) (minusp (rat-num x)))
         ((bigfloatp x) (minusp (cadr x)))))
 
+(defun mintegerp (x)
+  (or (and (numberp x) (integerp x))
+      (getprop x '$integer)
+      (getprop x '$odd)
+      (getprop x '$even)))
+
 ;;; ----------------------------------------------------------------------------
 
 (defun decl-constant (x)
