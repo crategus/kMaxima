@@ -67,9 +67,10 @@ END-INFO-DIR-ENTRY
 * Parser::
 * Lineare Anzeige::
 * 2D-Anzeige::
-* Hauptschleife::
+* Systemfunktionen::
 * Vereinfachung::
 * Grosse Gleitkommazahlen::
+* Dateieingabe und -ausgabe::
 * kmaxima.lisp::
 * Quelltext::
 * Index der Funktionen und Variablen::
@@ -95,7 +96,7 @@ END-INFO-DIR-ENTRY
 @chapter Lineare Anzeige
 @include LDisplay.texi
 
-@node 2D-Anzeige, Hauptschleife, Lineare Anzeige, Top
+@node 2D-Anzeige, Systemfunktionen, Lineare Anzeige, Top
 @chapter 2D-Anzeige
 @include 2DDisplay.texi
 
@@ -103,15 +104,19 @@ END-INFO-DIR-ENTRY
 @chapter Systemfunktionen
 @include Systemfunktionen.texi
 
-@node Vereinfachung, Grosse Gleitkommazahlen, Hauptschleife, Top
+@node Vereinfachung, Grosse Gleitkommazahlen, Systemfunktionen, Top
 @chapter Vereinfachung
 @include Vereinfachung.texi
 
-@node Grosse Gleitkommazahlen, kmaxima.lisp, Vereinfachung, Top
+@node Grosse Gleitkommazahlen, Dateieingabe und -ausgabe, Vereinfachung, Top
 @chapter Gro@ss{}e Gleitkommazahlen
 @include Bigfloat.texi
 
-@node kmaxima.lisp, Quelltext, Grosse Gleitkommazahlen, Top
+@node Dateieingabe und -ausgabe, kmaxima.lisp, Vereinfachung, Top
+@chapter Dateieingabe und -ausgabe
+@include Dateien.texi
+
+@node kmaxima.lisp, Quelltext, Dateieingabe und -ausgabe, Top
 @appendix kmaxima.lisp
 @include Quelltext1.texi
 
