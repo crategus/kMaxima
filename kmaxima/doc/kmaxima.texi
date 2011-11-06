@@ -99,9 +99,9 @@ END-INFO-DIR-ENTRY
 @chapter 2D-Anzeige
 @include 2DDisplay.texi
 
-@node Hauptschleife, Vereinfachung, 2D-Anzeige, Top
-@chapter Hauptschleife
-@include Hauptschleife.texi
+@node Systemfunktionen, Vereinfachung, 2D-Anzeige, Top
+@chapter Systemfunktionen
+@include Systemfunktionen.texi
 
 @node Vereinfachung, Grosse Gleitkommazahlen, Hauptschleife, Top
 @chapter Vereinfachung
