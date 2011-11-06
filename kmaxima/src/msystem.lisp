@@ -166,7 +166,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun meval (form &aux u)
+(defun meval (form)
+  (simplifya (meval1 form) nil))
+  
+
+(defun meval1 (form &aux u)
   (cond
     ((atom form)
      (cond ((not (symbolp form))
@@ -477,11 +481,10 @@
   (labels ((maybe-reset (key val)
              (let ((reset nil))
                (when (and (boundp key)
-                          ;; equalp must be generalized for Maxima forms.
-                          (not (equalp (symbol-value key) val)))
+                          (not (alike1 (symbol-value key) val)))
                  (setq reset key)
-                 (let ((*munbindp* t)    ; no error, when reseting
-                       ($optionset nil)) ; no message, when reseting
+                 (let ((*munbindp* t)
+                       ($optionset nil))
                    (declare (special *munbindp* $optionset))
                    (meval `((msetq) ,key ((mquote) ,val)))))
                reset)))
