@@ -534,6 +534,21 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(setf (get 'bigfloat 'operators) 'simp-bigfloat)
+
+(defun simp-bigfloat (x vestigial simp-flag)
+  (declare (ignore vestigial simp-flag))
+  (bigfloatm* x))
+
+(setf (get 'bigfloat 'mspec) 'bigfloatm*)
+
+(defun bigfloatm* (bf)
+  (unless (member 'simp (cdar bf) :test #'eq)
+    (setq bf (cons (list* (caar bf) 'simp (cdar bf)) (cdr bf))))
+  (if $float ($float bf) bf))
+
+;;; ----------------------------------------------------------------------------
+
 (setf (get 'mquotient 'operators) 'simp-mquotient)
 
 (defun simp-mquotient (x y z)
@@ -566,8 +581,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-;;; Implementation of the Square root function
-
 (defprop $sqrt %sqrt verb)
 (defprop $sqrt %sqrt alias)
 
@@ -583,10 +596,6 @@
   (declare (ignore ignored))
   (oneargcheck x)
   (simplifya (list '(mexpt) (cadr x) '((rat simp) 1 2)) z))
-
-;;; ----------------------------------------------------------------------------
-
-(defvar *plusflag* nil)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -621,6 +630,8 @@
                 res))))
 
 ;;; ----------------------------------------------------------------------------
+
+(defvar *plusflag* nil)
 
 (defun pls (x out)
   (prog (fm *plusflag*)
@@ -1290,11 +1301,6 @@
                 (mnumberp pot)
                 (or (not (ratnump gr)) (not (ratnump pot))))
            (return (eqtest (exptrl gr pot) check)))
-          ((and (alike1 pot '((rat) 1 2))
-                (or (setq res (flonum-eval '%sqrt gr))
-                    (and (not (member 'simp (car x) :test #'eq))
-                         (setq res (big-float-eval '%sqrt gr)))))
-           (return res))
           ((eq gr '$%i)
            (return (%itopot pot)))
           ((and (realp gr) (minusp gr) (mevenp pot))
@@ -1302,16 +1308,16 @@
            (go cont))
           ((and (realp gr) (minusp gr) (moddp pot))
            (return (mul2 -1 (power (- gr) pot))))
-          ((and (eql gr -1) (maxima-integerp pot) (mminusp pot))
+          ((and (eql gr -1) (mintegerp pot) (mminusp pot))
            (setq pot (neg pot))
            (go cont))
           ((and (eql gr -1)
-                (maxima-integerp pot)
+                (mintegerp pot)
                 (mtimesp pot)
                 (= (length pot) 3)
                 (fixnump (cadr pot))
                 (oddp (cadr pot))
-                (maxima-integerp (caddr pot)))
+                (mintegerp (caddr pot)))
            (setq pot (caddr pot))
            (go cont))
           ((atom gr) (go atgr))
@@ -1432,9 +1438,6 @@
                  (return (exptrl gr pot)))))
           ((eq gr '$%e)
            (when $%emode
-             (let ((val (flonum-eval '%exp pot)))
-               (when val
-                 (return val)))
              (when (and (not (member 'simp (car x) :test #'eq))
                         (complex-number-p pot 'bigfloat-or-number-p))
                (let ((x ($realpart pot))
@@ -1525,7 +1528,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun simplexpon (e)
-  (or (maxima-integerp e)
+  (or (mintegerp e)
       (and (eq $domain '$real)
            (ratnump e) (oddp (caddr e)))))
 
@@ -1604,13 +1607,6 @@
          (cond ((minusp r2)
                 (exptrl (cond ((eql (abs (cadr r1)) 1)
                                (* (cadr r1) (caddr r1)))
-                               ;; We set the simp flag at this place. This
-                               ;; changes nothing for an exponent r2 # -1.
-                               ;; exptrl is called again and does not look at
-                               ;; the simp flag. For the case r2 = -1 exptrl
-                               ;; is called with an exponent 1. For this case
-                               ;; the base is immediately returned. Now the
-                               ;; base has the correct simp flag. (DK 02/2010)
                               ((minusp (cadr r1))
                                (list '(rat simp) (- (caddr r1)) (- (cadr r1))))
                               (t (list '(rat simp) (caddr r1) (cadr r1))))
@@ -1632,7 +1628,7 @@
         ((floatp r1)
          (if (plusp r1)
              (exptrl r1 (rat2float r2))
-             (mul (exptrl -1 r2) ;; (-4.5)^(1/4) -> (4.5)^(1/4) * (-1)^(1/4)
+             (mul (exptrl -1 r2)
                   (exptrl (- r1) r2))))
         (exptrlsw (list '(mexpt simp) r1 r2))
         (t
