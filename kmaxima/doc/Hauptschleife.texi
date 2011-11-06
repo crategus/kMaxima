@@ -30,6 +30,79 @@ die Maxima-Funktion @mref{meval} ersetzt.  Die Lisp-Funktion @code{read} wird
 nun durch die Maxima-Funktion @mref{mread} ersetzt und die Lisp-Funktion
 @code{format} wird durch die Maxima-Funktion @mref{mdisplay} ersetzt.
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*maxima-version*}
+@defvr {Globale Variable} *maxima-version*
+Standardwert: @code{0.1}
+
+Enth@"alt die aktuelle Version von kMaxima.
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{maxima-banner}
+@deffn {Funktion} maxima-banner
+
+Die Funktion @code{maxima-banner} gibt beim Starten von kMaxima eine Information
+auf der Konsole aus.  Darunter ist die aktuelle Version, die in der
+globalen Variablen @mref{*maxima-version*} abgelegt ist.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun maxima-banner ()
+  (format t "~&kMaxima ~a~%" *maxima-version*)
+  (format t "using Lisp ~a ~a~%" (lisp-implementation-type)
+                                 (lisp-implementation-version))
+  (format t "Distributed under the GNU Public License. ~
+             See the file COPYING.~%")
+  (format t "Dedicated to the memory of William Schelter.~%"))
+@end group
+@end lisp
+@end deffn
+
+;;; ----------------------------------------------------------------------------
+
+(defun bye ()
+  #+(or cmu scl clisp) (ext:quit)
+  #+sbcl               (sb-ext:quit)
+  #+allegro            (excl:exit)
+  #+(or mcl openmcl)   (ccl:quit)
+  #+gcl                (lisp:quit)
+  #+ecl                (si:quit)
+  #+lispworks          (lispworks:quit))
+
+(defun $quit ()
+  (throw 'maxima-quit-to-lisp 0))
+
+(defun used-area (&optional unused)
+  (declare (ignore unused))
+  (sb-ext:get-bytes-consed))
+
+;;; ----------------------------------------------------------------------------
+
+(defvar *prompt-prefix* "")
+(defvar *prompt-suffix* "")
+
+(defmvar $prompt "_")
+
+(defun main-prompt ()
+  (declare (special *display-labels-p* $inchar $linenum))
+  (if *display-labels-p*
+      (let ((*print-circle* nil))
+        (format nil "~A(~A~D) ~A"
+                *prompt-prefix*
+                (print-invert-case (stripdollar $inchar))
+                $linenum
+                *prompt-suffix*))
+      ""))
+
+(defun break-prompt ()
+  (let ((*print-circle* nil))
+    (format nil "~A~A~A"
+            *prompt-prefix*
+            (print-invert-case (stripdollar $prompt))
+            *prompt-suffix*)))
+
 @c -----------------------------------------------------------------------------
 @node Marken f@"ur die Eingaben und Ausgaben, Die Funktion maxima-toplevel-eval, Einf@"uhrung in die Hauptschleife, Hauptschleife
 @section Marken f@"ur die Eingaben und Ausgaben
