@@ -418,7 +418,6 @@ durch das Voranstellen eines @code{$}- oder @code{%}-Zeichens.  Siehe
 @ref{Verb- und Substantivform} f@"ur weitere Ausf@"uhrungen zu diesem Thema.
 
 @c -----------------------------------------------------------------------------
-@anchor{meval}
 @node Implementierung des ersten Evaluators, , Syntax von kMaxima-Ausdr@"ucken, Der erste Evaluator
 @subsection Implementierung des ersten Evaluators
 @c -----------------------------------------------------------------------------
