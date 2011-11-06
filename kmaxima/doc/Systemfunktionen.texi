@@ -1,25 +1,27 @@
 @c -----------------------------------------------------------------------------
-@c File     : Hautschleife.texi
+@c File     : Systemfunktionen.texi
 @c License  : GNU General Public License (GPL)
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 10.04.2011
-@c Revision : 27.08.2011
+@c Revision : 06.11.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @menu
-* Einf@"uhrung in die Hauptschleife::
+* Einf@"uhrung in Systemfunktionen::
+* Einfache Systemfunktionen::
 * Marken f@"ur die Eingaben und Ausgaben::
 * Die Funktion maxima-toplevel-eval::
 * Die Funktion maxima-toplevel-read::
 * Die Funktion maxima-toplevel-loop::
+* Weitere Systemfunktionen::
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Einf@"uhrung in die Hauptschleife, Marken f@"ur die Eingaben und Ausgaben, Hauptschleife, Hauptschleife
-@section Einf@"uhrung in die Hauptschleife
+@node Einf@"uhrung in Systemfunktionen, Marken f@"ur die Eingaben und Ausgaben, Systemfunktionen, Systemfunktionen
+@section Einf@"uhrung in Systemfunktionen
 @c -----------------------------------------------------------------------------
 
 Mit der Implementation des Parsers und den Routinen f@"ur die lineare Anzeige
@@ -29,6 +31,11 @@ Lisp-read-eval-Schleife ausgef@"uhrt.  Die Lisp-Funktion @code{eval} ist durch
 die Maxima-Funktion @mref{meval} ersetzt.  Die Lisp-Funktion @code{read} wird
 nun durch die Maxima-Funktion @mref{mread} ersetzt und die Lisp-Funktion
 @code{format} wird durch die Maxima-Funktion @mref{mdisplay} ersetzt.
+
+@c -----------------------------------------------------------------------------
+@node Einfache Systemfunktionen, Marken f@"ur die Eingaben und Ausgaben, Einf@"uhrung in Systemfunktionen, Systemfunktionen
+@section Einfache Systemfunktionen
+@c -----------------------------------------------------------------------------
 
 @c --- 06.11.2011 --------------------------------------------------------------
 @anchor{*maxima-version*}
@@ -60,8 +67,17 @@ globalen Variablen @mref{*maxima-version*} abgelegt ist.
 @end lisp
 @end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{bye}
+@deffn {Funktion} bye
 
+Beendet die kMaxima- und die Lisp-Sitzung.  Die Implementation ist abh@"angig
+von dem verwendeten Lisp.  Hier ist eine Implementation für 10 verschiedene
+Lisp-Varianten gezeigt.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun bye ()
   #+(or cmu scl clisp) (ext:quit)
   #+sbcl               (sb-ext:quit)
@@ -70,41 +86,44 @@ globalen Variablen @mref{*maxima-version*} abgelegt ist.
   #+gcl                (lisp:quit)
   #+ecl                (si:quit)
   #+lispworks          (lispworks:quit))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$quit}
+@deffn {Funktion} $quit
+
+Mit der Funktion @code{$quit} wird eine kMaxima-Sitzung beendet.
+Die Lisp-Sitzung wird nicht beendet.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun $quit ()
   (throw 'maxima-quit-to-lisp 0))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{used-area}
+@deffn {Funktion} used-area &optional unused
+
+Gibt Information @"uber die Nutzung des Speicherplatzes aus.
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun used-area (&optional unused)
   (declare (ignore unused))
   (sb-ext:get-bytes-consed))
-
-;;; ----------------------------------------------------------------------------
-
-(defvar *prompt-prefix* "")
-(defvar *prompt-suffix* "")
-
-(defmvar $prompt "_")
-
-(defun main-prompt ()
-  (declare (special *display-labels-p* $inchar $linenum))
-  (if *display-labels-p*
-      (let ((*print-circle* nil))
-        (format nil "~A(~A~D) ~A"
-                *prompt-prefix*
-                (print-invert-case (stripdollar $inchar))
-                $linenum
-                *prompt-suffix*))
-      ""))
-
-(defun break-prompt ()
-  (let ((*print-circle* nil))
-    (format nil "~A~A~A"
-            *prompt-prefix*
-            (print-invert-case (stripdollar $prompt))
-            *prompt-suffix*)))
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
-@node Marken f@"ur die Eingaben und Ausgaben, Die Funktion maxima-toplevel-eval, Einf@"uhrung in die Hauptschleife, Hauptschleife
+@node Marken f@"ur die Eingaben und Ausgaben, Die Funktion maxima-toplevel-eval, Einfache Systemfunktionen, Systemfunktionen
 @section Marken f@"ur die Eingaben und Ausgaben
 @c -----------------------------------------------------------------------------
 
@@ -117,14 +136,6 @@ eingef@"uhrt werden.  Die Marken werden fortlaufend nummeriert.  Die hier
 definierten Funktionen und Variablen werden von der Funktion
 @code{maxima-toplevel-loop} genutzt.
 
-@vindex *linelabel*
-@vindex $linenum
-@vindex $inchar
-@vindex $outchar
-@vindex $linechar
-@vindex $nolabels
-@vindex $labels
-
 Folgende Variablen sind f@"ur die Verwaltung der Marken definiert.  Die globale
 Variable @code{*linelabel*} enth@"alt die zuletzt erzeugte Marke.  Die
 Optionsvariable @code{$linenum} enth@"alt die Nummer der aktuellen Eingabe und
@@ -134,21 +145,47 @@ Zwischenmarken.  Mit der Optionsvariablen @code{$nolabels} kann das abspeichern
 in den Marken ausgeschaltet werden.  Die Optionsvariable @code{$labels}
 enth@"alt eine Liste aller erzeugten Marken.
 
-@verbatim
-(defvar *linelabel* nil)
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*linelabel*}
+@defvr {Globale Variable} *linelabel*
+Standardwert: @code{nil}
+@end defvr
 
-(defmvar $linenum 0)
-(defmvar $inchar   '$%i)
-(defmvar $outchar  '$%o)
-(defmvar $linechar '$%t)
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$linenum}
+@defvr {Globale Variable} $linenum
+Standardwert: @code{0}
+@end defvr
 
-(defmvar $nolabels nil)
-(defmvar $labels (list '(mlist simp)))
-@end verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$inchar}
+@defvr {Globale Variable} $inchar
+Standardwert: @code{$%i}
+@end defvr
 
-@findex createlabel
-@findex checklabel
-@findex makelabel
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$outchar}
+@defvr {Globale Variable} $outchar
+Standardwert: @code{$%o}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$linechar}
+@defvr {Globale Variable} $linechar
+Standardwert: @code{$%t}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$nolabels}
+@defvr {Globale Variable} $nolabels
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{variable_$labels}
+@defvr {Globale Variable} $labels
+Standardwert: @code{(list '(mlist simp))}
+@end defvr
 
 Die Funktion @code{createlabel} setzt ein Symbol oder eine Zeichenkette @code{x}
 und eine Nummer @code{num} zu einem Symbol zusammen, das in das aktuelle
@@ -163,15 +200,41 @@ Funktion @code{makelabel} generiert eine Marke zum Symbol @code{x}.  Das Symbol
 hat, sollen Marken genutzt werden und die erzeugte Marke wird der Liste in der
 Optionsvariablen @code{$labels}  hinzugef@"ugt.
 
-@verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{createlabel}
+@deffn {Funktion} createlabel x num
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun createlabel (x num)
   (intern (format nil "~a~d" x num)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{checklabel}
+@deffn {Funktion} checklabel x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun checklabel (x)
   (not (or $nolabels
            (= $linenum 0)
            (boundp (createlabel x $linenum)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{makelabel}
+@deffn {Funktion} makelabel x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun makelabel (x)
   (declare (special *linelabel*))
   (setq *linelabel* (createlabel x $linenum))
@@ -184,9 +247,10 @@ Optionsvariablen @code{$labels}  hinzugef@"ugt.
               (not (eq *linelabel* (cadr $labels))))
       (setq $labels (cons (car $labels) (cons *linelabel* (cdr $labels))))))
   *linelabel*)
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@noindent
 @b{Beispiele:} Die folgenden Beispiele zeigen die Verwendung der Funktionen
 @code{createlabel}, @code{checklabel} und @code{makelabel}.
 
@@ -225,10 +289,6 @@ $%I2
 ((MLIST SIMP) $%I2 $%I1)
 @end example
 
-@findex getfirstcharlabel
-@findex getlabels
-@findex getlabels2
-
 Mit den Funktionen @code{getlabels} und @code{getlabels2} werden genutzte
 Marken heraus gefiltert.  Die Funktion @code{getlabels} gibt die Marken
 zur@"uck, die mit einem einem bestimmten Zeichen beginnen.  Die Funktion
@@ -238,13 +298,29 @@ Argument @code{flag} den Wert @code{T} werden nur Eingabemarken ausgew@"ahlt.
 Die Funktion @code{getfirstcharlabel} ermittelt das erste Zeichen einer Marke,
 das verschieden von dem Zeichen @code{$} und @code{%} ist.
 
-@verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{getfirstcharlabel}
+@deffn {Funktion} getfirstcharlabel x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun getfirstcharlabel (x)
   (let ((c (char (symbol-name x) 1)))
     (if (char= c #\%)
         (char (symbol-name x) 2)
         c)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{getlabels}
+@deffn {Funktion} getlabels x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun getlabels (x)
   (do ((l (cdr $labels) (cdr l))
        (ch (getfirstcharlabel x))
@@ -252,7 +328,17 @@ das verschieden von dem Zeichen @code{$} und @code{%} ist.
       ((null l) (reverse acc))
     (if (char= (getfirstcharlabel (car l)) ch)
         (push (car l) acc))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{getlabels2}
+@deffn {Funktion} getlabels2 n1 n2 &optional (flag nil)
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun getlabels2 (n1 n2 &optional (flag nil))
   (do ((i n1 (1+ i))
        (acc)
@@ -265,20 +351,35 @@ das verschieden von dem Zeichen @code{$} und @code{%} ist.
         ((null l))
       (if (boundp (setq z (createlabel (first l) i)))
           (push z acc)))))
-@end verbatim
-
-@findex $labels
-@findex $%th
+@end group
+@end lisp
+@end deffn
 
 Zuletzt folgt noch die Implementierung der Nutzerfunktionen @code{$labels} und
 @code{$%th}.  Die Funktion @code{$labels} gibt eine Liste aller Marken zur@"uck,
 die mit dem Argument @code{x} beginnen.  Mit der Funktion @code{$%th} kann auf
 das n-te vorhergehende Ergebnis zur@"uckgegriffen werden.
 
-@verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$labels}
+@deffn {Funktion} $labels x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun $labels (x)
   (cons '(mlist simp) (getlabels x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{%th}
+@deffn {Funktion} %th x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun $%th (x)
   (prog (l outchar)
     (if (or (not (fixnump x)) (= x 0))
@@ -294,14 +395,14 @@ das n-te vorhergehende Ergebnis zur@"uckgegriffen werden.
         (return (meval (car l))))
     (setq l (cdr l))
     (go loop)))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
 @c -----------------------------------------------------------------------------
-@node Die Funktion maxima-toplevel-eval, Die Funktion maxima-toplevel-read, Marken f@"ur die Eingaben und Ausgaben, Hauptschleife
+@node Die Funktion maxima-toplevel-eval, Die Funktion maxima-toplevel-read, Marken f@"ur die Eingaben und Ausgaben, Systemfunktionen
 @section Die Funktion @code{maxima-toplevel-eval}
 @c -----------------------------------------------------------------------------
-
-@findex maxima-toplevel-eval
 
 Die Funktion @code{meval} ersetzt die Lisp-Funktion @code{eval} im 
 kMaxima-Evaluator der in @ref{Der erste Evaluator} beschrieben ist.  In einem
@@ -313,30 +414,86 @@ Funktion @code{simplifya}, die den ausgewerteten Ausdruck vereinfacht.  Die
 R@"uckgabe ist ein ausgwerteter und vereinfachter Ausdruck.  Die Funktion
 wird von @code{maxima-toplevel-loop} aufgerufen.
 
-@verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{maxima-toplevel-eval}
+@deffn {Funktion} maxima-toplevel-eval form
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun maxima-toplevel-eval (form)
   (simplifya (meval form) nil))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-Die Funktion @code{simplifya} implementiert den Vereinfacher des
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{meval}
+@deffn {Funktion} meval form
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun meval (form)
+  (simplifya (meval1 form) nil))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{meval1}
+@deffn {Funktion} meval1 form
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun meval1 (form &aux u)
+  (cond
+    ((atom form)
+     (cond ((not (symbolp form))
+            form)
+           ((not (boundp form))
+            form)
+           (t (symbol-value form))))
+    ((consp (car form))
+     (let ((op (caar form)))
+       (cond ((mfunctionp op)
+              (apply op (mevalargs (cdr form))))
+             ((setq u (getprop op 'mspec))
+              (apply u (cons form nil)))
+             ((macro-function op)
+              (eval (cons op (cdr form))))
+             (t
+              (cons (car form) (mevalargs (cdr form)))))))
+    (t (eval form))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{mevalargs}
+@deffn {Funktion} mevalargs args
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mevalargs (args)
+  (mapcar #'meval args))
+@end group
+@end lisp
+@end deffn
+
+Die Funktion @mref{simplifya} implementiert den Vereinfacher des
 Computeralgebrasystems.  An dieser Stelle f@"uhren wir eine Dummy-Funktion ein,
 die erst in einem sp@"ateren Kapitel mit Code aufgef@"ullt wird.  Die
 Dummy-Funktion hat die Aufgabe das Argument unver@"andert zur@"uckzugeben.  Das
 zweite Argument ist ein Schalter, der sp@"ater genutzt wird, um dem Vereinfacher
 mitzuteilen, dass die Argumente eines Operators bereits vereinfacht sind.
 
-@verbatim
-(defun simplifya (form flag)
-  (declare (ignore flag))
-  form)
-@end verbatim
-
 @c -----------------------------------------------------------------------------
-@node Die Funktion maxima-toplevel-read, Die Funktion maxima-toplevel-loop, Die Funktion maxima-toplevel-eval, Hauptschleife
+@node Die Funktion maxima-toplevel-read, Die Funktion maxima-toplevel-loop, Die Funktion maxima-toplevel-eval, Systemfunktionen
 @section Die Funktion @code{maxima-toplevel-read}
 @c -----------------------------------------------------------------------------
-
-@findex maxima-toplevel-read
 
 Mit dem Parser ist die Funktion @code{mread} definiert worden, die die Eingabe
 liest und in einen kMaxima-Ausdruck umwandelt.  Die Funktion 
@@ -366,11 +523,19 @@ Variable @code{*need-prompt*} auf den Wert @code{t} gesetzt, um zu
 signalisieren, dass beim n@"achsten Aufruf der Funktion
 @code{maxima-toplevel-read} eine Eingabeaufforderung auszugeben ist.
 
-@vindex *need-prompt*
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*need-prompt*}
+@defvr {Globale Variable} *need-prompt*
+Standardwert: @code{t}
+@end defvr
 
-@verbatim
-(defvar *need-prompt* t)
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{maxima-toplevel-read}
+@deffn {Funktion} maxima-toplevel-read stream eof-p eof
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun maxima-toplevel-read (stream eof-p eof)
   (let ((mprompt *mread-prompt*)
         (*mread-prompt* "")
@@ -384,6 +549,8 @@ signalisieren, dass beim n@"achsten Aufruf der Funktion
         (progn
           (setf *prompt-on-read-hang* t)
           (setf *read-hang-prompt* mprompt)))
+@end group
+@group
     (tagbody
      top
       (setq ch (read-char stream eof-p eof))
@@ -393,6 +560,8 @@ signalisieren, dass beim n@"achsten Aufruf der Funktion
             ((eq ch eof)
              (return-from maxima-toplevel-read eof)))
       (unread-char ch stream))
+@end group
+@group
     (cond
       ((eql #\? ch)
        (read-char stream)
@@ -412,6 +581,8 @@ signalisieren, dass beim n@"achsten Aufruf der Funktion
             (mread (make-concatenated-stream (make-string-input-stream "?")
                                              stream)
                    eof)))))
+@end group
+@group
       (t
        (let ((result (mread stream eof))
              (next-char (read-char-no-hang stream eof-p eof)))
@@ -424,9 +595,10 @@ signalisieren, dass beim n@"achsten Aufruf der Funktion
                 (setf *need-prompt* nil)
                 (unread-char next-char stream)))
          result)))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@noindent
 @b{Beispiele:} Die ersten Beispiele zeigen die Ergebnisse, wenn das spezielle
 Zeichen @code{?} in der Eingabe gefunden wird.  Das letzte Beispiel zeigt die
 Eingabe eines mathematischen Ausdrucks.
@@ -448,7 +620,7 @@ sin(x)+x^2;
 @end example
 
 @c -----------------------------------------------------------------------------
-@node Die Funktion maxima-toplevel-loop, , Die Funktion maxima-toplevel-read, Hauptschleife
+@node Die Funktion maxima-toplevel-loop, Weitere Systemfunktionen, Die Funktion maxima-toplevel-read, Systemfunktionen
 @section Die Funktion @code{maxima-toplevel-loop}
 @c -----------------------------------------------------------------------------
 
@@ -457,11 +629,73 @@ Abfolge des Einlesen, des Auswertens, Vereinfachens von Ausdr@"ucken und der
 Anzeige des Ergebnisses implementieren. Wir beginnen mit einigen Hilfsfunktionen
 und Variablen.
 
-@vindex *prompt-prefix*
-@vindex *prompt-suffix*
-@vindex $prompt
-@findex main-prompt
-@findex break-prompt
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*prompt-prefix*}
+@defvr {Globale Variable} *prompt-prefix*
+Standardwert: @code{""}
+
+Der Wert der globalen Variablen @code{*prompt-prefix*} wird immer vor der
+Ausgabe des Prompts auf der Konsole ausgegeben.
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*prompt-suffix*}
+@defvr {Globale Variable} *prompt-suffix*
+Standardwert: @code{""}
+
+Der Wert der globalen Variablen @code{*prompt-suffix*} wird immer nach der
+Ausgabe des Prompts auf der Konsole ausgegeben.
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$prompt}
+@defvr {Optionsvariable} $prompt
+Standardwert: @code{"_"}
+
+@code{$prompt} enthält das Zeichen für den Prompt der bei einer Unterbrechung
+von kMaxima oder im Demo-Modus ausgegeben wird.
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{main-prompt}
+@deffn {Funktion} main-prompt
+
+Generiert den Prompt f@"ur die Eingabeaufforderung von einer Konsole und gibt
+diesen als Ergebnis zur@"uck.
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun main-prompt ()
+  (declare (special *display-labels-p* $inchar $linenum))
+  (if *display-labels-p*
+      (let ((*print-circle* nil))
+        (format nil "~A(~A~D) ~A"
+                *prompt-prefix*
+                (print-invert-case (stripdollar $inchar))
+                $linenum
+                *prompt-suffix*))
+      ""))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{break-prompt}
+@deffn {Funktion} break-prompt
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun break-prompt ()
+  (let ((*print-circle* nil))
+    (format nil "~A~A~A"
+            *prompt-prefix*
+            (print-invert-case (stripdollar $prompt))
+            *prompt-suffix*)))
+@end group
+@end lisp
+@end deffn
 
 Mit den Funktionen @code{main-prompt} und @code{break-prompt} werden zwei
 unterschiedliche Eingabeaufforderungen implementiert. Die Funktion
@@ -484,47 +718,33 @@ f@"ur kMaxima implementiert.  Das Zeichen f@"ur die Eingabeaufforderung ist in
 diesem Fall in der Optionsvariablen @code{$prompt} abgelegt und kann vom Nutzer
 ge@"andert werden.
 
-@verbatim
-(defvar *prompt-prefix* "")
-(defvar *prompt-suffix* "")
-(defmvar $prompt "_")
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*general-display-prefix*}
+@defvr {Globale Variable} *general-display-prefix*
+Standardwert: @code{""}
+@end defvr
 
-(defun main-prompt ()
-  (declare (special *display-labels-p*))
-  (if *display-labels-p*
-      (let ((*print-circle* nil))
-        (format nil "~A(~A~D) ~A"
-                *prompt-prefix*
-                (print-invert-case (stripdollar $inchar))
-                $linenum
-                *prompt-suffix*))
-      ""))
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{showtime}
+@defvr {Optionsvariable} $showtime
+Standardwert: @code{nil}
+@end defvr
 
-(defun break-prompt ()
-  (let ((*print-circle* nil))
-    (format nil "~A~A~A"
-            *prompt-prefix*
-            (print-invert-case (stripdollar $prompt))
-            *prompt-suffix*)))
-@end verbatim
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{maxima-toplevel-loop}
+@deffn {Funktion} maxima-toplevel-loop input-stream mode
 
-@verbatim
-(defun used-area (&optional unused)
-  (declare (ignore unused))
-  (sb-ext:get-bytes-consed))
-@end verbatim
-
-@verbatim
-(defvar *general-display-prefix* "")
-
-(defmvar $showtime nil)
-
+@emph{Quelltext:}
+@lisp
+@group
 (defun maxima-toplevel-loop (input-stream mode)
   (declare (special $% $_ $__))
   (when (eql mode :demo)
     (format t
     "~%At the '~A' prompt, type ';' and <enter> to get next demonstration.~&"
             (print-invert-case (stripdollar $prompt))))
+@end group
+@group
   (catch 'abort-demo
     (do ((form)
          (time) (etime) (area)
@@ -570,6 +790,8 @@ ge@"andert werden.
           (putprop o-tag (cons time  etime) 'time))
         (if (eq (caar form) 'displayinput)
             (linear-display `((mlabel) ,o-tag ,$%)))
+@end group
+@group
         (when (eq mode ':demo)
           (princ (break-prompt))
           (force-output)
@@ -587,6 +809,8 @@ ge@"andert werden.
                 ((#\newline)
                  (if quitting (throw 'abort-demo nil) (return nil)))
                 (t (setq quitting t))))))
+@end group
+@group
         (when mode
           (do ((char)) (())
             (setq char (read-char input-stream nil nil))
@@ -595,6 +819,348 @@ ge@"andert werden.
             (unless (member char '(#\space #\newline #\return #\tab))
               (unread-char char input-stream)
               (return nil))))))))
-@end verbatim
+@end group
+@end lisp
+@end deffn
 
-@c --- End of file Hauptschleife.texi ------------------------------------------
+@c -----------------------------------------------------------------------------
+@node Weitere Systemfunktionen, , Die Funktion maxima-toplevel-loop, Systemfunktionen
+@section Weitere Systemfunktionen
+@c -----------------------------------------------------------------------------
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*maxima-quit*}
+@defvr {Globale Variable} *maxima-quit*
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*maxima-epilog*}
+@defvr {Globale Variable} *maxima-epilog*
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{maxima-toplevel}
+@deffn {Funktion} maxima-toplevel input-stream mode
+
+@emph{Quelltext:}
+@lisp
+@group
+(let ((maxima-started nil))
+  (defun maxima-toplevel (input-stream mode)
+    (in-package :kmaxima)
+    (if maxima-started
+        (format t "Maxima restarted.~%")
+        (progn
+          (if (not *maxima-quiet*) (maxima-banner))
+          (setq maxima-started t)))
+    (catch 'maxima-quit-toplevel
+           (loop
+             (catch 'maxima-continue
+                    (maxima-toplevel-loop input-stream mode)
+                    (format t *maxima-epilog*)
+                    (bye))))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{cl-user::run}
+@deffn {Funktion} cl-user::run
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun cl-user::run ()
+  (in-package :kmaxima)
+  (let ((input-stream *standard-input*)
+        (mode nil))
+    (catch 'maxima-quit-to-lisp
+           (loop
+            (with-simple-restart (kmaxima "Return to kMaxima top level.")
+              (maxima-toplevel input-stream mode))))))
+
+(import 'cl-user::run)
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$writefile}
+@deffn {Funktion} $writefile filename
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun $writefile (filename)
+  (let ((msg (dribble filename)))
+    (format t "~&~A~&" msg)
+    '$done))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$closefile}
+@deffn {Funktion} $closefile
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun $closefile ()
+  (let ((msg (dribble)))
+    (format t "~&~A~&" msg))
+  '$done)
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{merror}
+@deffn {Funktion} merror message &rest args
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun merror (message &rest args)
+  (apply #'format `(t ,message ,@@args))
+  (format t "~& -- an error. To debug this try: debugmode(true);~%")
+  (throw 'maxima-continue 'maxima-error))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*values*}
+@defvr {Globale Variable} *values*
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*options*}
+@defvr {Globale Variable} *options*
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$optionset}
+@defvr {Optionsvariable} $optionset
+Standardwert: @code{nil}
+
+@lisp
+(defprop $optionset boolset assign)
+@end lisp
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{mset}
+@deffn {Funktion} mset
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mset (x y)
+  (cond ((symbolp x)
+         (let ((f (getprop x 'assign)))
+           (if (and f (or (not (eq x y))
+                          (eq f 'neverset)))
+               (if (eq (funcall f x y) 'munbindp)
+                   (return-from mset nil))))
+         (cond ((not (boundp x))
+                (push x *values*))
+               ((and (not (eq x y))
+                     (boundp x)
+                     (not (member x *values*)))
+                (if $optionset
+                    (format t "assignment: assigning to option ~A~%" x))
+                (push x *options*)))
+         (return-from mset (setf (symbol-value x) y)))
+        (t (merror "assignment: cannot assign to ~A~%" x))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{*munbindp*}
+@defvr {Globale Variable} *munbindp*
+Standardwert: @code{nil}
+@end defvr
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{mseterror}
+@deffn {Funktion} mseterror var val
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mseterror (var val)
+  (declare (special *munbindp*))
+  (if *munbindp*
+      'munbindp
+      (merror "assignment: cannot assign ~a to ~a" val var)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{neverset}
+@deffn {Funktion} neverset var val
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun neverset (var val)
+  (mseterror var val))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{boolset}
+@deffn {Funktion} boolset var val
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun boolset (var val)
+  (if (not (member val '(t nil $false $true)))
+      (mseterror var val)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{shadowset}
+@deffn {Funktion} shadowset var val
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun shadowset (var val)
+  (mset (get var 'shadowvar) val))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{shadowboolset}
+@deffn {Funktion} shadowboolset var val
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun shadowboolset (var val)
+  (if (not (member val '(t nil $false $true)))
+      (mseterror var val)
+      (mset (get var 'shadowvar) val)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$values}
+@deffn {Funktion} $values
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun $values ()
+  (cons '(mlist simp) (copy-list *values*)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$options}
+@deffn {Funktion} $options
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun $options ()
+  (cons '(mlist simp) (copy-list *options*)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{mquote}
+@deffn {Spezialform} mquote form
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmspec mquote (form)
+  (cadr form))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{msetq}
+@deffn {Spezialform} msetq l
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmspec msetq (l)
+  (mset (cadr l) (meval (caddr l))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{reset1}
+@deffn {Funktion} reset1 args
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun reset1 (args)
+  (declare (special *variable-initial-values*))
+  (labels ((maybe-reset (key val)
+             (let ((reset nil))
+               (when (and (boundp key)
+                          (not (alike1 (symbol-value key) val)))
+                 (setq reset key)
+                 (let ((*munbindp* t)
+                       ($optionset nil))
+                   (declare (special *munbindp* $optionset))
+                   (meval `((msetq) ,key ((mquote) ,val)))))
+               reset)))
+    (let ((actually-reset nil))
+      (if args
+        (mapcar
+          #'(lambda (key)
+              (multiple-value-bind (val found-p)
+                  (gethash key *variable-initial-values*)
+                (if found-p
+                    (if (maybe-reset key val)
+                        (push key actually-reset)))))
+          args)
+        (maphash
+          #'(lambda (key val)
+              (if (maybe-reset key val)
+                  (push key actually-reset)))
+          *variable-initial-values*))
+      (cons '(mlist) (nreverse actually-reset)))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{$reset}
+@deffn {Spezialform} $reset1 l
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmspec $reset (l)
+  (reset1 (cdr l)))
+@end group
+@end lisp
+@end deffn
+
+@c --- End of file Systemfunktionen.texi ---------------------------------------
+
