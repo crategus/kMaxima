@@ -115,64 +115,6 @@
   (let (($lispdispflag nil))
     (dimension-string (fpformat form) result)))
 
-#+nil
-(defun fpformat (l)
-  (if (not (member 'simp (cdar l) :test #'eq))
-      (setq l (cons (cons (caar l) (cons 'simp (cdar l))) (cdr l))))
-  (cond ((eql (cadr l) 0)
-         (if (not (eql (caddr l) 0))
-             (merror "fpformat: detected an incorrect form of 0.0b0: ~M, ~M~%"
-                    (cadr l) (caddr l)))
-         (list '|0| '|.| '|0| '|b| '|0|))
-        (t
-         (let ((extradigs (floor (1+ (/ (integer-length (caddr l))
-                                        #.(/ (log 10.0) (log 2.0))))))
-               (*m 1)
-               (*cancelled 0))
-           (setq l
-                 (let ((*decfp t)
-                       (fpprec (+ extradigs (decimalsin (- (caddar l) 2))))
-                       (of (caddar l))
-                       (l (cdr l))
-                       (expon nil))
-                   (setq expon (- (cadr l) of))
-                   (setq l (if (minusp expon)
-                               (fpquotient (intofp (car l))
-                                           (fpintexpt 2 (- expon) of))
-                               (fptimes* (intofp (car l))
-                                         (fpintexpt 2 expon of))))
-                   (incf fpprec (- extradigs))
-                   (list (fpround (car l)) (+ (- extradigs) *m (cadr l))))))
-         (let ((*print-base* 10)
-               *print-radix*
-               (l1 nil))
-           (setq l1 (if (not $bftrunc)
-                        (explodec (car l))
-                        (do ((l (nreverse (explodec (car l))) (cdr l)))
-                            ((not (eq '|0| (car l))) (nreverse l)))))
-           (nconc (ncons (car l1))
-                  (ncons '|.|)
-                  (or (and (cdr l1)
-                           (cond ((or (zerop $fpprintprec)
-                                      (not (< $fpprintprec $fpprec))
-                                      (null (cddr l1)))
-                                  (cdr l1))
-                                 (t
-                                  (setq l1 (cdr l1))
-                                  (do ((i $fpprintprec (1- i))
-                                       (l2))
-                                      ((or (< i 2) (null l1))
-                                       (cond ((not $bftrunc) (nreverse l2))
-                                             (t
-                                              (do ((l3 l2 (cdr l3)))
-                                                  ((not (eq '|0| (car l3)))
-                                                   (nreverse l3))))))
-                                    (setq l2 (cons (car l1) l2)
-                                          l1 (cdr l1))))))
-                      (ncons '|0|))
-                  (ncons '|b|)
-                  (explodec (1- (cadr l))))))))
-
 (defun fpformat (l)
   (if (not (member 'simp (cdar l) :test #'eq))
       (setq l (cons (cons (caar l) (cons 'simp (cdar l))) (cdr l))))
@@ -292,7 +234,8 @@
 
 (defun fpration1 (x)
   (let ((fprateps (cdr ($bfloat (if $bftorat
-                                    (list '(rat simp) 1 (exptrl 2 (1- fpprec)))
+                                    (list '(rat simp) 1
+                                          (exptrl 2 (1- fpprec)))
                                     $ratepsilon)))))
     (or (and (equal x bigfloatzero)
              (cons 0 1))
@@ -311,9 +254,10 @@
                       (not (fpgreaterp
                              (fpabs
                                (fpquotient
-                                 (fpdifference (cdr x)
-                                               (fpquotient (cdr ($bfloat num))
-                                                           (cdr ($bfloat den))))
+                                 (fpdifference
+                                   (cdr x)
+                                   (fpquotient (cdr ($bfloat num))
+                                                    (cdr ($bfloat den))))
                                  (cdr x)))
                              fprateps)))
                  (cons num den))))))))
@@ -348,7 +292,8 @@
 
 (defun floattofp (x)
   (when (float-nan-p x)
-    (merror "bfloat: attempted conversion of floating point NaN (not-a-number).~%"))
+    (merror
+      "bfloat: attempted conversion of floating point NaN (not-a-number).~%"))
   (when (float-inf-p x)
     (merror "bfloat: attempted conversion of floating-point infinity.~%"))
   (unless $float2bf
