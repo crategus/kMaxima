@@ -161,14 +161,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun mevalargs (args)
-  (mapcar #'maxima-toplevel-eval args))
-
-;;; ----------------------------------------------------------------------------
+(defun maxima-toplevel-eval (form)
+  (simplifya (meval form) nil))
 
 (defun meval (form)
   (simplifya (meval1 form) nil))
-  
 
 (defun meval1 (form &aux u)
   (cond
@@ -189,6 +186,67 @@
              (t
               (cons (car form) (mevalargs (cdr form)))))))
     (t (eval form))))
+
+(defun mevalargs (args)
+  (mapcar #'meval args))
+
+;;; ----------------------------------------------------------------------------
+
+(defvar *need-prompt* t)
+
+(defun maxima-toplevel-read (stream eof-p eof)
+  (let ((mprompt *mread-prompt*)
+        (*mread-prompt* "")
+        ch)
+    (if (and *need-prompt* (> (length mprompt) 0))
+        (progn
+          (fresh-line *standard-output*)
+          (princ mprompt *standard-output*)
+          (force-output *standard-output*)
+          (setf *prompt-on-read-hang* nil))
+        (progn
+          (setf *prompt-on-read-hang* t)
+          (setf *read-hang-prompt* mprompt)))
+    (tagbody
+     top
+      (setq ch (read-char stream eof-p eof))
+      (cond ((or (eql ch #\newline)
+                 (eql ch #\return))
+             (go top))
+            ((eq ch eof)
+             (return-from maxima-toplevel-read eof)))
+      (unread-char ch stream))
+    (cond
+      ((eql #\? ch)
+       (read-char stream)
+       (let ((next (peek-char nil stream nil)))
+         (cond
+           ((member next '(#\space #\tab #\!))
+            (let ((line (string-trim '(#\space #\tab #\; #\$ )
+                                     (subseq (read-line stream eof-p eof)
+                                             1))))
+              `((displayinput) nil (($describe) ,line $exact))))
+           ((equal next #\?)
+            (let ((line (string-trim '(#\space #\tab #\; #\$ )
+                                     (subseq (read-line stream eof-p eof) 
+                                             1))))
+              `((displayinput) nil (($describe) ,line $inexact))))
+           (t
+            (mread (make-concatenated-stream (make-string-input-stream "?")
+                                             stream)
+                   eof)))))
+      (t
+       (let ((result (mread stream eof))
+             (next-char (read-char-no-hang stream eof-p eof)))
+         (cond ((or (eql next-char nil)
+                    (equal next-char '(nil)))
+                (setf *need-prompt* t))
+               ((member next-char '(#\newline #\return))
+                (setf *need-prompt* t))
+               (t
+                (setf *need-prompt* nil)
+                (unread-char next-char stream)))
+         result)))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -272,69 +330,6 @@
             (unless (member char '(#\space #\newline #\return #\tab))
               (unread-char char input-stream)
               (return nil))))))))
-
-;;; ----------------------------------------------------------------------------
-
-(defvar *need-prompt* t)
-
-(defun maxima-toplevel-read (stream eof-p eof)
-  (let ((mprompt *mread-prompt*)
-        (*mread-prompt* "")
-        ch)
-    (if (and *need-prompt* (> (length mprompt) 0))
-        (progn
-          (fresh-line *standard-output*)
-          (princ mprompt *standard-output*)
-          (force-output *standard-output*)
-          (setf *prompt-on-read-hang* nil))
-        (progn
-          (setf *prompt-on-read-hang* t)
-          (setf *read-hang-prompt* mprompt)))
-    (tagbody
-     top
-      (setq ch (read-char stream eof-p eof))
-      (cond ((or (eql ch #\newline)
-                 (eql ch #\return))
-             (go top))
-            ((eq ch eof)
-             (return-from maxima-toplevel-read eof)))
-      (unread-char ch stream))
-    (cond
-      ((eql #\? ch)
-       (read-char stream)
-       (let ((next (peek-char nil stream nil)))
-         (cond
-           ((member next '(#\space #\tab #\!))
-            (let ((line (string-trim '(#\space #\tab #\; #\$ )
-                                     (subseq (read-line stream eof-p eof)
-                                             1))))
-              `((displayinput) nil (($describe) ,line $exact))))
-           ((equal next #\?)
-            (let ((line (string-trim '(#\space #\tab #\; #\$ )
-                                     (subseq (read-line stream eof-p eof) 
-                                             1))))
-              `((displayinput) nil (($describe) ,line $inexact))))
-           (t
-            (mread (make-concatenated-stream (make-string-input-stream "?")
-                                             stream)
-                   eof)))))
-      (t
-       (let ((result (mread stream eof))
-             (next-char (read-char-no-hang stream eof-p eof)))
-         (cond ((or (eql next-char nil)
-                    (equal next-char '(nil)))
-                (setf *need-prompt* t))
-               ((member next-char '(#\newline #\return))
-                (setf *need-prompt* t))
-               (t
-                (setf *need-prompt* nil)
-                (unread-char next-char stream)))
-         result)))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun maxima-toplevel-eval (form)
-  (simplifya (meval form) nil))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -428,9 +423,9 @@
 (defun neverset (var val)
   (mseterror var val))
 
-(defun boolset (x y)
-  (if (not (member y '(t nil $false $true)))
-      (mseterror x y)))
+(defun boolset (var val)
+  (if (not (member val '(t nil $false $true)))
+      (mseterror var val)))
 
 (defun shadowset (var val)
   (mset (get var 'shadowvar) val))
@@ -450,15 +445,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmvar $numer nil)
-(defmvar $float nil)
-
-;;; ----------------------------------------------------------------------------
-
 (defprop $optionset boolset assign)
-
-(defprop $numer shadowboolset assign)
-(defprop $numer $float shadowvar)
 
 (defprop $%pi neverset assign)
 (defprop $%i neverset assign)
