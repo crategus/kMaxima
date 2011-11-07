@@ -26,10 +26,13 @@
 (in-package :kmaxima)
 
 (defmvar $simp t)
-(defmvar $float nil)
-(defmvar $numer nil)
 (defmvar $%enumer nil)
 (defmvar $negdistrib t)
+(defmvar $float nil)
+
+(defmvar $numer nil)
+(defprop $numer shadowboolset assign)
+(defprop $numer $float shadowvar)
 
 (defmvar $domain '$real)
 (defmvar $radexpand t)
