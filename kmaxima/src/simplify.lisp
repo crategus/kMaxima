@@ -64,6 +64,19 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(setf (get '$%e '$constant) t)
+(setf (get '$%pi '$constant) t)
+(setf (get '$%gamma '$constant) t)
+(setf (get '$%phi '$constant) t)
+(setf (get '$%i '$constant) t)
+
+;;; ----------------------------------------------------------------------------
+
+(defmacro take (operator &rest args)
+  `(simplifya (list ,operator ,@args) t))
+
+;;; ----------------------------------------------------------------------------
+
 (defun oneargcheck (l)
   (when (or (null (cdr l))
             (cddr l))
