@@ -87,7 +87,7 @@
                     user-object)))))
 
 (defun errset-namestring (x)
-  (let ((errset nil))
+  (let ((*errset* nil))
     (errset (pathname x) nil)))
 
 ;;; ----------------------------------------------------------------------------
