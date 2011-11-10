@@ -2,17 +2,36 @@
 
 (in-package :kmaxima-tests)
 
+(define-test macros
+  (assert-expands '(cons 'a nil) (ncons 'a))
+  (assert-expands '(DO () ((NOT (< N 100))) (INCF N))
+                  (while (< n 100) (incf n)))
+  (assert-expands '(SETF (GET 'F 'FUNC) #'(LAMBDA (X Y) (+ X Y)))
+                  (defun-prop (f func) (x y) (+ x y)))
+  (assert-expands '(DEFUN-PROP (F MSPEC) (X Y) (+ X Y))
+                  (defmspec f(x y) (+ x y)))
+  (assert-expands '(PROGN
+                     (UNLESS (GETHASH 'X KMAXIMA::*VARIABLE-INITIAL-VALUES*)
+                     (SETF (GETHASH 'X KMAXIMA::*VARIABLE-INITIAL-VALUES*) 99))
+                     (DEFVAR X 99))
+                  (defmvar x 99))
+  (assert-expands '(HANDLER-CASE (LIST (/ 1 2))
+                     (ERROR (KMAXIMA::E) 
+                            (WHEN KMAXIMA::*ERRSET* (ERROR KMAXIMA::E))))
+                  (errset (/ 1 2))))
+
+
+(define-test fixnump
+  (assert-true (fixnump 1))
+  (assert-false (fixnump 1.0))
+  (assert-false (fixnump 'symbol)))
+
 (define-test mfunctionp
   (assert-true (mfunctionp #'car ))
   (assert-true (mfunctionp 'car))
   (assert-false (mfunctionp 'defprop))
   (assert-true (functionp #'car ))
   (assert-false (functionp 'car)))
-
-(define-test fixnump
-  (assert-true (fixnump 1))
-  (assert-false (fixnump 1.0))
-  (assert-false (fixnump 'symbol)))
 
 (define-test alphabetp
   (assert-true (alphabetp #\a ))
