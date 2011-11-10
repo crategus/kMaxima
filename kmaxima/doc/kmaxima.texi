@@ -5,7 +5,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 10.08.2011
+@c Revision : 08.11.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ END-INFO-DIR-ENTRY
 @menu
 * Einf@"uhrung::
 * Grundger@"ust::
-* Hilfsfunktionen::
+* Erste Makros und Hilfsfunktionen::
 * Parser::
 * Lineare Anzeige::
 * 2D-Anzeige::
@@ -80,15 +80,15 @@ END-INFO-DIR-ENTRY
 @chapter Einf@"uhrung
 @include Einfuehrung.texi
 
-@node Grundger@"ust, Hilfsfunktionen, Einf@"uhrung, Top
+@node Grundger@"ust, Erste Makros und Hilfsfunktionen, Einf@"uhrung, Top
 @chapter Grundger@"ust
 @include Grundgeruest.texi
 
-@node Hilfsfunktionen, Parser, Grundger@"ust, Top
-@chapter Hilfsfunktionen
+@node Erste Makros und Hilfsfunktionen, Parser, Grundger@"ust, Top
+@chapter Erste Makros und Hilfsfunktionen
 @include Hilfsfunktionen.texi
 
-@node Parser, Lineare Anzeige, Hilfsfunktionen, Top
+@node Parser, Lineare Anzeige, Erste Makros und Hilfsfunktionen, Top
 @chapter Parser
 @include Parser.texi
 
