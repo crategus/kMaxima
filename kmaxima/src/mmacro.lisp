@@ -41,9 +41,9 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmacro while (cond &rest body)
+(defmacro while (condition &rest body)
   `(do ()
-       ((not ,cond))
+       ((not ,condition))
      ,@body))
 
 ;;; ----------------------------------------------------------------------------
@@ -51,9 +51,8 @@
 (defmacro defun-prop (f arg &body body)
   `(setf (get ',(first f) ',(second f)) #'(lambda ,arg ,@body)))
 
-(defmacro defmspec (func . rest)
-  `(progn
-     (defun-prop (,func mspec) ,@rest)))
+(defmacro defmspec (func arg &body body)
+  `(defun-prop (,func mspec) ,arg ,@body))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -69,15 +68,10 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defvar errset nil)
+(defvar *errset* nil)
 
 (defmacro errset (&rest l)
   `(handler-case (list ,(car l))
-     (error (e) (when errset (error e)))))
-
-;;; ----------------------------------------------------------------------------
-
-(defmacro take (operator &rest args)
-  `(simplifya (list ,operator ,@args) t))
+     (error (e) (when *errset* (error e)))))
 
 ;;; ----------------------------------------------------------------------------
