@@ -4,14 +4,15 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 16.04.2011
-@c Revision : 28.10.2011
+@c Revision : 08.11.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
 
 @menu
-* Allgemeine Makros::
-* Testfunktionen f@"ur kMaxima-Ausdr@"ucke::
+* Makros::
+* Testfunktionen::
+* Weitere Funktionen f@"ur Ausdr@"ucke::
 * Funktionen f@"ur die Eigenschaftsliste::
 * Konvertierung zwischen Gross- und Kleinschreibung::
 * Zerlegung von Symbolen und Zeichenketten in Listen::
@@ -22,16 +23,47 @@
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Allgemeine Makros, Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Hilfsfunktionen, Hilfsfunktionen
-@section Allgemeine Makros
+@node Makros, Testfunktionen, Erste Makros und Hilfsfunktionen, Erste Makros und Hilfsfunktionen
+@section Makros
 @c -----------------------------------------------------------------------------
 
-@c --- 20.10.2011 --------------------------------------------------------------
+In diesem Kapitel werden erste Makros eingef@"uhrt, die sehr fr@"uh definiert
+werden m@"ussen, da diese an vielen Stellen im Quellcode eingesetzt werden.
+Die Makros werden in der Datei @code{mmacro.lisp} definiert, die als eine der
+ersten Dateien von Lisp geladen wird.
+
+Folgende Makros werden in diesem Kapitel beschrieben:
+@verbatim
+   ncons        float      while
+   defun-prop   defmspec   defmvar
+   errset
+@end verbatim
+
+Weiterhin werden die folgenden globalen Variablen definiert:
+
+@verbatim
+   *variable-initial-values*
+   *errset*
+@end verbatim
+
+@menu
+* Allgemeine Makros::
+* Die Makros @code{defun-prop} und @code{defmspec}::
+* Das Makro @code{defmvar}::
+* Das Makro @code{errset}::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Allgemeine Makros, Die Makros @code{defun-prop} und @code{defmspec}, Makros, Makros
+@subsection Allgemeine Makros
+@c -----------------------------------------------------------------------------
+
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{ncons}
 @deffn {Makro} ncons x
 
-Das Makro @code{ncons} ist eine Abk@"urzung, um das Argument @var{x} zum
-einzigen Element einer Liste zu machen.
+Das Makro @code{ncons} macht das Argument @var{x} zum einzigen Element einer
+Liste.
 
 @emph{Beispiel:}
 @example
@@ -75,38 +107,45 @@ DOUBLE-FLOAT
 
 @c --- 20.10.2011 --------------------------------------------------------------
 @anchor{while}
-@deffn {Makro} while cond &rest body
+@deffn {Makro} while condition &rest body
 
 Das Makro implementiert eine @code{while}-Schleife.
 
 @emph{Quelltext:}
 @lisp
 @group
-(defmacro while (cond &rest body)
+(defmacro while (condition &rest body)
   `(do ()
-       ((not ,cond))
+       ((not ,condition))
      ,@@body))
 @end group
 @end lisp
 @end deffn
 
-@c --- 15.10.2011 --------------------------------------------------------------
+@c -----------------------------------------------------------------------------
+@node Die Makros @code{defun-prop} und @code{defmspec}, Das Makro @code{defmvar}, Allgemeine Makros, Makros
+@subsection Die Makros @code{defun-prop} und @code{defmspec}
+@c -----------------------------------------------------------------------------
+
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{defun-prop}
 @deffn {Makro} defun-prop f arg &body body
 
-Das Makro @code{defun-prop} generiert den Code, um die Definition einer Funktion
-auf der Eigenschaftsliste eines Symbols abzulegen.
-
-Das Argument @var{f} ist eine Liste mit zwei Elementen.  Das erste Element
-ist ein Symbol, das die Funktion bezeichnet.  Das zweite Element ist ein
-Symbol, das den Indikator bezeichnet, zu dem die Funktionsdefinition @var{body}
-auf der Eigenschaftsliste abgelegt wird.  @var{arg} ist eine Liste mit den
-Argumenten der Funktionsdefinition @var{body}.
+Das Makro @code{defun-prop} generiert den Code, um die Definition @var{body}
+einer Funktion auf der Eigenschaftsliste eines Symbols abzulegen.  Das Argument
+@var{f} ist eine Liste mit zwei Elementen.  Das erste Element ist ein Symbol,
+das die zu definierende Funktion bezeichnet.  Das zweite Element ist ein Symbol,
+das den Indikator bezeichnet, zu dem die Definition der Funktion auf der
+Eigenschaftsliste abgelegt wird.  Das Argument @var{arg} ist eine Liste mit
+den Argumenten der Funktionsdefinition.  Die R@"uckgabe ist ein Ausdruck, der
+die Funktionsdefinition @var{body} mit den Argumenten @var{arg} zu einem Symbol
+auf der Eigenschaftsliste ablegt.
 
 Siehe auch das Makro @mrefcomma{defmspec} mit dem kMaxima-Spezialformen
-definiert werden.  Weiterhin werden mit den Makros @mref{def-led-fun} und
-@mref{def-nud-fun} Funktionen definiert, die die @code{led}- und
-@code{nud}-Funktionen auf der Eigenschaftsliste eines Operators abgelegen.
+definiert werden.  Weiterhin werden vom Parser mit den Makros
+@mref{def-led-fun} und @mref{def-nud-fun} Funktionen definiert, die die
+@code{led}- und @code{nud}-Funktionen auf der Eigenschaftsliste eines Operators
+ablegen.
 
 @emph{Beispiel:}
 
@@ -118,10 +157,8 @@ Funktion wird zum Indikator @code{func} auf der Eigenschaftsliste abgelegt.
 * (macroexpand-1 '(defun-prop (f func) (x y) (+ x y)))
 (SETF (GET 'F 'FUNC) #'(LAMBDA (X Y) (+ X Y)))
 T
-
 * (defun-prop (f func) (x y) (+ x y))
 #<FUNCTION (LAMBDA (X Y)) @{B595DBD@}>
-
 * (apply (get 'f 'func) '(2 3))
 5
 @end example
@@ -135,18 +172,22 @@ T
 @end lisp
 @end deffn
 
-@c --- 15.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{defmspec}
-@deffn {Makro} defmspec function . rest
+@deffn {Makro} defmspec func arg &body body
 
-Das Makro @code{defmspec} legt die Definition einer Funktion zum Indikator
-@code{mspec} auf der Eigenschaftsliste ab.  Dazu generiert das Makro einen
-Ausdruck mit dem Makro @mrefdot{defun-prop}
+Das Makro @code{defmspec} legt die Definition @var{body} einer Funktion, die die
+Argumente @var{arg} hat, zum Indikator @code{mspec} auf der Eigenschaftsliste
+des Symbols @var{func} ab.  Dazu generiert das Makro einen Ausdruck mit dem
+Makro @mrefdot{defun-prop}  Das Argument @var{func} ist ein
+Symbol das die zu definierende Funktion bezeichnet. 
 
-kMaxima-Spezialformen sind Nutzerfunktionen, die ihre Argumente nicht auswerten.
-Der Evaluator @mref{meval} erkennt Symbole, die eine kMaxima-Spezialform
-repr@"asentieren und wendet die Funktion an, die auf der Eigenschaftsliste
-abgelegt ist.
+Mit dem Makro @code{defmspec} werden Nutzerfunktionen definiert, die ihre
+Argumente nicht auswerten und auch als Spezialformen bezeichnet werden.  Der
+Evaluator @mref{meval1} erkennt Symbole, die eine Spezialform repr@"asentieren
+und wendet die Funktion an, die auf der Eigenschaftsliste abgelegt ist.
+Beispiele f@"ur Spezialformen sind die Funktionen @mref{$alias} und
+@mrefdot{$reset}
 
 @emph{Beispiel:}
 
@@ -157,32 +198,41 @@ abgelegt ist.
      (X Y)
    (+ X Y)))
 T
-@end example
-
-@example
 * (defmspec f(x y) (+ x y))
 #<FUNCTION (LAMBDA (X Y)) @{AF8A7BD@}>
 * (symbol-plist 'f)
 (MSPEC #<FUNCTION (LAMBDA #) @{AF8A7BD@}>)
 @end example
 
+@need 800
+@emph{Bemerkung:}
+
+Im Original Maxima wird aus historischen Gr@"unden die Funktion zum Indikator
+@code{mfexpr*} abgelegt.  Weiterhin wird in kMaxima anstatt @code{(func . rest)} 
+eine erweiterte Argumentliste verwendet, um die Syntax einer Spezialform besser
+wiederzugeben.
+
 @emph{Quelltext:}
 @lisp
 @group
-(defmacro defmspec (func . rest)
-  `(progn
-     (defun-prop (,func mspec) ,@@rest)))
+(defmacro defmspec (func arg &body body)
+  `(defun-prop (,func mspec) ,arg ,@@body))
 @end group
 @end lisp
 @end deffn
 
-@c --- 16.10.2011 --------------------------------------------------------------
+@c -----------------------------------------------------------------------------
+@node Das Makro @code{defmvar}, Das Makro @code{errset}, Die Makros @code{defun-prop} und @code{defmspec}, Makros
+@subsection Das Makro @code{defmvar}
+@c -----------------------------------------------------------------------------
+
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{*variable-initial-values*}
 @defvr {Globale Variable} *variable-initial-values*
-Standardwert: @code{#<HASH-TABLE :TEST EQL :COUNT 0 @{AF946F1@}>}
+Standardwert: @code{#<HASH-TABLE :TEST EQL :COUNT 0>}
 
-Hash-Tabelle mit allen Variablen und deren Anfangswerte, die mit dem Makro
-@mref{defmvar} definiert sind.  kMaxima nutzt die Eintr@"age der
+Ist eine Hash-Tabelle mit allen Variablen und deren Anfangswerte, die mit dem
+Makro @mref{defmvar} definiert sind.  kMaxima nutzt die Eintr@"age der
 Hash-Tabelle, wenn Optionsvariablen mit der Funktion @mref{$reset} auf ihren
 Anfangswert zur@"uckgesetzt werden.
 @end defvr
@@ -191,16 +241,15 @@ Anfangswert zur@"uckgesetzt werden.
 @anchor{defmvar}
 @deffn {Makro} defmvar var &rest val-and-doc
 
-Definiert eine globale Variable @var{var}, deren Wert, wenn noch nicht
+Das Makro definiert eine globale Variable @var{var}, deren Wert, wenn noch nicht
 vorhanden, in die Hash-Tabelle @mref{*variable-initial-values*} eingetragen
-wird.  Das Argument @var{val-and-doc} enth@"alt den Wert der Variablen sowie
-gegebenenfalls eine Zeichenkette f@"ur die Dokumentation.
+wird.  Das Argument @var{val-and-doc} ist die Liste mit den weiteren Argumenten
+und enth@"alt als erstes Element den Wert der Variablen sowie als zweites
+Element gegebenenfalls eine Zeichenkette f@"ur die Dokumentation.  Jedes weitere
+Element der Liste wird ignoriert.
 
 Mit der Nutzerfunktion @mref{$reset} k@"onnen Variablen, die mit @code{defmvar}
-definiert wurden, auf ihren Anfangswert zur@"uckgesetzt werden.  Wird das
-Argument @var{val-and-doc} nicht angegeben, dann wird die Variable mit dem Wert
-@code{nil} initialisiert.  Die Variable wird im Unterschied zu einer Definition
-mit @code{defvar} also immer an einen Wert gebunden.
+definiert wurden, auf ihren Anfangswert zur@"uckgesetzt werden. 
 
 @emph{Beispiel:}
 
@@ -210,6 +259,12 @@ mit @code{defvar} also immer an einen Wert gebunden.
  (UNLESS (GETHASH 'X *VARIABLE-INITIAL-VALUES*)
    (SETF (GETHASH 'X *VARIABLE-INITIAL-VALUES*) 100))
  (DEFVAR X 100))
+T
+* (macroexpand '(defmvar y))
+(PROGN
+ (UNLESS (GETHASH 'Y *VARIABLE-INITIAL-VALUES*)
+   (SETF (GETHASH 'Y *VARIABLE-INITIAL-VALUES*) NIL))
+ (DEFVAR Y))
 T
 @end example
 
@@ -227,37 +282,40 @@ T
 @end lisp
 @end deffn
 
-@c --- 16.10.2011 --------------------------------------------------------------
-@anchor{errset_variable}
-@defvr {Globale Variable} errset
+@c -----------------------------------------------------------------------------
+@node Das Makro @code{errset}, , Das Makro @code{defmvar}, Makros
+@subsection Das Makro @code{errset}
+@c -----------------------------------------------------------------------------
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{*errset*}
+@defvr {Globale Variable} *errset*
 Standardwert: @code{nil}
 
-Hat @code{errset} den Wert @code{t}, wird in einer mit dem Makro
-@mref{errset} definierten Umgebung bei Auftreten eines Fehlers das Programm
-durch Aufruf der @code{Lisp}-Funktion @code{error} abgebrochen.
+Hat @code{*errset*} den Wert @code{t}, wird in einer mit dem Makro
+@mref{errset} definierten Umgebung bei Auftreten eines Fehlers kMaxima durch
+Aufruf der @code{Lisp}-Funktion @code{error} abgebrochen.
 @end defvr
 
-@c --- 21.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{errset}
 @deffn {Makro} errset &rest l
 
 Mit dem Makro @code{errset} wird eine Umgebung definiert, die Fehler abf@"angt,
 wenn das Argument @var{l} ausgewertet wird.  Hat die Variable
-@mxref{errset_variable, errset} den Wert @code{nil}, bricht die Ausf@"uhrung des
-Programms bei einem Fehler nicht ab und der R@"uckgabewert ist @code{nil}.  Kann
-das Argument erfolgreich ausgewertet werden, wird das Ergebnis als Element einer
-Liste zur@"uckgegeben.  Hat die Variable @code{errset} dagegen den Wert
-@code{t}, bricht die Ausf@"uhrung von kMaxima mit dem Aufruf der Lisp-Funktion
+@mref{*errset*} den Wert @code{nil}, bricht die Ausf@"uhrung des Programms bei
+einem Fehler nicht ab und der R@"uckgabewert ist @code{nil}.  Kann das Argument
+erfolgreich ausgewertet werden, wird das Ergebnis als Element einer Liste
+zur@"uckgegeben.  Hat die Variable @code{errset} dagegen den Wert @code{t},
+bricht die Ausf@"uhrung von kMaxima mit dem Aufruf der Lisp-Funktion
 @code{error} ab.
 
 @emph{Beispiele:}
 @example
 * (let ((errset nil)) (errset (/ 1 2)))
 (1/2)
-
 * (let ((errset nil)) (errset (/ 1 0)))
 NIL
-
 * (let ((errset t)) (errset (/ 1 0)))
 ; in: LAMBDA NIL
 ;     (/ 1 0)
@@ -266,22 +324,7 @@ NIL
 ;   Lisp error during constant folding:
 ;   arithmetic error DIVISION-BY-ZERO signalled
 ;   Operation was SB-KERNEL::DIVISION, operands (1 0).
-; 
-; compilation unit finished
-;   caught 1 STYLE-WARNING condition
-
-debugger invoked on a DIVISION-BY-ZERO in thread #<THREAD
-                                                   "initial thread" RUNNING
-                                                   @{AA8A979@}>:
-  arithmetic error DIVISION-BY-ZERO signalled
-Operation was SB-KERNEL::DIVISION, operands (1 0).
-
-Type HELP for debugger help, or (SB-EXT:QUIT) to exit from SBCL.
-
-restarts (invokable by number or by possibly-abbreviated name):
-  0: [ABORT] Exit debugger, returning to top level.
-
-((LAMBDA ()))
+[...]
 @end example
 
 @emph{Quelltext:}
@@ -295,15 +338,201 @@ restarts (invokable by number or by possibly-abbreviated name):
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Funktionen f@"ur die Eigenschaftsliste, Allgemeine Makros, Hilfsfunktionen
-@section Testfunktionen f@"ur kMaxima-Ausdr@"ucke
+@node Testfunktionen, Funktionen f@"ur die Eigenschaftsliste, Makros, Erste Makros und Hilfsfunktionen
+@section Testfunktionen
 @c -----------------------------------------------------------------------------
 
-@c --- 21.10.2011 --------------------------------------------------------------
+@menu
+* Allgemeine Testfunktionen::
+* Teste kMaxima-Ausdr@"ucke::
+* Teste kMaxima-Zahlen::
+* Teste Symbole mit Eigenschaften::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Allgemeine Testfunktionen, Teste kMaxima-Ausdr@"ucke, Testfunktionen, Testfunktionen
+@subsection Allgemeine Testfunktionen
+@c -----------------------------------------------------------------------------
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{fixnump}
+@deffn {Funktion} fixnump x
+
+Ist das Argument @var{x} eine ganze Zahl vom Typ @code{fixnum}, ist das Ergebnis
+@code{true} und ansonsten @code{false}.
+
+Der Bereich der ganzen Zahlen vom Typ @code{fixnum} ist abh@"angig von der
+Lisp-Implementation.  Der gr@"o@ss{}te Wert ist @code{most-positive-fixnum} und
+der kleinste ist @code{most-negative-fixnum}.
+
+Siehe auch die Funktion @mrefdot{bignump}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun fixnump (x)
+  (typep n 'fixnum))
+@end group
+@end lisp
+@end deffn
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{bignump}
+@deffn {Funktion} bignump x
+
+Ist das Argument @var{x} eine ganze Zahl vom Typ @code{bignum}, ist das
+Ergebnis @code{true} und ansonsten @code{false}.
+
+Siehe auch die Funktion @mrefdot{fixnump}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun  bignump (x)
+  (typep x 'bignum))
+@end group
+@end lisp
+@end deffn
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{mfunctionp}
+@deffn {Funktion} mfunctionp x
+
+Ist das Argument @var{x} eine Funktion oder ein Symbol, das eine Funktion
+bezeichnet, dann ist die R@"uckgabe @code{t} und ansonsten @code{nil}.  Die
+Funktion @code{mfunctionp} ist eine Erweiterung der Lisp-Funktion
+@code{functionp}, die auch Symbole ber@"ucksichtigt, die eine Funktion als
+Wert haben.
+
+@emph{Beispiele:}
+@example
+* (functionp #'meval)
+T
+* (functionp 'meval)
+NIL
+* (mfunctionp 'meval)
+T
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mfunctionp (x)
+  (cond ((symbolp x)
+         (and (not (macro-function x))
+              (fboundp x) t))
+        ((functionp x))))
+@end group
+@end lisp
+@end deffn
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{*alphabet*}
+@defvr {Globale Variable} *alphabet*
+Standardwert: @code{(#\_ #\%)}
+
+Die globale Liste @code{*alphabet*} enth@"alt die Zeichen, die in kMaxima
+zus@"atzlich zu den Zeichen @code{A ... Z} und @code{a ... z} alphabetische
+Zeichen sind.  Die Funktion @mref{alphabetp} ber@"ucksichtigt bei einem Test
+die in @code{*alphabet*} enthaltenen Zeichen.
+
+kMaxima-Bezeichner k@"onnen alle Zeichen enthalten, die alphabetisch sind.
+Sonderzeichen, die der globalen Variablen @code{*alphabet*} hinzugef@"ugt
+werden, k@"onnen zus@"atzlich in Bezeichnern verwendet werden.
+@end defvr
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{alphabetp}
+@deffn {Funktion} alphabetp ch
+
+Hat das Ergebnis @code{true}, wenn das Argument @var{ch} ein alphabetisches
+Zeichen ist.  Alphabetisch sind die Zeichen @code{A ... Z} und @code{a ... z}
+sowie die Zeichen, die in der globalen Variablen @mref{*alphabet*} enthalten
+sind.
+
+Alphabetische Zeichen k@"onnen in einem kMaxima-Bezeichner verwendet werden.
+Wenn ein Token mit der Funktion @mref{scan-token} vom Parser eingelesen wird,
+dann endet das Einlesen des Tokens mit dem ersten Zeichen, das kein
+alphabetisches Zeichen ist.
+
+@emph{Beispiele:}
+@example
+* (alphabetp #\A)
+T
+* (alphabetp #\+)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun alphabetp (ch)
+  (and (characterp ch)
+       (or (alpha-char-p ch)
+           (member ch *alphabet*))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Teste kMaxima-Ausdr@"ucke, Teste kMaxima-Zahlen, Allgemeine Testfunktionen, Testfunktionen
+@subsection Teste kMaxima-Ausdr@"ucke
+@c -----------------------------------------------------------------------------
+
+kMaxima-Ausdr@"ucke haben immer die Form @code{((op) arg_1 arg_2 ...)}.  Das
+erste Element der Liste ist eine Liste mit dem Hauptoperator des Ausdrucks als
+erstes Element.  Dann folgen die Argumente des Operators.  Sehr h@"aufig muss
+getestet werden, ob ein bestimmter Operator vorliegt.  Hierf@"ur werden in
+diesem Kapitel Testfunktionen bereit gestellt.
+
+@c --- 08.11.2011 --------------------------------------------------------------
+@anchor{moperatorp}
+@deffn {Funktion} moperatorp x op
+
+Die R@"uckgabe ist @code{t}, wenn der Operator @var{op} der Hauptoperator des
+Ausdrucks @var{x} ist.  Die Funktion testet, ob ein g@"ultiger kMaxima-Ausdruck
+vorliegt.  Ist dies nicht der Fall, ist die R@"uckgabe @code{nil}.
+
+@emph{Beispiele:}
+@example
+* (moperatorp '((mplus) $a $b) 'mplus)
+T
+* (moperatorp '((mplus) $a $b) 'mtimes)
+NIL
+* (moperatorp '((mplus) ((mtimes) 2 $a) $b) 'mtimes)
+NIL
+* (moperatorp 100 'mplus)
+NIL
+* (moperatorp '(a b c) 'mplus)
+NIL
+@end example
+
+@emph{Hinweis:}
+
+Im Original Maxima gibt es eine Funktion @code{op-equalp}, die eine beliebige
+Anzahl an Operatoren als Argument akzeptiert und mit der Lisp-Funktion
+@code{equal} testet.  Die hier definierte Funktion kopiert die Syntax anderer
+Testfunktionen wie @mref{mplusp} oder @mrefdot{mexptp}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun moperatorp (x op)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) op)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{mminusp}
 @deffn {Funktion} mminusp x
 
-Pr@"uft, ob das Argument @var{x} ein @code{mminus}-Ausdruck ist.
+Testet, ob das Argument @var{x} ein @code{mminus}-Ausdruck ist, also den
+Operator @code{mminus} f@"ur die Negation als Hauptoperator hat.  Siehe auch
+die Funktion @mrefcomma{moperatorp} die allgemeiner definiert ist und einen
+Operator als weiteres Argument akzeptiert.
 
 @emph{Quelltext:}
 @lisp
@@ -320,7 +549,11 @@ Pr@"uft, ob das Argument @var{x} ein @code{mminus}-Ausdruck ist.
 @anchor{mplusp}
 @deffn {Funktion} mplusp x
 
-Pr@"uft, ob das Argument @var{x} ein @code{mplusp}-Ausdruck ist.
+Testet, ob das Argument @var{x} ein @code{mplusp}-Ausdruck ist, also den
+Operator @code{mplus} f@"ur eine Summe als Hauptoperator hat.  Siehe auch die
+Funktion @mrefcomma{moperatorp} die allgemeiner definiert ist und einen
+Operator als weiteres Argument akzeptiert.
+
 
 @emph{Quelltext:}
 @lisp
@@ -337,8 +570,12 @@ Pr@"uft, ob das Argument @var{x} ein @code{mplusp}-Ausdruck ist.
 @anchor{mtimesp}
 @deffn {Funktion} mtimesp x
 
-Pr@"uft, ob das Argument @var{x} ein @code{mtimes}-Ausdruck ist.
+Testet, ob das Argument @var{x} ein @code{mtimesp}-Ausdruck ist, also den
+Operator @code{mtimes} f@"ur ein Produkt als Hauptoperator hat.  Siehe auch die
+Funktion @mrefcomma{moperatorp} die allgemeiner definiert ist und einen
+Operator als weiteres Argument akzeptiert.
 
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -350,11 +587,14 @@ Pr@"uft, ob das Argument @var{x} ein @code{mtimes}-Ausdruck ist.
 @end lisp
 @end deffn
 
-@c --- 21.10.2011 --------------------------------------------------------------
+@c --- 21.10.2011 -------------------------------------------------------------- 
 @anchor{mexptp}
 @deffn {Funktion} mexptp x
 
-Pr@"uft, ob das Argument @var{x} ein @code{mexpt}-Ausdruck ist.
+Testet, ob das Argument @var{x} ein @code{mexptp}-Ausdruck ist, also den
+Operator @code{mexpt} f@"ur die Exponentiation als Hauptoperator hat.  Siehe
+auch die Funktion @mrefcomma{moperatorp} die allgemeiner definiert ist und
+einen Operator als weiteres Argument akzeptiert.
 
 @emph{Quelltext:}
 @lisp
@@ -371,7 +611,10 @@ Pr@"uft, ob das Argument @var{x} ein @code{mexpt}-Ausdruck ist.
 @anchor{mlistp}
 @deffn {Funktion} mlistp x
 
-Pr@"uft, ob das Argument @var{x} ein @code{mlistp}-Ausdruck ist.
+Testet, ob das Argument @var{x} ein @code{mlistp}-Ausdruck ist, also den
+Operator @code{mlist} f@"ur eine Liste als Hauptoperator hat.  Siehe auch die
+Funktion @mrefcomma{moperatorp} die allgemeiner definiert ist und einen Operator
+als weiteres Argument akzeptiert.
 
 @emph{Quelltext:}
 @lisp
@@ -384,116 +627,10 @@ Pr@"uft, ob das Argument @var{x} ein @code{mlistp}-Ausdruck ist.
 @end lisp
 @end deffn
 
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{marrayp}
-@deffn {Funktion} marrayp x
-
-Pr@"uft, ob das Argument @var{x} eine indizierte Variable ist.
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun marrayp (x)
-  (and (consp x)
-       (consp (car x))
-       (member 'array (cdar x) :test #'eq)
-       t))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{moperatorp}
-@deffn {Funktion} moperatorp x op
-
-Die R@"uckgabe ist @code{t}, wenn der Operator @var{op} der Hauptoperator des
-Ausdrucks @var{x} ist.
-
-@emph{Beispiele:}
-@example
-* (moperatorp '((mplus) $a $b) 'mplus)
-T
-
-* (moperatorp '((mplus) $a $b) 'mtimes)
-NIL
-
-* (moperatorp '((mplus) ((mtimes) 2 $a) $b) 'mtimes)
-NIL
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun moperatorp (x op)
-  (and (consp x)
-       (consp (car x))
-       (eq (caar x) op)))
-@end group
-@end lisp
-
-@emph{Hinweis:}
-
-Im Original Maxima gibt es eine Funktion @code{op-equalp}, die eine beliebige
-Anzahl an Operatoren als Argument akzeptiert und mit der Lisp-Funktion
-@code{equal} testet.  Die hier definierte Funktion kopiert die Syntax anderer
-Testfunktionen wie @mref{mplusp} oder @mrefdot{mexptp}
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{mop}
-@deffn {Funktion} mop form
-
-Gebe die Argumente des Hauptoperators des Ausdrucks @var{form} zur@"uck.  Die
-Funktion @code{mop} pr@"uft dabei, ob ein @code{mqapply}-Ausdruck vorliegt.
-
-Siehe auch die Funktion @mrefdot{margs}
-
-@emph{Beispiel:}
-@example
-* (mop '((mplus) a b))
-MPLUS
-* (mop '((mqapply) ((f array) x) a b))
-((F ARRAY) X)
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun mop (form)
-  (if (eq (caar form) 'mqapply)
-      (cadr form)
-      (caar form)))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{margs}
-@deffn {Funktion} margs form
-
-Gebe die Argumente des Hauptoperators zur@"uck.  Die Funktion @code{margs}
-pr@"uft dabei, ob ein @code{mqapply}-Ausdruck vorliegt.
-
-Siehe auch die Funktion @mrefdot{mop}
-
-@emph{Beispiele:}
-@example
-* (margs '((mplus) a b))
-(A B)
-* (margs '((mqapply) ((f array) x) a b))
-(A B)
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun margs (form)
-  (if (eq (caar form) 'mqapply)
-      (cddr form)
-      (cdr form)))
-@end group
-@end lisp
-@end deffn
+@c -----------------------------------------------------------------------------
+@node Teste kMaxima-Zahlen, Teste Symbole mit Eigenschaften, Teste kMaxima-Ausdr@"ucke, Testfunktionen
+@subsection Teste kMaxima-Zahlen
+@c -----------------------------------------------------------------------------
 
 @c --- 21.10.2011 --------------------------------------------------------------
 @anchor{mnumberp}
@@ -539,8 +676,9 @@ werden nicht als eine Lisp-Zahl, sondern als ein Ausdruck mit dem Operator
 @anchor{bigfloatp}
 @deffn {Funktion} bigfloatp x
 
-Testet, ob das Argument @var{x} eine gro@ss{} Gleitkommazahl ist.
+Testet, ob das Argument @var{x} eine gro@ss{}e Gleitkommazahl ist.
 
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -552,12 +690,23 @@ Testet, ob das Argument @var{x} eine gro@ss{} Gleitkommazahl ist.
 @end lisp
 @end deffn
 
-@c --- 23.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{zerop1}
 @deffn {Funktion} zerop1 x
 
-Testet, ob das Argument @var{x} Null ist.  Im Unterschied zur Lisp-Funktion
-@code{zerop}, werden auch gro@ss{}e Gleitkommazahlen auf den Wert Null getestet.
+Testet, ob das Argument @var{x} die Zahl Null ist.  Im Unterschied zur
+Lisp-Funktion @code{zerop}, werden auch gro@ss{}e Gleitkommazahlen auf den Wert
+Null getestet.  Siehe auch die Funktionen @mref{onep} und @mrefdot{onep1}
+
+@emph{Beispiele:}
+@example
+* (zerop1 0)
+T
+* (zerop1 0.0)
+T
+* (zerop1 ($bfloat 0))
+T
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -571,7 +720,7 @@ Testet, ob das Argument @var{x} Null ist.  Im Unterschied zur Lisp-Funktion
 @end lisp
 @end deffn
 
-@c --- 23.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{onep}
 @deffn {Funktion} onep x
 
@@ -579,6 +728,22 @@ Testet, ob das Argument @var{x} eine Lisp-Zahl mit dem Wert Eins ist.
 @code{onep} ist vergleichbar mit der Lisp-Funktion @code{zerop}.
 
 Siehe auch die Funktionen @mref{onep1} und @mrefdot{zerop1}
+
+@emph{Hinweis:}
+
+Das Original Maxima hat auch die Funktion @code{onep}.  Diese testet jedoch
+nur, ob das Argument die ganze Zahl @code{1} ist.  Die hier definierte
+Funktion hat dagegen auch f@"ur eine Gleitkommazahl mit dem Wert @code{1.0} das
+Ergebnis @code{t}.  Das entspricht der Funktionalit@"at der entsprechenden
+Lisp-Funktion @code{zerop}.
+
+@emph{Beispiele:}
+@example
+* (onep 1)
+T
+* (onep 1.0)
+T
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -589,7 +754,7 @@ Siehe auch die Funktionen @mref{onep1} und @mrefdot{zerop1}
 @end lisp
 @end deffn
 
-@c --- 23.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{onep1}
 @deffn {Funktion} onep1 x
 
@@ -597,6 +762,14 @@ Testet, ob das Argument @var{x} eine Zahl mit dem Wert Eins ist.  Im Unterschied
 zur Funktion @mref{onep} werden auch gro@ss{}e Gleitkommazahlen auf den Wert
 Eins getestet.
 
+@emph{Beispiel:}
+
+@example
+* (onep1 ($bfloat 1))
+T
+@end example
+
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -609,11 +782,25 @@ Eins getestet.
 @end lisp
 @end deffn
 
-@c --- 23.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{mnegativep}
 @deffn {Funktion} mnegativep x
 
-Testet, ob das Argument @var{x} eine negative Zahl ist.
+Testet, ob das Argument @var{x} eine negative Zahl ist.  Das Argument kann
+eine Lisp-Zahl sowie eine rationale Zahl oder gro@ss{}e Gleitkommazahl sein.
+
+@emph{Beispiele:}
+
+@example
+* (mnegativep -1)
+T
+* (mnegativep -1.0)
+T
+* (mnegativep ($bfloat -1))
+T
+* (mnegativep ($bfloat 2))
+NIL
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -626,13 +813,27 @@ Testet, ob das Argument @var{x} eine negative Zahl ist.
 @end lisp
 @end deffn
 
+@c -----------------------------------------------------------------------------
+@node Teste Symbole mit Eigenschaften, , Teste kMaxima-Zahlen, Testfunktionen
+@subsection Teste Symbole mit Eigenschaften
+@c -----------------------------------------------------------------------------
+
 @c --- 29.10.2011 --------------------------------------------------------------
 @anchor{decl-constant}
 @deffn {Funktion} decl-constant x
 
-Testet, ob das Argument @var{x}, als ein konstantes Symbol deklariert ist.
-
+Testet, ob das Argument @var{x} ein Symbol ist, das als konstant deklariert ist.
 Siehe auch die Funktion @mrefdot{mconstantp}
+
+@emph{Hinweis:}
+
+Eigenschaften wie die, das ein Symbol eine Konstante repr@"asentiert, werden
+im Original Maxima in eine Datenbank abgelegt.  Diese ist hier noch nicht
+implementiert.  Um die zugeh@"orige Funktionalit@"at vorab implementieren zu
+k@"onnen, erwartet die Funktion @code{decl-constant} die entsprechende
+Eigenschaft auf der Eigenschaftsliste des Symbols.  Sp@"ater kann die Funktion
+@code{decl-constant} leicht umformuliert werden, ohne das der bereits
+vorhandene Code ge@"andert werden muss.
 
 @emph{Quelltext:}
 @lisp
@@ -643,15 +844,24 @@ Siehe auch die Funktion @mrefdot{mconstantp}
 @end lisp
 @end deffn
 
-@c --- 29.10.2011 --------------------------------------------------------------
+@c --- 09.11.2011 --------------------------------------------------------------
 @anchor{mconstantp}
 @deffn {Funktion} mconstantp x
 
 Testet, ob das Argument @var{x} eine Lisp-Zahl oder ein Symbol ist, das als
-konstant deklariert ist.
+konstant deklariert ist.  So sind zum Beispiele die Symbole @code{%e},
+@code{%pi}, @code{%gamma}, @code{%phi} oder @code{%i} als konstant deklariert.
 
-Siehe auch @mref{decl-constant}
+Siehe auch die Funktion @mrefdot{decl-constant}
 
+@emph{Bemerkung:}
+
+Das Original Maxima hat die Funktion @code{maxima-constantp}, die mit dieser
+Funktion vergleichbar ist.  Rationale Zahlen und gro@ss{}e Gleitkommazahlen
+geben nicht das Ergebnis @code{t} f@"ur eine Konstante zur@"uck.  Dies erscheint
+nicht konsistent.  Ein Grund f@"ur diese Inkonsistenz ist noch nicht gefunden.
+
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -660,15 +870,76 @@ Siehe auch @mref{decl-constant}
       (decl-constant x)))
 @end group
 @end lisp
-
-@emph{Hinweis:}
-
-Das Original Maxima hat die Funktion @code{maxima-constantp}, die mit dieser
-Funktion vergleichbar ist.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Testfunktionen f@"ur kMaxima-Ausdr@"ucke, Hilfsfunktionen
+@node Weitere Funktionen f@"ur Ausdr@"ucke, Funktionen f@"ur die Eigenschaftsliste, Testfunktionen, Erste Makros und Hilfsfunktionen
+@section Weitere Funktionen f@"ur Ausdr@"ucke
+@c -----------------------------------------------------------------------------
+
+@c --- 09.11.2011 --------------------------------------------------------------
+@anchor{mop}
+@deffn {Funktion} mop form
+
+Gibt den Hauptoperator des Ausdrucks @var{form} zur@"uck, der ein g@"ultiger
+kMaxima-Ausdruck sein muss.  Die Funktion @code{mop} pr@"uft dabei, ob ein
+@code{mqapply}-Ausdruck vorliegt.  Es ist ein Fehler keinen g@"ultigen
+kMaxima-Ausdruck als Argument an die Funktion zu @"ubergeben.  In diesem Fall
+bricht die Ausf@"uhrung mit einem Lisp-Fehler ab.
+
+Siehe auch die Funktion @mrefdot{margs}
+
+@emph{Beispiel:}
+@example
+* (mop '((mplus) a b))
+MPLUS
+* (mop '((mqapply) ((f array) x) a b))
+((F ARRAY) X)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{margs}
+@deffn {Funktion} margs form
+
+Gibt die Argumente des Hauptoperators des Ausdrucks @var{form} zur@"uck.  Das
+Argument @var{form} muss ein g@"ultiger kMaxima-Ausdruck sein, ansonsten wird ein
+Lisp-Fehler signalisiert.  Die Funktion @code{margs} pr@"uft dabei, ob ein
+@code{mqapply}-Ausdruck vorliegt.
+
+Siehe auch die Funktion @mrefdot{mop}
+
+@emph{Beispiele:}
+@example
+* (margs '((mplus) a b))
+(A B)
+* (margs '((mqapply) ((f array) x) a b))
+(A B)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Weitere Funktionen f@"ur Ausdr@"ucke, Erste Makros und Hilfsfunktionen
 @section Funktionen f@"ur die Eigenschaftsliste
 @c -----------------------------------------------------------------------------
 
@@ -727,7 +998,7 @@ NIL
 Das Makro @code{defprop} ruft die Funktion @mref{putprop} auf, um den Wert
 @var{val} zum Indikator @var{indic} auf der Eigenschaftsliste des Symbols
 @var{sym} abzulegen.  Im Unterschied zur Funktion @mref{putprop} wertet das
-Makro @code{defprop} ihre Argument nicht aus, so dass Symbole nicht quotiert
+Makro @code{defprop} die Argumente nicht aus, so dass Symbole nicht quotiert
 werden m@"ussen.  
 
 Siehe auch die Funktion @mref{getprop} und @mrefdot{getpropl}
@@ -777,10 +1048,27 @@ NIL
 @deffn {Funktion} getpropl sym indicl
 
 @code{getpropl} ist eine Verallgemeinerung der Funktion @mrefcomma{getprop}@w{}
-die auch eine Liste als zweites Argument akzeptiert und eine Liste zur@"uckgibt,
+die eine Liste als zweites Argument erwartet und eine Liste zur@"uckgibt,
 deren erstes Element der Indikator ist, zu dem der erste Eintrag auf der
 Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der Liste sind die
 folgenden Eintr@"age der Eigenschaftsliste.
+
+Beispiel:
+
+@example
+* (defprop f 100 width)
+100
+* (defprop f round shape)
+ROUND
+* (symbol-plist 'f)
+(SHAPE ROUND WIDTH 100)
+* (getpropl 'f '(shape))
+(SHAPE ROUND WIDTH 100)
+* (getpropl 'f '(width))
+(WIDTH 100)
+* (getpropl 'f '(colour width))
+(WIDTH 100)
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -797,7 +1085,7 @@ folgenden Eintr@"age der Eigenschaftsliste.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Funktionen f@"ur die Eigenschaftsliste, Hilfsfunktionen
+@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Funktionen f@"ur die Eigenschaftsliste, Erste Makros und Hilfsfunktionen
 @section Konvertierung zwischen Gro@ss{}- und Kleinschreibung
 @c -----------------------------------------------------------------------------
 
@@ -833,6 +1121,7 @@ Symbole sowie Symbole in gemischter Schreibweise.
 "aBc"
 @end example
 
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -921,7 +1210,7 @@ ABC
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Zerlegung von Symbolen und Zeichenketten in Listen, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Hilfsfunktionen
+@node Zerlegung von Symbolen und Zeichenketten in Listen, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Erste Makros und Hilfsfunktionen
 @section Zerlegung von Symbolen und Zeichenketten in Listen
 @c -----------------------------------------------------------------------------
 
@@ -1088,7 +1377,7 @@ NIL
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Alias und Reversealias, Verb- und Substantivform, Zerlegung von Symbolen und Zeichenketten in Listen, Hilfsfunktionen
+@node Alias und Reversealias, Verb- und Substantivform, Zerlegung von Symbolen und Zeichenketten in Listen, Erste Makros und Hilfsfunktionen
 @section Alias und Reversealias
 @c -----------------------------------------------------------------------------
 
@@ -1292,7 +1581,7 @@ Anzeige durch das vom Nutzer definierte Symbol @code{|$I|} ersetzt.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Verb- und Substantivform, Vergleiche Ausdr@"ucke, Alias und Reversealias, Hilfsfunktionen
+@node Verb- und Substantivform, Vergleiche Ausdr@"ucke, Alias und Reversealias, Erste Makros und Hilfsfunktionen
 @section Verb- und Substantivform
 @c -----------------------------------------------------------------------------
 
@@ -1304,7 +1593,7 @@ Beispiel hat die Sinusfunktion die Verbform @code{$sin} und die Substantivform
 @code{%sin}.
 
 @c --- 29.10.2011 --------------------------------------------------------------
-@anchor{$nounifiy}
+@anchor{$nounify}
 @deffn {Funktion} $nounify x
 
 Die Funktion @code{$nounify} ist als eine Maxima-Nutzerfunktion implementiert,
@@ -1494,7 +1783,7 @@ NIL
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen und Variablen, Verb- und Substantivform, Hilfsfunktionen
+@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen und Variablen, Verb- und Substantivform, Erste Makros und Hilfsfunktionen
 @section Vergleiche Ausdr@"ucke
 @c -----------------------------------------------------------------------------
 
@@ -1669,7 +1958,7 @@ Siehe auch die Funktion @mrefdot{free}
 
 @c -----------------------------------------------------------------------------
 @need 800
-@node Weitere Hilfsfunktionen und Variablen, , Vergleiche Ausdr@"ucke, Hilfsfunktionen
+@node Weitere Hilfsfunktionen und Variablen, , Vergleiche Ausdr@"ucke, Erste Makros und Hilfsfunktionen
 @section Weitere Hilfsfunktionen und Variablen
 @c -----------------------------------------------------------------------------
 
@@ -1761,62 +2050,6 @@ $DEPENDENCIES
             (delete (assoc (car item) llist :test #'equal)
                     llist :count 1 :test #'equal)))
     (nconc llist (list item))))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{fixnump}
-@deffn {Funktion} fixnump n
-
-Ist das Argument @var{n} eine ganze Zahl vom Typ @code{fixnum}, ist das Ergebnis
-@code{true} und ansonsten @code{false}.
-
-Der Bereich der ganzen Zahlen vom Typ @code{fixnum} ist abh@"angig von der
-Lisp-Implementation.  Der gr@"o@ss{}te Wert ist @code{most-positive-fixnum} und
-der kleinste ist @code{most-negative-fixnum}.
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun fixnump (n)
-  (typep n 'fixnum))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@anchor{*alphabetp*}
-@defvr {Globale Variable} *alphabetp*
-Standardwert: @code{(#\_ #\%)}
-
-Die globale Liste @code{*alphabetp*} enth@"alt die Zeichen, die in kMaxima
-zus@"atzlich zu den Zeichen @code{A ... Z} und @code{a ... z} alphabetische
-Zeichen sind.  Die Funktion @mref{alphabetp} ber@"ucksichtigt bei einem Test
-die in @code{*alphabetp*} enthaltenen Zeichen.
-
-kMaxima-Bezeichner k@"onnen alle Zeichen enthalten, die alphabetisch sind.
-Sonderzeichen, die der globalen Variablen @code{*alphabetp*} hinzugef@"ugt
-werden, k@"onnen zus@"atzlich in Bezeichnern verwendet werden.
-@end defvr
-
-@c -----------------------------------------------------------------------------
-@anchor{alphabetp}
-@deffn {Funktion} alphabetp ch
-
-Hat das Ergebnis @code{true}, wenn das Argument @var{ch} ein alphabetisches
-Zeichen ist.  Alphabetisch sind die Zeichen @code{A ... Z} und @code{a ... z}
-sowie die Zeichen, die in der globalen Variablen @mref{*alphabetp*} enthalten
-sind.
-
-@emph{Quelltext:}
-
-@lisp
-@group
-(defun alphabetp (ch)
-  (and (characterp ch)
-       (or (alpha-char-p ch)
-           (member ch *alphabet*))))
 @end group
 @end lisp
 @end deffn
