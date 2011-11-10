@@ -586,14 +586,14 @@ NIL
 @c -----------------------------------------------------------------------------
 
 @menu
-* Das Makro defmspec::
-* Das Makro defmvar::
+* Definition von Funktionen mit defmspec::
+* Definition von Variablen mit defmvar::
 * Setzen und Lesen der Eigenschaftsliste::
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Das Makro defmspec, Das Makro defmvar, Die ersten Makros und weitere Funktionen, Die ersten Makros und weitere Funktionen
-@subsection Das Makro @code{defmspec}
+@node Definition von Funktionen mit defmspec, Definition von Variablen mit defmvar, Die ersten Makros und weitere Funktionen, Die ersten Makros und weitere Funktionen
+@subsection Definition von Funktionen mit @code{defmspec}
 @c -----------------------------------------------------------------------------
 
 @findex defmspec
@@ -648,8 +648,8 @@ gezeigte Anwendung der Funktion mit @code{apply} ausgef@"uhrt wird.
 @end example
 
 @c -----------------------------------------------------------------------------
-@node Das Makro defmvar, Setzen und Lesen der Eigenschaftsliste, Das Makro defmspec, Die ersten Makros und weitere Funktionen
-@subsection Das Makro @code{defmvar}
+@node Definition von Variablen mit defmvar, Setzen und Lesen der Eigenschaftsliste, Definition von Funktionen mit defmspec, Die ersten Makros und weitere Funktionen
+@subsection Definition von Variablen mit @code{defmvar}
 @c -----------------------------------------------------------------------------
 
 @findex defmvar
@@ -694,7 +694,7 @@ T
 @end example
 
 @c -----------------------------------------------------------------------------
-@node Setzen und Lesen der Eigenschaftsliste, , Das Makro defmvar, Die ersten Makros und weitere Funktionen
+@node Setzen und Lesen der Eigenschaftsliste, , Definition von Variablen mit defmvar, Die ersten Makros und weitere Funktionen
 @subsection Setzen und Lesen der Eigenschaftsliste
 @c -----------------------------------------------------------------------------
 
