@@ -686,6 +686,58 @@ ein @code{mexpt}-Ausdruck.
 @end lisp
 @end deffn
 
+@c --- 07.11.2011 --------------------------------------------------------------
+@anchor{take}
+@deffn {Makro} take operator &rest args
+
+@emph{Argumente und R@"uckgabe:}
+
+@table @emph
+@item @var{operator}
+Eine Liste mit einem Symbol als einziges Element, das einen Operator bezeichnet.
+@item @var{args}
+Die Argumente des Operators.
+@item R@"uckgabe
+Das Makro expandiert zu einem Aufruf der Funktion @code{simplifya}.  Das erste
+Argument ist ein Ausdruck der aus den Argumenten @var{operator} und @var{args}
+gebildet wird und das zweite Argument hat den Wert @code{t}.
+@end table
+
+@emph{Beschreibung:}
+
+Das Makro @code{take} ist eine abk@"urzende Schreibweise, um die Funktion
+@mref{simplifya} mit dem Operator @var{operator} und den Argumenten @var{args}
+aufzurufen.  Die Funktion @code{simplifya} wird mit dem Wert
+@code{t} als zweites Argument aufgerufen, so dass die Argumente des Operators
+von der Funktion @code{simplifya} als bereits vereinfacht angenommen werden.
+
+@emph{Beispiele:}
+
+Expansion des Makros in einen Aufruf der Funktion @code{simplifya}.
+
+@example
+* (macroexpand-1 '(take '(mplus) 1 3))
+(SIMPLIFYA (LIST '(MPLUS) 1 3) T)
+@end example
+
+Die Auswertung vereinfacht den Ausdruck.
+
+@example
+* (take '(mplus) 1 3)
+4
+* (take '(mplus) '$a '$b)
+((MPLUS SIMP) $A $B)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro take (operator &rest args)
+  `(simplifya (list ,operator ,@@args) t))
+@end group
+@end lisp
+@end deffn
+
 @c -----------------------------------------------------------------------------
 @node Vereinfachung von rationalen Zahlen, Pr@"ufe Anzahl der Argumente von Funktionen f@"ur die Vereinfachung, Hilfsfunktionen der Vereinfachung
 @subsection Vereinfachung von rationalen Zahlen
