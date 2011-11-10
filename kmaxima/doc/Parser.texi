@@ -1144,7 +1144,7 @@ Fehler, die die Funktion @code{mread-synerr} aufrufen.
 @group
 (defun mread-synerr (format-string &rest l)
   (let (tem
-        errset
+        *errset*
         (file "stdin"))
     (errset (setq tem (file-position *parse-stream*))
             (setq file (namestring *parse-stream*)))
@@ -1947,13 +1947,18 @@ einem @code{?}-Zeichen, dem ein @code{:}-Zeichen folgt.
 @end lisp
 @end deffn
 
-@c --- 15.10.2011 --------------------------------------------------------------
+@c --- 08.11.2011 --------------------------------------------------------------
 @anchor{scan-token}
 @deffn {Funktion} scan-token flag
 
 Lese ein kMaxima-, Lisp- oder Keyword-Token vom Stream.  Hat das Argument
 @code{flag} den Wert @code{t}, dann wird ein kMaxima-Token vom Stream gelesen,
 ansonsten wird ein Lisp-Token vom Stream gelesen.
+
+Ein Token kann alle Zeichen enthalten, die alphabetisch sind.  Das sind die
+Zeichen @code{A ... Z} und @code{a ... z} sowie alle Zeichen die in der
+globalen Liste @mref{*alphabet*} enthalten sind.  Siehe auch die Funktion
+@mrefcomma{alphabetp} mit der getestet wird, ob ein Zeichen alphabetisch ist.
 
 Die Funktion wird von den Funktionen @mrefcomma{scan-maxima-token}@w{}
 @mref{scan-lisp-token} und @mref{scan-keyword-token} aufgerufen.
