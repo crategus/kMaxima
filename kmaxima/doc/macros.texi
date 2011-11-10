@@ -103,7 +103,9 @@
    Op-ti-ons-va-ri-a-ble
    sig-na-li-siert
    Ver-ein-fach-ung
+   ver-gleich-bar
    vor-an-ge-stell-tes
+   Wei-ter-hin
    Wur-zel-funk-tion
    Zei-chen-ket-te
  }
