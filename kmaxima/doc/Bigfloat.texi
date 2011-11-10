@@ -820,20 +820,6 @@ neuen Wert.
            (ratbigfloat (cdr x)))
           ((setq y (getprop (caar x) 'floatprog))
            (funcall y (mapcar #'$bfloat (cdr x))))
-          ((or (trigp (caar x))
-               (arcp (caar x)))
-           (setq y ($bfloat (cadr x)))
-           (if (bigfloatp y)
-               (cond ((arcp (caar x))
-                      (setq y ($bfloat (logarc (caar x) y)))
-                      (if (free y '$%i)
-                          y
-                          (let ($ratprint) (fparcsimp ($rectform y)))))
-                     ((member (caar x) '(%cot %sec %csc) :test #'eq)
-                      (invertbigfloat
-                        ($bfloat (list (ncons (getprop (caar x) 'recip)) y))))
-                     (t ($bfloat (exponentialize (caar x) y))))
-               (subst0 (list (ncons (caar x)) y) x)))
           (t (recur-apply #'$bfloat x)))))
 @end group
 @end lisp
