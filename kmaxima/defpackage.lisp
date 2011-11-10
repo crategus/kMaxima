@@ -23,7 +23,7 @@
 (defpackage :kmaxima
   (:nicknames :kmaxima)
   (:use :cl)
-  (:shadow float)
+  (:shadow #:float)
   (:export
     ;; Constants
     #:$%e #:$%pi #:$%gamma #:$%phi
@@ -33,6 +33,10 @@
     #:$true
     #:displayinput
     #:simp
+    #:mspec
+    
+    ;; mmacros.lisp
+    #:ncons #:while #:defun-prop #:defmspec #:defmvar #:errset
     
     ;; parser.lisp
     #:$+     #:$-      #:$*    #:$**   #:$^    #:$^^
