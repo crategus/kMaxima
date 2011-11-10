@@ -160,7 +160,7 @@
 
 (defun mread-synerr (format-string &rest l)
   (let (tem
-        errset
+        *errset*
         (file "stdin"))
     (errset (setq tem (file-position *parse-stream*))
             (setq file (namestring *parse-stream*)))
