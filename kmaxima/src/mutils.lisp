@@ -27,8 +27,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defmvar $props '((mlist simp)))
-(setf (get '$props 'assign) 'neverset)
+(defun fixnump (x)
+  (typep x 'fixnum))
+
+(defun  bignump (x)
+  (typep x 'bignum))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -40,14 +43,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun fixnump (n)
-  (typep n 'fixnum))
-
-(defun  bignump (x)
-  (typep x 'bignum))
-
-;;; ----------------------------------------------------------------------------
-
 (defvar *alphabet* (list #\_ #\%))
 
 (defun alphabetp (ch)
@@ -56,6 +51,11 @@
            (member ch *alphabet*))))
 
 ;;; ----------------------------------------------------------------------------
+
+(defun moperatorp (x op)
+  (and (consp x)
+       (consp (car x))
+       (eq (caar x) op)))
 
 (defun mminusp (x)
   (and (consp x)
@@ -82,42 +82,6 @@
   (and (consp x)
        (consp (car x))
        (eq (caar x) 'mlist)))
-
-(defun marrayp (x)
-  (and (consp x)
-       (consp (car x))
-       (member 'array (cdar x) :test #'eq)
-       t))
-
-(defun moperatorp (x op)
-  (and (consp x)
-       (consp (car x))
-       (eq (caar x) op)))
-
-;;; ----------------------------------------------------------------------------
-
-(defun trigp (func)
-  (member func
-          '(%sin %cos %tan %csc %sec %cot %sinh %cosh %tanh %csch %sech %coth)
-          :test #'eq))
-
-(defun arcp (func)
-  (member func
-          '(%asin %acos %atan %acsc %asec %acot %asinh %acosh %atanh %acsch
-                  %asech %acoth)
-          :test #'eq))
-
-;;; ----------------------------------------------------------------------------
-
-(defun mop (form)
-  (if (eq (caar form) 'mqapply)
-      (cadr form)
-      (caar form)))
-
-(defun margs (form)
-  (if (eq (caar form) 'mqapply)
-      (cddr form)
-      (cdr form)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -175,6 +139,18 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+
+;;; ----------------------------------------------------------------------------
+
 (defun putprop (sym val indic)
   (and (symbolp sym)
        (setf (get sym indic) val)))
@@ -195,6 +171,9 @@
         (t (return-from getpropl nil))))
 
 ;;; ----------------------------------------------------------------------------
+
+(defmvar $props '((mlist simp)))
+(setf (get '$props 'assign) 'neverset)
 
 (defun add2lnc (item llist)
   (if (memalike item (if (mlistp llist) (cdr llist) llist))
@@ -244,10 +223,6 @@
              (return-from exploden str)))
           (t (setq str (format nil "~A" sym))))
     (coerce str 'list)))
-
-(defun explodec (symb)
-  (loop for v in (coerce (print-invert-case symb) 'list)
-        collect (intern (string v))))
 
 ;;; ----------------------------------------------------------------------------
 
