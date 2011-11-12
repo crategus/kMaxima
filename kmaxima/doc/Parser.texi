@@ -63,16 +63,16 @@ den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
    "::"   $::   mset           a::b   ((mset) $A $B)
    "<="   $<=   mleqp          a<=b   ((mleqp) $A $B)
    ">="   $>=   mgeqp          a>=b   ((mgeqp) $A $B)
-   "''"   $''   tritt in der Ausgabe nicht auf      
+   "''"   $''   tritt in der Ausgabe nicht auf
+   "&&"   $&&   tritt in der Ausgabe nicht auf      
    "::="  $::=  mdefmacro      a::=b  ((mdefmacro) $A $B)
 @end verbatim
 
-Im Unterschied zum Original Maxima sind die Operatoren @code{&}, @code{&&} und
-@code{!!} in kMaxima nicht definiert.  Der Operator @code{''} tritt
-in der Ausgabe nicht auf, da dieser vom Parser sofort angewendet wird.
-
-Zum Unterschied zwischen dem Namen und den Symbolen, die einen Operator
-bezeichnen siehe @ref{Namen der Operatoren}.
+Im Unterschied zum Original Maxima sind die Operatoren @code{&} und @code{!!}
+in kMaxima nicht definiert.  Der Operator @code{''} tritt in der Ausgabe nicht
+auf, da dieser vom Parser sofort angewendet wird.  Zum Unterschied zwischen dem
+Namen und den Symbolen, die einen Operator bezeichnen siehe
+@ref{Namen der Operatoren}.
 
 @c -----------------------------------------------------------------------------
 @need 1000
@@ -144,6 +144,16 @@ MCOND
 T
 @end example
 
+@emph{Bemerkung:}
+
+Die Funktion akzeptiert auch ein Symbol als Argument @var{x}.  In diesem Fall
+pr@"uft @code{getopr0}, ob der Name des Operators zum Indikator @code{opr} auf
+der Eigenschaftsliste abgelegt ist.  Das Original Maxima und kMaxima haben keine
+Operatoren, die mit einem Symbol als Namen bezeichnet werden und einen Eintrag
+in der Eigenschaftsliste haben.  M@"oglicherweise sollte die zus@"atzliche
+Funktionalit@"at entfernt werden.  Operatoren m@"ussen dann auf jeden Fall eine
+Zeichenkette als Namen haben.
+
 @emph{Quelltext:}
 @lisp
 @group
@@ -153,15 +163,6 @@ T
            (gethash x opr-table))))
 @end group
 @end lisp
-
-@emph{Bemerkung:}
-Die Funktion akzeptiert auch ein Symbol als Argument @var{x}.  In diesem Fall
-pr@"uft @code{getopr0}, ob der Name des Operators zum Indikator @code{opr} auf
-der Eigenschaftsliste abgelegt ist.  Das Original Maxima und kMaxima haben keine
-Operatoren, die mit einem Symbol als Namen bezeichnet werden und einen Eintrag
-in der Eigenschaftsliste haben.  M@"oglicherweise sollte die zus@"atzliche
-Funktionalit@"at entfernt werden.  Operatoren m@"ussen dann auf jeden Fall eine
-Zeichenkette als Namen haben.
 @end deffn
 
 @c --- 10.08.2011 --------------------------------------------------------------
@@ -178,6 +179,13 @@ Definiert der Nutzer einen Operator, wird @code{putopr} von der Funktion
 Siehe auch die Funktionen @mrefcomma{getopr0} @mref{getopr} und
 @mrefdot{remopr}
 
+@emph{Bemerkung:}
+
+Wie die Funktionen @mref{getopr0} und @mref{remopr} akzeptiert auch
+@code{putopr} ein Symbol als den Namen eines Operators.  Dies wird im Original
+und in kMaxima nicht genutzt.   Der Name eines Operators ist immer eine 
+Zeichenkette.
+
 @emph{Quelltext:}
 @lisp
 @group
@@ -186,12 +194,6 @@ Siehe auch die Funktionen @mrefcomma{getopr0} @mref{getopr} und
       (and (stringp x) (setf (gethash x opr-table) y))))
 @end group
 @end lisp
-
-@emph{Bemerkung:}
-Wie die Funktionen @mref{getopr0} und @mref{remopr} akzeptiert auch
-@code{putopr} ein Symbol als den Namen eines Operators.  Dies wird im Original
-und in kMaxima nicht genutzt.   Der Name eines Operators ist immer eine 
-Zeichenkette.
 @end deffn
 
 @c --- 29.09.2011 --------------------------------------------------------------
@@ -220,6 +222,13 @@ T
 NIL
 @end example
 
+@emph{Bemerkung:}
+
+Wie die Funktionen @mref{getopr0} und @mref{putopr} akzeptiert auch
+@code{remopr} ein Symbol als den Namen eines Operators.  Dies wird im Original
+und in kMaxima nicht genutzt.   Der Name eines Operators ist immer eine 
+Zeichenkette.
+
 @emph{Quelltext:}
 @lisp
 @group
@@ -228,12 +237,6 @@ NIL
       (and (stringp x) (remhash x opr-table))))
 @end group
 @end lisp
-
-@emph{Bemerkung:}
-Wie die Funktionen @mref{getopr0} und @mref{putopr} akzeptiert auch
-@code{remopr} ein Symbol als den Namen eines Operators.  Dies wird im Original
-und in kMaxima nicht genutzt.   Der Name eines Operators ist immer eine 
-Zeichenkette.
 @end deffn
 
 @c --- 29.09.2011 --------------------------------------------------------------
@@ -263,7 +266,7 @@ vorhanden ist.
 Die Funktion @code{getop} gibt zu dem Symbol @var{x}, das einen Operator
 bezeichnet, den dazugeh@"orenden Namen als eine Zeichenkette zur@"uck.
 
-Beispiel:
+@emph{Beispiel}:
 
 Der Multiplikationsoperator hat das interne Symbol @code{mtimes}.  Der Name des
 Operators ist @code{"*"}.
@@ -314,12 +317,8 @@ werden.  Die Liste wird von der Funktion @mref{define-initial-symbols*}
 initialisiert.  Weiterhin wird diese Liste verwendet, um die globale
 Liste @mref{*maxima-operators*} zu initialisieren.
 
-@emph{Hinweis:}
-Nicht alle von kMaxima definierten Operatoren sind in der Liste
-@code{*symbols-defined*} enthalten.  So fehlen zum Beispiel die logischen
-Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
-
 @emph{Beispiel:}
+
 Nach dem Start von kMaxima enth@"alt @code{*symbols-defined*} die folgenden
 Symbole.
 
@@ -328,6 +327,12 @@ Symbole.
 (+ - * ^ < = > |(| |)| [ ] |,| |:| ! |#| |'| $ |;| ** ^^ |:=| |::| <= >= |''|
    && |::=|)
 @end example
+
+@emph{Bemerkung:}
+
+Nicht alle von kMaxima definierten Operatoren sind in der Liste
+@code{*symbols-defined*} enthalten.  So fehlen zum Beispiel die logischen
+Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
 @end defvr
 
 @c --- 29.09.2011 --------------------------------------------------------------
@@ -340,13 +345,7 @@ mit den Operatoren, die der Parser als Operatoren einliest.  Die Struktur der
 Liste wird der Funktion @mref{cstrsetup} mit Hilfe der Symbole der Liste
 @mref{*symbols-defined*} aufgebaut.
 
-@emph{Hinweis:}
-Wie f@"ur die Liste @code{*symbols-defined*} gilt auch f@"ur
-@code{*maxima-operators*}, dass nicht alle von kMaxima definierten Operatoren
-in der Liste enthalten sind.  So fehlen zum Beispiel die logischen
-Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
-
-Beispiel:
+@emph{Beispiel:}
 
 Nach dem Starten von kMaxima hat @code{*maxima-operators*} den folgenden Wert.
 
@@ -360,6 +359,13 @@ Nach dem Starten von kMaxima hat @code{*maxima-operators*} den folgenden Wert.
  (#\! (ANS $!)) (#\# (ANS |$#|)) (#\' (ANS |$'|) (#\' (ANS |$''|)))
  (#\$ (ANS $$)) (#\; (ANS |$;|)) (#\& #\& (ANS $&&)))
 @end example
+
+@emph{Bemerkung:}
+
+Wie f@"ur die Liste @code{*symbols-defined*} gilt auch f@"ur
+@code{*maxima-operators*}, dass nicht alle von kMaxima definierten Operatoren
+in der Liste enthalten sind.  So fehlen zum Beispiel die logischen
+Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
 @end defvr
 
 @c --- 04.10.2011 --------------------------------------------------------------
@@ -371,7 +377,8 @@ und initialisiert die globalen Variablen @mref{*symbols-defined*} sowie
 @mrefdot{*maxima-operators*}  Die eigentliche Initialisierung wird von der
 Funktion @mref{define-initial-symbols*} ausgef@"uhrt.
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
+
 Die Wirkungsweise der @code{let}-Umgebung im Makro muss noch erarbeitet werden.
 
 @emph{Quelltext:}
@@ -475,6 +482,7 @@ dem Namen des Operators.  Die R@"uckgabe ist ein Maxima-Symbol, das den Operator
 bezeichnet.
 
 @emph{Beispiel:}
+
 In diesem Beispiel wird ein Operator mit dem Namen @code{"grad"} definiert.
 Die R@"uckgabe ist das Symbol @code{$grad}.  W@"ahrend die Operatoren als
 Symbole in die Liste eingetragen sind, werden neue Operatoren mit ihrem Namen
@@ -534,6 +542,7 @@ von der Funktion @mref{make-parser-fun-def} gebraucht, die mit der Funktion
 Funktion @mref{inherit-propl} verwendet.
 
 @emph{Beispiel:}
+
 Das Beispiel zeigt die Expansion des Makros @code{led-propl}.
 
 @example
@@ -542,6 +551,12 @@ Das Beispiel zeigt die Expansion des Makros @code{led-propl}.
 T
 @end example
 
+@emph{Bemerkung:}
+
+Im Original Maxima werden diese Makros noch an weiteren Stellen verwendet.
+In kMaxima wurde jeweils die Expansion der Makros eingesetzt, um den Quelltext
+zu vereinfachen.
+
 @emph{Quelltext:}
 @lisp
 @group
@@ -549,11 +564,6 @@ T
 (defmacro nud-propl () ''(nud))
 @end group
 @end lisp
-
-@emph{Bemerkung:}
-Im Original Maxima werden diese Makros noch an weiteren Stellen verwendet.
-In kMaxima wurde jeweils die Expansion der Makros eingesetzt, um den Quelltext
-zu vereinfachen.
 @end deffn
 
 @c --- 04.10.2011 --------------------------------------------------------------
@@ -596,20 +606,19 @@ Das Makro, das zur@"uckgegeben wird, ist selbst ein Makro mit der Definition
 zum Indikator @var{p} auf die Eigenschaftsliste des Symbols @var{op} ablegt.
 
 @emph{Beispiel:}
+
 Das Beispiel zeigt die einzelnen Stufen der Expansion, wenn f@"ur den Operator
 @code{$^} eine @code{led-Funktion} definiert wird.
 
 @example
 * (make-parser-fun-def '$^ 'led '(op left) 'body)
 (DEF-LED-FUN $^ (OP LEFT) OP . BODY)
-
 * (macroexpand-1 (make-parser-fun-def '$^ 'led '(op left) 'body))
 (DEFUN-PROP ($^ LED)
     (OP LEFT)
   OP
   . BODY)
 T
-
 * (macroexpand (make-parser-fun-def '$^ 'led '(op left) 'body))
 (LET* ((#:G629 '$^) (#:G630 'LED))
   (MULTIPLE-VALUE-BIND (#:G632)
@@ -649,6 +658,7 @@ Siehe auch das Makro @mrefcomma{def-led-equiv} um die @code{led}-Funktion auf
 der Eigenschaftsliste eines Operators abzulegen.
 
 @emph{Beispiel:}
+
 Das Beispiel zeigt die Expansion des Makros, wenn f@"ur den Operator der
 Addition @code{$+} die Funktion @code{parse-prefix} als @code{nud}-Funktion
 definiert wird.
@@ -684,6 +694,7 @@ Siehe auch das Makro @mrefcomma{def-nud-equiv} um die @code{nud}-Funktion auf
 der Eigenschaftsliste eines Operators abzulegen.
 
 @emph{Beispiel:}
+
 Das Beispiel zeigt die Expansion des Makros, wenn f@"ur den Operator der
 Multiplikation @code{$*} die Funktion @code{parse-nary} als @code{led}-Funktion
 definiert wird.
@@ -729,6 +740,7 @@ Eigenschaftsliste abzulegen.  Ansonsten wird diese Funktion vom Parser nicht
 weiter genutzt.
 
 @emph{Beispiele:}
+
 Die folgenden Beispiele zeigen wie die Funktion verwendet werden kann.
 
 @example
@@ -738,7 +750,8 @@ NIL
 (NIL NIL)
 @end example
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
+
 F@"ur die Definition des links- und rechtsseitigen Vorrangs wird bei der
 Definition der Operatoren nicht die Funktion @code{set-lbp-and-rbp} genutzt,
 sondern die Makros @mref{def-rbp} und @mrefdot{def-lbp}
@@ -750,11 +763,15 @@ sondern die Makros @mref{def-rbp} und @mrefdot{def-lbp}
   (cond ((not (consp op))
          (let ((existing-lbp (getprop op 'lbp))
                (existing-rbp (getprop op 'rbp)))
+@end group
+@group
          (cond ((not lbp))
                ((not existing-lbp)
                 (putprop op lbp 'lbp))
                ((not (eql existing-lbp lbp))
                 (merror "Incompatible LBP's defined for operator ~a" op)))
+@end group
+@group
          (cond ((not rbp))
                ((not existing-rbp)
                 (putprop op rbp 'rbp))
@@ -955,6 +972,7 @@ die Funktionen @mrefcomma{pos} @mref{lpos} sowie @mrefcomma{rpos} um die
 Wortarten eines Operators zu ermitteln.
 
 @emph{Beispiel:}
+
 Die Wortart des Operators @code{not} ist @code{$clause} f@"ur das Ergebnis und
 das Argument.  Ein algebraischer Ausdruck der Wortart @code{$expr} f@"uhrt zu
 einer Fehlermeldung und zum Abbruch des Einlesens.
@@ -966,7 +984,8 @@ not a^2;
       ^
 @end example
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
+
 Der Mechanismus die Syntax eines Ausdrucks mit der Wortart zu pr@"ufen, ist kaum
 implementiert.  Viele Ausdr@"ucke werden nicht als ung@"ultig erkannt.  Die
 Implementation ist genauer zu pr@"ufen und gegebenenfalls zu verbessern und zu
@@ -1203,6 +1222,7 @@ interner Fehler beim Parsen einer Eingabe aufgetreten ist.
 
 Siehe auch die Funktion @mrefdot{mread-synerr}
 
+@need 1000
 @emph{Quelltext:}
 @lisp
 @group
@@ -1309,6 +1329,7 @@ rechtsseitigen Vorrang als Eintrag hat.  In diesem Fall ist die R@"uckgabe
 Siehe auch die Funktion @mrefcomma{operatorp} die nur pr@"uft, ob eine
 @code{led}- oder @code{nud}-Funktion auf der Eigenschaftsliste abgelegt ist.
 
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -1659,7 +1680,8 @@ Token zur@"uckgegeben.  Ansonsten wird mit der Funktion
 @mref{scan-one-token} ein Token vom Stream gelesen, in den Puffer geschrieben
 und als Ergebnis zur@"uckgegeben.
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
+
 Der Originalcode hat einen Fehler.  Wird wiederholt mit der Funktion 
 @code{peek-one-token} versucht ein Token von einem Stream zu lesen, der kein
 weiteres Zeichen enth@"alt, wird die globale Variable
@@ -1720,6 +1742,8 @@ wird die Funktion aufgerufen, um einen kMaxima-Bezeichner vom Stream zu lesen.
          (if eof-p
              eof
              (merror "parser: end of file while scanning expression.")))
+@end group
+@group
         ((eql test #\/ )
          (parse-tyi)
          (cond ((char= (parse-tyi-peek) #\* )
@@ -1727,6 +1751,8 @@ wird die Funktion aufgerufen, um einen kMaxima-Bezeichner vom Stream zu lesen.
                 (gobble-comment)
                 (scan-one-token eof-p eof))
                (t '$/)))
+@end group
+@group
         ((eql test #\. )
          (parse-tyi)
          (if (digit-char-p (parse-tyi-peek) 10)
@@ -1848,6 +1874,8 @@ ein kMaxima-Bezeichner f@"ur den Operator.  Zum Beispiel hat der Operator
                       (if (eql (caar v) ch) (return (car v))))
                      ((eql (car v) ch)
                       (return v))))))
+@end group
+@group
     (let* ((ch (parse-tyi-peek))
            (lis (if (eql ch *parse-stream-eof*)
                     nil
@@ -1866,6 +1894,8 @@ ein kMaxima-Bezeichner f@"ur den Operator.  Zum Beispiel hat der Operator
                        (or (not (alphabetp (cadr (exploden (cadadr lis)))))
                            (member (parse-tyi-peek) *whitespaces*))
                        (cadr (cadr lis)))))
+@end group
+@group
            (t
             (let ((res (and (eql (car (cadr lis)) 'ans) (cadadr lis)))
                   (token (scan-operator-token-aux (cddr lis))))
@@ -2085,8 +2115,9 @@ Beispiel:
 12.45e34 ->  '((#\4 #\5) (#\+) (#\E) (#\3 #\4) (#\.) (#\1 #\2))
 @end example
 
-Die Rückgabe ist eine Zahl in der internen Darstellung von kMaxima.  Diese sind
-ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
+Die R@"uckgabe ist eine Zahl in der internen Darstellung von kMaxima.  Diese
+sind ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder gro@ss{}e
+Gleitkommazahlen.
 
 @emph{Quelltext:}
 @lisp
@@ -2097,6 +2128,8 @@ ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
     (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L ))
         (setf (nth 3 data) (list +flonum-exponent-marker+)))))
+@end group
+@group
   (if (not (equal (nth 3 data) '(#\B)))
       (read-from-string (coerce (apply #'append data) 'string))
       (let ((int-part (read-from-string
@@ -2106,6 +2139,8 @@ ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
             (frac-len (length (third data)))
             (exp-sign (first (fifth data)))
             (expo (read-from-string (coerce (sixth data) 'string))))
+@end group
+@group
         (if (and $fast_bfloat_conversion
                  (> (abs expo) $fast_bfloat_threshold))
             (let* ((extra-prec (+ *fast-bfloat-extra-bits*
@@ -2121,6 +2156,8 @@ ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
                    (result (mul bf-mant p)))
               (let ((fpprec (- fpprec extra-prec)))
                 (check-bigfloat result)))
+@end group
+@group
             (let ((ratio (* (+ int-part (* frac-part (expt 10 (- frac-len))))
                             (expt 10 (if (char= exp-sign #\-)
                                          (- expo)
@@ -2211,6 +2248,7 @@ ganze Zahlen, rationale Zahlen, Gleitkommazahlen oder große Gleitkommazahlen.
 @anchor{scan-number-after-dot}
 @deffn {Funktion} scan-number-after-dot data
 
+@need 800
 @emph{Quelltext:}
 @lisp
 @group
@@ -2397,6 +2435,8 @@ a+b$
               *parse-window* (cdr *parse-window*)))
       (princ *mread-prompt*)
       (force-output))
+@end group
+@group
     (if (eq *mread-eof-obj* (peek-one-token t *mread-eof-obj*))
         *mread-eof-obj*
         (do ((labels ())
@@ -2409,11 +2449,15 @@ a+b$
                            (if labels
                                (cons (mheader '|$[| ) (nreverse labels)))
                            input)))
+@end group
+@group
             ((|$&&|)
              (scan-one-token)
              (if (symbolp input)
                  (push input labels)
                  (mread-synerr "Invalid && tag. Tag must be a symbol")))
+@end group
+@group
             (t
              (parse-bug-err 'mread)))))))
 @end group
@@ -2482,6 +2526,7 @@ ob der Ausdruck @var{item} die Wortart @code{mode} hat.  Ist dies der Fall wird
 der eingelesene Ausdruck zur@"uckgegeben.  Ansonsten wird ein Parser-Fehler
 generiert wird.
 
+@need 1200
 @emph{Quelltext:}
 @lisp
 @group
@@ -2620,7 +2665,7 @@ rechtsseitigen Argumente des Operators @var{op} vom Stream zu lesen.  Die
 Argumente m@"ussen die Wortart @var{mode} haben.  Das Argument @var{rbp}
 ist der rechtsseitige Vorrang des zuletzt gelesenen Operators.
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
 
 In kMaxima und im Original Maxima wird die Funktion nur von der Funktion
 @code{parse-nary}.  Die Funktion k@"onnte daher lokal definiert werden.
@@ -2665,7 +2710,7 @@ Das zweite Argument ist der Header des Operators.  Mit der Funktion
 Lese die rechtsseitigen Argumente eines Matchfix-Operators vom Stream.  Die
 Argumente sind mit Kommata voneinander getrennt.
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
 
 Der rechtsseitige Vorrang jedes Matchfix-Operators wird hier immer mit dem
 Wert @code{10} definiert.  Dies k@"onnte vermieden werden, wenn der
@@ -2818,32 +2863,27 @@ Substantivform der Funktion zur@"uckgegeben.  Dies gilt auch f@"ur
 Array-Funktionen wie zum Beispiel @code{'f[a](x)}.  Siehe auch die Beispiele
 f@"ur die einzelnen F@"alle.
 
+@need 800
 @emph{Beispiele:}
 @example
 * (caddr (mread *standard-input*))
 '(expr);
 ((MQUOTE) $EXPR)
-
 * (caddr (mread *standard-input*))
 'atom;
 ((MQUOTE) $ATOM)
-
 * (caddr (mread *standard-input*))
 '[a,b,c];
 ((MQUOTE) ((MLIST) $A $B $C))
-
 * (caddr (mread *standard-input*))
 '(a,b,c);
 ((MQUOTE) ((MPROGN) $A $B $C))
-
 * (caddr (mread *standard-input*))
 'f(x);
 ((%F) $X)
-
 * (caddr (mread *standard-input*))
 '(f(x));
 ((MQUOTE) (($F) $X))
-
 * (caddr (mread *standard-input*))
 'f[a](x);
 ((MQAPPLY) ((%F ARRAY) $A) $X)
@@ -2893,15 +2933,12 @@ Funktionen werden in ihre Verbform umgewandelt.
 @example
 * (setq $a 99)
 99
-
 * (caddr (mread *standard-input*))
 ''a;
 99
-
 * (caddr (mread *standard-input*))
 ''f(x);
 (($F) $X)
-
 * (caddr (mread *standard-input*))
 ''f[a](x);
 ((MQAPPLY) (($F ARRAY) $A) $X)
@@ -3454,6 +3491,8 @@ Operatoren f@"ur die Definition von Programmschleifen.
       (nil)
     (if (eq op '|$:|) (setq op '$from))
     (setq active-bitmask (collision-check '$do active-bitmask op))
+@end group
+@group
     (let ((data (parse (rpos op) (rbp op))))
       (case op
         ($do   (setf (mdo-body left) data) (return (cons '$any left)))
@@ -3461,9 +3500,13 @@ Operatoren f@"ur die Definition von Programmschleifen.
         ($from (setf (mdo-from left) data))
         ($in   (setf (mdo-op   left) 'mdoin)
                (setf (mdo-from left) data))
+@end group
+@group
         ($step (setf (mdo-step left) data))
         ($next (setf (mdo-next left) data))
         ($thru (setf (mdo-thru left) data))
+@end group
+@group
         (($unless $while)
          (if (eq op '$while)
              (setq data (list (mheader '$not) data)))
@@ -3771,6 +3814,8 @@ Symbol, mit dem die Eingabe beendet wird.
           x))
     (if (stringp op) (setq op (define-symbol op)))
     (op-setup op)
+@end group
+@group
     (let ((noun ($nounify op))
           (dissym (cdr (exploden op))))
       (cond
@@ -3783,6 +3828,8 @@ Symbol, mit dem die Eingabe beendet wird.
          (putprop op match 'match)
          (putprop match 5 'lbp)
          (setq dissym (cons dissym (cdr (exploden match))))))
+@end group
+@group
       (putprop op pos 'pos)
       (putprop op (cdr parse-data) (car parse-data))
       (putprop op grind-fn 'grind)
@@ -3790,6 +3837,8 @@ Symbol, mit dem die Eingabe beendet wird.
       (putprop noun dim-fn 'dimension)
       (putprop op dissym 'dissym)
       (putprop noun dissym 'dissym)
+@end group
+@group
       (when rbp
         (putprop op rbp 'rbp)
         (putprop noun rbp 'rbp))
