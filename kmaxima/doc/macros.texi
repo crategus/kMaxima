@@ -100,6 +100,8 @@
    ge-schrie-be-ner
    kon-trol-liert
    ma-the-ma-ti-sche
+   Maxima
+   O-pe-ra-to-ren
    Op-ti-ons-va-ri-a-ble
    sig-na-li-siert
    Ver-ein-fach-ung
