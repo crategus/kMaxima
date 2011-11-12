@@ -1166,8 +1166,13 @@ neuen Wert.
 @end lisp
 @end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{mabsbigfloat}
+@deffn {Funktion} mabsbigfloat l
 
-@smalllisp
+@emph{Quelltext:}
+@lisp
+@group
 (defprop mabs mabsbigfloat floatprog)
 
 (defun mabsbigfloat (l)
@@ -1176,20 +1181,48 @@ neuen Wert.
     (return (if (null r)
                 (list '(mabs) (car l))
                 (bcons (fpabs (cdr r)))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpabs}
+@deffn {Funktion} fpabs x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpabs (x)
   (if (>= (car x) 0)
       x
       (cons (- (car x)) (cdr x))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{*fpexp}
+@deffn {Funktion} *fpexp a
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun *fpexp (a)
   (fpend (let ((fpprec (+ 8 fpprec)))
            (if (bigfloatp (setq a ($bfloat a)))
                (fpexp (cdr a))
                (list '(mexpt) '$%e a)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpexp}
+@deffn {Funktion} fpexp x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpexp (x)
   (prog (r s)
     (unless (>= (car x) 0)
@@ -1205,7 +1238,17 @@ neuen Wert.
                               (let ((fpprec (+ fpprec (integer-length r) -1))
                                     (r r))
                                 (bcons (fpexpt (fpe) r)))))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpexp1}
+@deffn {Funktion} fpexp1 x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpexp1 (x)
   (prog (term ans oans)
      (setq ans (setq term (fpone)))
@@ -1215,9 +1258,17 @@ neuen Wert.
        (setq oans ans)
        (setq ans (fpplus ans term)))
      (return ans)))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{exptbigfloat}
+@deffn {Funktion} exptbigfloat p n
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun exptbigfloat (p n)
   (declare (special $numer $float $keepfloat $ratprint))
   (cond ((eql n 1) p)
@@ -1239,9 +1290,9 @@ neuen Wert.
                       (t
                        (setq p (exptbigfloat (bcons (fpminus (cdr p))) n)
                              n ($bfloat `((mtimes) $%pi ,n)))
-                       (add2 ($bfloat `((mtimes) ,p ,(*fpsin n nil)))
+                       (add2 ($bfloat `((mtimes) ,p ,(fpsin* n nil)))
                              `((mtimes simp)
-                               ,($bfloat `((mtimes) ,p ,(*fpsin n t)))
+                               ,($bfloat `((mtimes) ,p ,(fpsin* n t)))
                                $%i)))))
                (t (list '(mexpt) p n))))
         ((and (ratnump n) (< (caddr n) 10))
@@ -1263,7 +1314,17 @@ neuen Wert.
                   (bcons p)))))
         ((< n 0) (invertbigfloat (exptbigfloat p (- n))))
         (t (bcons (fpexpt (cdr p) n)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpexpt}
+@deffn {Funktion} fpexpt p nn
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpexpt (p nn)
   (cond ((zerop nn) (fpone))
         ((eql nn 1) p)
@@ -1278,9 +1339,17 @@ neuen Wert.
              (setq p (fptimes* p p))
              (when (oddp ii) (setq u (fptimes* u p))))
            (return u)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{big-float-sqrt}
+@deffn {Funktion} big-float-sqrt x &optional y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun big-float-sqrt (x &optional y)
   (if y
       (multiple-value-bind (u v) (complex-sqrt x y)
@@ -1289,7 +1358,17 @@ neuen Wert.
         (if (fplessp fp-x (intofp 0))
             (mul '$%i (bcons (fproot (bcons (fpminus fp-x)) 2)))
             (bcons (fproot x 2))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{complex-sqrt}
+@deffn {Funktion} complex-sqrt xx yy
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun complex-sqrt (xx yy)
   (let* ((x (cdr (check-bigfloat xx)))
          (y (cdr (check-bigfloat yy)))
@@ -1308,7 +1387,17 @@ neuen Wert.
                        (fpminus rho)
                        rho))))
       (values eta nu))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fproot}
+@deffn {Funktion} fproot a n
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fproot (a n)
   (if (eq (cadr a) 0)
       '(0 0)
@@ -1331,15 +1420,31 @@ neuen Wert.
                    (> (- (cadr x) (cadr bk)) ofprec))
                (setq a x))))
         (list (fpround (car a)) (+ -2 *m (cadr a))))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpentier}
+@deffn {Funktion} fpentier f
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpentier (f)
   (let ((fpprec (caddar f)))
     (fpintpart (cdr f))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpquotient}
+@deffn {Funktion} fpquotient a b
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpquotient (a b)
   (cond ((equal (car b) 0)
          (merror "pquotient: attempted quotient by zero."))
@@ -1347,67 +1452,184 @@ neuen Wert.
         (t
          (list (fpround (truncate (fpshift (car a) (+ 3 fpprec)) (car b)))
                (+ -3 (- (cadr a) (cadr b)) *m)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpone}
+@deffn {Funktion} fpone
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpone ()
   (cond (*decfp (intofp 1))
         ((= fpprec (caddar bigfloatone)) (cdr bigfloatone))
         (t (intofp 1))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpdifference}
+@deffn {Funktion} fpdifference a b
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpdifference (a b)
   (fpplus a (fpminus b)))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpminus}
+@deffn {Funktion} fpminus x
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpminus (x)
   (if (eql (car x) 0)
       x
       (list (- (car x)) (cadr x))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpgreaterp}
+@deffn {Funktion} fpgreaterp a b
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpgreaterp (a b)
   (fpposp (fpdifference a b)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fplessp}
+@deffn {Funktion} fplessp a b
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fplessp (a b)
   (fpposp (fpdifference b a)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpposp}
+@deffn {Funktion} fpposp x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpposp (x)
   (> (car x) 0))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpmin}
+@deffn {Funktion} fpmin arg1 &rest args
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpmin (arg1 &rest args)
   (let ((min arg1))
     (mapc #'(lambda (u) (if (fplessp u min) (setq min u))) args)
     min))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpmax}
+@deffn {Funktion} fpmax arg1 &rest args
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpmax (arg1 &rest args)
   (let ((max arg1))
     (mapc #'(lambda (u) (if (fpgreaterp u max) (setq max u))) args)
     max))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpe}
+@deffn {Funktion} fpe
 
-(let ((table (make-hash-table)))
+@emph{Quelltext:}
+@lisp
+@group
   (defun fpe ()
     (let ((value (gethash fpprec table)))
       (if value
           value
           (setf (gethash fpprec table) (cdr (fpe1))))))
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpe-table}
+@deffn {Funktion} fpe-table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun fpe-table ()
     table)
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{clear_fpe_table}
+@deffn {Funktion} clear_fpe_table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun clear_fpe_table ()
     (clrhash table)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpe1}
+@deffn {Funktion} fpe1
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpe1 nil
   (bcons (list (fpround (compe (+ fpprec 12))) (+ -12 *m))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{compe}
+@deffn {Funktion} compe prec
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun compe (prec)
   (let (s h (n 1) d (k (isqrt prec))) 
      (setq h (ash 1 prec))
@@ -1423,35 +1645,92 @@ neuen Wert.
        (setq h (truncate (* h n) d))
        (setq s (+ s h)))
      s))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fppi}
+@deffn {Funktion} fppi
 
-(let ((table (make-hash-table)))
+@emph{Quelltext:}
+@lisp
+@group
   (defun fppi ()
     (let ((value (gethash fpprec table)))
       (if value
           value
           (setf (gethash fpprec table) (cdr (fppi1))))))
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fppi-table}
+@deffn {Funktion} fppi-table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun fppi-table ()
     table)
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{clear_fppi_table}
+@deffn {Funktion} clear_fppi_table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun clear_fppi_table ()
     (clrhash table)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fppi1}
+@deffn {Funktion} fppi1
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fppi1 nil
   (bcons
     (fpquotient
       (fprt18231_)
       (list (fpround (comppi (+ fpprec 12))) (+ -12 *m)) )))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fprt18231_}
+@deffn {Funktion} fprt18231_
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fprt18231_ ()
   (let ((a 1823176476672000))
     (setq a (ash a (* 2 fpprec)))
     (destructuring-bind (mantissa exp)
         (intofp (isqrt a))
       (list mantissa (- exp fpprec)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{comppi}
+@deffn {Funktion} comppi
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun comppi (prec)
   (let (s h n d)
      (setq s (ash 13591409 prec))
@@ -1472,25 +1751,72 @@ neuen Wert.
        (setq h (neg (truncate (* h n) d)))
        (setq s (+ s h)))
      s ))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpgamma}
+@deffn {Funktion} fpgamma
 
-(let ((table (make-hash-table)))
+@emph{Quelltext:}
+@lisp
+@group
   (defun fpgamma ()
     (let ((value (gethash fpprec table)))
       (if value
           value
           (setf (gethash fpprec table) (cdr (fpgamma1))))))
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpgamma-table}
+@deffn {Funktion} fpgamma-table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun fpgamma-table ()
     table)
-  
+@end group
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpgamma_table}
+@deffn {Funktion} fpgamma_table
+
+@emph{Quelltext:}
+@lisp
+@group  
   (defun clear_fpgamma_table ()
     (clrhash table)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpgamma1}
+@deffn {Funktion} fpgamma1
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpgamma1 ()
   (bcons (list (fpround (first (comp-bf%gamma (+ fpprec 8)))) 0)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{comp-bf%gamma}
+@deffn {Funktion} comp-bf%gamma prec
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun comp-bf%gamma (prec)
   (let* ((fpprec prec)
          (big-n (floor (* 1/4 prec (log 2.0))))
@@ -1512,10 +1838,17 @@ neuen Wert.
         (setf b-sum (fpplus b-sum term))))
     (fpplus (fpquotient a-sum b-sum)
             (fpminus (fplog (intofp big-n))))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fplog2}
+@deffn {Funktion} fplog2
 
-(let ((table (make-hash-table)))
+@emph{Quelltext:}
+@lisp
+@group
   (defun fplog2 ()
     (let ((value (gethash fpprec table)))
       (if value
@@ -1525,7 +1858,17 @@ neuen Wert.
     table)
   (defun clear_fplog2_table ()
     (clrhash table)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{comp-log2}
+@deffn {Funktion} comp-log2
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun comp-log2 ()
   (flet ((fast-atanh (k)
            (let* ((term (fpquotient (intofp 1) (intofp k)))
@@ -1546,20 +1889,48 @@ neuen Wert.
                       (fptimes* (intofp 8) (fast-atanh 8749))))))
       (list (fpround (car result))
             (+ -8 *m)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{sinbigfloat}
+@deffn {Funktion} sinbigfloat
 
+@emph{Quelltext:}
+@lisp
+@group
 (defprop %sin sinbigfloat floatprog)
 
 (defun sinbigfloat (x)
-  (*fpsin (car x) t))
+  (fpsin* (car x) t))
+@end group
+@end lisp
+@end deffn
 
-(defun *fpsin (a fl)
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpsin*}
+@deffn {Funktion} fpsin* a fl
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun fpsin* (a fl)
   (fpend (let ((fpprec (+ 8 fpprec)))
            (cond ((bigfloatp a) (fpsin (cdr ($bfloat a)) fl))
                  (fl (list '(%sin) a))
                  (t (list '(%cos) a))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpsin}
+@deffn {Funktion} fpsin x fl
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpsin (x fl)
   (prog (piby2 r sign res k *cancelled)
     (setq sign (cond (fl (> (car x) 0))
@@ -1600,13 +1971,43 @@ neuen Wert.
                     (t
                      (incf fpprec *cancelled)
                      (go loop))))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpcos1}
+@deffn {Funktion} fpcos1 x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpcos1 (x)
   (fpsincos1 x nil))
+@end group
+@end lisp
+@end deffn
 
-(defun fpsin1(x)
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpsin1}
+@deffn {Funktion} fpsin1 x
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun fpsin1 (x)
   (fpsincos1 x t))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpsincos1}1
+@deffn {Funktion} fpsincos1 x fl
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpsincos1 (x fl)
   (prog (ans term oans x2)
      (setq ans (if fl x (intofp 1))
@@ -1618,16 +2019,32 @@ neuen Wert.
        (setq oans ans
              ans (fpplus ans term)))
      (return ans)))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{cosbigfloat}
+@deffn {Funktion} cosbigfloat x
 
+@emph{Quelltext:}
+@lisp
+@group
 (defprop %cos cosbigfloat floatprog)
 
 (defun cosbigfloat (x)
-  (*fpsin (car x) nil))
+  (fpsin* (car x) nil))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{tanbigfloat}
+@deffn {Funktion} tanbigfloat a
 
+@emph{Quelltext:}
+@lisp
+@group
 (defprop %tan tanbigfloat floatprog)
 
 (defun tanbigfloat (a)
@@ -1637,16 +2054,34 @@ neuen Wert.
                   (setq a (cdr ($bfloat a)))
                   (fpquotient (fpsin a t) (fpsin a nil)))
                  (t (list '(%tan) a))))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{big-float-asin}
+@deffn {Funktion} big-float-asin x &optional y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun big-float-asin (x &optional y)
   (if y
       (multiple-value-bind (u v)
           (complex-asin x y)
         (add u (mul '$%i v)))
       (fpasin x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{complex-asin}
+@deffn {Funktion} complex-asin x y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun complex-asin (x y)
   (let ((x (cdr (check-bigfloat x)))
         (y (cdr (check-bigfloat y))))
@@ -1672,10 +2107,30 @@ neuen Wert.
                                                  im-sqrt-1+z)
                                        (fptimes* im-sqrt-1-z
                                                  re-sqrt-1+z)))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpasin}
+@deffn {Funktion} fpasin x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpasin (x)
   ($bfloat (fpasin-core x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpasin-core}
+@deffn {Funktion} fpasin-core
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpasin-core (x)
   (let ((fp-x (cdr (check-bigfloat x))))
     (cond ((minusp (car fp-x))
@@ -1709,16 +2164,34 @@ neuen Wert.
                                          (fpplus (fpone) fp-x)))
                              2)
                            fp-x)))))))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{big-float-acos}
+@deffn {Funktion} big-float-acos x &optional y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun big-float-acos (x &optional y)
   (if y
       (multiple-value-bind (u v)
           (complex-acos x y)
         (add u (mul '$%i v)))
       (fpacos x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{complex-acos}
+@deffn {Funktion} complex-acos x y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun complex-acos (x y)
   (let ((x (cdr (check-bigfloat x)))
         (y (cdr (check-bigfloat y))))
@@ -1735,24 +2208,62 @@ neuen Wert.
                            (fpdifference
                              (fptimes* re-sqrt-1+z im-sqrt-1-z)
                              (fptimes* im-sqrt-1+z re-sqrt-1-z)))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpacos}
+@deffn {Funktion} fpacos
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpacos (x)
   ($bfloat (add (div '$%pi 2) (mul -1 (fpasin-core x)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{atanbigfloat}
+@deffn {Funktion} atanbigfloat x
 
+@emph{Quelltext:}
+@lisp
+@group
 (defprop %atan atanbigfloat floatprog)
 
 (defun atanbigfloat (x)
   (*fpatan (car x) (cdr x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{*fpatan}
+@deffn {Funktion} *fpatan a y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun *fpatan (a y)
   (fpend (let ((fpprec (+ 8. fpprec)))
            (if (null y)
                (if (bigfloatp a) (fpatan (cdr ($bfloat a)))
                    (list '(%atan) a))
                (fpatan2 (cdr ($bfloat a)) (cdr ($bfloat (car y))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpatan}
+@deffn {Funktion} fpatan
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpatan (x)
   (prog (term x2 ans oans one two tmp)
     (setq one (intofp 1) two (intofp 2))
@@ -1781,7 +2292,17 @@ neuen Wert.
              (setq oans ans
                    ans (fpplus ans (fpquotient term (intofp n)))))))
     (return ans)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpatan2}
+@deffn {Funktion} fpatan2 y x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpatan2 (y x)
   (cond ((eql (car x) 0)
          (cond ((equal (car y) 0)
@@ -1796,13 +2317,31 @@ neuen Wert.
          (fpplus (fppi) (fpatan (fpquotient y x))))
         (t
          (fpdifference (fpatan (fpquotient y x)) (fppi)))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{big-float-sinh}
+@deffn {Funktion} big-float-sinh x &optional y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun big-float-sinh (x &optional y)
   (unless y
     (fpsinh x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpsinh}
+@deffn {Funktion} fpsinh x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpsinh (x)
   (cond ((eql 0 (cadr x))
          (check-bigfloat x))
@@ -1814,7 +2353,17 @@ neuen Wert.
          (bcons 
            (fpminus
              (cdr (fpsinh (bcons (fpminus (cdr (check-bigfloat x)))))))))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpexpm1}
+@deffn {Funktion} fpexpm1 x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fpexpm1 (x)
   (cond ((fpgreaterp (fpabs x) (fpone))
          (fpdifference (fpexp x) (fpone)))
@@ -1828,16 +2377,34 @@ neuen Wert.
              (setf oans ans)
              (setf ans (fpplus ans term)))
            ans))))
+@end group
+@end lisp
+@end deffn
 
-;;; ----------------------------------------------------------------------------
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{big-float-tanh}
+@deffn {Funktion} big-float-tanh x &optional y
 
+@emph{Quelltext:}
+@lisp
+@group
 (defun big-float-tanh (x &optional y)
   (if y
       (multiple-value-bind (u v)
           (complex-tanh x y)
         (add u (mul '$%i v)))
       (fptanh x)))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{complex-tanh}
+@deffn {Funktion} complex-tanh x y
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun complex-tanh (x y)
   (let* ((tv (cdr (tanbigfloat (list y))))
 	 (beta (fpplus (fpone) (fptimes* tv tv)))
@@ -1847,14 +2414,25 @@ neuen Wert.
 	 (den (fpplus (fpone) (fptimes* beta s^2))))
     (values (bcons (fpquotient (fptimes* beta (fptimes* rho s)) den))
 	    (bcons (fpquotient tv den)))))
+@end group
+@end lisp
+@end deffn
 
+@c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fptanh}
+@deffn {Funktion} fptanh x
+
+@emph{Quelltext:}
+@lisp
+@group
 (defun fptanh (x)
   (let* ((two (intofp 2))
          (fp (cdr (check-bigfloat x)))
          (d (fpexpm1 (fptimes* fp two))))
     (bcons (fpquotient d (fpplus d two)))))
-@end smalllisp
-
+@end group
+@end lisp
+@end deffn
 
 @c --- 06.11.2011 --------------------------------------------------------------
 @anchor{big-float-asinh}
