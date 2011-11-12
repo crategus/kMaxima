@@ -1766,7 +1766,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
         (z nil))
     (when (mplusp product) (setq product (list '(mtimes simp) product)))
     (cond ((zerop1 factor)
-           (cond ((mnegativep power)
+           (cond ((minusp1 power)
                   (if errorsw
                       (throw 'errorsw t)
                       (merror "Division by 0")))
@@ -1850,7 +1850,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
                                  (setq w (cadr x)
                                        fm y)
                                  (go start))))
-                         ((maxima-constantp (car x))
+                         ((constantp (car x))
                           (go const))
                          ((onep1 w)
                           (cond ((mtimesp (car x))
@@ -1985,8 +1985,8 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
                    (setq w (cadr x))
                    (go start))
                   
-                  ((or (maxima-constantp (car x))
-                       (maxima-constantp (cadadr fm)))
+                  ((or (mconstantp (car x))
+                       (mconstantp (cadadr fm)))
                    (if (great temp (cadr fm))
                        (go gr)))
                   ((great (car x) (cadadr fm))
@@ -2012,7 +2012,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
             (setq temp (power (car x) (cadr x)))
             (setq w (cadr x))
             (go start))
-           ((maxima-constantp (car x))
+           ((mconstantp (car x))
             (when (great temp (cadr fm))
               (go gr)))
            ((great (car x) (cadr fm))
@@ -2075,7 +2075,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
               ;; The rational doesn't contain any (simple) powers of
               ;; the exponential term.  We're done.
               (return (cdr (rplacd fm (cons temp (cdr fm)))))))
-           ((and (maxima-constantp (car x))
+           ((and (mconstantp (car x))
                  (do ((l (cdr fm) (cdr l)))
                      ((null (cdr l)))
                    (when (and (mexptp (cadr l))
@@ -2126,7 +2126,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
             (go del))
            ((and (mnumberp (car x)) (mnumberp w))
             (return (rplaca (cdr fm) (exptrl (car x) w))))
-           ((maxima-constantp (car x))
+           ((mconstantp (car x))
             (go const)))
   spcheck
      (setq z (list '(mexpt) (car x) w))
@@ -2183,7 +2183,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
            ((or (zerop1 pot) (onep1 gr)) (go retno))
            ((zerop1 gr)
             (cond ((mnumberp pot)
-                   (if (mnegativep pot)
+                   (if (minusp1 pot)
                        (merror "expt: Undefined: 0 to a negative exponent.")
                        (return (cond ((or (floatp gr) (floatp pot)) 0.0)
                                      (t 0)))))
@@ -2463,7 +2463,7 @@ Zahlen nutzt der Algorithmus die Funktion @mrefdot{timeskl}
                      (or (and $radexpand
                               (eq $domain '$real))
                          (and (eq ($csign (cadr gr)) '$complex)
-                              ($constantp (cadr gr)))))
+                              (mconstantp (cadr gr)))))
                 ;; This does (1/z)^a -> 1/z^a. This is in general wrong.
                 ;; We switch this type of simplification on, when
                 ;; $ratsimpexpons is T. E.g. radcan sets this flag to T.
