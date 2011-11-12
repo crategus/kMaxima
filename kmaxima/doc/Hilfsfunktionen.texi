@@ -11,19 +11,14 @@
 
 @menu
 * Makros::
+* Allgemeine Hilfsfunktionen::
 * Testfunktionen::
-* Weitere Funktionen f@"ur Ausdr@"ucke::
-* Funktionen f@"ur die Eigenschaftsliste::
-* Konvertierung zwischen Gross- und Kleinschreibung::
-* Zerlegung von Symbolen und Zeichenketten in Listen::
-* Alias und Reversealias::
-* Verb- und Substantivform::
-* Vergleiche Ausdr@"ucke::
-* Weitere Hilfsfunktionen und Variablen::
+* Syntax der Bezeichner::
+* Funktionen f@"ur Ausdr@"ucke::
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Makros, Testfunktionen, Erste Makros und Hilfsfunktionen, Erste Makros und Hilfsfunktionen
+@node Makros, Allgemeine Hilfsfunktionen, Erste Makros und Hilfsfunktionen, Erste Makros und Hilfsfunktionen
 @section Makros
 @c -----------------------------------------------------------------------------
 
@@ -338,7 +333,264 @@ NIL
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Testfunktionen, Funktionen f@"ur die Eigenschaftsliste, Makros, Erste Makros und Hilfsfunktionen
+@node Allgemeine Hilfsfunktionen, Testfunktionen, Makros, Erste Makros und Hilfsfunktionen
+@section Allgemeine Hilfsfunktionen
+@c -----------------------------------------------------------------------------
+
+@menu
+* Funktionen f@"ur die Eigenschaftsliste::
+* Informationslisten::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Funktionen f@"ur die Eigenschaftsliste, Informationslisten, Allgemeine Hilfsfunktionen, Allgemeine Hilfsfunktionen
+@subsection Funktionen f@"ur die Eigenschaftsliste
+@c -----------------------------------------------------------------------------
+
+Die Lisp-Eigenschaftsliste wird von kMaxima h@"aufig genutzt, um Eigenschaften
+f@"ur Lisp-Symbole abzulegen.  Diese Eigenschaften k@"onnen Werte und Funktionen
+sein.  Die Eigenschaftsliste erlaubt einen Programmierstil, der objektorientiert
+ist, ohne dass Mechanismen gebraucht werden, wie sie in anderen
+Programmiersprachen notwendig sind.
+
+Um eine einheitliche Syntax zu erm@"oglichen, werden f@"ur das Setzen eines
+Wertes die Funktion @code{putprop} und das Makro @code{defprop} definiert.
+Im Unterschied zur Funktion @code{putprop} wertet das Makro @code{defprop}
+die Argumente nicht aus.  Das erlaubt eine bequemere Schreibweise, da auf
+das Voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
+die Argumente Symbole sind.  Mit der Funktion @code{getprop} kann eine
+Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
+@code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
+ein Symbol ist.  Ist dies nicht der Fall ist die R@"uckgabe @code{nil}.
+
+@c --- 21.11.2011 --------------------------------------------------------------
+@anchor{putprop}
+@deffn {Funktion} putprop sym val indic
+
+Die Funktion @code{putprop} legt den Wert @var{val} zum Indikator @var{indic}
+auf der Eigenschaftsliste des Symbols @var{sym} ab.  Die Funktion testet, ob
+das Argument @var{sym} ein Symbol ist.  Ist @var{sym} kein Symbol, wird der Wert
+@code{nil} zur@"uckgegeben.
+
+Siehe auch die Funktionen @mrefcomma{defprop} @mref{getprop} und
+@mrefdot{getpropl}
+
+@emph{Beispiele}:
+@example
+* (putprop 'sym 999 'val)
+999
+@group
+* (get 'sym 'val)
+999
+@end group
+* (putprop 999 999 999)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun putprop (sym val indic)
+  (and (symbolp sym)
+       (setf (get sym indic) val)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{defprop}
+@deffn {Makro} defprop sym val indic
+
+Das Makro @code{defprop} ruft die Funktion @mref{putprop} auf, um den Wert
+@var{val} zum Indikator @var{indic} auf der Eigenschaftsliste des Symbols
+@var{sym} abzulegen.  Im Unterschied zur Funktion @mref{putprop} wertet das
+Makro @code{defprop} die Argumente nicht aus, so dass Symbole nicht quotiert
+werden m@"ussen.  
+
+Siehe auch die Funktion @mref{getprop} und @mrefdot{getpropl}
+
+@emph{Quelltext:}
+@lisp
+@group
+(defmacro defprop (sym val indic)
+  `(putprop ',sym ',val ',indic))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{getprop}
+@deffn {Funktion} getprop sym indic
+
+Die Funktion @code{getprop} holt den Wert zum Indikator @var{indic} von der
+Eigenschaftsliste des Symbols @var{indic}.  Die Funktion testet zum Unterschied
+der Lisp-Funktion @code{get}, ob das Argument @var{sym} ein Symbol ist und gibt
+den Wert @code{nil} zur@"uck, wenn dies nicht der Fall ist.  Auch wird
+@code{nil} zur@"uckgegeben, wenn kein Wert zum Indikator @var{indic} auf der
+Eigenschaftsliste abgelegt ist.
+
+@emph{Quelltext:}
+@example
+* (putprop 'sym 999 'val)
+999
+* (getprop 'sym 'val)
+999
+* (getprop 999 'val)
+NIL
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun getprop (sym indic)
+  (and (symbolp sym)
+       (get sym indic)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{getpropl}
+@deffn {Funktion} getpropl sym indicl
+
+@code{getpropl} ist eine Verallgemeinerung der Funktion @mrefcomma{getprop}@w{}
+die eine Liste als zweites Argument erwartet und eine Liste zur@"uckgibt,
+deren erstes Element der Indikator ist, zu dem der erste Eintrag auf der
+Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der Liste sind die
+folgenden Eintr@"age der Eigenschaftsliste.
+
+Beispiel:
+
+@example
+* (defprop f 100 width)
+100
+* (defprop f round shape)
+ROUND
+* (symbol-plist 'f)
+(SHAPE ROUND WIDTH 100)
+@group
+* (getpropl 'f '(shape))
+(SHAPE ROUND WIDTH 100)
+@end group
+* (getpropl 'f '(width))
+(WIDTH 100)
+* (getpropl 'f '(colour width))
+(WIDTH 100)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun getpropl (sym indicl)
+  (cond ((symbolp sym)
+         (setq sym (symbol-plist sym))
+         (loop for tail on sym by #'cddr
+               when (member (car tail) indicl :test #'eq)
+               do (return tail)))
+        (t (return-from getpropl nil))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Informationslisten, , Funktionen f@"ur die Eigenschaftsliste, Allgemeine Hilfsfunktionen
+@subsection Informationslisten
+@c -----------------------------------------------------------------------------
+
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{$props}
+@defvr {Systemvariable} $props
+Standardwert: @code{[]}
+
+Die Systemvariable @code{$props} ist eine Informationsliste f@"ur den Nutzer
+und enth@"alt die Symbole, die vom Nutzer eine Eigenschaft erhalten haben.
+
+@code{$props} hat die @code{assign}-Eigenschaft @code{neverset}.  Der
+Systemvariablen kann daher vom Nutzer kein Wert zugewiesen werden.
+
+Siehe zum Beispiel die Funktion @mrefcomma{op-setup} die Symbole in der Liste
+@code{$props} ablegt, die als Operator definiert werden.
+@end defvr
+
+@c --- 10.08.2011 --------------------------------------------------------------
+@anchor{add2lnc}
+@deffn {Funktion} add2lnc item llist
+
+Die Funktion @code{add2lnc} f@"ugt der Liste @var{llist} das Element @var{item}
+hinzu.  @"Ublicherweise ist ein @var{item} ein Symbol und @var{llist} eine der
+Informationslisten, die kMaxima zur Verf@"ugung stellt.  Die Informationslisten
+haben das interne Format @code{((mlist simp) $item1 $item2 ...)}.  @var{item}
+kann auch eine Liste sein.  F@"ur Symbole oder Listen als Argument @var{item}
+verh@"alt sich die Funktion etwas unterschiedlich.
+
+Es wird zun@"achst gepr@"uft, ob das Argument @var{item} bereits in der Liste
+enthalten ist.  Der Test wird mit der Funktion @mref{memalike} durchgef@"uhrt,
+die die Funktion @mref{alike1} nacheinander auf die Elemente der Liste anwendet.
+Ist @var{item} kein Element der Liste wird das Element am Ende der Liste
+hinzugef@"ugt.
+
+F@"ur den Fall das das Argument @var{item} eine Liste ist, wird gepr@"uft, ob
+das erste Element der Liste @var{item} bereits in der Liste enthalten ist.  Ist
+dies der Fall, wird das vorhandene Element von der Liste gel@"oscht und das
+neue Element an das Ende der Liste angeh@"angt.
+
+Die R@"uckgabe ist die modifizierte Liste @var{llist}.
+
+@emph{Seiteneffekte:} Das Argument @var{llist} wird modifiziert und enth@"alt
+nach dem Aufruf der Funktion eine aktualisierte Liste.
+
+@emph{Beispiele:}
+Die ersten Beispiele zeigen die @"ubliche Verwendung der Funktion
+@code{add2lnc}.  Symbole werden hier der Informationsliste @mref{$props}@w{}
+hinzugef@"ugt.
+
+@example
+* $props
+((MLIST SIMP))
+* (add2lnc '$a $props)
+((MLIST SIMP) $A)
+* (add2lnc '$b $props)
+((MLIST SIMP) $A $B)
+* (add2lnc '$c $props)
+((MLIST SIMP) $A $B $C)
+* (add2lnc '$b $props)
+((MLIST SIMP) $A $B $C)
+@end example
+
+Die M@"oglichkeit einer Liste als erstes Argument wird von Maxima genutzt, um
+die Abh@"angigkeit einer Funktion von Variablen in der Informationsliste
+@code{$dependencies} zu aktualisieren.  Hier sind @code{f(x,y)} und
+@code{g(x,y)} zwei Funktionen, die von den Variablen @code{x} und @code{y}
+abh@"angen sollen.  Im letzten Beispiel wird die Abh@"angigkeit von den
+Variablen @code{a} und @code{b} neu definiert.  Der alte Eintrag ist entfernt.
+
+@example
+* (defvar $dependencies '((mlist simp)))
+$DEPENDENCIES
+* (add2lnc '($f $x $y) $dependencies)
+((MLIST SIMP) ($F $X $Y))
+* (add2lnc '($g $x $y) $dependencies)
+((MLIST SIMP) ($F $X $Y) ($G $X $Y))
+* (add2lnc '($f $a $b) $dependencies)
+((MLIST SIMP) ($G $X $Y) ($F $A $B))
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun add2lnc (item llist)
+  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
+    (unless (atom item)
+      (setf llist
+            (delete (assoc (car item) llist :test #'equal)
+                    llist :count 1 :test #'equal)))
+    (nconc llist (list item))))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Testfunktionen, Syntax der Bezeichner, Allgemeine Hilfsfunktionen, Erste Makros und Hilfsfunktionen
 @section Testfunktionen
 @c -----------------------------------------------------------------------------
 
@@ -404,6 +656,7 @@ Funktion @code{mfunctionp} ist eine Erweiterung der Lisp-Funktion
 @code{functionp}, die auch Symbole ber@"ucksichtigt, die eine Funktion als
 Wert haben.
 
+@need 800
 @emph{Beispiele:}
 @example
 * (functionp #'meval)
@@ -507,7 +760,7 @@ NIL
 NIL
 @end example
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
 
 Im Original Maxima gibt es eine Funktion @code{op-equalp}, die eine beliebige
 Anzahl an Operatoren als Argument akzeptiert und mit der Lisp-Funktion
@@ -729,14 +982,6 @@ Testet, ob das Argument @var{x} eine Lisp-Zahl mit dem Wert Eins ist.
 
 Siehe auch die Funktionen @mref{onep1} und @mrefdot{zerop1}
 
-@emph{Hinweis:}
-
-Das Original Maxima hat auch die Funktion @code{onep}.  Diese testet jedoch
-nur, ob das Argument die ganze Zahl @code{1} ist.  Die hier definierte
-Funktion hat dagegen auch f@"ur eine Gleitkommazahl mit dem Wert @code{1.0} das
-Ergebnis @code{t}.  Das entspricht der Funktionalit@"at der entsprechenden
-Lisp-Funktion @code{zerop}.
-
 @emph{Beispiele:}
 @example
 * (onep 1)
@@ -744,6 +989,14 @@ T
 * (onep 1.0)
 T
 @end example
+
+@emph{Bemerkung:}
+
+Das Original Maxima hat auch die Funktion @code{onep}.  Diese testet jedoch
+nur, ob das Argument die ganze Zahl @code{1} ist.  Die hier definierte
+Funktion hat dagegen auch f@"ur eine Gleitkommazahl mit dem Wert @code{1.0} das
+Ergebnis @code{t}.  Das entspricht der Funktionalit@"at der entsprechenden
+Lisp-Funktion @code{zerop}.
 
 @emph{Quelltext:}
 @lisp
@@ -783,8 +1036,8 @@ T
 @end deffn
 
 @c --- 08.11.2011 --------------------------------------------------------------
-@anchor{mnegativep}
-@deffn {Funktion} mnegativep x
+@anchor{minusp1}
+@deffn {Funktion} minusp1 x
 
 Testet, ob das Argument @var{x} eine negative Zahl ist.  Das Argument kann
 eine Lisp-Zahl sowie eine rationale Zahl oder gro@ss{}e Gleitkommazahl sein.
@@ -792,20 +1045,20 @@ eine Lisp-Zahl sowie eine rationale Zahl oder gro@ss{}e Gleitkommazahl sein.
 @emph{Beispiele:}
 
 @example
-* (mnegativep -1)
+* (minusp1 -1)
 T
-* (mnegativep -1.0)
+* (minusp1 -1.0)
 T
-* (mnegativep ($bfloat -1))
+* (minusp1 ($bfloat -1))
 T
-* (mnegativep ($bfloat 2))
+* (minusp1 ($bfloat 2))
 NIL
 @end example
 
 @emph{Quelltext:}
 @lisp
 @group
-(defun mnegativep (x)
+(defun minusp1 (x)
   (cond ((realp x) (minusp x))
         ((ratnump x) (minusp (rat-num x)))
         ((bigfloatp x) (minusp (cadr x)))))
@@ -825,7 +1078,7 @@ NIL
 Testet, ob das Argument @var{x} ein Symbol ist, das als konstant deklariert ist.
 Siehe auch die Funktion @mrefdot{mconstantp}
 
-@emph{Hinweis:}
+@emph{Bemerkung:}
 
 Eigenschaften wie die, das ein Symbol eine Konstante repr@"asentiert, werden
 im Original Maxima in eine Datenbank abgelegt.  Diese ist hier noch nicht
@@ -873,220 +1126,20 @@ nicht konsistent.  Ein Grund f@"ur diese Inkonsistenz ist noch nicht gefunden.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Weitere Funktionen f@"ur Ausdr@"ucke, Funktionen f@"ur die Eigenschaftsliste, Testfunktionen, Erste Makros und Hilfsfunktionen
-@section Weitere Funktionen f@"ur Ausdr@"ucke
+@node Syntax der Bezeichner, Funktionen f@"ur Ausdr@"ucke, Testfunktionen, Erste Makros und Hilfsfunktionen
+@section Syntax der Bezeichner
 @c -----------------------------------------------------------------------------
 
-@c --- 09.11.2011 --------------------------------------------------------------
-@anchor{mop}
-@deffn {Funktion} mop form
-
-Gibt den Hauptoperator des Ausdrucks @var{form} zur@"uck, der ein g@"ultiger
-kMaxima-Ausdruck sein muss.  Die Funktion @code{mop} pr@"uft dabei, ob ein
-@code{mqapply}-Ausdruck vorliegt.  Es ist ein Fehler keinen g@"ultigen
-kMaxima-Ausdruck als Argument an die Funktion zu @"ubergeben.  In diesem Fall
-bricht die Ausf@"uhrung mit einem Lisp-Fehler ab.
-
-Siehe auch die Funktion @mrefdot{margs}
-
-@emph{Beispiel:}
-@example
-* (mop '((mplus) a b))
-MPLUS
-* (mop '((mqapply) ((f array) x) a b))
-((F ARRAY) X)
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun mop (form)
-  (if (eq (caar form) 'mqapply)
-      (cadr form)
-      (caar form)))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{margs}
-@deffn {Funktion} margs form
-
-Gibt die Argumente des Hauptoperators des Ausdrucks @var{form} zur@"uck.  Das
-Argument @var{form} muss ein g@"ultiger kMaxima-Ausdruck sein, ansonsten wird ein
-Lisp-Fehler signalisiert.  Die Funktion @code{margs} pr@"uft dabei, ob ein
-@code{mqapply}-Ausdruck vorliegt.
-
-Siehe auch die Funktion @mrefdot{mop}
-
-@emph{Beispiele:}
-@example
-* (margs '((mplus) a b))
-(A B)
-* (margs '((mqapply) ((f array) x) a b))
-(A B)
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun margs (form)
-  (if (eq (caar form) 'mqapply)
-      (cddr form)
-      (cdr form)))
-@end group
-@end lisp
-@end deffn
+@menu
+* Konvertierung zwischen Gross- und Kleinschreibung::
+* Zerlegen von Symbolen und Zeichenketten::
+* Alias und Reversealias::
+* Verb- und Substantivform::
+@end menu
 
 @c -----------------------------------------------------------------------------
-@node Funktionen f@"ur die Eigenschaftsliste, Konvertierung zwischen Gross- und Kleinschreibung, Weitere Funktionen f@"ur Ausdr@"ucke, Erste Makros und Hilfsfunktionen
-@section Funktionen f@"ur die Eigenschaftsliste
-@c -----------------------------------------------------------------------------
-
-Die Lisp-Eigenschaftsliste wird von kMaxima h@"aufig genutzt, um Eigenschaften
-f@"ur Lisp-Symbole abzulegen.  Diese Eigenschaften k@"onnen Werte und Funktionen
-sein.  Die Eigenschaftsliste erlaubt einen Programmierstil, der objektorientiert
-ist, ohne dass Mechanismen gebraucht werden, wie sie in anderen
-Programmiersprachen notwendig sind.
-
-Um eine einheitliche Syntax zu erm@"oglichen, werden f@"ur das Setzen eines
-Wertes die Funktion @code{putprop} und das Makro @code{defprop} definiert.
-Im Unterschied zur Funktion @code{putprop} wertet das Makro @code{defprop}
-die Argumente nicht aus.  Das erlaubt eine bequemere Schreibweise, da auf
-das Voranstellen des Quote-Operators @code{'} verzichtet werden kann, wenn
-die Argumente Symbole sind.  Mit der Funktion @code{getprop} kann eine
-Eigenschaft zu einem Symbol gelesen werden.  Im Unterschied zur Lisp-Funktion
-@code{get} testet die Funktion @code{getprop} zun@"achst, ob das erste Argument
-ein Symbol ist.  Ist dies nicht der Fall ist die R@"uckgabe @code{nil}.
-
-@c --- 21.11.2011 --------------------------------------------------------------
-@anchor{putprop}
-@deffn {Funktion} putprop sym val indic
-
-Die Funktion @code{putprop} legt den Wert @var{val} zum Indikator @var{indic}
-auf der Eigenschaftsliste des Symbols @var{sym} ab.  Die Funktion testet, ob
-das Argument @var{sym} ein Symbol ist.  Ist @var{sym} kein Symbol, wird der Wert
-@code{nil} zur@"uckgegeben.
-
-Siehe auch die Funktionen @mrefcomma{defprop} @mref{getprop} und
-@mrefdot{getpropl}
-
-@emph{Beispiele}:
-@example
-* (putprop 'sym 999 'val)
-999
-* (get 'sym 'val)
-999
-* (putprop 999 999 999)
-NIL
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun putprop (sym val indic)
-  (and (symbolp sym)
-       (setf (get sym indic) val)))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{defprop}
-@deffn {Makro} defprop sym val indic
-
-Das Makro @code{defprop} ruft die Funktion @mref{putprop} auf, um den Wert
-@var{val} zum Indikator @var{indic} auf der Eigenschaftsliste des Symbols
-@var{sym} abzulegen.  Im Unterschied zur Funktion @mref{putprop} wertet das
-Makro @code{defprop} die Argumente nicht aus, so dass Symbole nicht quotiert
-werden m@"ussen.  
-
-Siehe auch die Funktion @mref{getprop} und @mrefdot{getpropl}
-
-@emph{Quelltext:}
-@lisp
-@group
-(defmacro defprop (sym val indic)
-  `(putprop ',sym ',val ',indic))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{getprop}
-@deffn {Funktion} getprop sym indic
-
-Die Funktion @code{getprop} holt den Wert zum Indikator @var{indic} von der
-Eigenschaftsliste des Symbols @var{indic}.  Die Funktion testet zum Unterschied
-der Lisp-Funktion @code{get}, ob das Argument @var{sym} ein Symbol ist und gibt
-den Wert @code{nil} zur@"uck, wenn dies nicht der Fall ist.  Auch wird
-@code{nil} zur@"uckgegeben, wenn kein Wert zum Indikator @var{indic} auf der
-Eigenschaftsliste abgelegt ist.
-
-@emph{Quelltext:}
-@example
-* (putprop 'sym 999 'val)
-999
-* (getprop 'sym 'val)
-999
-* (getprop 999 'val)
-NIL
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun getprop (sym indic)
-  (and (symbolp sym)
-       (get sym indic)))
-@end group
-@end lisp
-@end deffn
-
-@c --- 21.10.2011 --------------------------------------------------------------
-@anchor{getpropl}
-@deffn {Funktion} getpropl sym indicl
-
-@code{getpropl} ist eine Verallgemeinerung der Funktion @mrefcomma{getprop}@w{}
-die eine Liste als zweites Argument erwartet und eine Liste zur@"uckgibt,
-deren erstes Element der Indikator ist, zu dem der erste Eintrag auf der
-Eigenschaftsliste gefunden wurde.  Die weiteren Elemente der Liste sind die
-folgenden Eintr@"age der Eigenschaftsliste.
-
-Beispiel:
-
-@example
-* (defprop f 100 width)
-100
-* (defprop f round shape)
-ROUND
-* (symbol-plist 'f)
-(SHAPE ROUND WIDTH 100)
-* (getpropl 'f '(shape))
-(SHAPE ROUND WIDTH 100)
-* (getpropl 'f '(width))
-(WIDTH 100)
-* (getpropl 'f '(colour width))
-(WIDTH 100)
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun getpropl (sym indicl)
-  (cond ((symbolp sym)
-         (setq sym (symbol-plist sym))
-         (loop for tail on sym by #'cddr
-               when (member (car tail) indicl :test #'eq)
-               do (return tail)))
-        (t (return-from getpropl nil))))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegung von Symbolen und Zeichenketten in Listen, Funktionen f@"ur die Eigenschaftsliste, Erste Makros und Hilfsfunktionen
-@section Konvertierung zwischen Gro@ss{}- und Kleinschreibung
+@node Konvertierung zwischen Gross- und Kleinschreibung, Zerlegen von Symbolen und Zeichenketten, Syntax der Bezeichner, Syntax der Bezeichner
+@subsection Konvertierung zwischen Gro@ss{}- und Kleinschreibung
 @c -----------------------------------------------------------------------------
 
 Im Gegensatz zu Lisp unterscheidet kMaxima Gro@ss{}- und Kleinschreibung.  Dabei
@@ -1164,12 +1217,16 @@ Die R@"uckgabe ist eine Zeichenkette.
 (defun maybe-invert-string (str)
   (let ((all-upper t)
         (all-lower t))
+@end group
+@group
     (dotimes (i (length str))
       (let ((ch (char str i)))
         (when (both-case-p ch)
           (if (upper-case-p ch)
               (setq all-lower nil)
               (setq all-upper nil)))))
+@end group
+@group
     (cond (all-upper (string-downcase str))
           (all-lower (string-upcase str))
           (t str))))
@@ -1210,8 +1267,8 @@ ABC
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Zerlegung von Symbolen und Zeichenketten in Listen, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Erste Makros und Hilfsfunktionen
-@section Zerlegung von Symbolen und Zeichenketten in Listen
+@node Zerlegen von Symbolen und Zeichenketten, Alias und Reversealias, Konvertierung zwischen Gross- und Kleinschreibung, Syntax der Bezeichner
+@subsection Zerlegen von Symbolen und Zeichenketten
 @c -----------------------------------------------------------------------------
 
 H@"aufig werden Zahlen, Symbole oder Zeichenketten als eine Liste ihrer
@@ -1377,8 +1434,8 @@ NIL
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Alias und Reversealias, Verb- und Substantivform, Zerlegung von Symbolen und Zeichenketten in Listen, Erste Makros und Hilfsfunktionen
-@section Alias und Reversealias
+@node Alias und Reversealias, Verb- und Substantivform, Zerlegen von Symbolen und Zeichenketten, Syntax der Bezeichner
+@subsection Alias und Reversealias
 @c -----------------------------------------------------------------------------
 
 @c --- 15.10.2011 --------------------------------------------------------------
@@ -1405,6 +1462,7 @@ den Alias @code{nil} f@"ur das Symbol @code{$false} zu nutzen, da die
 Funkion @code{getprop} in diesem Fall den R@"uckgabewert @code{nil} hat, was
 ein signalisieren w@"urde, dass kein Alias gefunden wurde.
 
+@need 800
 @emph{Beispiele:}
 
 Wenn kMaxima die Zeichenfolge @code{sin} von der Eingabe liest, wird diese
@@ -1567,6 +1625,8 @@ Anzeige durch das vom Nutzer definierte Symbol @code{|$I|} ersetzt.
   (let ((y (and (or remp
                     (member x (cdr $aliases) :test #'equal))
                 (getprop x 'reversealias))))
+@end group
+@group
     (cond ((and y (eq x '%derivative))
            (remprop x 'reversealias)
            (setf $aliases (delete x $aliases :count 1 :test #'eq))
@@ -1581,8 +1641,8 @@ Anzeige durch das vom Nutzer definierte Symbol @code{|$I|} ersetzt.
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Verb- und Substantivform, Vergleiche Ausdr@"ucke, Alias und Reversealias, Erste Makros und Hilfsfunktionen
-@section Verb- und Substantivform
+@node Verb- und Substantivform, , Alias und Reversealias, Syntax der Bezeichner
+@subsection Verb- und Substantivform
 @c -----------------------------------------------------------------------------
 
 Die Funktionen @code{$nounify} und @code{$verbify} implementieren den
@@ -1783,8 +1843,86 @@ NIL
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@node Vergleiche Ausdr@"ucke, Weitere Hilfsfunktionen und Variablen, Verb- und Substantivform, Erste Makros und Hilfsfunktionen
-@section Vergleiche Ausdr@"ucke
+@node Funktionen f@"ur Ausdr@"ucke, , Syntax der Bezeichner, Erste Makros und Hilfsfunktionen
+@section Funktionen f@"ur Ausdr@"ucke
+@c -----------------------------------------------------------------------------
+
+@menu
+* Operatoren und Argumente holen::
+* Vergleiche Ausdr@"ucke::
+@end menu
+
+@c -----------------------------------------------------------------------------
+@node Operatoren und Argumente holen, Vergleiche Ausdr@"ucke, Funktionen f@"ur Ausdr@"ucke, Funktionen f@"ur Ausdr@"ucke
+@subsection Operatoren und Argumente holen
+@c -----------------------------------------------------------------------------
+
+@c --- 09.11.2011 --------------------------------------------------------------
+@anchor{mop}
+@deffn {Funktion} mop form
+
+Gibt den Hauptoperator des Ausdrucks @var{form} zur@"uck, der ein g@"ultiger
+kMaxima-Ausdruck sein muss.  Die Funktion @code{mop} pr@"uft dabei, ob ein
+@code{mqapply}-Ausdruck vorliegt.  Es ist ein Fehler keinen g@"ultigen
+kMaxima-Ausdruck als Argument an die Funktion zu @"ubergeben.  In diesem Fall
+bricht die Ausf@"uhrung mit einem Lisp-Fehler ab.
+
+Siehe auch die Funktion @mrefdot{margs}
+
+@emph{Beispiel:}
+@example
+* (mop '((mplus) a b))
+MPLUS
+@group
+* (mop '((mqapply) ((f array) x) a b))
+((F ARRAY) X)
+@end group
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+@end group
+@end lisp
+@end deffn
+
+@c --- 21.10.2011 --------------------------------------------------------------
+@anchor{margs}
+@deffn {Funktion} margs form
+
+Gibt die Argumente des Hauptoperators des Ausdrucks @var{form} zur@"uck.  Das
+Argument @var{form} muss ein g@"ultiger kMaxima-Ausdruck sein, ansonsten wird ein
+Lisp-Fehler signalisiert.  Die Funktion @code{margs} pr@"uft dabei, ob ein
+@code{mqapply}-Ausdruck vorliegt.
+
+Siehe auch die Funktion @mrefdot{mop}
+
+@emph{Beispiele:}
+@example
+* (margs '((mplus) a b))
+(A B)
+* (margs '((mqapply) ((f array) x) a b))
+(A B)
+@end example
+
+@emph{Quelltext:}
+@lisp
+@group
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+@end group
+@end lisp
+@end deffn
+
+@c -----------------------------------------------------------------------------
+@node Vergleiche Ausdr@"ucke, , Operatoren und Argumente holen, Funktionen f@"ur Ausdr@"ucke
+@subsection Vergleiche Ausdr@"ucke
 @c -----------------------------------------------------------------------------
 
 kMaxima-Ausdr@"ucke werden als Lisp-Listen der Form @code{((op) arg1 arg2 ...)}
@@ -1952,104 +2090,6 @@ Siehe auch die Funktion @mrefdot{free}
   (do ((l l (cdr l)))
       ((null l) t)
     (when (not (free (car l) var)) (return nil))))
-@end group
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@need 800
-@node Weitere Hilfsfunktionen und Variablen, , Vergleiche Ausdr@"ucke, Erste Makros und Hilfsfunktionen
-@section Weitere Hilfsfunktionen und Variablen
-@c -----------------------------------------------------------------------------
-
-@c --- 10.08.2011 --------------------------------------------------------------
-@anchor{$props}
-@defvr {Systemvariable} $props
-Standardwert: @code{[]}
-
-Die Systemvariable @code{$props} ist eine Informationsliste f@"ur den Nutzer
-und enth@"alt die Symbole, die vom Nutzer eine Eigenschaft erhalten haben.
-
-@code{$props} hat die @code{assign}-Eigenschaft @code{neverset}.  Der
-Systemvariablen kann daher vom Nutzer kein Wert zugewiesen werden.
-
-Siehe zum Beispiel die Funktion @mrefcomma{op-setup} die Symbole in der Liste
-@code{$props} ablegt, die als Operator definiert werden.
-@end defvr
-
-@c --- 10.08.2011 --------------------------------------------------------------
-@anchor{add2lnc}
-@deffn {Funktion} add2lnc item llist
-
-Die Funktion @code{add2lnc} f@"ugt der Liste @var{llist} das Element @var{item}
-hinzu.  @"Ublicherweise ist ein @var{item} ein Symbol und @var{llist} eine der
-Informationslisten, die kMaxima zur Verf@"ugung stellt.  Die Informationslisten
-haben das interne Format @code{((mlist simp) $item1 $item2 ...)}.  @var{item}
-kann auch eine Liste sein.  F@"ur Symbole oder Listen als Argument @var{item}
-verh@"alt sich die Funktion etwas unterschiedlich.
-
-Es wird zun@"achst gepr@"uft, ob das Argument @var{item} bereits in der Liste
-enthalten ist.  Der Test wird mit der Funktion @mref{memalike} durchgef@"uhrt,
-die die Funktion @mref{alike1} nacheinander auf die Elemente der Liste anwendet.
-Ist @var{item} kein Element der Liste wird das Element am Ende der Liste
-hinzugef@"ugt.
-
-F@"ur den Fall das das Argument @var{item} eine Liste ist, wird gepr@"uft, ob
-das erste Element der Liste @var{item} bereits in der Liste enthalten ist.  Ist
-dies der Fall, wird das vorhandene Element von der Liste gel@"oscht und das
-neue Element an das Ende der Liste angeh@"angt.
-
-Die R@"uckgabe ist die modifizierte Liste @var{llist}.
-
-@emph{Seiteneffekte:} Das Argument @var{llist} wird modifiziert und enth@"alt
-nach dem Aufruf der Funktion eine aktualisierte Liste.
-
-@emph{Beispiele:}
-Die ersten Beispiele zeigen die @"ubliche Verwendung der Funktion
-@code{add2lnc}.  Symbole werden hier der Informationsliste @mref{$props}@w{}
-hinzugef@"ugt.
-
-@example
-* $props
-((MLIST SIMP))
-* (add2lnc '$a $props)
-((MLIST SIMP) $A)
-* (add2lnc '$b $props)
-((MLIST SIMP) $A $B)
-* (add2lnc '$c $props)
-((MLIST SIMP) $A $B $C)
-* (add2lnc '$b $props)
-((MLIST SIMP) $A $B $C)
-@end example
-
-Die M@"oglichkeit einer Liste als erstes Argument wird von Maxima genutzt, um
-die Abh@"angigkeit einer Funktion von Variablen in der Informationsliste
-@code{$dependencies} zu aktualisieren.  Hier sind @code{f(x,y)} und
-@code{g(x,y)} zwei Funktionen, die von den Variablen @code{x} und @code{y}
-abh@"angen sollen.  Im letzten Beispiel wird die Abh@"angigkeit von den
-Variablen @code{a} und @code{b} neu definiert.  Der alte Eintrag ist entfernt.
-
-@example
-* (defvar $dependencies '((mlist simp)))
-$DEPENDENCIES
-* (add2lnc '($f $x $y) $dependencies)
-((MLIST SIMP) ($F $X $Y))
-* (add2lnc '($g $x $y) $dependencies)
-((MLIST SIMP) ($F $X $Y) ($G $X $Y))
-* (add2lnc '($f $a $b) $dependencies)
-((MLIST SIMP) ($G $X $Y) ($F $A $B))
-@end example
-
-@emph{Quelltext:}
-@lisp
-@group
-(defun add2lnc (item llist)
-  (unless (memalike item (if (mlistp llist) (cdr llist) llist))
-    (unless (atom item)
-      (setf llist
-            (delete (assoc (car item) llist :test #'equal)
-                    llist :count 1 :test #'equal)))
-    (nconc llist (list item))))
 @end group
 @end lisp
 @end deffn
