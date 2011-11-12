@@ -876,7 +876,7 @@
         (z nil))
     (when (mplusp product) (setq product (list '(mtimes simp) product)))
     (cond ((zerop1 factor)
-           (cond ((mnegativep power)
+           (cond ((minusp1 power)
                   (if *errorsw*
                       (throw 'errorsw t)
                       (merror "Division by 0")))
@@ -915,7 +915,7 @@
 
 (defun exponent-of (m base)
   (unless (and (mnumberp m)
-               (not (mnegativep m))
+               (not (minusp1 m))
                (integerp base)
                (not (eql (abs base) 1)))
     (return-from exponent-of nil))
@@ -1286,7 +1286,7 @@
           ((or (zerop1 pot) (onep1 gr)) (return (exptrl gr pot)))
           ((zerop1 gr)
            (cond ((mnumberp pot)
-                  (if (mnegativep pot)
+                  (if (minusp1 pot)
                       (merror "expt: Undefined: 0 to a negative exponent.")
                       (return (cond ((or (floatp gr) (floatp pot)) 0.0)
                                     (t 0)))))
@@ -1576,7 +1576,7 @@
                (t (list '(mexpt simp) r1 1.0))))
         ((zerop1 r1)
          (cond ((or (zerop1 r2)
-                    (mnegativep r2))
+                    (minusp1 r2))
                 (if *errorsw*
                     (throw 'errorsw t)
                     (merror "expt: undefined: ~a" (list '(mexpt) r1 r2))))
