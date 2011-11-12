@@ -493,49 +493,64 @@
 
 (defprop mplus addbigfloat floatprog)
 
-(defun addbigfloat (h)
+#+nil
+(defun addbigfloat (args)
   (prog (fans tst r nfans)
-    (setq fans (setq tst bigfloatzero)
+    (setq fans  bigfloatzero
+          tst   bigfloatzero
           nfans 0)
-    (do ((l h (cdr l)))
+    (do ((l args (cdr l)))
         ((null l))
       (cond ((setq r (check-bigfloat (car l)))
              (setq fans (bcons (fpplus (cdr r) (cdr fans)))))
             (t
              (setq nfans (list '(mplus) (car l) nfans)))))
     (return (cond ((eql nfans 0) fans)
-                  ((eql fans tst) nfans)
+                  ((equal fans tst) nfans)
                   (t (simplifya (list '(mplus) fans nfans) nil))))))
 
+(defun addbigfloat (args)
+  (let ((fans  (cdr bigfloatzero))
+        (nfans nil))
+    (do ((l args (cdr l)))
+        ((null l)
+         (cond ((null nfans) (bcons fans))
+               ((zerop (car fans)) (addn nfans nil))
+               (t (addn (cons (bcons fans) nfans) nil))))
+      (cond ((setq r (check-bigfloat (car l)))
+             (setq fans (fpplus (cdr r) fans)))
+            (t
+             (setq nfans (cons (car l) nfans)))))))
+    
 (defun fpplus (a b)
-  (prog (*m exp man sticky)
+  (prog (*m expo man sticky)
     (setq *cancelled 0)
     (cond ((eql (car a) 0) (return b))
           ((eql (car b) 0) (return a)))
-    (setq exp (- (cadr a) (cadr b)))
-    (setq man (cond ((eql exp 0)
+    (setq expo (- (cadr a) (cadr b)))
+    (setq man (cond ((eql expo 0)
                      (setq sticky 0)
                      (fpshift (+ (car a) (car b)) 2))
-                    ((> exp 0)
-                     (setq sticky (hipart (car b) (- 1 exp)))
+                    ((> expo 0)
+                     (setq sticky (hipart (car b) (- 1 expo)))
                      (setq sticky (cond ((zerop sticky) 0)
                                         ((< (car b) 0) -1)
                                         (t 1)))
                      (+ (fpshift (car a) 2)
-                        (fpshift (car b) (- 2 exp))))
+                        (fpshift (car b) (- 2 expo))))
                     (t
-                     (setq sticky (hipart (car a) (1+ exp)))
+                     (setq sticky (hipart (car a) (1+ expo)))
                      (setq sticky (cond ((zerop sticky) 0)
                                         ((< (car a) 0) -1)
                                         (t 1)))
                      (+ (fpshift (car b) 2)
-                        (fpshift (car a) (+ 2 exp))))))
+                        (fpshift (car a) (+ 2 expo))))))
     (setq man (+ man sticky))
     (return (cond ((eql man 0) '(0 0))
                   (t
                    (setq man (fpround man))
-                   (setq exp (+ -2 *m (max (cadr a) (cadr b))))
-                   (list man exp))))))
+                   (setq expo (+ -2 *m (max (cadr a) (cadr b))))
+                   (list man expo))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -543,7 +558,8 @@
 
 (defun timesbigfloat (h)
   (prog (fans r nfans)
-    (setq fans (bcons (fpone)) nfans 1)
+    (setq fans (bcons (fpone))
+          nfans 1)
     (do ((l h (cdr l)))
         ((null l))
       (if (setq r (check-bigfloat (car l)))
@@ -571,7 +587,8 @@
 
 (defun big-float-log (x &optional y)
   (if y
-      (multiple-value-bind (u v) (complex-log x y)
+      (multiple-value-bind (u v)
+          (complex-log x y)
         (add (bcons u) (mul '$%i (bcons v))))
       (flet ((%log (x)
                (cdr
@@ -729,9 +746,9 @@
                       (t
                        (setq p (exptbigfloat (bcons (fpminus (cdr p))) n)
                              n ($bfloat `((mtimes) $%pi ,n)))
-                       (add2 ($bfloat `((mtimes) ,p ,(*fpsin n nil)))
+                       (add2 ($bfloat `((mtimes) ,p ,(fpsin* n nil)))
                              `((mtimes simp)
-                               ,($bfloat `((mtimes) ,p ,(*fpsin n t)))
+                               ,($bfloat `((mtimes) ,p ,(fpsin* n t)))
                                $%i)))))
                (t (list '(mexpt) p n))))
         ((and (ratnump n) (< (caddr n) 10))
@@ -1042,9 +1059,9 @@
 (defprop %sin sinbigfloat floatprog)
 
 (defun sinbigfloat (x)
-  (*fpsin (car x) t))
+  (fpsin* (car x) t))
 
-(defun *fpsin (a fl)
+(defun fpsin* (a fl)
   (fpend (let ((fpprec (+ 8 fpprec)))
            (cond ((bigfloatp a) (fpsin (cdr ($bfloat a)) fl))
                  (fl (list '(%sin) a))
@@ -1114,7 +1131,7 @@
 (defprop %cos cosbigfloat floatprog)
 
 (defun cosbigfloat (x)
-  (*fpsin (car x) nil))
+  (fpsin* (car x) nil))
 
 ;;; ----------------------------------------------------------------------------
 
