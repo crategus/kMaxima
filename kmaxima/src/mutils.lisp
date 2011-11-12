@@ -52,6 +52,42 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun putprop (sym val indic)
+  (and (symbolp sym)
+       (setf (get sym indic) val)))
+
+(defmacro defprop (sym val indic)
+  `(putprop ',sym ',val ',indic))
+
+(defun getprop (sym indic)
+  (and (symbolp sym)
+       (get sym indic)))
+
+(defun getpropl (sym indicl)
+  (cond ((symbolp sym)
+         (setq sym (symbol-plist sym))
+         (loop for tail on sym by #'cddr
+               when (member (car tail) indicl :test #'eq)
+               do (return tail)))
+        (t (return-from getpropl nil))))
+
+;;; ----------------------------------------------------------------------------
+
+(defmvar $props '((mlist simp)))
+(setf (get '$props 'assign) 'neverset)
+
+(defun add2lnc (item llist)
+  (if (memalike item (if (mlistp llist) (cdr llist) llist))
+      llist
+      (progn
+        (unless (atom item)
+          (setf llist
+               (delete (assoc (car item) llist :test #'equal)
+                       llist :count 1 :test #'equal)))
+        (nconc llist (list item)))))
+
+;;; ----------------------------------------------------------------------------
+
 (defun moperatorp (x op)
   (and (consp x)
        (consp (car x))
@@ -117,7 +153,7 @@
       (and (bigfloatp x)
            (zerop (second (sub x 1))))))
 
-(defun mnegativep (x)
+(defun minusp1 (x)
   (cond ((realp x) (minusp x))
         ((ratnump x) (minusp (rat-num x)))
         ((bigfloatp x) (minusp (cadr x)))))
@@ -136,54 +172,6 @@
 (defun mconstantp (x)
   (or (numberp x)
       (decl-constant x)))
-
-;;; ----------------------------------------------------------------------------
-
-(defun mop (form)
-  (if (eq (caar form) 'mqapply)
-      (cadr form)
-      (caar form)))
-
-(defun margs (form)
-  (if (eq (caar form) 'mqapply)
-      (cddr form)
-      (cdr form)))
-
-;;; ----------------------------------------------------------------------------
-
-(defun putprop (sym val indic)
-  (and (symbolp sym)
-       (setf (get sym indic) val)))
-
-(defmacro defprop (sym val indic)
-  `(putprop ',sym ',val ',indic))
-
-(defun getprop (sym indic)
-  (and (symbolp sym)
-       (get sym indic)))
-
-(defun getpropl (sym indicl)
-  (cond ((symbolp sym)
-         (setq sym (symbol-plist sym))
-         (loop for tail on sym by #'cddr
-               when (member (car tail) indicl :test #'eq)
-               do (return tail)))
-        (t (return-from getpropl nil))))
-
-;;; ----------------------------------------------------------------------------
-
-(defmvar $props '((mlist simp)))
-(setf (get '$props 'assign) 'neverset)
-
-(defun add2lnc (item llist)
-  (if (memalike item (if (mlistp llist) (cdr llist) llist))
-      llist
-      (progn
-        (unless (atom item)
-          (setf llist
-               (delete (assoc (car item) llist :test #'equal)
-                       llist :count 1 :test #'equal)))
-        (nconc llist (list item)))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -381,6 +369,18 @@
 
 ;;; ----------------------------------------------------------------------------
 
+(defun mop (form)
+  (if (eq (caar form) 'mqapply)
+      (cadr form)
+      (caar form)))
+
+(defun margs (form)
+  (if (eq (caar form) 'mqapply)
+      (cddr form)
+      (cdr form)))
+
+;;; ----------------------------------------------------------------------------
+
 (defun alike1 (x y)
   (labels ((memqarr (ll)
              (if (member 'array ll :test #'eq) t)))
@@ -422,6 +422,7 @@
       ((null l) t)
     (when (not (free (car l) var)) (return nil))))
 
+;;; ----------------------------------------------------------------------------
 ;;; ----------------------------------------------------------------------------
 
 (defun recur-apply (fun form)
