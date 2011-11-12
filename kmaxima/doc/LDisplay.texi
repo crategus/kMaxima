@@ -205,16 +205,12 @@ rekursiv auf die Teilausdr@"ucke eines Ausdrucks anwendet.
 @example
 * (nformat '((mtimes simp) -2 $x))
 ((MMINUS) ((MTIMES) 2 $X))
-
 * (nformat '((mexpt simp) $x ((rat) 1 2)))
 ((%SQRT) $X)
-
 * (nformat '((mexpt) $x ((rat) 1 2)))
 ((MEXPT) $X ((RAT) 1 2))
-
 * (nformat '((mexpt simp) ((mtimes simp) -2 $x) ((rat simp) 1 2)))
 ((%SQRT) ((MTIMES SIMP) -2 $X))
-
 * (nformat-all '((mexpt simp) ((mtimes simp) -2 $x) ((rat simp) 1 2)))
 ((%SQRT) ((MMINUS) ((MTIMES) 2 $X)))
 @end example
@@ -241,6 +237,7 @@ rekursiv auf die Teilausdr@"ucke eines Ausdrucks anwendet.
 @end lisp
 
 @emph{Bemerkungen:}
+
 Im Unterschied zum Original Maxima werden die booleschen Konstanten @code{t}
 und @code{nil} @emph{nicht} von @code{nformat} formatiert.  Die Formatierung
 zu den Symbolen @code{$true} und @code{$false} wird in den Funktionen
@@ -282,6 +279,7 @@ Die R@"uckgabe ist ein Ausdruck in der externen Darstellung.
 @end lisp
 
 @emph{Bemerkung:}
+
 Gegen@"uber dem Original in Maxima ist der Test auf einen
 @code{bigfloat}-Ausdruck entfernt.  Da @code{nformat} im Unterschied zum
 Original die booleschen Variablen @code{t} und @code{nil} nicht formatiert,
@@ -366,6 +364,7 @@ Differenzen @code{a - b} kontrolliert.
 @end lisp
 
 @emph{Bemerkung:}
+
 Im Original Maxima hat diese Funktion den Namen @code{form-mplus}.  Die Funktion
 ist umbenannt, um eine einheitliche Bezeichnung der Funktionen f@"ur die 
 Formatierung in eine externe Darstellung zu erhalten.  Weiterhin ist die
@@ -471,6 +470,7 @@ T
 @end lisp
 
 @emph{Bemerkung:}
+
 Im Original Maxima hat diese Funktion den Namen @code{form-mtimes}.  Die
 Funktion ist umbenannt, um eine einheitliche Bezeichnung der Funktionen f@"ur
 die Formatierung in eine externe Darstellung zu erhalten.
@@ -544,7 +544,9 @@ einschlie@ss{}lich aller Teilausdr@"ucke zu formatieren.
 @end group
 @end lisp
 
+@need 800
 @emph{Bemerkung:}
+
 Im Original Maxima hat diese Funktion den Namen @code{form-mexpt}.  Die
 Funktion ist umbenannt, um eine einheitliche Bezeichnung der Funktionen f@"ur
 die Formatierung in eine externe Darstellung zu erhalten.
@@ -601,6 +603,7 @@ Funktion @mref{makestring} in Anf@"uhrungszeichen gesetzt.  Die Funktion
 @mref{makestring1} bindet @code{$stringdispflag} an den Wert @code{nil}.
 
 @emph{Bemerkung:}
+
 Im Original Maxima hat diese Variable den Namen @code{$stringdisp}.
 @end defvr
 
@@ -614,6 +617,7 @@ Fragezeichen @code{?}.  Die Funktion @mref{makestring1} bindet
 @code{$lispdispflag} an den Wert @code{nil}.
 
 @emph{Bemerkung:}
+
 Im Original Maxima hat diese Variable den Namen @code{$lispdisp}.
 @end defvr
 
@@ -637,7 +641,7 @@ Siehe auch die Funktion @mrefdot{makestring1}  Diese Funktion bindet die
 Optionsvariablen @code{$stringdispflag} und @code{$lispdispflag} an den Wert
 @code{nil}.
 
-Beispiele:
+@emph{Beispiele}:
 
 @example
 * (makestring 'mplus)
@@ -799,8 +803,7 @@ Variablen @code{*linel*} enthalten.
                         (setq chrps 0)
                         (terpri out)
                         (mtyotbsp i out)))
-                 (mprint (car l) out)))))))
-)
+                 (mprint (car l) out))))))))
 @end group
 @end lisp
 @end deffn
@@ -846,7 +849,6 @@ aufgerufen.
 
 Als erstes wird das Argument @var{x} mit der Funktion @mref{nformat} für die
 externe Darstellung formatiert.  Dann werden ...
-
 
 @emph{Quelltext:}
 @lisp
@@ -1126,7 +1128,6 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @end lisp
 @end deffn
 
-
 @c -----------------------------------------------------------------------------
 @anchor{msize-mlabel}
 @deffn {Funktion} msize-mlabel x l r
@@ -1313,6 +1314,7 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @end lisp
 
 @emph{Bemerkung:}
+
 Gegen@"uber dem Original Maxima ist die Funktion deutlich kompakter.  F@"ur die
 Formatierung wird die Funktion @mref{msznary} aufgerufen.  Das hat den Vorteil,
 dass die Formatierung insgesamt flexibler ist.  Weiterhin ist die Formatierung
