@@ -53,7 +53,7 @@
 (defvar fpprec)
 (defvar *m)
 (defvar *cancelled)
-(defvar *decfp nil)
+(defvar *decfp* nil)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -105,8 +105,8 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defun bcons (s)
-  `((bigfloat simp ,fpprec) . ,s))
+(defun bcons (x)
+  `((bigfloat simp ,fpprec) . ,x))
 
 (defun check-bigfloat (x)
   (prog ()
@@ -121,72 +121,77 @@
                                 (+ (caddr x) *m fpprec (- (caddar x))))))))
     (return (if (eql (cadr x) 0) (bcons (list 0 0)) x))))
 
-(defun intofp (l)
-  (cond ((not (atom l)) ($bfloat l))
-        ((floatp l) (float2fp l))
-        ((eql l 0) '(0 0))
-        ((eq l '$%pi) (fppi))
-        ((eq l '$%e) (fpe))
-        ((eq l '$%gamma) (fpgamma))
-        (t (list (fpround l) (+ *m fpprec)))))
+(defun intofp (x)
+  (cond ((floatp x) (float2fp x))
+        ((eql x 0) '(0 0))
+        ((eq x '$%pi) (fppi))
+        ((eq x '$%e) (fpe))
+        ((eq x '$%gamma) (fpgamma))
+        ((eq x '$%phi)
+         (cdr ($bfloat '((mtimes simp)
+                         ((rat simp) 1 2)
+                         ((mplus simp) 1
+                          ((mexpt simp) 5 ((rat simp) 1 2)))))))
+        (t (list (fpround x) (+ *m fpprec)))))
 
-(defun fpround (l &aux (*print-base* 10) *print-radix*)
+(defun fpround (x &aux (*print-base* 10) *print-radix*)
   (prog (adjust)
      (cond
-       ((null *decfp)
-        (setq *m (- (integer-length l) fpprec))
-        (when (= *m 0)
-          (setq *cancelled 0)
-          (return l))
-        (setq adjust (fpshift 1 (1- *m)))
-        (when (minusp l) (setq adjust (- adjust)))
-        (incf l adjust)
-        (setq *m (- (integer-length l) fpprec))
-        (setq *cancelled (abs *m))
-        (cond ((zerop (hipart l (- *m)))
-               (return (fpshift (fpshift l (- -1 *m)) 1)))
-              (t (return (fpshift l (- *m))))))
+       ((null *decfp*)
+        (setq *m (- (integer-length x) fpprec))
+        (cond ((= *m 0)
+               (setq *cancelled 0)
+               (return x))
+              (t
+               (setq adjust (fpshift 1 (1- *m)))
+               (when (minusp x) (setq adjust (- adjust)))
+               (incf x adjust)
+               (setq *m (- (integer-length x) fpprec))
+               (setq *cancelled (abs *m))
+               (cond ((zerop (hipart x (- *m)))
+                      (return (fpshift (fpshift x (- -1 *m)) 1)))
+                     (t (return (fpshift x (- *m))))))))
        (t
-        (setq *m (- (length (exploden (abs l))) fpprec))
+        (setq *m (- (length (exploden (abs x))) fpprec))
         (setq adjust (fpshift 1 (1- *m)))
-        (when (minusp l) (setq adjust (- adjust)))
+        (when (minusp x) (setq adjust (- adjust)))
         (setq adjust (* 5 adjust))
-        (setq *m (- (length (exploden (abs (setq l (+ l adjust))))) fpprec))
-        (return (fpshift l (- *m)))))))
+        (setq *m (- (length (exploden (abs (setq x (+ x adjust))))) fpprec))
+        (return (fpshift x (- *m)))))))
 
-(defun fpshift (l n)
-  (cond ((null *decfp)
-         (cond ((and (minusp n) (minusp l))
-                (- (ash (- l) n)))
-               (t (ash l n))))
+(defun fpshift (x n)
+  (cond ((null *decfp*)
+         (cond ((and (minusp n) (minusp x))
+                (- (ash (- x) n)))
+               (t (ash x n))))
         ((> n 0)
-         (* l (expt 10 n)))
+         (* x (expt 10 n)))
         ((< n 0)
-         (truncate l (expt 10 (- n))))
-        (t l)))
+         (truncate x (expt 10 (- n))))
+        (t x)))
 
-(defun fpintpart (f)
-  (prog (m)
-     (setq m (- fpprec (cadr f)))
-     (return (if (> m 0)
-                 (truncate (car f) (expt 2 m))
-                 (* (car f) (expt 2 (- m)))))))
+(defun fpintpart (x)
+  (let ((m (- fpprec (cadr x))))
+     (if (> m 0)
+         (truncate (car x) (expt 2 m))
+         (* (car x) (expt 2 (- m))))))
 
-(defun fpend (a)
-  (cond ((equal (car a) 0) (bcons a))
-        ((numberp (car a))
-         (setq a (list (fpround (car a)) (+ -8. *m (cadr a))))
-         (bcons a))
-        (t a)))
+(defun fpend (x)
+  (cond ((eql (car x) 0) (bcons x))
+        ((numberp (car x))
+         (bcons (list (fpround (car x)) (+ -8 *m (cadr x)))))
+        (t x)))
 
-(defun fparcsimp (e)
-  (if (and (mplusp e) (null (cdddr e))
-           (mtimesp (caddr e)) (null (cdddr (caddr e)))
-           (bigfloatp (cadr (caddr e)))
-           (eq (caddr (caddr e)) '$%i)
-           (< (caddr (cadr (caddr e))) (+ (- fpprec) 2)))
-      (cadr e)
-      e))
+(defun fparcsimp (x)
+  (if (and (mplusp x)
+           (null (cdddr x))
+           (mtimesp (caddr x))
+           (null (cdddr (caddr x)))
+           (bigfloatp (cadr (caddr x)))
+           (eq (caddr (caddr x)) '$%i)
+           (< (caddr (cadr (caddr x))) (+ (- fpprec) 2)))
+      (cadr x)
+      x))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -364,7 +369,7 @@
   (let (y)
     (cond ((check-bigfloat x))
           ((or (numberp x)
-               (member x '($%e $%pi $%gamma) :test #'eq))
+               (member x '($%e $%pi $%gamma $%phi) :test #'eq))
            (bcons (intofp x)))
           ((or (atom x)
                (member 'array (cdar x) :test #'eq))
@@ -603,15 +608,9 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun fpone ()
-  (cond (*decfp (intofp 1))
+  (cond (*decfp* (intofp 1))
         ((= fpprec (caddar bigfloatone)) (cdr bigfloatone))
         (t (intofp 1))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun fpentier (f)
-  (let ((fpprec (caddar f)))
-    (fpintpart (cdr f))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -715,45 +714,106 @@
 
 (let ((table (make-hash-table)))
   (defun fplog2 ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (comp-log2)))))
-  (defun fplog2-table ()
-    table)
-  (defun clear_fplog2_table ()
-    (clrhash table)))
-
-(defun comp-log2 ()
-  (flet ((fast-atanh (k)
-           (let* ((term (fpdiv (intofp 1) (intofp k)))
-                  (fact (fpmul term term))
-                  (oldsum (intofp 0))
-                  (sum term))
-             (loop for m from 3 by 2
-                   until (equal oldsum sum)
-                   do
-                   (setf oldsum sum)
-                   (setf term (fpmul term fact))
-                   (setf sum (fpadd sum (fpdiv term (intofp m)))))
-             sum)))
-    (let ((result
-            (let* ((fpprec (+ fpprec 8)))
-              (fpadd (fpsub (fpmul (intofp 18) (fast-atanh 26))
-                                    (fpmul (intofp 2) (fast-atanh 4801)))
-                      (fpmul (intofp 8) (fast-atanh 8749))))))
-      (list (fpround (car result))
-            (+ -8 *m)))))
+    (labels ((fast-atanh (k)
+               (let* ((term (fpdiv (intofp 1) (intofp k)))
+                      (fact (fpmul term term))
+                      (oldsum (intofp 0))
+                      (sum term))
+                 (loop for m from 3 by 2
+                       until (equal oldsum sum)
+                       do
+                       (setf oldsum sum)
+                       (setf term (fpmul term fact))
+                       (setf sum (fpadd sum (fpdiv term (intofp m)))))
+                 sum))
+             (comp-log2 ()
+               (let ((result
+                       (let ((fpprec (+ fpprec 8)))
+                         (fpadd (fpsub (fpmul (intofp 18) (fast-atanh 26))
+                                       (fpmul (intofp 2) (fast-atanh 4801)))
+                                (fpmul (intofp 8) (fast-atanh 8749))))))
+                 (list (fpround (car result))
+                       (+ -8 *m)))))
+      (let ((value (gethash fpprec table)))
+        (if value
+	    value
+	    (setf (gethash fpprec table) (comp-log2)))))))
 
 ;;; ----------------------------------------------------------------------------
 
-(defprop %log logbigfloat floatprog)
+(defun fpentier (x)
+  (let ((fpprec (caddar x)))
+    (fpintpart (cdr x))))
 
-(defun logbigfloat (a)
-  (cond ((bigfloatp (car a))
-         (big-float-log ($bfloat (car a))))
-        (t
-         (list '(%log) (car a)))))
+;;; ----------------------------------------------------------------------------
+
+(defprop mabs mabsbigfloat floatprog)
+
+(defun mabsbigfloat (arg)
+  (if (bigfloatp (setq arg (car arg)))
+      (bcons (fpabs (cdr (check-bigfloat arg))))
+      (list '(mabs) arg)))
+
+(defun fpabs (x)
+  (if (>= (car x) 0)
+      x
+      (cons (- (car x)) (cdr x))))
+
+;;; ----------------------------------------------------------------------------
+
+(defun big-float-sqrt (x &optional y)
+  (if y
+      (multiple-value-bind (u v)
+          (complex-sqrt x y)
+        (add (bcons u) (mul '$%i (bcons v))))
+      (let ((fp-x (cdr (check-bigfloat x))))
+        (if (fplessp fp-x (intofp 0))
+            (mul '$%i (bcons (fproot (bcons (fpminus fp-x)) 2)))
+            (bcons (fproot x 2))))))
+
+(defun complex-sqrt (xx yy)
+  (let* ((x (cdr (check-bigfloat xx)))
+         (y (cdr (check-bigfloat yy)))
+         (rho (fpadd (fpmul x x)
+                      (fpmul y y))))
+    (setf rho (fpadd (fpabs x) (fproot (bcons rho) 2)))
+    (setf rho (fpadd rho rho))
+    (setf rho (fpdiv (fproot (bcons rho) 2) (intofp 2)))
+    (let ((eta rho)
+          (nu y))
+      (when (fpgreaterp rho (intofp 0))
+        (setf nu (fpdiv (fpdiv nu rho) (intofp 2)))
+        (when (fplessp x (intofp 0))
+          (setf eta (fpabs nu))
+          (setf nu (if (minusp (car y))
+                       (fpminus rho)
+                       rho))))
+      (values eta nu))))
+
+(defun fproot (a n)
+  (if (eq (cadr a) 0)
+      (intofp 0)
+      (progn
+        (let* ((ofprec fpprec)
+               (fpprec (+ fpprec 2))
+               (bk (fpexpt
+                     (intofp 2)
+                     (1+ (truncate
+                           (cadr (setq a (cdr (check-bigfloat a)))) n)))))
+          (do ((x bk (fpsub
+                       x
+                       (setq bk
+                             (fpdiv
+                               (fpsub x (fpdiv a (fpexpt x n1)))
+                               n))))
+               (n1 (1- n))
+               (n (intofp n)))
+              ((or (equal bk '(0 0))
+                   (> (- (cadr x) (cadr bk)) ofprec))
+               (setq a x))))
+        (list (fpround (car a)) (+ -2 *m (cadr a))))))
+
+;;; ----------------------------------------------------------------------------
 
 (defun big-float-log (x &optional y)
   (if y
@@ -795,6 +855,14 @@
                  (intofp 2))
                 (fpdiv (fplog rho) (intofp 2)))
             (fpatan2 y x))))
+
+(defprop %log logbigfloat floatprog)
+
+(defun logbigfloat (a)
+  (cond ((bigfloatp (car a))
+         (big-float-log ($bfloat (car a))))
+        (t
+         (list '(%log) (car a)))))
 
 (defun fplog (x)
   (prog (over two ans oldans term e sum)
@@ -845,81 +913,6 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defprop mabs mabsbigfloat floatprog)
-
-(defun mabsbigfloat (l)
-  (prog (r)
-    (setq r (check-bigfloat (car l)))
-    (return (if (null r)
-                (list '(mabs) (car l))
-                (bcons (fpabs (cdr r)))))))
-
-(defun fpabs (x)
-  (if (>= (car x) 0)
-      x
-      (cons (- (car x)) (cdr x))))
-
-;;; ----------------------------------------------------------------------------
-
-(defun big-float-sqrt (x &optional y)
-  (if y
-      (multiple-value-bind (u v) (complex-sqrt x y)
-        (add (bcons u) (mul '$%i (bcons v))))
-      (let ((fp-x (cdr (check-bigfloat x))))
-        (if (fplessp fp-x (intofp 0))
-            (mul '$%i (bcons (fproot (bcons (fpminus fp-x)) 2)))
-            (bcons (fproot x 2))))))
-
-(defun complex-sqrt (xx yy)
-  (let* ((x (cdr (check-bigfloat xx)))
-         (y (cdr (check-bigfloat yy)))
-         (rho (fpadd (fpmul x x)
-                      (fpmul y y))))
-    (setf rho (fpadd (fpabs x) (fproot (bcons rho) 2)))
-    (setf rho (fpadd rho rho))
-    (setf rho (fpdiv (fproot (bcons rho) 2) (intofp 2)))
-    (let ((eta rho)
-          (nu y))
-      (when (fpgreaterp rho (intofp 0))
-        (setf nu (fpdiv (fpdiv nu rho) (intofp 2)))
-        (when (fplessp x (intofp 0))
-          (setf eta (fpabs nu))
-          (setf nu (if (minusp (car y))
-                       (fpminus rho)
-                       rho))))
-      (values eta nu))))
-
-(defun fproot (a n)
-  (if (eq (cadr a) 0)
-      '(0 0)
-      (progn
-        (let* ((ofprec fpprec)
-               (fpprec (+ fpprec 2))
-               (bk (fpexpt
-                     (intofp 2)
-                     (1+ (truncate
-                           (cadr (setq a (cdr (check-bigfloat a)))) n)))))
-          (do ((x bk (fpsub
-                       x
-                       (setq bk
-                             (fpdiv
-                               (fpsub x (fpdiv a (fpexpt x n1)))
-                               n))))
-               (n1 (1- n))
-               (n (intofp n)))
-              ((or (equal bk '(0 0))
-                   (> (- (cadr x) (cadr bk)) ofprec))
-               (setq a x))))
-        (list (fpround (car a)) (+ -2 *m (cadr a))))))
-
-;;; ----------------------------------------------------------------------------
-
-
-;;; ----------------------------------------------------------------------------
-
-
-;;; ----------------------------------------------------------------------------
-
 (defprop %sin sinbigfloat floatprog)
 
 (defun sinbigfloat (x)
@@ -927,7 +920,7 @@
 
 (defun fpsin* (a fl)
   (fpend (let ((fpprec (+ 8 fpprec)))
-           (cond ((bigfloatp a) (fpsin (cdr ($bfloat a)) fl))
+           (cond ((bigfloatp a) (fpsin (cdr (check-bigfloat a)) fl))
                  (fl (list '(%sin) a))
                  (t (list '(%cos) a))))))
 
@@ -1002,10 +995,9 @@
 (defprop %tan tanbigfloat floatprog)
 
 (defun tanbigfloat (a)
-  (setq a (car a))
   (fpend (let ((fpprec (+ 8 fpprec)))
-           (cond ((bigfloatp a)
-                  (setq a (cdr ($bfloat a)))
+           (cond ((bigfloatp (setq a (car a)))
+                  (setq a (cdr (check-bigfloat a)))
                   (fpdiv (fpsin a t) (fpsin a nil)))
                  (t (list '(%tan) a))))))
 
@@ -1027,22 +1019,15 @@
       (multiple-value-bind (re-sqrt-1+z im-sqrt-1+z)
           (complex-sqrt (bcons (fpadd (intofp 1) x))
                         (bcons y))
-        (values (bcons
-                  (let ((d (fpsub (fpmul re-sqrt-1-z
-                                                   re-sqrt-1+z)
-                                         (fpmul im-sqrt-1-z
-                                                   im-sqrt-1+z))))
-                    (cond ((equal d '(0 0))
-                           (if (fplessp x '(0 0))
-                               (fpminus (fpdiv (fppi) (intofp 2)))
-                               (fpdiv (fppi) (intofp 2))))
-                          (t
-                           (fpatan (fpdiv x d))))))
-                (fpasinh
-                  (bcons (fpsub (fpmul re-sqrt-1-z
-                                                 im-sqrt-1+z)
-                                       (fpmul im-sqrt-1-z
-                                                 re-sqrt-1+z)))))))))
+        (values (bcons (let ((d (fpsub (fpmul re-sqrt-1-z re-sqrt-1+z)
+                                       (fpmul im-sqrt-1-z im-sqrt-1+z))))
+                         (cond ((eql (car d) 0)
+                                (if (fplessp x '(0 0))
+                                    (fpminus (fpdiv (fppi) (intofp 2))
+                                             (fpdiv (fppi) (intofp 2)))))
+                               (t (fpatan (fpdiv x d))))))
+                (fpasin (bcons (fpsub (fpmul re-sqrt-1-z im-sqrt-1+z)
+                                      (fpmul im-sqrt-1-z re-sqrt-1+z)))))))))
 
 (defun fpasin (x)
   ($bfloat (fpasin-core x)))
@@ -1052,20 +1037,15 @@
     (cond ((minusp (car fp-x))
            (mul -1 (fpasin (bcons (fpminus fp-x)))))
           ((fplessp fp-x (cdr bfhalf))
-           (bcons
-             (fpatan
-               (fpdiv fp-x
-                           (fproot
-                             (bcons (fpmul (fpsub (fpone) fp-x)
-                                              (fpadd (fpone) fp-x)))
-                             2)))))
+           (bcons (fpatan (fpdiv fp-x
+                                 (fproot (bcons (fpmul (fpsub (fpone) fp-x)
+                                                       (fpadd (fpone) fp-x)))
+                                         2)))))
           ((fpgreaterp fp-x (fpone))
-           (let ((arg (fpadd
-                        fp-x
-                        (fproot
-                          (bcons (fpmul (fpsub fp-x (fpone))
-                                           (fpadd fp-x (fpone))))
-                          2))))
+           (let ((arg (fpadd fp-x
+                             (fproot (bcons (fpmul (fpsub fp-x (fpone))
+                                                   (fpadd fp-x (fpone))))
+                                     2))))
              (add (div '$%pi 2)
                   (mul -1 '$%i (bcons (fplog arg))))))
           (t
@@ -1073,13 +1053,10 @@
                 (mul -1
                      (bcons
                        (fpatan
-                         (fpdiv
-                           (fproot
-                             (bcons
-                               (fpmul (fpsub (fpone) fp-x)
-                                         (fpadd (fpone) fp-x)))
-                             2)
-                           fp-x)))))))))
+                         (fpdiv (fproot (bcons (fpmul (fpsub (fpone) fp-x)
+                                                      (fpadd (fpone) fp-x)))
+                                        2)
+                                fp-x)))))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1099,13 +1076,10 @@
       (multiple-value-bind (re-sqrt-1+z im-sqrt-1+z)
           (complex-sqrt (bcons (fpadd (intofp 1) x))
                         (bcons y))
-        (values (bcons
-                  (fpmul (intofp 2)
-                            (fpatan (fpdiv re-sqrt-1-z re-sqrt-1+z))))
-                (fpasinh (bcons
-                           (fpsub
-                             (fpmul re-sqrt-1+z im-sqrt-1-z)
-                             (fpmul im-sqrt-1+z re-sqrt-1-z)))))))))
+        (values (bcons (fpmul (intofp 2)
+                              (fpatan (fpdiv re-sqrt-1-z re-sqrt-1+z))))
+                (fpasinh (bcons (fpsub (fpmul re-sqrt-1+z im-sqrt-1-z)
+                                       (fpmul im-sqrt-1+z re-sqrt-1-z)))))))))
 
 (defun fpacos (x)
   ($bfloat (add (div '$%pi 2) (mul -1 (fpasin-core x)))))
@@ -1115,14 +1089,16 @@
 (defprop %atan atanbigfloat floatprog)
 
 (defun atanbigfloat (x)
-  (*fpatan (car x) (cdr x)))
+  (fpatan* (car x) (cdr x)))
 
-(defun *fpatan (a y)
-  (fpend (let ((fpprec (+ 8. fpprec)))
+(defun fpatan* (a y)
+  (fpend (let ((fpprec (+ 8 fpprec)))
            (if (null y)
-               (if (bigfloatp a) (fpatan (cdr ($bfloat a)))
+               (if (bigfloatp a)
+                   (fpatan (cdr (check-bigfloat a)))
                    (list '(%atan) a))
-               (fpatan2 (cdr ($bfloat a)) (cdr ($bfloat (car y))))))))
+               (fpatan2 (cdr (check-bigfloat a))
+                        (cdr (check-bigfloat (car y))))))))
 
 (defun fpatan (x)
   (prog (term x2 ans oans one two tmp)
@@ -1139,13 +1115,16 @@
            (do ((n 0 (1+ n)))
                ((equal ans oans))
              (setq term
-                   (fpmul term (fpmul x2 (fpdiv
-                                                 (intofp (+ 2 (* 2 n)))
-                                                 (intofp (+ (* 2 n) 3))))))
-             (setq oans ans ans (fpadd term ans)))
+                   (fpmul term
+                          (fpmul x2
+                                 (fpdiv (intofp (+ 2 (* 2 n)))
+                                        (intofp (+ (* 2 n) 3))))))
+             (setq oans ans
+                   ans (fpadd term ans)))
            (setq ans (fpmul tmp ans)))
           (t
-           (setq ans x x2 (fpminus (fpmul x x)) term x)
+           (setq ans x
+                 x2 (fpminus (fpmul x x)) term x)
            (do ((n 3 (+ n 2)))
                ((equal ans oans))
              (setq term (fpmul term x2))
@@ -1180,7 +1159,7 @@
         ((fpposp (cdr x))
          (let ((d (fpexpm1 (cdr (check-bigfloat x)))))
            (bcons (fpdiv (fpadd d (fpdiv d (fpadd d (fpone))))
-                              (intofp 2)))))
+                         (intofp 2)))))
         (t
          (bcons 
            (fpminus
@@ -1249,26 +1228,22 @@
     (cond ((fpgreaterp absx two)
            (setf result
                  (fplog
-                   (fpadd
-                     (fpmul absx two)
-                     (fpdiv
-                       one
-                       (fpadd absx
-                               (fproot
-                                 (bcons (fpadd one
-                                                (fpmul absx absx)))
-                                 2)))))))
+                   (fpadd (fpmul absx two)
+                          (fpdiv one
+                                 (fpadd absx
+                                        (fproot (bcons (fpadd one
+                                                              (fpmul absx
+                                                                     absx)))
+                                                2)))))))
           (t
            (let ((x*x (fpmul absx absx)))
              (setq result
                    (fplog1p
-                     (fpadd
-                       absx
-                       (fpdiv x*x
+                     (fpadd absx
+                            (fpdiv x*x
                                    (fpadd one
-                                           (fproot
-                                             (bcons (fpadd one x*x))
-                                             2)))))))))
+                                          (fproot (bcons (fpadd one x*x))
+                                                  2)))))))))
     (if minus
         (bcons (fpminus result))
         (bcons result))))
@@ -1307,11 +1282,10 @@
                        (if x-gt-plus-1
                            (cdr ($bfloat '((mminus) ((mquotient) $%pi 2))))
                            (merror "COMPLEX-ATANH: HOW DID I GET HERE?"))))
-                 (fpmul
-                   (cdr bfhalf)
-                   (fpatan2 (fpmul (intofp 2) y)
-                            (fpsub (fpmul 1-x (fpadd (fpone) x))
-                                          t1^2))))))
+                 (fpmul (cdr bfhalf)
+                        (fpatan2 (fpmul (intofp 2) y)
+                                 (fpsub (fpmul 1-x (fpadd (fpone) x))
+                                        t1^2))))))
     (values (bcons (fpmul beta eta))
             (bcons (fpminus (fpmul beta nu))))))
 
@@ -1324,19 +1298,16 @@
                (complex-atanh x (bcons (intofp 0)))
              (add u (mul '$%i v))))
           ((fpgreaterp fp-x (cdr bfhalf))
-           (bcons
-             (fpmul (cdr bfhalf)
-                    (fplog1p (fpdiv (fpmul (intofp 2) fp-x)
-                                    (fpsub (fpone) fp-x))))))
+           (bcons (fpmul (cdr bfhalf)
+                         (fplog1p (fpdiv (fpmul (intofp 2) fp-x)
+                                         (fpsub (fpone) fp-x))))))
           (t
            (let ((2x (fpmul (intofp 2) fp-x)))
-             (bcons
-               (fpmul
-                 (cdr bfhalf)
-                 (fplog1p
-                   (fpadd 2x
-                          (fpdiv (fpmul 2x fp-x)
-                                 (fpsub (fpone) fp-x)))))))))))
+             (bcons (fpmul (cdr bfhalf)
+                           (fplog1p (fpadd 2x
+                                           (fpdiv (fpmul 2x fp-x)
+                                                  (fpsub (fpone)
+                                                         fp-x)))))))))))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1364,7 +1335,7 @@
                (*m 1)
                (*cancelled 0))
            (setq l
-                 (let ((*decfp t)
+                 (let ((*decfp* t)
                        (fpprec (+ extradigs (decimalsin (- (caddar l) 2))))
                        (of (caddar l))
                        (l (cdr l))
