@@ -112,6 +112,10 @@
     #:bigfloatone
     #:bfhalf
     
+    #:bcons
+    #:check-bigfloat
+    #:intofp
+    
     #:fpformat
     #:$bfloat
     
