@@ -72,7 +72,7 @@ globalen Variablen @mref{*maxima-version*} abgelegt ist.
 @deffn {Funktion} bye
 
 Beendet die kMaxima- und die Lisp-Sitzung.  Die Implementation ist abh@"angig
-von dem verwendeten Lisp.  Hier ist eine Implementation für 10 verschiedene
+von dem verwendeten Lisp.  Hier ist eine Implementation f@"ur 10 verschiedene
 Lisp-Varianten gezeigt.
 
 @emph{Quelltext:}
@@ -652,8 +652,8 @@ Ausgabe des Prompts auf der Konsole ausgegeben.
 @defvr {Optionsvariable} $prompt
 Standardwert: @code{"_"}
 
-@code{$prompt} enthält das Zeichen für den Prompt der bei einer Unterbrechung
-von kMaxima oder im Demo-Modus ausgegeben wird.
+@code{$prompt} enth@"alt das Zeichen f@"ur den Prompt der bei einer
+Unterbrechung von kMaxima oder im Demo-Modus ausgegeben wird.
 @end defvr
 
 @c --- 06.11.2011 --------------------------------------------------------------
