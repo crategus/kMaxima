@@ -837,7 +837,8 @@
     (setq check x)
   start
     (setq x (cdr x))
-    (if (null x) (go end))
+    (cond ((zerop1 res) (return res))
+          ((null x) (go end)))
     (setq w (if z (car x) (simplifya (car x) nil)))
   st1
     (cond ((atom w) nil)
@@ -880,11 +881,7 @@
                   (if *errorsw*
                       (throw 'errorsw t)
                       (merror "Division by 0")))
-                 ((mnumberp product)
-                  (list '(mtimes) (timesk factor product)))
-                 ((mnumberp (cadr product))
-                  (list '(mtimes) (timesk factor (cadr product))))
-                 (t (list '(mtimes) factor))))
+                 (t factor)))
           ((and (null product)
                 (or (and (mtimesp factor) (eql power 1))
                     (and (setq product (list '(mtimes) 1)) nil)))
