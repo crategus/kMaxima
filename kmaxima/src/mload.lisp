@@ -518,8 +518,8 @@
          (setq m (if (rationalp m)
                      (div (numerator m) (denominator m))
                      m))
-         (setq m (fpdifference (cdr ($bfloat m))
-                               (fpabs (fpdifference (cdr a) (cdr b)))))
+         (setq m (fpsub (cdr ($bfloat m))
+                        (fpabs (fpsub (cdr a) (cdr b)))))
          (or (eql (car m) 0)
              (fpposp m)))))
 
