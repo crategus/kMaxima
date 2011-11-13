@@ -628,6 +628,8 @@
 
 (displa-def mminus dim-mminus)
 (defprop munaryminus (#\- #\space) dissym)
+(def-rbp munaryminus 134)
+(def-rbp munaryminus 100)
 
 (defun dim-mminus (form result)
   (cond ((and (null (cddr form))
