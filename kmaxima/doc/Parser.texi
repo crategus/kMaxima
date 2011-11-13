@@ -2087,7 +2087,7 @@ Standardwert: @code{0}
 
 Wandelt das Argument @var{x} rationale Zahlen von einem Lisp-Format in das
 kMaxima-Format um.  Das Argument @var{x} kann auch eine ganze Zahl sein, die
-unverändert zurückgegeben wird.
+unver@"andert zur@"uckgegeben wird.
 
 @emph{Quelltext:}
 @lisp
@@ -2105,7 +2105,7 @@ unverändert zurückgegeben wird.
 @deffn {Funktion} make-number data
 
 Das Argument @var{data} ist eine Liste mit den Zeichen der Zahl, die der
-Parser eingelesen hat. Die Liste @var{data} enthält Teillisten mit den Teil
+Parser eingelesen hat. Die Liste @var{data} enth@"alt Teillisten mit den Teil
 der Zahl vor einem Komma, dem Teil nach einem Komma und dem Exponenten der
 Zahl. Die einzelnen Elemente einer Zahl sind in einer umgekehrten Reihenfolge
 im Argument @var{data} enthalten.  Den Aufbau der Liste zeigt das folgende
