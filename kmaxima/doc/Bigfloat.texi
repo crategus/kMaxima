@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 03.11.2011
-@c Revision : 06.11.2011
+@c Revision : 13.11.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -163,10 +163,20 @@ Standardwert: keiner
 Standardwert: keiner
 @end defvr
 
-@c --- 04.11.2011 --------------------------------------------------------------
-@anchor{*decfp}
-@defvr {Globale Variable} *decfp
-Standardwert: keiner
+@c --- 13.11.2011 --------------------------------------------------------------
+@anchor{*decfp*}
+@defvr {Globale Variable} *decfp*
+Standardwert: @code{nil}
+
+Die globale Variable @code{*decfp*} wird in der Funktion @mref{fpformat} an den
+Wert @code{t} gebunden, um die Mantisse einer gro@ss{}en Gleitkommazahl f@"ur
+die Ausgabe in eine Dezimalzahl umzuwandeln.  Die Funktionen
+@mrefcomma{fpround} @mref{fpshift} und @mref{fpone} beachten den Wert von
+@code{*decfp*}.
+
+@emph{Bemerkung:}
+
+Im Original Maxima hat die Variable den Namen @code{*decfp}.
 @end defvr
 
 @c -----------------------------------------------------------------------------
@@ -259,6 +269,21 @@ neuen Wert.
 @end lisp
 @end deffn
 
+@c --- 13.11.2011 --------------------------------------------------------------
+@anchor{bcons}
+@deffn {Funktion} bcons x
+
+Das Argument @var{x} ist eine gro@ss{}e Gleitkommazahl in der internen
+Darstellung.  Die R@"uckgabe ist eine gro@ss{}e Gleitkommazahl, die mit dem
+Attribut @code{simp} und der aktuellen Genauigkeit @mref{fpprec} versehen wird.
+
+@emph{Quelltext:}
+@lisp
+(defun bcons (x)
+  `((bigfloat simp ,fpprec) . ,x))
+@end lisp
+@end deffn
+
 @c --- 12.11.2011 --------------------------------------------------------------
 @anchor{check-bigfloat}
 @deffn {Funktion} check-bigfloat x
@@ -268,6 +293,7 @@ gro@ss{}e Gleitkommazahl ist.  Ist dies der Fall, wird gegebenenfalls die
 Genauigkeit der gro@ss{}en Gleitkommazahl an die aktuelle Genauigkeit angepasst,
 die in der globalen Variablen @mref{fpprec} abgelegt ist.
 
+@need 800
 @emph{Quelltext:}
 @lisp
 (defun check-bigfloat (x)
@@ -285,135 +311,230 @@ die in der globalen Variablen @mref{fpprec} abgelegt ist.
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
-@anchor{bcons}
-@deffn {Funktion} bcons x
-
-@emph{Quelltext:}
-@lisp
-(defun bcons (x)
-  `((bigfloat simp ,fpprec) . ,x))
-@end lisp
-@end deffn
-
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{intofp}
-@deffn {Funktion} intofp l
+@deffn {Funktion} intofp x
+
+Wandelt das Argument @var{x}, das eine ganze Zahl, eine Gleitkommazahl oder
+eine der Konstanten @code{$%e, $%e, $%gamma, $%phi} ist, in eine gro@ss{}e
+Gleitkommazahl um und gibt das Ergebnis in der internen Darstellung zur@"uck.
+
+@emph{Bemerkung:}
+
+Im Unterschied zum Original Maxima testet diese Implementierung nicht, ob das
+Argument ein Atom ist und gibt f@"ur diesen Fall einen Lisp-Fehler.  Weiterhin
+ist zus@"atzlich die numerische Konstante @code{$%phi} an dieser Stelle
+implementiert, so dass die Funktion @mref{$bfloat} entsprechend vereinfacht
+werden kann.
 
 @emph{Quelltext:}
 @lisp
-(defun intofp (l)
-  (cond ((not (atom l)) ($bfloat l))
-        ((floatp l) (floattofp l))
-        ((eql l 0) '(0 0))
-        ((eq l '$%pi) (fppi))
-        ((eq l '$%e) (fpe))
-        ((eq l '$%gamma) (fpgamma))
-        (t (list (fpround l) (+ *m fpprec)))))
+(defun intofp (x)
+  (cond ((floatp x) (float2fp x))
+        ((eql x 0) '(0 0))
+        ((eq x '$%pi) (fppi))
+        ((eq x '$%e) (fpe))
+        ((eq x '$%gamma) (fpgamma))
+        ((eq x '$%phi)
+         (cdr ($bfloat '((mtimes simp)
+                         ((rat simp) 1 2)
+                         ((mplus simp) 1
+                          ((mexpt simp) 5 ((rat simp) 1 2)))))))
+        (t (list (fpround x) (+ *m fpprec)))))
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fpround}
-@deffn {Funktion} fpround l
+@deffn {Funktion} fpround x
 
+Die Funktion @code{fpround} rundet die Mantisse einer gro@ss{}en Gleitkommazahl
+auf die aktuelle Genauigkeit @mrefdot{fpprec}  Das Argument @var{x} ist die
+Mantisse einer gro@ss{}en Gleitkommazahl.  Die R@"uckgabe ist die gerundete
+Mantisse.
+
+Hat die globale Variable @mref{*decfp*} den Wert @code{t}, wird die Mantisse
+in eine Dezimalzahl f@"ur die Ausgabe formatiert.
+
+@emph{Beispiele:}
+@example
+* (let ((*decfp* nil) (fpprec 8)) (fpround (car (intofp 123))))
+246
+* (let ((*decfp* nil) (fpprec 16)) (fpround (car (intofp 123))))
+62976
+* (let ((*decfp* t) (fpprec 16)) (fpround (car (intofp 123))))
+1230000000000000
+@end example
+
+@need 800
 @emph{Quelltext:}
 @lisp
-(defun fpround (l &aux (*print-base* 10) *print-radix*)
-  (prog ()
+(defun fpround (x &aux (*print-base* 10) *print-radix*)
+  (prog (adjust)
      (cond
-       ((null *decfp)
-        (setq *m (- (integer-length l) fpprec))
-        (when (= *m 0)
-          (setq *cancelled 0)
-          (return l))
-        (setq adjust (fpshift 1 (1- *m)))
-        (when (minusp l) (setq adjust (- adjust)))
-        (incf l adjust)
-        (setq *m (- (integer-length l) fpprec))
-        (setq *cancelled (abs *m))
-        (cond ((zerop (hipart l (- *m)))
-               (return (fpshift (fpshift l (- -1 *m)) 1)))
-              (t (return (fpshift l (- *m))))))
+       ((null *decfp*)
+        (setq *m (- (integer-length x) fpprec))
+        (cond ((= *m 0)
+               (setq *cancelled 0)
+               (return x))
+              (t
+               (setq adjust (fpshift 1 (1- *m)))
+               (when (minusp x) (setq adjust (- adjust)))
+               (incf x adjust)
+               (setq *m (- (integer-length x) fpprec))
+               (setq *cancelled (abs *m))
+               (cond ((zerop (hipart x (- *m)))
+                      (return (fpshift (fpshift x (- -1 *m)) 1)))
+                     (t (return (fpshift x (- *m))))))))
        (t
-        (setq *m (- (length (exploden (abs l))) fpprec))
+        (setq *m (- (length (exploden (abs x))) fpprec))
         (setq adjust (fpshift 1 (1- *m)))
-        (when (minusp l) (setq adjust (- adjust)))
+        (when (minusp x) (setq adjust (- adjust)))
         (setq adjust (* 5 adjust))
-        (setq *m (- (length (exploden (abs (setq l (+ l adjust))))) fpprec))
-        (return (fpshift l (- *m)))))))
+        (setq *m (- (length (exploden (abs (setq x (+ x adjust))))) fpprec))
+        (return (fpshift x (- *m)))))))
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fpshift}
 @deffn {Funktion} fpshift l n
 
+Verschiebt die Mantisse @var{x} um @var{n} Stellen nach links oder rechts.  F@"ur
+@code{@var{n} = +/- 1} entspricht dies der Multiplikation oder der Division mit
+@code{2}.  @code{fpshift} beachtet den Wert der globalen Variablen
+@mrefdot{*decfp*}.  Hat @code{*decfp*} den Wert @code{t} wird die Mantisse als
+Dezimal angenommen und mit dem entsprechenden Faktor multipliziert.
+
+@emph{Beispiele:}
+
+@example
+* (mdisplay (bcons (cons (fpshift (car (fpone)) 1) (cdr (fpone)))))
+2.0b0
+NIL
+* (mdisplay (bcons (cons (fpshift (car (fpone)) -1) (cdr (fpone)))))
+5.0b-1
+NIL
+@end example
+
 @emph{Quelltext:}
 @lisp
-(defun fpshift (l n)
-  (cond ((null *decfp)
-         (cond ((and (minusp n) (minusp l))
-                (- (ash (- l) n)))
-               (t (ash l n))))
+(defun fpshift (x n)
+  (cond ((null *decfp*)
+         (cond ((and (minusp n) (minusp x))
+                (- (ash (- x) n)))
+               (t (ash x n))))
         ((> n 0)
-         (* l (expt 10 n)))
+         (* x (expt 10 n)))
         ((< n 0)
-         (truncate l (expt 10 (- n))))
-        (t l)))
+         (truncate x (expt 10 (- n))))
+        (t x)))
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fpintpart}
-@deffn {Funktion} fpintpart f
+@deffn {Funktion} fpintpart x
+
+Gibt den ganzzahligen Anteil der Mantisse sowie den Rest zur@"uck.  Das Argument
+@var{x} ist eine gro@ss{}e Gleitkommazahl in der internen Darstellung.  Die
+R@"uckgabe ist der ganzzahlige Anteil als ganze Zahl und als zweiter Wert die
+Mantisse des Restes.
+
+@emph{Beispiele:}
+
+@example
+* (fpintpart (intofp 2))
+2
+0
+* (fpintpart (intofp 2.5))
+2
+9007199254740992
+* (fpintpart (intofp 3))
+3
+0
+@end example
 
 @emph{Quelltext:}
 @lisp
-(defun fpintpart (f)
-  (prog (m)
-     (setq m (- fpprec (cadr f)))
-     (return (if (> m 0)
-                 (truncate (car f) (expt 2 m))
-                 (* (car f) (expt 2 (- m)))))))
+(defun fpintpart (x)
+  (let ((m (- fpprec (cadr x))))
+     (if (> m 0)
+         (truncate (car x) (expt 2 m))
+         (* (car x) (expt 2 (- m))))))
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fpend}
-@deffn {Funktion} fpend a
+@deffn {Funktion} fpend x
+
+Ist das Argument @var{x} eine gro@ss{}e Gleitkommazahl in der internen Darstellung
+wird die Mantisse auf die aktuelle Genauigkeit gerundet, der Exponent wird
+angepasst und das Argument als eine gro@ss{}e Gleitkommazahl zur@"uckgegeben.
+Ist das Argument @var{x} keine gro@ss{}e Gleitkommazahl sondern ein Ausdruck
+wird @var{x} selbst zur@"uckgegeben.  Im Falle eines Atoms wird jedoch ein
+Lisp-Fehler generiert.
+
+@emph{Beispiele:}
+
+@example
+* (fpend (intofp 0))
+((BIGFLOAT SIMP 56) 0 0)
+* (fpend (intofp 1))
+((BIGFLOAT SIMP 56) 36028797018963968 -7)
+* (fpend '((mplus) $a $b))
+((MPLUS) $A $B)
+@end example
 
 @emph{Quelltext:}
 @lisp
-(defun fpend (a)
-  (cond ((equal (car a) 0) (bcons a))
-        ((numberp (car a))
-         (setq a (list (fpround (car a)) (+ -8. *m (cadr a))))
-         (bcons a))
-        (t a)))
+(defun fpend (x)
+  (cond ((eql (car x) 0) (bcons x))
+        ((numberp (car x))
+         (bcons (list (fpround (car x)) (+ -8 *m (cadr x)))))
+        (t x)))
 @end lisp
 @end deffn
 
-@c --- 06.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fparcsimp}
-@deffn {Funktion} fparcsimp e
+@deffn {Funktion} fparcsimp x
+
+Die Funktion @code{fparcsimp} pr@"uft, ob das Argument @var{e} ein Ausdruck ist,
+der eine komplexe Zahl @code{a + %i * b} repr@"asentiert, wobei @code{a} und
+@code{b} gro@ss{}e Gleitkommazahlen sind.  Ist dies der Fall, wird der
+imagin@"are Anteil dann entfernt, wenn der Exponent kleiner als
+@code{-fpprec + 2}.
+
+@emph{Beispiel:}
+
+@example
+* (fparcsimp (add ($bfloat 1) (mul '$%i ($bfloat 1))))
+((MPLUS SIMP) ((BIGFLOAT SIMP 56) 36028797018963968 1)
+ ((MTIMES SIMP) ((BIGFLOAT SIMP 56) 36028797018963968 1) $%I))
+* (fparcsimp (add ($bfloat 1) (mul '$%i ($bfloat 1e-17))))
+((BIGFLOAT SIMP 56) 36028797018963968 1)
+@end example
 
 @emph{Quelltext:}
 @lisp
-(defun fparcsimp (e)
-  (if (and (mplusp e) (null (cdddr e))
-           (mtimesp (caddr e)) (null (cdddr (caddr e)))
-           (bigfloatp (cadr (caddr e)))
-           (eq (caddr (caddr e)) '$%i)
-           (< (caddr (cadr (caddr e))) (+ (- fpprec) 2)))
-      (cadr e)
-      e))
+(defun fparcsimp (x)
+  (if (and (mplusp x)
+           (null (cdddr x))
+           (mtimesp (caddr x))
+           (null (cdddr (caddr x)))
+           (bigfloatp (cadr (caddr x)))
+           (eq (caddr (caddr x)) '$%i)
+           (< (caddr (cadr (caddr x))) (+ (- fpprec) 2)))
+      (cadr x)
+      x))
 @end lisp
 @end deffn
 
 @c -----------------------------------------------------------------------------
 @node Umwandlung grosser Gleitkommazahlen, Arithmetik mit grossen Gleitkommazahlen, Implementierung grosser Gleitkommazahlen, Grosse Gleitkommazahlen
-@section Umwandlung grosser Gleitkommazahlen
+@section Umwandlung gro@ss{}er Gleitkommazahlen
 @c -----------------------------------------------------------------------------
 
 @c --- 06.11.2011 --------------------------------------------------------------
@@ -1024,15 +1145,15 @@ zur@"uckgegeben.
 @anchor{fpexpt}
 @deffn {Funktion} fpexpt p nn
 
-Die Funktion @code{fpexpt} berechnet die @var{nn}-te Potenz der großen
+Die Funktion @code{fpexpt} berechnet die @var{nn}-te Potenz der gro@ss{}en
 Gleitkommazahl @var{p}.  Das Argument @var{nn} muss eine ganze Zahl sein und
-das Argument @var{p} eine große Gleitkommazahl in der internen Darstellung.
-Das Ergebnis ist eine große Gleitkommazahl in der internen Darstellung.
+das Argument @var{p} eine gro@ss{}e Gleitkommazahl in der internen Darstellung.
+Das Ergebnis ist eine gro@ss{}e Gleitkommazahl in der internen Darstellung.
 
-Der Algorithmus behandelt die Sonderfälle @code{nn = 0} und @code{nn = 1}.
-Für eine negative ganze Zahl wird wird @code{1/p^(-nn)} berechnet.  Ist @var{nn}
-eine positive ganze Zahl größer als @code{1} wird vom Algorithmus die
-entsprechende Anzahl an Multiplikation ausgeführt.
+Der Algorithmus behandelt die Sonderf@"alle @code{nn = 0} und @code{nn = 1}.
+F@"ur eine negative ganze Zahl wird wird @code{1/p^(-nn)} berechnet.  Ist @var{nn}
+eine positive ganze Zahl gr@"o@ss{}er als @code{1} wird vom Algorithmus die
+entsprechende Anzahl an Multiplikation ausgef@"uhrt.
 
 @emph{Quelltext:}
 @lisp
@@ -1057,9 +1178,9 @@ entsprechende Anzahl an Multiplikation ausgeführt.
 @anchor{fpsub}
 @deffn {Funktion} fpsub a b
 
-Berechnet die Differenz der großen Gleitkommazahlen @var{a} und @var{b}, die
-in der internen Darstellung als Argument übergeben werden.  Das Ergebnis ist
-eine große Gleitkommazahl in der internen Darstellung.
+Berechnet die Differenz der gro@ss{}en Gleitkommazahlen @var{a} und @var{b}, die
+in der internen Darstellung als Argument @"ubergeben werden.  Das Ergebnis ist
+eine gro@ss{}e Gleitkommazahl in der internen Darstellung.
 
 @emph{Quelltext:}
 @lisp
@@ -1072,7 +1193,7 @@ eine große Gleitkommazahl in der internen Darstellung.
 @anchor{fpminus}
 @deffn {Funktion} fpminus x
 
-Die große Gleitkommazahl @var{x} wird negiert.  Das Ergebnis ist eine große
+Die gro@ss{}e Gleitkommazahl @var{x} wird negiert.  Das Ergebnis ist eine gro@ss{}e
 Gleitkommazahl in der internen Darstellung.
 
 @emph{Quelltext:}
@@ -1177,6 +1298,11 @@ Gleitkommazahl in der internen Darstellung.
 @end lisp
 @end deffn
 
+@c -----------------------------------------------------------------------------
+@node Mathematische Konstanten, Mathematische Funktionen, Testfunktionen und weitere Funktionen, Grosse Gleitkommazahlen
+@section Mathematische Konstanten
+@c -----------------------------------------------------------------------------
+
 @c --- 11.11.2011 --------------------------------------------------------------
 @anchor{fpone}
 @deffn {Funktion} fpone
@@ -1184,32 +1310,19 @@ Gleitkommazahl in der internen Darstellung.
 @emph{Quelltext:}
 @lisp
 (defun fpone ()
-  (cond (*decfp (intofp 1))
+  (cond (*decfp* (intofp 1))
         ((= fpprec (caddar bigfloatone)) (cdr bigfloatone))
         (t (intofp 1))))
 @end lisp
 @end deffn
 
 @c --- 11.11.2011 --------------------------------------------------------------
-@anchor{fpentier}
-@deffn {Funktion} fpentier f
-
-@emph{Quelltext:}
-@lisp
-(defun fpentier (f)
-  (let ((fpprec (caddar f)))
-    (fpintpart (cdr f))))
-@end lisp
-@end deffn
-
-@c -----------------------------------------------------------------------------
-@node Mathematische Konstanten, Mathematische Funktionen, Testfunktionen und weitere Funktionen, Grosse Gleitkommazahlen
-@section Mathematische Konstanten
-@c -----------------------------------------------------------------------------
-
-@c --- 11.11.2011 --------------------------------------------------------------
 @anchor{fpe}
 @deffn {Funktion} fpe
+
+Berechnet den numerischen Wert der Konstante @code{%e} als gro@ss{}e
+Gleitkommazahl.  Die R@"uckgabe ist gro@ss{}e Gleitkommazahl in der internen
+Darstellung.
 
 @emph{Quelltext:}
 @lisp
@@ -1239,9 +1352,13 @@ Gleitkommazahl in der internen Darstellung.
 @end lisp
 @end deffn
 
-@c --- 11.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fppi}
 @deffn {Funktion} fppi
+
+Berechnet den numerischen Wert der Konstante @code{%pi} als gro@ss{}e
+Gleitkommazahl.  Die R@"uckgabe ist gro@ss{}e Gleitkommazahl in der internen
+Darstellung.
 
 @emph{Quelltext:}
 @lisp
@@ -1285,9 +1402,13 @@ Gleitkommazahl in der internen Darstellung.
 @end lisp
 @end deffn
 
-@c --- 11.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fpgamma}
 @deffn {Funktion} fpgamma
+
+Berechnet den numerischen Wert der Konstante @code{%gamma} als gro@ss{}e
+Gleitkommazahl.  Die R@"uckgabe ist gro@ss{}e Gleitkommazahl in der internen
+Darstellung.
 
 @emph{Quelltext:}
 @lisp
@@ -1323,50 +1444,41 @@ Gleitkommazahl in der internen Darstellung.
 @end lisp
 @end deffn
 
-@c --- 11.11.2011 --------------------------------------------------------------
+@c --- 13.11.2011 --------------------------------------------------------------
 @anchor{fplog2}
 @deffn {Funktion} fplog2
 
+Berechnet den numerischen Wert von @code{log(2)} als gro@ss{}e Gleitkommazahl.
+Die R@"uckgabe ist gro@ss{}e Gleitkommazahl in der internen Darstellung.
+
 @emph{Quelltext:}
 @lisp
+(let ((table (make-hash-table)))
   (defun fplog2 ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (comp-log2)))))
-  (defun fplog2-table ()
-    table)
-  (defun clear_fplog2_table ()
-    (clrhash table)))
-@end lisp
-@end deffn
-
-@c --- 11.11.2011 --------------------------------------------------------------
-@anchor{comp-log2}
-@deffn {Funktion} comp-log2
-
-@emph{Quelltext:}
-@lisp
-(defun comp-log2 ()
-  (flet ((fast-atanh (k)
-           (let* ((term (fpquotient (intofp 1) (intofp k)))
-                  (fact (fptimes* term term))
-                  (oldsum (intofp 0))
-                  (sum term))
-             (loop for m from 3 by 2
-                   until (equal oldsum sum)
-                   do
-                   (setf oldsum sum)
-                   (setf term (fptimes* term fact))
-                   (setf sum (fpadd sum (fpquotient term (intofp m)))))
-             sum)))
-    (let ((result
-            (let* ((fpprec (+ fpprec 8)))
-              (fpadd (fpsub (fptimes* (intofp 18) (fast-atanh 26))
-                                    (fptimes* (intofp 2) (fast-atanh 4801)))
-                      (fptimes* (intofp 8) (fast-atanh 8749))))))
-      (list (fpround (car result))
-            (+ -8 *m)))))
+    (labels ((fast-atanh (k)
+               (let* ((term (fpdiv (intofp 1) (intofp k)))
+                      (fact (fpmul term term))
+                      (oldsum (intofp 0))
+                      (sum term))
+                 (loop for m from 3 by 2
+                       until (equal oldsum sum)
+                       do
+                       (setf oldsum sum)
+                       (setf term (fpmul term fact))
+                       (setf sum (fpadd sum (fpdiv term (intofp m)))))
+                 sum))
+             (comp-log2 ()
+               (let ((result
+                       (let ((fpprec (+ fpprec 8)))
+                         (fpadd (fpsub (fpmul (intofp 18) (fast-atanh 26))
+                                       (fpmul (intofp 2) (fast-atanh 4801)))
+                                (fpmul (intofp 8) (fast-atanh 8749))))))
+                 (list (fpround (car result))
+                       (+ -8 *m)))))
+      (let ((value (gethash fpprec table)))
+        (if value
+	    value
+	    (setf (gethash fpprec table) (comp-log2)))))))
 @end lisp
 @end deffn
 
@@ -1376,19 +1488,29 @@ Gleitkommazahl in der internen Darstellung.
 @c -----------------------------------------------------------------------------
 
 @c --- 11.11.2011 --------------------------------------------------------------
+@anchor{fpentier}
+@deffn {Funktion} fpentier x
+
+@emph{Quelltext:}
+@lisp
+(defun fpentier (x)
+  (let ((fpprec (caddar x)))
+    (fpintpart (cdr x))))
+@end lisp
+@end deffn
+
+@c --- 11.11.2011 --------------------------------------------------------------
 @anchor{mabsbigfloat}
-@deffn {Funktion} mabsbigfloat l
+@deffn {Funktion} mabsbigfloat arg
 
 @emph{Quelltext:}
 @lisp
 (defprop mabs mabsbigfloat floatprog)
 
-(defun mabsbigfloat (l)
-  (prog (r)
-    (setq r (check-bigfloat (car l)))
-    (return (if (null r)
-                (list '(mabs) (car l))
-                (bcons (fpabs (cdr r)))))))
+(defun mabsbigfloat (arg)
+  (if (bigfloatp (setq arg (car arg)))
+      (bcons (fpabs (cdr (check-bigfloat arg))))
+      (list '(mabs) arg)))
 @end lisp
 @end deffn
 
@@ -1481,22 +1603,6 @@ Gleitkommazahl in der internen Darstellung.
 @end deffn
 
 @c --- 06.11.2011 --------------------------------------------------------------
-@anchor{logbigfloat}
-@deffn {Funktion} logbigfloat a
-
-@emph{Quelltext:}
-@lisp
-(defprop %log logbigfloat floatprog)
-
-(defun logbigfloat (a)
-  (cond ((bigfloatp (car a))
-         (big-float-log ($bfloat (car a))))
-        (t
-         (list '(%log) (car a)))))
-@end lisp
-@end deffn
-
-@c --- 06.11.2011 --------------------------------------------------------------
 @anchor{big-float-log}
 @deffn {Funktion} big-float-log x &optional y
 
@@ -1549,6 +1655,22 @@ Gleitkommazahl in der internen Darstellung.
                  (intofp 2))
                 (fpquotient (fplog rho) (intofp 2)))
             (fpatan2 y x))))
+@end lisp
+@end deffn
+
+@c --- 06.11.2011 --------------------------------------------------------------
+@anchor{logbigfloat}
+@deffn {Funktion} logbigfloat a
+
+@emph{Quelltext:}
+@lisp
+(defprop %log logbigfloat floatprog)
+
+(defun logbigfloat (a)
+  (cond ((bigfloatp (car a))
+         (big-float-log ($bfloat (car a))))
+        (t
+         (list '(%log) (car a)))))
 @end lisp
 @end deffn
 
@@ -1666,9 +1788,9 @@ Gleitkommazahl in der internen Darstellung.
             (prog (x)
             loop
               (setq x (cdr (check-bigfloat xt)))
-              (setq piby2 (fpquotient (fppi) (intofp 2)))
-              (setq r (fpintpart (fpquotient x piby2)))
-              (setq x (fpadd x (fptimes* (intofp (- r)) piby2)))
+              (setq piby2 (fpdiv (fppi) (intofp 2)))
+              (setq r (fpintpart (fpdiv x piby2)))
+              (setq x (fpadd x (fpmul (intofp (- r)) piby2)))
               (setq k *cancelled)
               (fpadd x (fpminus piby2))
               (setq *cancelled (max k *cancelled))
@@ -1723,11 +1845,11 @@ Gleitkommazahl in der internen Darstellung.
 (defun fpsincos1 (x fl)
   (prog (ans term oans x2)
      (setq ans (if fl x (intofp 1))
-           x2 (fpminus(fptimes* x x)))
+           x2 (fpminus(fpmul x x)))
      (setq term ans)
      (do ((n (if fl 3 2) (+ n 2)))
          ((equal ans oans))
-       (setq term (fptimes* term (fpquotient x2 (intofp (* n (1- n))))))
+       (setq term (fpmul term (fpdiv x2 (intofp (* n (1- n))))))
        (setq oans ans
              ans (fpadd ans term)))
      (return ans)))
@@ -1756,11 +1878,10 @@ Gleitkommazahl in der internen Darstellung.
 (defprop %tan tanbigfloat floatprog)
 
 (defun tanbigfloat (a)
-  (setq a (car a))
   (fpend (let ((fpprec (+ 8 fpprec)))
-           (cond ((bigfloatp a)
-                  (setq a (cdr ($bfloat a)))
-                  (fpquotient (fpsin a t) (fpsin a nil)))
+           (cond ((bigfloatp (setq a (car a)))
+                  (setq a (cdr (check-bigfloat a)))
+                  (fpdiv (fpsin a t) (fpsin a nil)))
                  (t (list '(%tan) a))))))
 @end lisp
 @end deffn
@@ -1795,22 +1916,15 @@ Gleitkommazahl in der internen Darstellung.
       (multiple-value-bind (re-sqrt-1+z im-sqrt-1+z)
           (complex-sqrt (bcons (fpadd (intofp 1) x))
                         (bcons y))
-        (values (bcons
-                  (let ((d (fpsub (fptimes* re-sqrt-1-z
-                                                   re-sqrt-1+z)
-                                         (fptimes* im-sqrt-1-z
-                                                   im-sqrt-1+z))))
-                    (cond ((equal d '(0 0))
-                           (if (fplessp x '(0 0))
-                               (fpminus (fpquotient (fppi) (intofp 2)))
-                               (fpquotient (fppi) (intofp 2))))
-                          (t
-                           (fpatan (fpquotient x d))))))
-                (fpasinh
-                  (bcons (fpsub (fptimes* re-sqrt-1-z
-                                                 im-sqrt-1+z)
-                                       (fptimes* im-sqrt-1-z
-                                                 re-sqrt-1+z)))))))))
+        (values (bcons (let ((d (fpsub (fpmul re-sqrt-1-z re-sqrt-1+z)
+                                       (fpmul im-sqrt-1-z im-sqrt-1+z))))
+                         (cond ((eql (car d) 0)
+                                (if (fplessp x '(0 0))
+                                    (fpminus (fpdiv (fppi) (intofp 2))
+                                             (fpdiv (fppi) (intofp 2)))))
+                               (t (fpatan (fpdiv x d))))))
+                (fpasin (bcons (fpsub (fpmul re-sqrt-1-z im-sqrt-1+z)
+                                      (fpmul im-sqrt-1-z re-sqrt-1+z)))))))))
 @end lisp
 @end deffn
 
@@ -1836,20 +1950,15 @@ Gleitkommazahl in der internen Darstellung.
     (cond ((minusp (car fp-x))
            (mul -1 (fpasin (bcons (fpminus fp-x)))))
           ((fplessp fp-x (cdr bfhalf))
-           (bcons
-             (fpatan
-               (fpquotient fp-x
-                           (fproot
-                             (bcons (fptimes* (fpsub (fpone) fp-x)
-                                              (fpadd (fpone) fp-x)))
-                             2)))))
+           (bcons (fpatan (fpdiv fp-x
+                                 (fproot (bcons (fpmul (fpsub (fpone) fp-x)
+                                                       (fpadd (fpone) fp-x)))
+                                         2)))))
           ((fpgreaterp fp-x (fpone))
-           (let ((arg (fpadd
-                        fp-x
-                        (fproot
-                          (bcons (fptimes* (fpsub fp-x (fpone))
-                                           (fpadd fp-x (fpone))))
-                          2))))
+           (let ((arg (fpadd fp-x
+                             (fproot (bcons (fpmul (fpsub fp-x (fpone))
+                                                   (fpadd fp-x (fpone))))
+                                     2))))
              (add (div '$%pi 2)
                   (mul -1 '$%i (bcons (fplog arg))))))
           (t
@@ -1857,13 +1966,10 @@ Gleitkommazahl in der internen Darstellung.
                 (mul -1
                      (bcons
                        (fpatan
-                         (fpquotient
-                           (fproot
-                             (bcons
-                               (fptimes* (fpsub (fpone) fp-x)
-                                         (fpadd (fpone) fp-x)))
-                             2)
-                           fp-x)))))))))
+                         (fpdiv (fproot (bcons (fpmul (fpsub (fpone) fp-x)
+                                                      (fpadd (fpone) fp-x)))
+                                        2)
+                                fp-x)))))))))
 @end lisp
 @end deffn
 
@@ -1897,13 +2003,10 @@ Gleitkommazahl in der internen Darstellung.
       (multiple-value-bind (re-sqrt-1+z im-sqrt-1+z)
           (complex-sqrt (bcons (fpadd (intofp 1) x))
                         (bcons y))
-        (values (bcons
-                  (fptimes* (intofp 2)
-                            (fpatan (fpquotient re-sqrt-1-z re-sqrt-1+z))))
-                (fpasinh (bcons
-                           (fpsub
-                             (fptimes* re-sqrt-1+z im-sqrt-1-z)
-                             (fptimes* im-sqrt-1+z re-sqrt-1-z)))))))))
+        (values (bcons (fpmul (intofp 2)
+                              (fpatan (fpdiv re-sqrt-1-z re-sqrt-1+z))))
+                (fpasinh (bcons (fpsub (fpmul re-sqrt-1+z im-sqrt-1-z)
+                                       (fpmul im-sqrt-1+z re-sqrt-1-z)))))))))
 @end lisp
 @end deffn
 
@@ -1927,22 +2030,28 @@ Gleitkommazahl in der internen Darstellung.
 (defprop %atan atanbigfloat floatprog)
 
 (defun atanbigfloat (x)
-  (*fpatan (car x) (cdr x)))
+  (fpatan* (car x) (cdr x)))
 @end lisp
 @end deffn
 
 @c --- 11.11.2011 --------------------------------------------------------------
-@anchor{*fpatan}
-@deffn {Funktion} *fpatan a y
+@anchor{fpatan*}
+@deffn {Funktion} fpatan* a y
+
+@emph{Bemerkung:}
+
+Im Original Maxima hat diese Funktion den Namen @code{*fpatan}.
 
 @emph{Quelltext:}
 @lisp
-(defun *fpatan (a y)
-  (fpend (let ((fpprec (+ 8. fpprec)))
+(defun fpatan* (a y)
+  (fpend (let ((fpprec (+ 8 fpprec)))
            (if (null y)
-               (if (bigfloatp a) (fpatan (cdr ($bfloat a)))
+               (if (bigfloatp a)
+                   (fpatan (cdr (check-bigfloat a)))
                    (list '(%atan) a))
-               (fpatan2 (cdr ($bfloat a)) (cdr ($bfloat (car y))))))))
+               (fpatan2 (cdr (check-bigfloat a))
+                        (cdr (check-bigfloat (car y))))))))
 @end lisp
 @end deffn
 
@@ -1956,29 +2065,32 @@ Gleitkommazahl in der internen Darstellung.
   (prog (term x2 ans oans one two tmp)
     (setq one (intofp 1) two (intofp 2))
     (cond ((fpgreaterp (fpabs x) one)
-           (setq tmp (fpquotient (fppi) two))
-           (setq ans (fpsub tmp (fpatan (fpquotient one x))))
+           (setq tmp (fpdiv (fppi) two))
+           (setq ans (fpsub tmp (fpatan (fpdiv one x))))
            (return (cond ((fplessp x (intofp 0))
                           (fpsub ans (fppi)))
                          (t ans))))
-          ((fpgreaterp (fpabs x) (fpquotient one two))
-           (setq tmp (fpquotient x (fpadd (fptimes* x x) one)))
-           (setq x2 (fptimes* x tmp) term (setq ans one))
+          ((fpgreaterp (fpabs x) (fpdiv one two))
+           (setq tmp (fpdiv x (fpadd (fpmul x x) one)))
+           (setq x2 (fpmul x tmp) term (setq ans one))
            (do ((n 0 (1+ n)))
                ((equal ans oans))
              (setq term
-                   (fptimes* term (fptimes* x2 (fpquotient
-                                                 (intofp (+ 2 (* 2 n)))
-                                                 (intofp (+ (* 2 n) 3))))))
-             (setq oans ans ans (fpadd term ans)))
-           (setq ans (fptimes* tmp ans)))
+                   (fpmul term
+                          (fpmul x2
+                                 (fpdiv (intofp (+ 2 (* 2 n)))
+                                        (intofp (+ (* 2 n) 3))))))
+             (setq oans ans
+                   ans (fpadd term ans)))
+           (setq ans (fpmul tmp ans)))
           (t
-           (setq ans x x2 (fpminus (fptimes* x x)) term x)
+           (setq ans x
+                 x2 (fpminus (fpmul x x)) term x)
            (do ((n 3 (+ n 2)))
                ((equal ans oans))
-             (setq term (fptimes* term x2))
+             (setq term (fpmul term x2))
              (setq oans ans
-                   ans (fpadd ans (fpquotient term (intofp n)))))))
+                   ans (fpadd ans (fpdiv term (intofp n)))))))
     (return ans)))
 @end lisp
 @end deffn
@@ -1994,15 +2106,15 @@ Gleitkommazahl in der internen Darstellung.
          (cond ((equal (car y) 0)
                 (merror "atan2: atan2(0, 0) is undefined."))
                ((minusp (car y))
-                (fpquotient (fppi) (intofp -2)))
+                (fpdiv (fppi) (intofp -2)))
                (t
-                (fpquotient (fppi) (intofp 2)))))
+                (fpdiv (fppi) (intofp 2)))))
         ((> (car x) 0)
-         (fpatan (fpquotient y x)))
+         (fpatan (fpdiv y x)))
         ((> (car y) 0)
-         (fpadd (fppi) (fpatan (fpquotient y x))))
+         (fpadd (fppi) (fpatan (fpdiv y x))))
         (t
-         (fpsub (fpatan (fpquotient y x)) (fppi)))))
+         (fpsub (fpatan (fpdiv y x)) (fppi)))))
 @end lisp
 @end deffn
 
@@ -2029,8 +2141,8 @@ Gleitkommazahl in der internen Darstellung.
          (check-bigfloat x))
         ((fpposp (cdr x))
          (let ((d (fpexpm1 (cdr (check-bigfloat x)))))
-           (bcons (fpquotient (fpadd d (fpquotient d (fpadd d (fpone))))
-                              (intofp 2)))))
+           (bcons (fpdiv (fpadd d (fpdiv d (fpadd d (fpone))))
+                         (intofp 2)))))
         (t
          (bcons 
            (fpminus
@@ -2053,7 +2165,7 @@ Gleitkommazahl in der internen Darstellung.
                (term x))
            (do ((n 2 (1+ n)))
                ((equal ans oans))
-             (setf term (fpquotient (fptimes* x term) (intofp n)))
+             (setf term (fpdiv (fpmul x term) (intofp n)))
              (setf oans ans)
              (setf ans (fpadd ans term)))
            ans))))
@@ -2083,13 +2195,13 @@ Gleitkommazahl in der internen Darstellung.
 @lisp
 (defun complex-tanh (x y)
   (let* ((tv (cdr (tanbigfloat (list y))))
-	 (beta (fpadd (fpone) (fptimes* tv tv)))
+	 (beta (fpadd (fpone) (fpmul tv tv)))
 	 (s (cdr (fpsinh x)))
-	 (s^2 (fptimes* s s))
+	 (s^2 (fpmul s s))
 	 (rho (fproot (bcons (fpadd (fpone) s^2)) 2))
-	 (den (fpadd (fpone) (fptimes* beta s^2))))
-    (values (bcons (fpquotient (fptimes* beta (fptimes* rho s)) den))
-	    (bcons (fpquotient tv den)))))
+	 (den (fpadd (fpone) (fpmul beta s^2))))
+    (values (bcons (fpdiv (fpmul beta (fpmul rho s)) den))
+	    (bcons (fpdiv tv den)))))
 @end lisp
 @end deffn
 
@@ -2102,8 +2214,8 @@ Gleitkommazahl in der internen Darstellung.
 (defun fptanh (x)
   (let* ((two (intofp 2))
          (fp (cdr (check-bigfloat x)))
-         (d (fpexpm1 (fptimes* fp two))))
-    (bcons (fpquotient d (fpadd d two)))))
+         (d (fpexpm1 (fpmul fp two))))
+    (bcons (fpdiv d (fpadd d two)))))
 @end lisp
 @end deffn
 
@@ -2151,26 +2263,22 @@ Gleitkommazahl in der internen Darstellung.
     (cond ((fpgreaterp absx two)
            (setf result
                  (fplog
-                   (fpadd
-                     (fptimes* absx two)
-                     (fpquotient
-                       one
-                       (fpadd absx
-                               (fproot
-                                 (bcons (fpadd one
-                                                (fptimes* absx absx)))
-                                 2)))))))
+                   (fpadd (fpmul absx two)
+                          (fpdiv one
+                                 (fpadd absx
+                                        (fproot (bcons (fpadd one
+                                                              (fpmul absx
+                                                                     absx)))
+                                                2)))))))
           (t
-           (let ((x*x (fptimes* absx absx)))
+           (let ((x*x (fpmul absx absx)))
              (setq result
                    (fplog1p
-                     (fpadd
-                       absx
-                       (fpquotient x*x
+                     (fpadd absx
+                            (fpdiv x*x
                                    (fpadd one
-                                           (fproot
-                                             (bcons (fpadd one x*x))
-                                             2)))))))))
+                                          (fproot (bcons (fpadd one x*x))
+                                                  2)))))))))
     (if minus
         (bcons (fpminus result))
         (bcons result))))
@@ -2207,16 +2315,15 @@ Gleitkommazahl in der internen Darstellung.
          (x-lt-minus-1 (fplessp (fpadd fpx (fpone)) '(0 0)))
          (x-gt-plus-1 (fpgreaterp fpy (fpone)))
          (y-equals-0 (equal y '((bigfloat) 0 0)))
-         (x (fptimes* beta fpx))
-         (y (fptimes* beta (fpminus fpy)))
+         (x (fpmul beta fpx))
+         (y (fpmul beta (fpminus fpy)))
          (rho (intofp 0))
          (t1 (fpadd (fpabs y) rho))
-         (t1^2 (fptimes* t1 t1))
+         (t1^2 (fpmul t1 t1))
          (1-x (fpsub (fpone) x))
-         (eta (fpquotient
-                (fplog1p (fpquotient (fptimes* (intofp 4) x)
-                                     (fpadd (fptimes* 1-x 1-x) t1^2)))
-                (intofp 4)))
+         (eta (fpdiv (fplog1p (fpdiv (fpmul (intofp 4) x)
+                                     (fpadd (fpmul 1-x 1-x) t1^2)))
+                     (intofp 4)))
          (nu (if y-equals-0
                  (fpminus
                    (if x-lt-minus-1
@@ -2224,13 +2331,12 @@ Gleitkommazahl in der internen Darstellung.
                        (if x-gt-plus-1
                            (cdr ($bfloat '((mminus) ((mquotient) $%pi 2))))
                            (merror "COMPLEX-ATANH: HOW DID I GET HERE?"))))
-                 (fptimes*
-                   (cdr bfhalf)
-                   (fpatan2 (fptimes* (intofp 2) y)
-                            (fpsub (fptimes* 1-x (fpadd (fpone) x))
-                                          t1^2))))))
-    (values (bcons (fptimes* beta eta))
-            (bcons (fpminus (fptimes* beta nu))))))
+                 (fpmul (cdr bfhalf)
+                        (fpatan2 (fpmul (intofp 2) y)
+                                 (fpsub (fpmul 1-x (fpadd (fpone) x))
+                                        t1^2))))))
+    (values (bcons (fpmul beta eta))
+            (bcons (fpminus (fpmul beta nu))))))
 @end lisp
 @end deffn
 
@@ -2249,19 +2355,16 @@ Gleitkommazahl in der internen Darstellung.
                (complex-atanh x (bcons (intofp 0)))
              (add u (mul '$%i v))))
           ((fpgreaterp fp-x (cdr bfhalf))
-           (bcons
-             (fptimes* (cdr bfhalf)
-                       (fplog1p (fpquotient (fptimes* (intofp 2) fp-x)
-                                            (fpsub (fpone) fp-x))))))
+           (bcons (fpmul (cdr bfhalf)
+                         (fplog1p (fpdiv (fpmul (intofp 2) fp-x)
+                                         (fpsub (fpone) fp-x))))))
           (t
-           (let ((2x (fptimes* (intofp 2) fp-x)))
-             (bcons
-               (fptimes*
-                 (cdr bfhalf)
-                 (fplog1p
-                   (fpadd 2x
-                           (fpquotient (fptimes* 2x fp-x)
-                                       (fpsub (fpone) fp-x)))))))))))
+           (let ((2x (fpmul (intofp 2) fp-x)))
+             (bcons (fpmul (cdr bfhalf)
+                           (fplog1p (fpadd 2x
+                                           (fpdiv (fpmul 2x fp-x)
+                                                  (fpsub (fpone)
+                                                         fp-x)))))))))))
 @end lisp
 @end deffn
 
@@ -2316,7 +2419,7 @@ Gleitkommazahl in der internen Darstellung.
                (*m 1)
                (*cancelled 0))
            (setq l
-                 (let ((*decfp t)
+                 (let ((*decfp* t)
                        (fpprec (+ extradigs (decimalsin (- (caddar l) 2))))
                        (of (caddar l))
                        (l (cdr l))
