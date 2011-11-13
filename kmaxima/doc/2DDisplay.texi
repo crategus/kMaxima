@@ -84,7 +84,6 @@ Standardwert: @code{"]"}
 Standardwert: @code{nil}
 
 @emph{Bemerkung:}
-
 Die Optionsvariable hat eine @code{assign}-Funktion mit dem Namen
 @mrefdot{stardisp}  Die @code{assign}-Funktion wird mit dem Kommando
 @code{(defprop $stardisp stardisp assign)} der Optionsvariablen zugewiesen.
@@ -245,8 +244,10 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defmacro push-string (str sym)
   `(setq ,sym (list* ,@@(nreverse (exploden str)) ,sym)))
+@end group
 @end lisp
 @end deffn
 
@@ -256,6 +257,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defmacro displa-def (op dim-function &rest rest
                                       &aux l-dissym r-dissym lbp rbp)
   (dolist (x rest)
@@ -274,6 +276,7 @@ Standardwert: @code{nil}
     ,(when l-dissym  `(defprop ,op ,l-dissym dissym))
     ,(when lbp       `(defprop ,op ,lbp lbp))
     ,(when rbp       `(defprop ,op ,rbp rbp))))
+@end group
 @end lisp
 @end deffn
 
@@ -283,6 +286,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun mdisplay (form)
   (declare (special *linel*))
   (when (not #.ttyoff)
@@ -305,6 +309,7 @@ Standardwert: @code{nil}
            (fresh-line *standard-output*)
            (mgrind form *standard-output*)
            (terpri)))))
+@end group
 @end lisp
 @end deffn
 
@@ -314,9 +319,11 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun checkrat (form)
   (declare (ignore form))
   nil)
+@end group
 @end lisp
 @end deffn
 
@@ -326,9 +333,11 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun checkfit (w)
   (or (not *break*)
       (<= (- (+ w *break* *right* 1) *bkptwd*) *linel*)))
+@end group
 @end lisp
 @end deffn
 
@@ -338,6 +347,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun checkbreak (result w)
   (cond ((not *break*))
         ((> (- (setq w (+ w *break*)) *bkptout*) *linel*)
@@ -369,6 +379,7 @@ Standardwert: @code{nil}
                *bkptdp* (max *maxdp* *bkptdp*)
                *maxht* 1
                *maxdp* 0))))
+@end group
 @end lisp
 @end deffn
 
@@ -378,6 +389,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun forcebreak (result w)
   (output result 0)
   (setq *lines* (+ 2 *lines*)
@@ -385,6 +397,7 @@ Standardwert: @code{nil}
         *bkptout* (+ w *break*)
         *maxht* 1
         *maxdp* 0))
+@end group
 @end lisp
 @end deffn
 
@@ -394,11 +407,13 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun output (result w)
   (if (not (interactive-stream-p *standard-input*))
       (fresh-line))
   (if (not #.ttyoff)
       (output-linear (nreverse result) w)))
+@end group
 @end lisp
 @end deffn
 
@@ -408,6 +423,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun output-linear (result w)
   (declare (special *bkptdp* *bkptht* *linearray*))
   (draw-linear result *bkptdp* w)
@@ -415,6 +431,7 @@ Standardwert: @code{nil}
       ((< i 0))
     (cond ((null (aref *linearray* i)))
           (t (output-linear-one-line i)))))
+@end group
 @end lisp
 @end deffn
 
@@ -424,6 +441,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun output-linear-one-line (i)
   (declare (special *linearray*))
   (labels ((tyotbsp (n)
@@ -439,6 +457,7 @@ Standardwert: @code{nil}
       (tyotbsp n)
       (loop for v in (cdr line) do (write-char v))
       (terpri))))
+@end group
 @end lisp
 @end deffn
 
@@ -448,6 +467,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun draw-linear (dmstr *oldrow* *oldcol*)
   (declare (special *linearray* *oldrow* *oldcol*))
   (do ((line))
@@ -478,6 +498,7 @@ Standardwert: @code{nil}
            (setq *oldcol* (apply (caar dmstr) (cdar dmstr)))
            (pop dmstr))))
   *oldcol*)
+@end group
 @end lisp
 @end deffn
 
@@ -487,9 +508,11 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-hbar (w &optional (char #\-) &aux nl)
   (dotimes (i w)
     (push char nl))
+@end group
 @end lisp
 @end deffn
 
@@ -499,12 +522,14 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-vbar (h d &optional (char #\|))
   (setq d (- d))
   (do ((i (- h 2) (1- i))
        (nl `((0 ,(1- h) ,char))))
       ((< i d) (draw-linear (nreverse nl) *oldrow* *oldcol*))
     (push `(-1 ,i ,char) nl)))
+@end group
 @end lisp
 @end deffn
 
@@ -514,9 +539,11 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-integralsign (&aux dmstr)
   (setq dmstr `((0 2 #\/) (-1 1 #\[) (-1 0 #\I) (-1 -1 #\]) (-1 -2 #\/)))
   (draw-linear dmstr *oldrow* *oldcol*))
+@end group
 @end lisp
 @end deffn
 
@@ -526,10 +553,12 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-prodsign (&aux dmstr)
   (setq dmstr '((0 2 #\\ (d-hbar 3 #\=) #\/)
                 (-4 0) (d-vbar 2 1 #\!) #\space (d-vbar 2 1 #\!) (1 0)))
   (draw-linear dmstr *oldrow* *oldcol*))
+@end group
 @end lisp
 @end deffn
 
@@ -539,10 +568,12 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-sumsign (&aux dmstr)
   (setq dmstr '((0 2 (d-hbar 4 #\=))
                 (-4 1 #\\ ) #\> (-2 -1 #\/) (-1 -2 (d-hbar 4 #\=))))
   (draw-linear dmstr *oldrow* *oldcol*))
+@end group
 @end lisp
 @end deffn
 
@@ -552,8 +583,10 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-matrix (dir h d)
   (d-vbar h d (car (coerce (if (eq dir 'right) $rmxchar $lmxchar) 'list))))
+@end group
 @end lisp
 @end deffn
 
@@ -563,6 +596,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun d-box (h d w body &aux char dmstr)
   (setq char (car (coerce $boxchar 'list)))
   (setq dmstr `((0 ,h (d-hbar ,(+ 2 w) ,char))
@@ -573,6 +607,7 @@ Standardwert: @code{nil}
                 (-1 0)
                 (d-vbar ,h ,d ,char)))
       (draw-linear dmstr *oldrow* *oldcol*))
+@end group
 @end lisp
 @end deffn
 
@@ -582,11 +617,13 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun nformat-check (form)
   (if (and $display_format_internal
            (not (or (atom form) (atom (car form)))))
       form
       (nformat form)))
+@end group
 @end lisp
 @end deffn
 
@@ -596,6 +633,7 @@ Standardwert: @code{nil}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension (form result *lop* *rop* w *right*)
   (let ((*level* (1+ *level*))
         (*break* (if (and w *break*) (+ w *break*))))    
@@ -612,6 +650,7 @@ Standardwert: @code{nil}
            (funcall (getprop (caar form) 'dimension) form result))
           (t
            (dimension-function form result)))))
+@end group
 @end lisp
 @end deffn
 
@@ -627,6 +666,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-atom (form result)
   (cond ((and (symbolp form)
               (getprop form atom-context))
@@ -637,6 +677,7 @@ Standardwert: @code{'dimension-list}
          (dimension-string (makestring form) result))
         (t
          (dimension-string (makestring form) result))))
+@end group
 @end lisp
 @end deffn
 
@@ -646,6 +687,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-string (form result &aux crp)
   (declare (special *linel* *break* *bkptout* *width* *height* *depth*))
   (setq *width*  0
@@ -677,6 +719,7 @@ Standardwert: @code{'dimension-list}
                           w (+ *linel* *width*))
                     (incf *width*))
                   (setq result (rplacd form result))))))))
+@end group
 @end lisp
 @end deffn
 
@@ -686,6 +729,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-paren (form result)
   (setq result
         (cons #\) (dimension form
@@ -693,6 +737,7 @@ Standardwert: @code{'dimension-list}
                              'mparen 'mparen 1 (1+ *right*))))
   (incf *width* 2)
   result)
+@end group
 @end lisp
 @end deffn
 
@@ -702,6 +747,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-array (x result)
   (prog (dummy bas (w 0) (h 0) (d 0) sub)
     (if (eq (caar x) 'mqapply)
@@ -745,6 +791,7 @@ Standardwert: @code{'dimension-list}
                  *depth* (+ h d *depth*))))
     (update-heights *height* *depth*)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -754,6 +801,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-function (form result)
   (prog (fun (w 0) (h 0) (d 0))
     (cond ((or (not $noundisp) (not (symbolp (caar form)))))
@@ -787,6 +835,7 @@ Standardwert: @code{'dimension-list}
                  *height* (max h *height*)
                  *depth* (max d *depth*))))
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -796,6 +845,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-list (form result)
   (prog ((w 0) (h 0) (d 0))
     (setq result (dimension (cadr form) result *lop* 'mcomma 0 *right*)
@@ -815,6 +865,7 @@ Standardwert: @code{'dimension-list}
           *height* h
           *depth* d)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -824,6 +875,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-prefix (form result)
   (prog (dissym (symlength 0))
     (setq dissym (getprop (caar form) 'dissym)
@@ -834,6 +886,7 @@ Standardwert: @code{'dimension-list}
                      (caar form) *rop* symlength *right*)
           *width* (+ symlength *width*))
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -843,6 +896,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-infix (form result)
   (unless (= (length (cdr form)) 2)
     (return-from dimension-infix (dimension-function form result)))
@@ -862,6 +916,7 @@ Standardwert: @code{'dimension-list}
            *height* (max h *height*)
            *depth* (max d *depth*))
      (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -871,6 +926,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-postfix (form result)
   (prog (dissym (symlength 0))
     (setq dissym (getprop (caar form) 'dissym)
@@ -880,6 +936,7 @@ Standardwert: @code{'dimension-list}
                      result *lop* (caar form) 0 (+ symlength *right*))
           *width* (+ symlength *width*))
     (return (revappend dissym result))))
+@end group
 @end lisp
 @end deffn
 
@@ -889,10 +946,12 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-nofix (form result)
   (setq form (getprop (caar form) 'dissym)
         *width* (length form))
   (revappend form result))
+@end group
 @end lisp
 @end deffn
 
@@ -902,6 +961,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-match (form result)
   (prog (dissym (symlength 0))
     (setq dissym (getprop (caar form) 'dissym)
@@ -920,6 +980,7 @@ Standardwert: @code{'dimension-list}
                    (dimension-list form (revappend (car dissym) result))))
            (setq *width* (+ (length (cdr dissym)) symlength *width*))
            (return (revappend (cdr dissym) result))))))
+@end group
 @end lisp
 @end deffn
 
@@ -929,6 +990,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mplus (form result)
   (cond ((and (null (cddr form))
               (not (member (cadar form) '(trunc exact) :test #'eq)))
@@ -970,6 +1032,7 @@ Standardwert: @code{'dimension-list}
                         h (max h *height*)
                         d (max d *depth*))
                   (checkbreak result w)))))))
+@end group
 @end lisp
 @end deffn
 
@@ -979,10 +1042,12 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-rat (form result)
   (if $ratdispflag
       (dimension-nary form result)
       (dim-mquotient form result)))
+@end group
 @end lisp
 @end deffn
 
@@ -992,6 +1057,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mquotient (form result)
   (unless (= (length (cdr form)) 2)
     (return-from dim-mquotient (dimension-function form result)))
@@ -1008,6 +1074,7 @@ Standardwert: @code{'dimension-list}
     (unless (checkfit *width*)
       (return (dimension-nary form result)))
     (return (dratio result num w h d den *width* *height* *depth*))))
+@end group
 @end lisp
 @end deffn
 
@@ -1017,6 +1084,7 @@ Standardwert: @code{'dimension-list}
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dratio (result num w1 h1 d1 den w2 h2 d2)
   (setq *width* (max w1 w2)
         *height* (+ 1 h1 d1)
@@ -1029,17 +1097,20 @@ Standardwert: @code{'dimension-list}
   (push `(,(- 0 #.x2 w2) 0) result)
   (push `(d-hbar ,*width*) result)
   result)
+@end group
 @end lisp
 
 @emph{Bemerkung:}
 Die Funktion nutzt die globalen Variablen @code{x1} und @code{x2}.  Diese
 werden folgenderma@ss{}en initialisert:
 @lisp
+@group
 (defvar x1)
 (defvar x2)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (setq x1 'h1 x2 'd2))
+@end group
 @end lisp
 @end deffn
 
@@ -1049,10 +1120,12 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun update-heights (ht* dp*)
   (if *break*
       (setq *maxht* (max *maxht* ht*)
             *maxdp* (max *maxdp* dp*))))
+@end group
 @end lisp
 @end deffn
 
@@ -1062,6 +1135,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-nary (form result)
   (cond ((null (cddr form))
          (dimension-function form result))
@@ -1101,6 +1175,7 @@ werden folgenderma@ss{}en initialisert:
                           h (max h *height*)
                           d (max d *depth*)))))
            (return result)))))
+@end group
 @end lisp
 @end deffn
 
@@ -1110,6 +1185,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimnary (form result *lop* op *rop* w)
   (declare (ignore op))
   (if (and (consp form)
@@ -1125,6 +1201,7 @@ werden folgenderma@ss{}en initialisert:
         result)
       (progn
         (dimension form result *lop* *rop* w *right*))))
+@end group
 @end lisp
 @end deffn
 
@@ -1134,6 +1211,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mlabel (form result)
   (prog (dummy (w 0) (h 0) (d 0))
     (cond ((eq nil (cadr form))
@@ -1166,6 +1244,7 @@ werden folgenderma@ss{}en initialisert:
           *height* (max h *height*)
           *depth* (max d *depth*))
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1175,6 +1254,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimnary-boolean (form result *lop* op *rop* w)
   (declare (ignore op))
   (if (and (consp form)
@@ -1183,6 +1263,7 @@ werden folgenderma@ss{}en initialisert:
                (eq (caar form) 'mnot)))
       (dimension-paren form result)
       (dimension form result *lop* *rop* w *right*)))
+@end group
 @end lisp
 @end deffn
 
@@ -1192,6 +1273,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimension-superscript (form result)
   (prog (exp (w 0) (h 0) (d 0) bas)
     (setq exp (let ((*size* 1))
@@ -1199,6 +1281,8 @@ werden folgenderma@ss{}en initialisert:
           w *width*
           h *height*
           d *depth*)
+@end group
+@group
     (cond ((and (not (atom (cadr form)))
                 (member 'array (cdaadr form) :test #'eq))
            (prog (sub (w2 0) (h2 0) (d2 0))
@@ -1248,6 +1332,7 @@ werden folgenderma@ss{}en initialisert:
                      *height* (+ h d *height*)))
            (update-heights *height* *depth*)
            (return result)))))
+@end group
 @end lisp
 @end deffn
 
@@ -1257,6 +1342,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mdefine (form result)
   (let (($noundisp t)
         ($stringdispflag t))
@@ -1266,6 +1352,7 @@ werden folgenderma@ss{}en initialisert:
                                (cons '(mprogn) (cddr form)))
                          form)
                      result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1275,11 +1362,13 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mncexpt (form result)
   (dimension-superscript (list '(mncexpt)
                                (cadr form) 
                                (cons '(mangle) (cddr form)))
                          result))
+@end group
 @end lisp
 @end deffn
 
@@ -1289,6 +1378,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%integrate (form result)
   (prog (dummy (w 0)(h 0)(d 0) dummy2)
     (cond ((not (or (= (length (cdr form)) 2) (= (length (cdr form)) 4)))
@@ -1317,6 +1407,7 @@ werden folgenderma@ss{}en initialisert:
           *height* (max h *height*)
           *depth* (max d *depth*))
     (return dummy)))
+@end group
 @end lisp
 @end deffn
 
@@ -1326,6 +1417,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%derivative (form result)
   (prog ()
     (cond ((null (cddr form))
@@ -1343,6 +1435,7 @@ werden folgenderma@ss{}en initialisert:
            (return (dimension-paren form result)))
           (t
            (return (dmderivlong form result))))))
+@end group
 @end lisp
 @end deffn
 
@@ -1352,6 +1445,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dmderivabbrev (form result)
   (prog (dummy (w 0))
     (do ((l (cddr form) (cddr l)) (var))
@@ -1367,6 +1461,7 @@ werden folgenderma@ss{}en initialisert:
           *width* (+ w *width*) *depth* (max 1 (1+ *depth*)))
     (update-heights *height* *depth*)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1376,6 +1471,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dmderivlong (form result)
   (prog (num (w1 0) (h1 0) (d1 0) den (w2 0)( h2 0) (d2 0))
     (setq num (list (cadddr form))
@@ -1425,6 +1521,7 @@ werden folgenderma@ss{}en initialisert:
                  *depth* (max d1 *depth*))
            (update-heights *height* *depth*)
            (return result)))))
+@end group
 @end lisp
 @end deffn
 
@@ -1434,6 +1531,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%at (form result)
   (prog (exp eqs (w 0) (h 0) (d 0))
     (unless (= (length (cdr form)) 2)
@@ -1460,6 +1558,7 @@ werden folgenderma@ss{}en initialisert:
           *depth* (+ 1 d *depth*))
     (update-heights *height* *depth*)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1469,8 +1568,10 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%lsum (form result)
   (dsumprod form result '(d-sumsign) 4 3 2))
+@end group
 @end lisp
 @end deffn
 
@@ -1480,8 +1581,10 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%sum (form result)
   (dsumprod form result '(d-sumsign) 4 3 2))
+@end group
 @end lisp
 @end deffn
 
@@ -1491,8 +1594,10 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%product (form result)
   (dsumprod form result '(d-prodsign) 5 3 1))
+@end group
 @end lisp
 @end deffn
 
@@ -1502,6 +1607,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dsumprod (form result d-form sw sh sd)
   (prog (dummy (w 0) (h 0) (d 0) dummy2 (lsum (eq (caar form) '%lsum)))
     (setq dummy2 (dimension (caddr form) nil 'mparen 'mequal nil 0)
@@ -1540,6 +1646,7 @@ werden folgenderma@ss{}en initialisert:
           *height* (max h *height*)
           *depth* (max d *depth*))
     (return dummy)))
+@end group
 @end lisp
 @end deffn
 
@@ -1549,6 +1656,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-%limit (form result)
   (prog ((w 0) (h 0) (d 0) dummy)
     (unless (or (= (length (cdr form)) 3) (= (length (cdr form)) 4))
@@ -1577,6 +1685,7 @@ werden folgenderma@ss{}en initialisert:
     (setq *width* (+ 1 w *width*)
           *depth* (max d *depth*))
     (return dummy)))
+@end group
 @end lisp
 @end deffn
 
@@ -1586,6 +1695,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mcond (form result)
   (prog ((w 0) (h 0) (d 0))
     (push-string "if " result)
@@ -1635,6 +1745,7 @@ werden folgenderma@ss{}en initialisert:
           *height* h
           *depth* d)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1644,6 +1755,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mdo (form result)
   (prog ((w 0) (h 0) (d 0) brkflag)
     (cond ((not (null (cadr form)))
@@ -1653,6 +1765,8 @@ werden folgenderma@ss{}en initialisert:
                        (dimension (cadr form) result 'mdo 'mparen 4 *right*))
                  w (+ 4 *width*) h *height* d *depth*
                  brkflag t)))
+@end group
+@group
     (cond ((or (null (caddr form))
                (equal 1 (caddr form))))
           (t
@@ -1661,6 +1775,8 @@ werden folgenderma@ss{}en initialisert:
                  (cons #\space
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
+@end group
+@group
     (setq form (cdddr form))
     (cond ((equal 1 (car form)))
           ((not (null (car form)))
@@ -1675,6 +1791,8 @@ werden folgenderma@ss{}en initialisert:
                  (cons #\space
                        (dimension (cadr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*))))
+@end group
+@group
     (cond ((not (null (caddr form)))
            (push-string "thru " result)
            (setq result
@@ -1682,6 +1800,8 @@ werden folgenderma@ss{}en initialisert:
                        (dimension (caddr form) result 'mdo 'mparen (+ 6 w) 0))
                  w (+ 6 w *width*) h (max h *height*) d (max d *depth*)
                  brkflag t)))
+@end group
+@group
     (cond ((not (null (cadddr form)))
            (cond ((and (not (atom (cadddr form)))
                        (eq (caar (cadddr form)) 'mnot))
@@ -1701,6 +1821,8 @@ werden folgenderma@ss{}en initialisert:
                                          result 'mdo 'mparen (+ 8 w) 0))
                         w (+ 8 w *width*) h (max h *height*)
                         d (max d *depth*))))))
+@end group
+@group
     (if brkflag (checkbreak result w))
     (push-string "do " result)
     (setq result
@@ -1709,6 +1831,7 @@ werden folgenderma@ss{}en initialisert:
           *height* (max h *height*)
           *depth* (max d *depth*))
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1718,6 +1841,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mdoin (form result)
   (prog ((w 0) (h 0) (d 0))
     (push-string "for " result)
@@ -1749,6 +1873,7 @@ werden folgenderma@ss{}en initialisert:
           *height* (max h *height*)
           *depth* (max d *depth*))
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1758,6 +1883,7 @@ werden folgenderma@ss{}en initialisert:
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mabs (form result &aux arg bar)
   (setq arg (dimension (cadr form) nil 'mparen 'mparen nil 0))
   (cond ((or (> (+ 2 *width*) *linel*)
@@ -1769,6 +1895,7 @@ werden folgenderma@ss{}en initialisert:
          (setq bar `(d-vbar ,*height* 
                             ,*depth* ,(car (coerce $absboxchar 'list))))
          (cons bar (nconc arg (cons bar result))))))
+@end group
 @end lisp
 @end deffn
 
@@ -1782,6 +1909,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-$matrix (form result)
   (prog (dmstr rstr cstr consp cols)
      (setq cols (if (mlistp (cadr form)) (length (cadr form)) 0))
@@ -1826,6 +1954,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
               (matout dmstr cstr rstr result))
              ((and (not consp) (<= *level* 2)) (colout dmstr cstr result))
              (t (dimension-function form result))))))
+@end group
 @end lisp
 @end deffn
 
@@ -1835,6 +1964,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun matout (dmstr cstr rstr result)
   (push `(d-matrix left ,*height* ,*depth*) result)
   (push #\space result)
@@ -1852,6 +1982,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
   (rplaca (car result) (1- (caar result)))
   (push `(d-matrix *right* ,*height* ,*depth*) result)
   result)
+@end group
 @end lisp
 @end deffn
 
@@ -1861,6 +1992,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun colout (dmstr cstr result)
   (setq *width* 0
         *height* 1
@@ -1892,6 +2024,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
     (update-heights h d)
     (checkbreak result *width*))
   result)
+@end group
 @end lisp
 @end deffn
 
@@ -1901,6 +2034,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mbox (form result &aux dummy)
   (setq dummy (dimension (cadr form) nil 'mparen 'mparen nil 0))
   (cond ((not (checkfit (+ 2 *width*)))
@@ -1912,6 +2046,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
                *depth* (1+ *depth*))
          (update-heights *height* *depth*)
          result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1921,6 +2056,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mlabox (form result)
   (prog (dummy ch)
     (setq dummy (dimension (cadr form) nil 'mparen 'mparen nil 0))
@@ -1955,6 +2091,7 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
           (list* `(d-vbar ,(1- *height*) ,(1- *depth*) ,ch) '(-1 0) result))
     (update-heights *height* *depth*)
     (return result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1964,10 +2101,12 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dim-mtext (form result)
   (if (null (cddr form))
       (dimension (cadr form) result *lop* *rop* 0 0)
       (dimension-nary form result)))
+@end group
 @end lisp
 @end deffn
 
@@ -1977,9 +2116,11 @@ wird @var{form} als eine Funktion in einer linearen Darstellung formatiert.
 
 @emph{Quelltext:}
 @lisp
+@group
 (defun dimnary-mtext (form result *lop* op *rop* w)
   (declare (ignore op))
   (dimension form result *lop* *rop* w *right*))
+@end group
 @end lisp
 @end deffn
 
