@@ -443,7 +443,7 @@
         ((and (symbolp e) (getprop e '$numer)))
         ((or (atom e) (member 'array (cdar e) :test #'eq)) e)
         ((eq (caar e) 'rat) (rat2float e))
-        ((eq (caar e) 'bigfloat) (fp2flo e))
+        ((eq (caar e) 'bigfloat) (fp2float e))
         ((member (caar e) '(mexpt mncexpt) :test #'eq)
          (let ((res (recur-apply #'$float e)))
            (if (floatp res)
