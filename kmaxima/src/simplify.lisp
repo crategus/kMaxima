@@ -813,17 +813,22 @@
     (return (rplacd fm (cddr fm)))
   equt
     (setq x1 (muln (cons (addk w (if flag (cadadr fm) 1)) x) t))
+    (setq x1 (list '(mplus) x1))
   equt2
     (rplaca (cdr fm)
             (if (zerop1 x1)
                 (list* '(mtimes) x1 x)
                 (if (mtimesp x1) (testtneg x1) x1)))
     (if (not (mtimesp (cadr fm))) (go check))
-    (when (and (eql 1 (cadadr fm)) flag (null (cdddr (cadr fm))))
-      (rplaca (cdr fm) (caddr (cadr fm))) (go check))
+    (when (and flag
+               (eql 1 (cadadr fm))
+               (null (cdddr (cadr fm))))
+      (rplaca (cdr fm) (caddr (cadr fm)))
+      (go check))
     (go del)
   check
-    (if (mplusp (cadr fm)) (setq *plusflag* t))
+    (if (mplusp (cadr fm))
+        (setq *plusflag* t))
     (return (cdr fm))))
 
 ;;; ----------------------------------------------------------------------------
