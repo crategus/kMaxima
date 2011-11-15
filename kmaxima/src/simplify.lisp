@@ -862,8 +862,10 @@
                          (mul (caddr eqnflag) res)))
                   (t res)))))
 
+(defvar *rulesw* nil)
+
 (defun tms (factor power product &aux tem)
-  (let ((rulesw nil)
+  (let ((*rulesw* nil)
         (z nil))
     (when (mplusp product) (setq product (list '(mtimes simp) product)))
     (cond ((zerop1 factor)
@@ -875,8 +877,10 @@
           ((and (null product)
                 (or (and (mtimesp factor) (eql power 1))
                     (and (setq product (list '(mtimes) 1)) nil)))
-           (setq tem (append '((mtimes)) (if (mnumberp (cadr factor)) nil '(1))
+           (setq tem (append '((mtimes))
+                             (if (mnumberp (cadr factor)) nil '(1))
                              (cdr factor) nil))
+           (format t "in TMS: tem = ~A~%" tem)
            (if (= (length tem) 1)
                (setq tem (copy-list tem))
                tem))
@@ -884,12 +888,12 @@
            (do ((factor-list (cdr factor) (cdr factor-list)))
                ((or (null factor-list) (zerop1 product))  product)
              (setq z (timesin (car factor-list) (cdr product) power))
-             (when rulesw
-               (setq rulesw nil)
+             (when *rulesw*
+               (setq *rulesw* nil)
                (setq product (tms-format-product z)))))
           (t
            (setq z (timesin factor (cdr product) power))
-           (if rulesw
+           (if *rulesw*
                (tms-format-product z)
                product)))))
 
@@ -934,8 +938,8 @@
     (cond ((eql w 1)
            (setq temp x))
           (t
-           (setq temp (cons '(mexpt) (if check 
-                                         (list (cadr x) (mult (caddr x) w))
+           (setq temp (cons '(mexpt) (if check
+                                         (list (cadr x) (mul (caddr x) w))
                                          (list x w))))
            (if (and (not *timesinp*)
                     (not (eq x '$%i)))
@@ -980,7 +984,7 @@
                         ((onep1 w)
                          (cond ((mtimesp (car x))
                                 (rplacd fm (cddr fm))
-                                (setq rulesw t)
+                                (setq *rulesw* t)
                                 (return (muln (nconc y (cdar x)) t)))
                                (t (return (rplaca (cdr fm) (car x))))))
                         (t
@@ -1227,7 +1231,7 @@
            (return (rplaca (cdr fm) x)))
           (t
            (rplacd fm (cddr fm))
-           (setq rulesw t)
+           (setq *rulesw* t)
            (return (muln (cons x y) t))))
   const
     (rplacd fm (cddr fm))
@@ -1238,7 +1242,7 @@
     (return (cond ((eq z temp)
                    (cdr z))
                   (t
-                   (setq rulesw t) z)))
+                   (setq *rulesw* t) z)))
   del
     (return (rplacd fm (cddr fm)))
   %i
@@ -1259,7 +1263,7 @@
 (setf (get 'mexpt 'operators) 'simp-mexpt)
 
 (defun simp-mexpt (x y z)
-  (prog (gr pot check res rulesw w mlpgr mlppot)
+  (prog (gr pot check res *rulesw* w mlpgr mlppot)
     (setq check x)
     (if z
         (setq gr  (cadr x)
@@ -1395,8 +1399,8 @@
                         (cond ((not (onep1 rad))
                                (setq rad
                                      (testt (tms rad 1 (cons '(mtimes) res))))
-                               (cond (rulesw
-                                      (setq rulesw nil res (cdr rad))))))
+                               (cond (*rulesw*
+                                      (setq *rulesw* nil res (cdr rad))))))
                         (eqtest (testt (cons '(mtimes) res)) check))))
               (setq z ($csign (car l)))
               (if (member z '($complex $imaginary))
@@ -1412,7 +1416,7 @@
                     (t
                      (setq w (testt (tms (simplifya (list '(mexpt) w pot) t)
                                          1 (cons '(mtimes) res))))))
-              (cond (rulesw (setq rulesw nil res (cdr w))))))
+              (cond (*rulesw* (setq *rulesw* nil res (cdr w))))))
   start
     (cond ((and (cdr res) (onep1 (car res)) (ratnump (cadr res)))
            (setq res (cdr res))))
@@ -1426,7 +1430,7 @@
            (setq y (list '(mexpt) (car gr) pot)))
           (t (setq y (list '(mexpt simp) (car gr) pot))))
     (setq w (testt (tms (simplifya y t) 1 (cons '(mtimes) res))))
-    (cond (rulesw (setq rulesw nil res (cdr w))))
+    (cond (*rulesw* (setq *rulesw* nil res (cdr w))))
     (go start)
   atgr
     (cond ((zerop1 pot)
