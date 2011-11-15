@@ -749,33 +749,18 @@
                       (truncate (rat-num n) (rat-den n))
                     (multiple-value-bind (n2 d2)
                         (truncate (rat-num m) (rat-den m))
-                      (cond ((eql d1 d2)
-                             (setq x1
-                                   (mul (addk (timesk v (exptb a n1))
-                                              (timesk w (exptb a n2)))
-                                        (power a
-                                               (add c
-                                                    (div d1 (rat-den n))))))
-                             (go equt2))
+                      (cond ((eql d1 d2))
                             ((minusp d2)
                              (setq n1 (add n1 (div (sub d1 d2) (rat-den n))))
-                             (setq x1
-                                   (mul (addk (timesk v (exptb a n1))
-                                              (timesk w (exptb a n2)))
-                                        (power a
-                                               (add c
-                                                    (div d2 (rat-den n))))))
-                             (go equt2))
+                             (setq d1 d2))
                             ((minusp d1)
-                             (setq n2 (add n2 (div (sub d2 d1) (rat-den n))))
-                             (setq x1
-                                   (mul (addk (timesk v (exptb a n1))
-                                              (timesk w (exptb a n2)))
-                                        (power a 
-                                               (add c
-                                                    (div d1 (rat-den n))))))
-                             (go equt2))
-                            (t (merror "Internal error in simplus."))))))))
+                             (setq n2 (add n2 (div (sub d2 d1) (rat-den n)))))
+                            (t (merror "Internal error in simplus.")))
+                      (setq x1 (mul (addk (timesk v (exptb a n1))
+                                          (timesk w (exptb a n2)))
+                                    (power a
+                                           (add c (div d1 (rat-den n))))))
+                      (go equt2))))))
           ((mtimesp (cadr fm))
            (cond ((alike1 x1 (cadr fm))
                   (go equt))
