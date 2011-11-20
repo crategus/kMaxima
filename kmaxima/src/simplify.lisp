@@ -29,6 +29,7 @@
 (defmvar $%enumer nil)
 (defmvar $negdistrib t)
 (defmvar $float nil)
+(defmvar $%emode nil)
 
 (defmvar $numer nil)
 (defprop $numer shadowboolset assign)
@@ -904,10 +905,9 @@
         ((not (mnumberp (cadr x))) (cons '(mtimes) (cons 1 (cdr x))))
         (t x)))
 
+#+nil
 (defun exponent-of (m base)
-  (unless (and (mnumberp m)
-               (not (minusp1 m))
-               (integerp base)
+  (unless (and (integerp base)
                (not (eql (abs base) 1)))
     (return-from exponent-of nil))
   (cond ((great 1 m)
@@ -928,6 +928,17 @@
            (if (zerop expo)
                nil
                expo)))))
+
+(defun exponent-of (m base)
+  (let ((expo 0))
+    (loop
+      (multiple-value-bind (q r)
+          (floor m base)
+        (cond ((zerop r)
+               (setf m q)
+               (incf expo))
+              (t (return nil)))))
+    (if (zerop expo) nil expo)))
 
 (defvar *timesinp* nil)
 
@@ -993,50 +1004,33 @@
                        (or (ratnump (car x))
                            (and (integerp (car x))
                                 (not (eql 1 (car x))))))
-                  (let* ((numerator (if (integerp (car x))
-                                        (car x)
-                                        (second (car x))))
-                         (denom (if (integerp (car x))
-                                    1
-                                    (third (car x))))
-                         (sgn (signum numerator)))
-                    (setf expo (exponent-of (abs numerator)
-                                            (second (cadr fm))))
-                    (when expo
-                      (setq temp (power (second (cadr fm)) 
-                                        (add (third (cadr fm)) expo)))
-                      (setq x (mul sgn
-                                   (car y)
-                                   (div (div (mul sgn numerator)
-                                             (power (second (cadr fm))
-                                                    expo))
-                                        denom)))
-                      (setf y (rplaca y 1))
-                      (rplacd fm (cddr fm))
-                      (rplacd fm (cons temp (cdr fm)))
-                      (setq temp x
-                            x (list x 1)
-                            w 1
-                            fm y)
-                      (go start))
-                    (setf expo (exponent-of (inv denom) (second (cadr fm))))
-                    (when expo
-                      (setq temp (power (second (cadr fm)) 
-                                        (add (third (cadr fm)) expo)))
-                      (setq x (mul (car y)
-                                   (div numerator
-                                        (div denom
-                                             (power (second (cadr fm)) 
-                                                    (- expo))))))
-                      (setf y (rplaca y 1))
-                      (rplacd fm (cddr fm))
-                      (rplacd fm (cons temp (cdr fm)))
-                      (setq temp x
-                            x (list x 1)
-                            w 1
-                            fm y)
-                      (go start))
-                    (setq fm (cdr fm))
+                  (let ((num (rat-num (car x)))
+                        (den (rat-den (car x)))
+                        (bas (second (cadr fm))))
+                    (cond ((and (integerp bas)
+                                (not (eql 1 (abs bas)))
+                                (setq expo (exponent-of (abs num) bas)))
+                           (setq x (mul (car y)
+                                        (div (mul num (exptrl bas (- expo)))
+                                             den))))
+                          ((and (integerp bas)
+                                (not (eql 1 (abs bas)))
+                                (setq expo (exponent-of den bas)))
+                           (setq expo (- expo))
+                           (setq x (mul (car y)
+                                        (div num
+                                             (mul den (exptrl bas expo))))))
+                          (t
+                           (setq fm (cdr fm))
+                           (go start)))
+                    (setq temp (power bas (add (third (cadr fm)) expo)))
+                    (setf y (rplaca y 1))
+                    (rplacd fm (cddr fm))
+                    (rplacd fm (cons temp (cdr fm)))
+                    (setq temp x
+                          x (list x 1)
+                          w 1
+                          fm y)
                     (go start)))
                  ((and (not (atom (car x)))
                        (eq (caar (car x)) 'mabs)
@@ -1136,42 +1130,29 @@
                 (not (onep1 (car y)))
                 (or (integerp (car y))
                     (ratnump (car y))))
-           (let* ((numerator (if (integerp (car y)) 
-                                 (car y)
-                                 (second (car y))))
-                  (denom (if (integerp (car y)) 
-                             1
-                             (third (car y)))))
-             (setf expo (exponent-of (abs numerator) (car x)))
-             (when expo
-               (setq temp (power (car x)
-                                 (add (cadr x) expo)))
-               (setq x (div (div numerator
-                                 (power (car x) expo))
-                            denom))
-               (setf y (rplaca y 1))
-               (rplacd fm (cons temp (cdr fm)))
-               (setq temp x
-                     x (list x 1)
-                     w 1
-                     fm y)
-               (go start))
-             (setf expo (exponent-of (inv denom) (car x)))
-             (when expo
-               (setq temp (power (car x) 
-                                 (add (cadr x) expo)))
-               (setq x (div numerator
-                            (div denom
-                                 (power (car x) 
-                                        (- expo)))))
-               (setf y (rplaca y 1))
-               (rplacd fm (cons temp (cdr fm)))
-               (setq temp x
-                     x (list x 1)
-                     w 1
-                     fm y)
-               (go start))
-             (return (cdr (rplacd fm (cons temp (cdr fm)))))))
+           (let ((num (rat-num (car y)))
+                 (den (rat-den (car y)))
+                 (bas (car x)))
+             (cond ((and (integerp bas)
+                         (not (eql 1 (abs bas)))
+                         (setq expo (exponent-of (abs num) bas)))
+                    (setq temp (power bas (add (cadr x) expo)))
+                    (setq x (div (div num (exptrl bas expo)) den)))
+                   ((and (integerp bas)
+                         (not (eql 1 (abs bas)))
+                         (setq expo (exponent-of den bas)))
+                    (setq expo (- expo))
+                    (setq temp (power bas (add (cadr x) expo)))
+                    (setq x (div num (div den (exptrl bas (- expo))))))
+                   (t
+                    (return (cdr (rplacd fm (cons temp (cdr fm)))))))
+             (setf y (rplaca y 1))
+             (rplacd fm (cons temp (cdr fm)))
+             (setq temp x
+                   x (list x 1)
+                   w 1
+                   fm y)
+             (go start)))
           ((and (mconstantp (car x))
                 (do ((l (cdr fm) (cdr l)))
                     ((null (cdr l)))
@@ -1182,8 +1163,8 @@
            (go start))
           ((or (and (mnumberp (car x))
                     (mnumberp w))
-               (and (eq (car x) '$%e)
-                    $%emode
+               (and $%emode
+                    (eq (car x) '$%e)
                     (among '$%i w)
                     (among '$%pi w)
                     (setq u (%especial w))))
