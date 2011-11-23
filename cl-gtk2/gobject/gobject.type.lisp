@@ -296,7 +296,7 @@
 ;;; be letters, numbers or any of '-_+'.
 ;;; ----------------------------------------------------------------------------
 
-(in-package :gobject.ffi)
+(in-package :gobject)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GType
@@ -318,7 +318,8 @@
 ;;; types that serve as ultimate bases for the derived types, thus they are the
 ;;; roots of distinct inheritance hierarchies.
 ;;;
-;;; type : A GType value.
+;;; type :
+;;;     A GType value.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (g-type-fundamental "g_type_fundamental") g-type-designator
@@ -343,9 +344,15 @@
 ;;; Use g_type_fundamental_next() instead of this macro to create new
 ;;; fundamental types.
 ;;;
-;;; x       : the fundamental type number.
-;;; Returns : the GType
+;;; x :
+;;;     the fundamental type number.
+;;;
+;;; Returns :
+;;;     the GType
 ;;; ----------------------------------------------------------------------------
+
+(defun g-type-make-fundamental-type (x)
+  (ash x 2))
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_IS_ABSTRACT()
@@ -1132,9 +1139,15 @@
 ;;; ID, but randomized type IDs should not be passed in and will most likely
 ;;; lead to a crash.
 ;;;
-;;; type    : Type to return name for.
-;;; Returns : Static type name or NULL.
+;;; type :
+;;;     Type to return name for.
+;;;
+;;; Returns :
+;;;     Static type name or NULL.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (%g-type-name "g_type_name") (:string :free-from-foreign nil)
+  (type g-type))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_qname ()
@@ -1143,8 +1156,11 @@
 ;;;
 ;;; Get the corresponding quark of the type IDs name.
 ;;;
-;;; type    : Type to return quark of type name for.
-;;; Returns : The type names quark or 0.
+;;; type :
+;;;     Type to return quark of type name for.
+;;;
+;;; Returns :
+;;;     The type names quark or 0.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -1156,9 +1172,15 @@
 ;;; registered under this name (this is the preferred method to find out by name
 ;;; whether a specific type has been registered yet).
 ;;;
-;;; name    : Type name to lookup.
-;;; Returns : Corresponding type ID or 0.
+;;; name :
+;;;     Type name to lookup.
+;;;
+;;; Returns :
+;;;     Corresponding type ID or 0.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (%g-type-from-name "g_type_from_name") g-type
+  (name :string))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_parent ()
@@ -1437,13 +1459,18 @@
 ;;; when you want to make sure that signals and properties for an interface
 ;;; have been installed.
 ;;;
-;;; g_type  : an interface type
-;;; Returns : the default vtable for the interface; call
-;;;           g_type_default_interface_unref() when you are done using the
-;;;           interface.
+;;; g_type :
+;;;     an interface type
+;;;
+;;; Returns :
+;;;     the default vtable for the interface; call
+;;;     g_type_default_interface_unref() when you are done using the interface.
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-type-default-interface-ref :pointer
+  (type g-type-designator))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_default_interface_peek ()
@@ -1471,11 +1498,15 @@
 ;;; for the interface's default vtable (the class_finalize member of GTypeInfo)
 ;;; will be called.
 ;;;
-;;; g_iface : the default vtable structure for a interface, as returned by
-;;;           g_type_default_interface_ref().
+;;; g_iface :
+;;;     the default vtable structure for a interface, as returned by
+;;;     g_type_default_interface_ref().
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-type-default-interface-unref :void
+  (interface :pointer))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_children ()
@@ -1496,6 +1527,15 @@
   (type g-type-designator)
   (n-children (:pointer :uint)))
 
+(defun g-type-children (g-type)
+  (with-foreign-object (n-children :uint)
+    (let ((g-types-ptr (%g-type-children g-type n-children)))
+      (prog1
+          (loop
+             for i from 0 below (mem-ref n-children :uint)
+             collect (mem-aref g-types-ptr 'g-type-designator i))
+        (g-free g-types-ptr)))))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_interfaces ()
 ;;;
@@ -1514,6 +1554,15 @@
 (defcfun (%g-type-interfaces "g_type_interfaces") (:pointer g-type)
   (type g-type-designator)
   (n-interfaces (:pointer :uint)))
+
+(defun g-type-interfaces (g-type)
+  (with-foreign-object (n-interfaces :uint)
+    (let ((g-types-ptr (%g-type-interfaces g-type n-interfaces)))
+      (prog1
+          (loop
+             for i from 0 below (mem-ref n-interfaces :uint)
+             collect (mem-aref g-types-ptr 'g-type-designator i))
+        (g-free g-types-ptr)))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_interface_prerequisites ()
@@ -1535,6 +1584,16 @@
          (:pointer g-type)
   (type g-type-designator)
   (n-interface-prerequisites (:pointer :uint)))
+
+(defun g-type-interface-prerequisites (g-type)
+  (with-foreign-object (n-interface-prerequisites :uint)
+    (let ((g-types-ptr (%g-type-interface-prerequisites g-type
+                                                        n-interface-prerequisites)))
+      (prog1
+          (loop
+             for i from 0 below (mem-ref n-interface-prerequisites :uint)
+             collect (mem-aref g-types-ptr 'g-type-designator i))
+        (g-free g-types-ptr)))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_set_qdata ()
@@ -1576,10 +1635,17 @@
 ;;; GTypeQuery is 0. All members filled into the GTypeQuery structure should be
 ;;; considered constant and have to be left untouched.
 ;;;
-;;; type  : the GType value of a static, classed type.
-;;; query : A user provided structure that is filled in with constant values
-;;;         upon success.
+;;; type :
+;;;     the GType value of a static, classed type.
+;;;
+;;; query :
+;;;     A user provided structure that is filled in with constant values upon
+;;;     success.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-type-query :void
+  (type g-type-designator)
+  (query (:pointer g-type-query)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GTypeQuery
@@ -1985,11 +2051,21 @@
 ;;; contained in the GInterfaceInfo structure pointed to by info is used to
 ;;; manage the relationship.
 ;;;
-;;; instance_type  : GType value of an instantiable type.
-;;; interface_type : GType value of an interface type.
-;;; info           : The GInterfaceInfo structure for this (instance_type,
-;;;                  interface_type) combination.
+;;; instance_type  :
+;;;     GType value of an instantiable type.
+;;;
+;;; interface_type :
+;;;     GType value of an interface type.
+;;;
+;;; info :
+;;;     The GInterfaceInfo structure for this (instance_type, interface_type)
+;;;     combination.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-type-add-interface-static :void
+  (instance-type g-type-designator)
+  (interface-type g-type-designator)
+  (info (:pointer g-interface-info)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_add_interface_dynamic ()
@@ -2020,9 +2096,16 @@
 ;;; interface derivation (which GType doesn't support). An interface can have at
 ;;; most one instantiatable prerequisite type.
 ;;;
-;;; interface_type    : GType value of an interface type.
-;;; prerequisite_type : GType value of an interface or instantiatable type.
+;;; interface_type :
+;;;     GType value of an interface type.
+;;;
+;;; prerequisite_type :
+;;;     GType value of an interface or instantiatable type.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-type-interface-add-prerequisite :void
+  (interface-type g-type-designator)
+  (prerequisite-type g-type-designator))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_get_plugin ()
@@ -2558,11 +2641,15 @@ G_TYPE_ENUM
 #define G_TYPE_ENUM			G_TYPE_MAKE_FUNDAMENTAL (12)
 
 The fundamental type from which all enumeration types are derived.
+
+;;; ----------------------------------------------------------------------------
 G_TYPE_FLAGS
 
-#define G_TYPE_FLAGS			G_TYPE_MAKE_FUNDAMENTAL (13)
+#define G_TYPE_FLAGS G_TYPE_MAKE_FUNDAMENTAL (13)
 
 The fundamental type from which all flags types are derived.
+;;; ----------------------------------------------------------------------------
+
 G_TYPE_FLOAT
 
 #define G_TYPE_FLOAT			G_TYPE_MAKE_FUNDAMENTAL (14)
