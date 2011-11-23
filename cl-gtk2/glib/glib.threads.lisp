@@ -31,150 +31,175 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; #define             G_THREADS_ENABLED
-;;; #define             G_THREADS_IMPL_POSIX
-;;; #define             G_THREADS_IMPL_NONE
-;;; 
-;;; #define             G_THREAD_ERROR
-;;; enum                GThreadError;
-;;; 
-;;; struct              GThreadFunctions;
-;;; void                g_thread_init                       (GThreadFunctions *vtable);
-;;; gboolean            g_thread_supported                  ();
-;;; gboolean            g_thread_get_initialized            (void);
-;;; 
-;;; gpointer            (*GThreadFunc)                      (gpointer data);
-;;; enum                GThreadPriority;
-;;; struct              GThread;
-;;; GThread *           g_thread_create                     (GThreadFunc func,
-;;;                                                          gpointer data,
-;;;                                                          gboolean joinable,
-;;;                                                          GError **error);
-;;; GThread *           g_thread_create_full                (GThreadFunc func,
-;;;                                                          gpointer data,
-;;;                                                          gulong stack_size,
-;;;                                                          gboolean joinable,
-;;;                                                          gboolean bound,
-;;;                                                          GThreadPriority priority,
-;;;                                                          GError **error);
-;;; GThread *           g_thread_self                       (void);
-;;; gpointer            g_thread_join                       (GThread *thread);
-;;; void                g_thread_set_priority               (GThread *thread,
-;;;                                                          GThreadPriority priority);
-;;; void                g_thread_yield                      ();
-;;; void                g_thread_exit                       (gpointer retval);
-;;; void                g_thread_foreach                    (GFunc thread_func,
-;;;                                                          gpointer user_data);
-;;; 
-;;;                     GMutex;
-;;; GMutex *            g_mutex_new                         ();
-;;; void                g_mutex_lock                        (GMutex *mutex);
-;;; gboolean            g_mutex_trylock                     (GMutex *mutex);
-;;; void                g_mutex_unlock                      (GMutex *mutex);
-;;; void                g_mutex_free                        (GMutex *mutex);
-;;; 
-;;;                     GStaticMutex;
-;;; #define             G_STATIC_MUTEX_INIT
-;;; void                g_static_mutex_init                 (GStaticMutex *mutex);
-;;; void                g_static_mutex_lock                 (GStaticMutex *mutex);
-;;; gboolean            g_static_mutex_trylock              (GStaticMutex *mutex);
-;;; void                g_static_mutex_unlock               (GStaticMutex *mutex);
-;;; GMutex *            g_static_mutex_get_mutex            (GStaticMutex *mutex);
-;;; void                g_static_mutex_free                 (GStaticMutex *mutex);
-;;; 
-;;; #define             G_LOCK_DEFINE                       (name)
-;;; #define             G_LOCK_DEFINE_STATIC                (name)
-;;; #define             G_LOCK_EXTERN                       (name)
-;;; #define             G_LOCK                              (name)
-;;; #define             G_TRYLOCK                           (name)
-;;; #define             G_UNLOCK                            (name)
-;;; 
-;;; struct              GStaticRecMutex;
-;;; #define             G_STATIC_REC_MUTEX_INIT
-;;; void                g_static_rec_mutex_init             (GStaticRecMutex *mutex);
-;;; void                g_static_rec_mutex_lock             (GStaticRecMutex *mutex);
-;;; gboolean            g_static_rec_mutex_trylock          (GStaticRecMutex *mutex);
-;;; void                g_static_rec_mutex_unlock           (GStaticRecMutex *mutex);
-;;; void                g_static_rec_mutex_lock_full        (GStaticRecMutex *mutex,
-;;;                                                          guint depth);
-;;; guint               g_static_rec_mutex_unlock_full      (GStaticRecMutex *mutex);
-;;; void                g_static_rec_mutex_free             (GStaticRecMutex *mutex);
-;;; 
-;;; struct              GStaticRWLock;
-;;; #define             G_STATIC_RW_LOCK_INIT
-;;; void                g_static_rw_lock_init               (GStaticRWLock *lock);
-;;; void                g_static_rw_lock_reader_lock        (GStaticRWLock *lock);
-;;; gboolean            g_static_rw_lock_reader_trylock     (GStaticRWLock *lock);
-;;; void                g_static_rw_lock_reader_unlock      (GStaticRWLock *lock);
-;;; void                g_static_rw_lock_writer_lock        (GStaticRWLock *lock);
-;;; gboolean            g_static_rw_lock_writer_trylock     (GStaticRWLock *lock);
-;;; void                g_static_rw_lock_writer_unlock      (GStaticRWLock *lock);
-;;; void                g_static_rw_lock_free               (GStaticRWLock *lock);
-;;; 
-;;;                     GCond;
-;;; GCond*              g_cond_new                          ();
-;;; void                g_cond_signal                       (GCond *cond);
-;;; void                g_cond_broadcast                    (GCond *cond);
-;;; void                g_cond_wait                         (GCond *cond,
-;;;                                                          GMutex *mutex);
-;;; gboolean            g_cond_timed_wait                   (GCond *cond,
-;;;                                                          GMutex *mutex,
-;;;                                                          GTimeVal *abs_time);
-;;; void                g_cond_free                         (GCond *cond);
-;;; 
-;;;                     GPrivate;
-;;; GPrivate*           g_private_new                       (GDestroyNotify destructor);
-;;; gpointer            g_private_get                       (GPrivate *private_key);
-;;; void                g_private_set                       (GPrivate *private_key,
-;;;                                                          gpointer data);
-;;; 
-;;; struct              GStaticPrivate;
-;;; #define             G_STATIC_PRIVATE_INIT
-;;; void                g_static_private_init               (GStaticPrivate *private_key);
-;;; gpointer            g_static_private_get                (GStaticPrivate *private_key);
-;;; void                g_static_private_set                (GStaticPrivate *private_key,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify notify);
-;;; void                g_static_private_free               (GStaticPrivate *private_key);
-;;; 
-;;; struct              GOnce;
-;;; enum                GOnceStatus;
-;;; #define             G_ONCE_INIT
-;;; #define             g_once                              (once,
-;;;                                                          func,
-;;;                                                          arg)
-;;; gboolean            g_once_init_enter                   (volatile gsize *value_location);
-;;; void                g_once_init_leave                   (volatile gsize *value_location,
-;;;                                                          gsize initialization_value);
-;;; 
-;;; void                g_bit_lock                          (volatile gint *address,
-;;;                                                          gint lock_bit);
-;;; gboolean            g_bit_trylock                       (volatile gint *address,
-;;;                                                          gint lock_bit);
-;;; void                g_bit_unlock                        (volatile gint *address,
-;;;                                                          gint lock_bit);
-;;; void                g_pointer_bit_lock                  (volatile void *address,
-;;;                                                          gint lock_bit);
-;;; gboolean            g_pointer_bit_trylock               (volatile void *address,
-;;;                                                          gint lock_bit);
-;;; void                g_pointer_bit_unlock                (volatile void *address,
-;;;                                                          gint lock_bit);
+;;; #define   G_THREADS_ENABLED
+;;; #define   G_THREADS_IMPL_POSIX
+;;; #define   G_THREADS_IMPL
+;;; #define   G_THREAD_ERROR
+;;; enum      GThreadE
+;;; struct    GThreadFunctions;
+;;; void      g_thread_init                   (GThreadFunctions *vtable);
+;;; gboolean  g_thread_supported              ();
+;;; gboolean  g_thread_get_initialized        (v
+;;; gpointer  (*GThreadFunc)                  (gpointer data);
+;;; enum      GThreadPrior
+;;; struct    GThr
+;;; GThread * g_thread_create                 (GThreadFunc func,
+;;;                                            gpointer data,
+;;;                                            gboolean joinable,
+;;;                                            GError **error);
+;;; GThread * g_thread_create_full            (GThreadFunc func,
+;;;                                            gpointer data,
+;;;                                            gulong stack_size,
+;;;                                            gboolean joinable,
+;;;                                            gboolean bound,
+;;;                                            GThreadPriority priority,
+;;;                                            GError **error);
+;;; GThread * g_thread_self                   (void);
+;;; gpointer  g_thread_join                   (GThread *thread);
+;;; void      g_thread_set_priority           (GThread *thread,
+;;;                                            GThreadPriority priority);
+;;; void      g_thread_yield                  ();
+;;; void      g_thread_exit                   (gpointer retval);
+;;; void      g_thread_foreach                (GFunc thread_func,
+;;;                                            gpointer user_d
+;;;           GMu
+;;; GMutex *  g_mutex_new                     ();
+;;; void      g_mutex_lock                    (GMutex *mutex);
+;;; gboolean  g_mutex_trylock                 (GMutex *mutex);
+;;; void      g_mutex_unlock                  (GMutex *mutex);
+;;; void      g_mutex_free                    (GMutex *mu
+;;;           GStaticMu
+;;; #define   G_STATIC_MUTEX_
+;;; void      g_static_mutex_init             (GStaticMutex *mutex);
+;;; void      g_static_mutex_lock             (GStaticMutex *mutex);
+;;; gboolean  g_static_mutex_trylock          (GStaticMutex *mutex);
+;;; void      g_static_mutex_unlock           (GStaticMutex *mutex);
+;;; GMutex *  g_static_mutex_get_mutex        (GStaticMutex *mutex);
+;;; void      g_static_mutex_free             (GStaticMutex *mu
+;;; #define   G_LOCK_DEFINE                   (name)
+;;; #define   G_LOCK_DEFINE_STATIC            (name)
+;;; #define   G_LOCK_EXTERN                   (name)
+;;; #define   G_LOCK                          (name)
+;;; #define   G_TRYLOCK                       (name)
+;;; #define   G_UNLOCK                        (
+;;; struct    GStaticRecMu
+;;; #define   G_STATIC_REC_MUTEX_
+;;; void      g_static_rec_mutex_init         (GStaticRecMutex *mutex);
+;;; void      g_static_rec_mutex_lock         (GStaticRecMutex *mutex);
+;;; gboolean  g_static_rec_mutex_trylock      (GStaticRecMutex *mutex);
+;;; void      g_static_rec_mutex_unlock       (GStaticRecMutex *mutex);
+;;; void      g_static_rec_mutex_lock_full    (GStaticRecMutex *mutex,
+;;;                                            guint depth);
+;;; guint     g_static_rec_mutex_unlock_full  (GStaticRecMutex *mutex);
+;;; void      g_static_rec_mutex_free         (GStaticRecMutex *mu
+;;; struct    GStaticRWL
+;;; #define   G_STATIC_RW_LOCK_
+;;; void      g_static_rw_lock_init           (GStaticRWLock *lock);
+;;; void      g_static_rw_lock_reader_lock    (GStaticRWLock *lock);
+;;; gboolean  g_static_rw_lock_reader_trylock (GStaticRWLock *lock);
+;;; void      g_static_rw_lock_reader_unlock  (GStaticRWLock *lock);
+;;; void      g_static_rw_lock_writer_lock    (GStaticRWLock *lock);
+;;; gboolean  g_static_rw_lock_writer_trylock (GStaticRWLock *lock);
+;;; void      g_static_rw_lock_writer_unlock  (GStaticRWLock *lock);
+;;; void      g_static_rw_lock_free           (GStaticRWLock *l
+;;;           GC
+;;; GCond*    g_cond_new                      ();
+;;; void      g_cond_signal                   (GCond *cond);
+;;; void      g_cond_broadcast                (GCond *cond);
+;;; void      g_cond_wait                     (GCond *cond,
+;;;                                            GMutex *mutex);
+;;; gboolean  g_cond_timed_wait               (GCond *cond,
+;;;                                            GMutex *mutex,
+;;;                                            GTimeVal *abs_time);
+;;; void      g_cond_free                     (GCond *c
+;;;           GPriv
+;;; GPrivate* g_private_new                   (GDestroyNotify destructor);
+;;; gpointer  g_private_get                   (GPrivate *private_key);
+;;; void      g_private_set                   (GPrivate *private_key,
+;;;                                            gpointer d
+;;; struct    GStaticPriv
+;;; #define   G_STATIC_PRIVATE_
+;;; void      g_static_private_init           (GStaticPrivate *private_key);
+;;; gpointer  g_static_private_get            (GStaticPrivate *private_key);
+;;; void      g_static_private_set            (GStaticPrivate *private_key,
+;;;                                            gpointer data,
+;;;                                            GDestroyNotify notify);
+;;; void      g_static_private_free           (GStaticPrivate *private_
+;;; struct    GO
+;;; enum      GOnceSta
+;;; #define   G_ONCE_
+;;; #define   g_once                          (once,
+;;;                                            func,
+;;;                                            arg)
+;;; gboolean  g_once_init_enter               (volatile gsize *value_location);
+;;; void      g_once_init_leave               (volatile gsize *value_location,
+;;;                                            gsize initialization_va
+;;; void      g_bit_lock                      (volatile gint *address,
+;;;                                            gint lock_bit);
+;;; gboolean  g_bit_trylock                   (volatile gint *address,
+;;;                                            gint lock_bit);
+;;; void      g_bit_unlock                    (volatile gint *address,
+;;;                                            gint lock_bit);
+;;; void      g_pointer_bit_lock              (volatile void *address,
+;;;                                            gint lock_bit);
+;;; gboolean  g_pointer_bit_trylock           (volatile void *address,
+;;;                                            gint lock_bit);
+;;; void      g_pointer_bit_unlock            (volatile void *address,
+;;;                                            gint lock_bit);
 ;;; 
 ;;; Description
 ;;; 
-;;; Threads act almost like processes, but unlike processes all threads of one process share the same memory. This is good, as it provides easy communication between the involved threads via this shared memory, and it is bad, because strange things (so called "Heisenbugs") might happen if the program is not carefully designed. In particular, due to the concurrent nature of threads, no assumptions on the order of execution of code running in different threads can be made, unless order is explicitly forced by the programmer through synchronization primitives.
+;;; Threads act almost like processes, but unlike processes all threads of one
+;;; process share the same memory. This is good, as it provides easy
+;;; communication between the involved threads via this shared memory, and it is
+;;; bad, because strange things (so called "Heisenbugs") might happen if the
+;;; program is not carefully designed. In particular, due to the concurrent
+;;; nature of threads, no assumptions on the order of execution of code running
+;;; in different threads can be made, unless order is explicitly forced by the
+;;; programmer through synchronization primitives.
 ;;; 
-;;; The aim of the thread related functions in GLib is to provide a portable means for writing multi-threaded software. There are primitives for mutexes to protect the access to portions of memory (GMutex, GStaticMutex, G_LOCK_DEFINE, GStaticRecMutex and GStaticRWLock). There is a facility to use individual bits for locks (g_bit_lock()). There are primitives for condition variables to allow synchronization of threads (GCond). There are primitives for thread-private data - data that every thread has a private instance of (GPrivate, GStaticPrivate). There are facilities for one-time initialization (GOnce, g_once_init_enter()). Last but definitely not least there are primitives to portably create and manage threads (GThread).
+;;; The aim of the thread related functions in GLib is to provide a portable
+;;; means for writing multi-threaded software. There are primitives for mutexes
+;;; to protect the access to portions of memory (GMutex, GStaticMutex,
+;;; G_LOCK_DEFINE, GStaticRecMutex and GStaticRWLock). There is a facility to
+;;; use individual bits for locks (g_bit_lock()). There are primitives for
+;;; condition variables to allow synchronization of threads (GCond). There are
+;;; primitives for thread-private data - data that every thread has a private
+;;; instance of (GPrivate, GStaticPrivate). There are facilities for one-time
+;;; initialization (GOnce, g_once_init_enter()). Last but definitely not least
+;;; there are primitives to portably create and manage threads (GThread).
 ;;; 
-;;; The threading system is initialized with g_thread_init(), which takes an optional custom thread implementation or NULL for the default implementation. If you want to call g_thread_init() with a non-NULL argument this must be done before executing any other GLib functions (except g_mem_set_vtable()). This is a requirement even if no threads are in fact ever created by the process.
+;;; The threading system is initialized with g_thread_init(), which takes an
+;;; optional custom thread implementation or NULL for the default
+;;; implementation. If you want to call g_thread_init() with a non-NULL argument
+;;; this must be done before executing any other GLib functions (except
+;;; g_mem_set_vtable()). This is a requirement even if no threads are in fact
+;;; ever created by the process.
 ;;; 
-;;; Calling g_thread_init() with a NULL argument is somewhat more relaxed. You may call any other glib functions in the main thread before g_thread_init() as long as g_thread_init() is not called from a glib callback, or with any locks held. However, many libraries above glib does not support late initialization of threads, so doing this should be avoided if possible.
+;;; Calling g_thread_init() with a NULL argument is somewhat more relaxed. You
+;;; may call any other glib functions in the main thread before g_thread_init()
+;;; as long as g_thread_init() is not called from a glib callback, or with any
+;;; locks held. However, many libraries above glib does not support late
+;;; initialization of threads, so doing this should be avoided if possible.
 ;;; 
-;;; Please note that since version 2.24 the GObject initialization function g_type_init() initializes threads (with a NULL argument), so most applications, including those using Gtk+ will run with threads enabled. If you want a special thread implementation, make sure you call g_thread_init() before g_type_init() is called.
+;;; Please note that since version 2.24 the GObject initialization function
+;;; g_type_init() initializes threads (with a NULL argument), so most
+;;; applications, including those using Gtk+ will run with threads enabled. If
+;;; you want a special thread implementation, make sure you call g_thread_init()
+;;; before g_type_init() is called.
 ;;; 
-;;; After calling g_thread_init(), GLib is completely thread safe (all global data is automatically locked), but individual data structure instances are not automatically locked for performance reasons. So, for example you must coordinate accesses to the same GHashTable from multiple threads. The two notable exceptions from this rule are GMainLoop and GAsyncQueue, which are threadsafe and need no further application-level locking to be accessed from multiple threads.
+;;; After calling g_thread_init(), GLib is completely thread safe (all global
+;;; data is automatically locked), but individual data structure instances are
+;;; not automatically locked for performance reasons. So, for example you must
+;;; coordinate accesses to the same GHashTable from multiple threads. The two
+;;; notable exceptions from this rule are GMainLoop and GAsyncQueue, which are
+;;; threadsafe and need no further application-level locking to be accessed from
+;;; multiple threads.
 ;;; 
-;;; To help debugging problems in multithreaded applications, GLib supports error-checking mutexes that will give you helpful error messages on common problems. To use error-checking mutexes, define the symbol G_ERRORCHECK_MUTEXES when compiling the application.
+;;; To help debugging problems in multithreaded applications, GLib supports
+;;; error-checking mutexes that will give you helpful error messages on common
+;;; problems. To use error-checking mutexes, define the symbol
+;;; G_ERRORCHECK_MUTEXES when compiling the application.
 ;;; ----------------------------------------------------------------------------
 
 (in-package :glib)
@@ -184,17 +209,29 @@
 ;;; 
 ;;; #define G_THREADS_ENABLED
 ;;; 
-;;; This macro is defined if GLib was compiled with thread support. This does not necessarily mean that there is a thread implementation available, but it does mean that the infrastructure is in place and that once you provide a thread implementation to g_thread_init(), GLib will be multi-thread safe. If G_THREADS_ENABLED is not defined, then Glib is not, and cannot be, multi-thread safe.
+;;; This macro is defined if GLib was compiled with thread support. This does
+;;; not necessarily mean that there is a thread implementation available, but it
+;;; does mean that the infrastructure is in place and that once you provide a
+;;; thread implementation to g_thread_init(), GLib will be multi-thread safe. If
+;;; G_THREADS_ENABLED is not defined, then Glib is not, and cannot be,
+;;; multi-thread safe.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_THREADS_IMPL_POSIX
 ;;; 
 ;;; #define G_THREADS_IMPL_POSIX
 ;;; 
 ;;; This macro is defined if POSIX style threads are used.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_THREADS_IMPL_NONE
 ;;; 
 ;;; #define G_THREADS_IMPL_NONE
 ;;; 
-;;; This macro is defined if no thread implementation is used. You can, however, provide one to g_thread_init() to make GLib multi-thread safe.
+;;; This macro is defined if no thread implementation is used. You can, however,
+;;; provide one to g_thread_init() to make GLib multi-thread safe.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -261,7 +298,11 @@
 ;;; 				   gpointer              thread2);
 ;;; };
 ;;; 
-;;; This function table is used by g_thread_init() to initialize the thread system. The functions in the table are directly used by their g_* prepended counterparts (described in this document). For example, if you call g_mutex_new() then mutex_new() from the table provided to g_thread_init() will be called.
+;;; This function table is used by g_thread_init() to initialize the thread
+;;; system. The functions in the table are directly used by their g_* prepended
+;;; counterparts (described in this document). For example, if you call
+;;; g_mutex_new() then mutex_new() from the table provided to g_thread_init()
+;;; will be called.
 ;;; 
 ;;; Note
 ;;; 
@@ -368,8 +409,8 @@
 ;;; Note
 ;;; 
 ;;; To use g_thread_init() in your program, you have to link with the libraries
-;;; that the command pkg-config --libs gthread-2.0 outputs. This is not the case
-;;; for all the other thread related functions of GLib. Those can be used
+;;; that the command pkg-config --libs gthread-2.0 outputs. This is not the
+;;; case for all the other thread related functions of GLib. Those can be used
 ;;; without having to link with the thread libraries.
 ;;; 
 ;;; vtable :
@@ -415,15 +456,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GThreadFunc ()
 ;;; 
-;;; gpointer            (*GThreadFunc)                      (gpointer data);
+;;; gpointer (*GThreadFunc) (gpointer data);
 ;;; 
-;;; Specifies the type of the func functions passed to g_thread_create() or g_thread_create_full().
+;;; Specifies the type of the func functions passed to g_thread_create() or 
+;;; g_thread_create_full().
 ;;; 
 ;;; data :
 ;;; 	data passed to the thread.
 ;;; 
 ;;; Returns :
-;;; 	the return value of the thread, which will be returned by g_thread_join().
+;;; 	the return value of the thread, which will be returned by
+;;;     g_thread_join().
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -484,18 +527,22 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_create ()
 ;;; 
-;;; GThread *           g_thread_create                     (GThreadFunc func,
-;;;                                                          gpointer data,
-;;;                                                          gboolean joinable,
-;;;                                                          GError **error);
+;;; GThread * g_thread_create (GThreadFunc func,
+;;;                            gpointer data,
+;;;                            gboolean joinable,
+;;;                            GError **error)
 ;;; 
 ;;; This function creates a new thread with the default priority.
 ;;; 
-;;; If joinable is TRUE, you can wait for this threads termination calling g_thread_join(). Otherwise the thread will just disappear when it terminates.
+;;; If joinable is TRUE, you can wait for this threads termination calling
+;;; g_thread_join(). Otherwise the thread will just disappear when it
+;;; terminates.
 ;;; 
-;;; The new thread executes the function func with the argument data. If the thread was created successfully, it is returned.
+;;; The new thread executes the function func with the argument data. If the
+;;; thread was created successfully, it is returned.
 ;;; 
-;;; error can be NULL to ignore errors, or non-NULL to report errors. The error is set, if and only if the function returns NULL.
+;;; error can be NULL to ignore errors, or non-NULL to report errors. The error
+;;; is set, if and only if the function returns NULL.
 ;;; 
 ;;; func :
 ;;; 	a function to execute in the new thread.
@@ -516,29 +563,45 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_create_full ()
 ;;; 
-;;; GThread *           g_thread_create_full                (GThreadFunc func,
-;;;                                                          gpointer data,
-;;;                                                          gulong stack_size,
-;;;                                                          gboolean joinable,
-;;;                                                          gboolean bound,
-;;;                                                          GThreadPriority priority,
-;;;                                                          GError **error);
+;;; GThread * g_thread_create_full (GThreadFunc func,
+;;;                                 gpointer data,
+;;;                                 gulong stack_size,
+;;;                                 gboolean joinable,
+;;;                                 gboolean bound,
+;;;                                 GThreadPriority priority,
+;;;                                 GError **error)
 ;;; 
-;;; This function creates a new thread with the priority priority. If the underlying thread implementation supports it, the thread gets a stack size of stack_size or the default value for the current platform, if stack_size is 0.
+;;; This function creates a new thread with the priority priority. If the
+;;; underlying thread implementation supports it, the thread gets a stack size
+;;; of stack_size or the default value for the current platform, if
+;;; stack_size is 0.
 ;;; 
-;;; If joinable is TRUE, you can wait for this threads termination calling g_thread_join(). Otherwise the thread will just disappear when it terminates. If bound is TRUE, this thread will be scheduled in the system scope, otherwise the implementation is free to do scheduling in the process scope. The first variant is more expensive resource-wise, but generally faster. On some systems (e.g. Linux) all threads are bound.
+;;; If joinable is TRUE, you can wait for this threads termination calling
+;;; g_thread_join(). Otherwise the thread will just disappear when it
+;;; terminates. If bound is TRUE, this thread will be scheduled in the system
+;;; scope, otherwise the implementation is free to do scheduling in the process
+;;; scope. The first variant is more expensive resource-wise, but generally
+;;; faster. On some systems (e.g. Linux) all threads are bound.
 ;;; 
-;;; The new thread executes the function func with the argument data. If the thread was created successfully, it is returned.
+;;; The new thread executes the function func with the argument data. If the
+;;; thread was created successfully, it is returned.
 ;;; 
-;;; error can be NULL to ignore errors, or non-NULL to report errors. The error is set, if and only if the function returns NULL.
+;;; error can be NULL to ignore errors, or non-NULL to report errors. The error
+;;; is set, if and only if the function returns NULL.
 ;;; 
 ;;; Note
 ;;; 
-;;; It is not guaranteed that threads with different priorities really behave accordingly. On some systems (e.g. Linux) there are no thread priorities. On other systems (e.g. Solaris) there doesn't seem to be different scheduling for different priorities. All in all try to avoid being dependent on priorities. Use G_THREAD_PRIORITY_NORMAL here as a default.
+;;; It is not guaranteed that threads with different priorities really behave
+;;; accordingly. On some systems (e.g. Linux) there are no thread priorities. On
+;;; other systems (e.g. Solaris) there doesn't seem to be different scheduling
+;;; for different priorities. All in all try to avoid being dependent on
+;;; priorities. Use G_THREAD_PRIORITY_NORMAL here as a default.
 ;;; 
 ;;; Note
 ;;; 
-;;; Only use g_thread_create_full() if you really can't use g_thread_create() instead. g_thread_create() does not take stack_size, bound, and priority as arguments, as they should only be used in cases in which it is unavoidable.
+;;; Only use g_thread_create_full() if you really can't use g_thread_create()
+;;; instead. g_thread_create() does not take stack_size, bound, and priority as
+;;; arguments, as they should only be used in cases in which it is unavoidable.
 ;;; 
 ;;; func :
 ;;; 	a function to execute in the new thread.
@@ -603,14 +666,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_set_priority ()
 ;;; 
-;;; void                g_thread_set_priority               (GThread *thread,
-;;;                                                          GThreadPriority priority);
+;;; void g_thread_set_priority (GThread *thread, GThreadPriority priority)
 ;;; 
 ;;; Changes the priority of thread to priority.
 ;;; 
 ;;; Note
 ;;; 
-;;; It is not guaranteed that threads with different priorities really behave accordingly. On some systems (e.g. Linux) there are no thread priorities. On other systems (e.g. Solaris) there doesn't seem to be different scheduling for different priorities. All in all try to avoid being dependent on priorities.
+;;; It is not guaranteed that threads with different priorities really behave
+;;; accordingly. On some systems (e.g. Linux) there are no thread priorities. On
+;;; other systems (e.g. Solaris) there doesn't seem to be different scheduling
+;;; for different priorities. All in all try to avoid being dependent on
+;;; priorities.
 ;;; 
 ;;; thread :
 ;;; 	a GThread.
@@ -626,38 +692,52 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_yield ()
 ;;; 
-;;; void                g_thread_yield                      ();
+;;; void g_thread_yield ()
 ;;; 
 ;;; Gives way to other threads waiting to be scheduled.
 ;;; 
-;;; This function is often used as a method to make busy wait less evil. But in most cases you will encounter, there are better methods to do that. So in general you shouldn't use this function.
+;;; This function is often used as a method to make busy wait less evil. But in
+;;; most cases you will encounter, there are better methods to do that. So in
+;;; general you shouldn't use this function.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_exit ()
 ;;; 
-;;; void                g_thread_exit                       (gpointer retval);
+;;; void g_thread_exit (gpointer retval)
 ;;; 
-;;; Exits the current thread. If another thread is waiting for that thread using g_thread_join() and the current thread is joinable, the waiting thread will be woken up and get retval as the return value of g_thread_join(). If the current thread is not joinable, retval is ignored. Calling
+;;; Exits the current thread. If another thread is waiting for that thread using
+;;; g_thread_join() and the current thread is joinable, the waiting thread will
+;;; be woken up and get retval as the return value of g_thread_join(). If the 
+;;; current thread is not joinable, retval is ignored. Calling
 ;;; 
 ;;; 1 g_thread_exit (retval);
 ;;; 
-;;; is equivalent to returning retval from the function func, as given to g_thread_create().
+;;; is equivalent to returning retval from the function func, as given to 
+;;; g_thread_create().
 ;;; 
 ;;; Note
 ;;; 
-;;; Never call g_thread_exit() from within a thread of a GThreadPool, as that will mess up the bookkeeping and lead to funny and unwanted results.
+;;; Never call g_thread_exit() from within a thread of a GThreadPool, as that 
+;;; will mess up the bookkeeping and lead to funny and unwanted results.
 ;;; 
 ;;; retval :
 ;;; 	the return value of this thread.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_thread_foreach ()
 ;;; 
-;;; void                g_thread_foreach                    (GFunc thread_func,
-;;;                                                          gpointer user_data);
+;;; void g_thread_foreach (GFunc thread_func, gpointer user_data)
 ;;; 
-;;; Call thread_func on all existing GThread structures. Note that threads may decide to exit while thread_func is running, so without intimate knowledge about the lifetime of foreign threads, thread_func shouldn't access the GThread* pointer passed in as first argument. However, thread_func will not be called for threads which are known to have exited already.
+;;; Call thread_func on all existing GThread structures. Note that threads may
+;;; decide to exit while thread_func is running, so without intimate knowledge 
+;;; about the lifetime of foreign threads, thread_func shouldn't access the 
+;;; GThread* pointer passed in as first argument. However, thread_func will not 
+;;; be called for threads which are known to have exited already.
 ;;; 
-;;; Due to thread lifetime checks, this function has an execution complexity which is quadratic in the number of existing threads.
+;;; Due to thread lifetime checks, this function has an execution complexity 
+;;; which is quadratic in the number of existing threads.
 ;;; 
 ;;; thread_func :
 ;;; 	function to call for all GThread structures
