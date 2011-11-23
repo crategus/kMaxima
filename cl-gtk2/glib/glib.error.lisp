@@ -23,7 +23,7 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ;;; ----------------------------------------------------------------------------
-;;; ----------------------------------------------------------------------------
+;;;
 ;;; Error Reporting
 ;;; 
 ;;; A system for reporting errors
@@ -636,12 +636,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_propagate_prefixed_error ()
 ;;; 
-;;; void                g_propagate_prefixed_error          (GError **dest,
-;;;                                                          GError *src,
-;;;                                                          const gchar *format,
-;;;                                                          ...);
+;;; void g_propagate_prefixed_error (GError **dest,
+;;;                                  GError *src,
+;;;                                  const gchar *format,
+;;;                                  ...)
 ;;; 
-;;; If dest is NULL, free src; otherwise, moves src into *dest. *dest must be NULL. After the move, add a prefix as with g_prefix_error().
+;;; If dest is NULL, free src; otherwise, moves src into *dest. *dest must be
+;;; NULL. After the move, add a prefix as with g_prefix_error().
 ;;; 
 ;;; dest :
 ;;; 	error return location
