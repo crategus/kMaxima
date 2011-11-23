@@ -233,7 +233,7 @@
 ;;;  9 g_object_unref (object); /* release previously acquired reference */
 ;;; ----------------------------------------------------------------------------
 
-(in-package :gobject.ffi)
+(in-package :gobject)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GObject
