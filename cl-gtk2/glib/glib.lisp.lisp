@@ -160,3 +160,14 @@
     result))
 
 ;;; ----------------------------------------------------------------------------
+
+;;; Lisp support for threads
+
+
+;;; Initialize threads
+
+(at-init ()
+  (unless (g-thread-get-initialized)
+    (g-thread-init (null-pointer))))
+
+;;; ----------------------------------------------------------------------------
