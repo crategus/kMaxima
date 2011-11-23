@@ -211,9 +211,7 @@ In this example, for every @code{class}, @code{(initialize-gobject-class-g-type 
 
 
 
-(at-init ()
-  (unless (g-thread-get-initialized)
-    (g-thread-init (null-pointer))))
+
 
 
 
