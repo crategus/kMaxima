@@ -2162,570 +2162,806 @@
 ;;; Returns : fundamental type ID
 ;;; ----------------------------------------------------------------------------
 
-#|
-g_type_create_instance ()
-
-GTypeInstance *     g_type_create_instance              (GType type);
-
-Creates and initializes an instance of type if type is valid and can be instantiated. The type system only performs basic allocation and structure setups for instances: actual instance creation should happen through functions supplied by the type's fundamental type implementation. So use of g_type_create_instance() is reserved for implementators of fundamental types only. E.g. instances of the GObject hierarchy should be created via g_object_new() and never directly through g_type_create_instance() which doesn't handle things like singleton objects or object construction. Note: Do not use this function, unless you're implementing a fundamental type. Also language bindings should not use this function but g_object_new() instead.
-
-type :
-	An instantiatable type to create an instance for.
-
-Returns :
-	An allocated and initialized instance, subject to further treatment by the fundamental type implementation.
-
-g_type_free_instance ()
-
-void                g_type_free_instance                (GTypeInstance *instance);
-
-Frees an instance of a type, returning it to the instance pool for the type, if there is one.
-
-Like g_type_create_instance(), this function is reserved for implementors of fundamental types.
-
-instance :
-	an instance of a type.
-g_type_add_class_cache_func ()
-
-void                g_type_add_class_cache_func         (gpointer cache_data,
-                                                         GTypeClassCacheFunc cache_func);
-
-Adds a GTypeClassCacheFunc to be called before the reference count of a class goes from one to zero. This can be used to prevent premature class destruction. All installed GTypeClassCacheFunc functions will be chained until one of them returns TRUE. The functions have to check the class id passed in to figure whether they actually want to cache the class of this type, since all classes are routed through the same GTypeClassCacheFunc chain.
-
-cache_data :
-	data to be passed to cache_func
-
-cache_func :
-	a GTypeClassCacheFunc
-g_type_remove_class_cache_func ()
-
-void                g_type_remove_class_cache_func      (gpointer cache_data,
-                                                         GTypeClassCacheFunc cache_func);
-
-Removes a previously installed GTypeClassCacheFunc. The cache maintained by cache_func has to be empty when calling g_type_remove_class_cache_func() to avoid leaks.
-
-cache_data :
-	data that was given when adding cache_func
-
-cache_func :
-	a GTypeClassCacheFunc
-g_type_class_unref_uncached ()
-
-void                g_type_class_unref_uncached         (gpointer g_class);
-
-A variant of g_type_class_unref() for use in GTypeClassCacheFunc implementations. It unreferences a class without consulting the chain of GTypeClassCacheFuncs, avoiding the recursion which would occur otherwise.
-
-g_class :
-	The GTypeClass structure to unreference. [type GObject.TypeClass]
-g_type_add_interface_check ()
-
-void                g_type_add_interface_check          (gpointer check_data,
-                                                         GTypeInterfaceCheckFunc check_func);
-
-Adds a function to be called after an interface vtable is initialized for any class (i.e. after the interface_init member of GInterfaceInfo has been called).
-
-This function is useful when you want to check an invariant that depends on the interfaces of a class. For instance, the implementation of GObject uses this facility to check that an object implements all of the properties that are defined on its interfaces.
-
-check_data :
-	data to pass to check_func
-
-check_func :
-	function to be called after each interface is initialized.
-
-Since 2.4
-g_type_remove_interface_check ()
-
-void                g_type_remove_interface_check       (gpointer check_data,
-                                                         GTypeInterfaceCheckFunc check_func);
-
-Removes an interface check function added with g_type_add_interface_check().
-
-check_data :
-	callback data passed to g_type_add_interface_check()
-
-check_func :
-	callback function passed to g_type_add_interface_check()
-
-Since 2.4
-GTypeInterfaceCheckFunc ()
-
-void                (*GTypeInterfaceCheckFunc)          (gpointer check_data,
-                                                         gpointer g_iface);
-
-A callback called after an interface vtable is initialized. See g_type_add_interface_check().
-
-check_data :
-	data passed to g_type_add_interface_check().
-
-g_iface :
-	the interface that has been initialized
-
-Since 2.4
-g_type_value_table_peek ()
-
-GTypeValueTable *   g_type_value_table_peek             (GType type);
-
-Returns the location of the GTypeValueTable associated with type. Note that this function should only be used from source code that implements or has internal knowledge of the implementation of type.
-
-type :
-	A GType value.
-
-Returns :
-	Location of the GTypeValueTable associated with type or NULL if there is no GTypeValueTable associated with type.
-G_DEFINE_TYPE()
-
-#define G_DEFINE_TYPE(TN, t_n, T_P)			    G_DEFINE_TYPE_EXTENDED (TN, t_n, T_P, 0, {})
-
-A convenience macro for type implementations, which declares a class initialization function, an instance initialization function (see GTypeInfo for information about these) and a static variable named t_n_parent_class pointing to the parent class. Furthermore, it defines a *_get_type() function. See G_DEFINE_TYPE_EXTENDED() for an example.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the parent type.
-
-Since 2.4
-G_DEFINE_TYPE_WITH_CODE()
-
-#define G_DEFINE_TYPE_WITH_CODE(TN, t_n, T_P, _C_)	    _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, 0) {_C_;} _G_DEFINE_TYPE_EXTENDED_END()
-
-A convenience macro for type implementations. Similar to G_DEFINE_TYPE(), but allows you to insert custom code into the *_get_type() function, e.g. interface implementations via G_IMPLEMENT_INTERFACE(). See G_DEFINE_TYPE_EXTENDED() for an example.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the parent type.
-
-_C_ :
-	Custom code that gets inserted in the *_get_type() function.
-
-Since 2.4
-G_DEFINE_ABSTRACT_TYPE()
-
-#define G_DEFINE_ABSTRACT_TYPE(TN, t_n, T_P)		    G_DEFINE_TYPE_EXTENDED (TN, t_n, T_P, G_TYPE_FLAG_ABSTRACT, {})
-
-A convenience macro for type implementations. Similar to G_DEFINE_TYPE(), but defines an abstract type. See G_DEFINE_TYPE_EXTENDED() for an example.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the parent type.
-
-Since 2.4
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE()
-
-#define G_DEFINE_ABSTRACT_TYPE_WITH_CODE(TN, t_n, T_P, _C_) _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, G_TYPE_FLAG_ABSTRACT) {_C_;} _G_DEFINE_TYPE_EXTENDED_END()
-
-A convenience macro for type implementations. Similar to G_DEFINE_TYPE_WITH_CODE(), but defines an abstract type and allows you to insert custom code into the *_get_type() function, e.g. interface implementations via G_IMPLEMENT_INTERFACE(). See G_DEFINE_TYPE_EXTENDED() for an example.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the parent type.
-
-_C_ :
-	Custom code that gets inserted in the type_name_get_type() function.
-
-Since 2.4
-G_DEFINE_INTERFACE()
-
-#define G_DEFINE_INTERFACE(TN, t_n, T_P)		    G_DEFINE_INTERFACE_WITH_CODE(TN, t_n, T_P, ;)
-
-A convenience macro for GTypeInterface definitions, which declares a default vtable initialization function and defines a *_get_type() function.
-
-The macro expects the interface initialization function to have the name t_n ## _default_init, and the interface structure to have the name TN ## Interface.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the prerequisite type for the interface, or 0 (G_TYPE_INVALID) for no prerequisite type.
-
-Since 2.24
-G_DEFINE_INTERFACE_WITH_CODE()
-
-#define G_DEFINE_INTERFACE_WITH_CODE(TN, t_n, T_P, _C_)     _G_DEFINE_INTERFACE_EXTENDED_BEGIN(TN, t_n, T_P) {_C_;} _G_DEFINE_INTERFACE_EXTENDED_END()
-
-A convenience macro for GTypeInterface definitions. Similar to G_DEFINE_INTERFACE(), but allows you to insert custom code into the *_get_type() function, e.g. additional interface implementations via G_IMPLEMENT_INTERFACE(), or additional prerequisite types. See G_DEFINE_TYPE_EXTENDED() for a similar example using G_DEFINE_TYPE_WITH_CODE().
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the prerequisite type for the interface, or 0 (G_TYPE_INVALID) for no prerequisite type.
-
-_C_ :
-	Custom code that gets inserted in the *_get_type() function.
-
-Since 2.24
-G_IMPLEMENT_INTERFACE()
-
-#define             G_IMPLEMENT_INTERFACE(TYPE_IFACE, iface_init)
-
-A convenience macro to ease interface addition in the _C_ section of G_DEFINE_TYPE_WITH_CODE() or G_DEFINE_ABSTRACT_TYPE_WITH_CODE(). See G_DEFINE_TYPE_EXTENDED() for an example.
-
-Note that this macro can only be used together with the G_DEFINE_TYPE_* macros, since it depends on variable names from those macros.
-
-TYPE_IFACE :
-	The GType of the interface to add
-
-iface_init :
-	The interface init function
-
-Since 2.4
-G_DEFINE_TYPE_EXTENDED()
-
-#define G_DEFINE_TYPE_EXTENDED(TN, t_n, T_P, _f_, _C_)	    _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, _f_) {_C_;} _G_DEFINE_TYPE_EXTENDED_END()
-
-The most general convenience macro for type implementations, on which G_DEFINE_TYPE(), etc are based.
-
-1
-2
-3
-4
-5
-6
-
-	
-
-G_DEFINE_TYPE_EXTENDED (GtkGadget,
-                        gtk_gadget,
-                        GTK_TYPE_WIDGET,
-                        0,
-                        G_IMPLEMENT_INTERFACE (TYPE_GIZMO,
-                                               gtk_gadget_gizmo_init));
-
-expands to
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-
-	
-
-static void     gtk_gadget_init       (GtkGadget      *self);
-static void     gtk_gadget_class_init (GtkGadgetClass *klass);
-static gpointer gtk_gadget_parent_class = NULL;
-static void     gtk_gadget_class_intern_init (gpointer klass)
-{
-  gtk_gadget_parent_class = g_type_class_peek_parent (klass);
-  gtk_gadget_class_init ((GtkGadgetClass*) klass);
-}
-
-GType
-gtk_gadget_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
-  if (g_once_init_enter (&g_define_type_id__volatile))
-    {
-      GType g_define_type_id =
-        g_type_register_static_simple (GTK_TYPE_WIDGET,
-                                       g_intern_static_string ("GtkGadget"),
-                                       sizeof (GtkGadgetClass),
-                                       (GClassInitFunc) gtk_gadget_class_intern_init,
-                                       sizeof (GtkGadget),
-                                       (GInstanceInitFunc) gtk_gadget_init,
-                                       (GTypeFlags) flags);
-      {
-        static const GInterfaceInfo g_implement_interface_info = {
-          (GInterfaceInitFunc) gtk_gadget_gizmo_init
-        };
-        g_type_add_interface_static (g_define_type_id, TYPE_GIZMO, &g_implement_interface_info);
-      }
-      g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-    }
-  return g_define_type_id__volatile;
-}
-
-The only pieces which have to be manually provided are the definitions of the instance and class structure and the definitions of the instance and class init functions.
-
-TN :
-	The name of the new type, in Camel case.
-
-t_n :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-T_P :
-	The GType of the parent type.
-
-_f_ :
-	GTypeFlags to pass to g_type_register_static()
-
-_C_ :
-	Custom code that gets inserted in the *_get_type() function.
-
-Since 2.4
-G_DEFINE_BOXED_TYPE()
-
-#define G_DEFINE_BOXED_TYPE(TypeName, type_name, copy_func, free_func) G_DEFINE_BOXED_TYPE_WITH_CODE (TypeName, type_name, copy_func, free_func, {})
-
-A convenience macro for boxed type implementations, which defines a type_name_get_type() function registering the boxed type.
-
-TypeName :
-	The name of the new type, in Camel case.
-
-type_name :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-copy_func :
-	the GBoxedCopyFunc for the new type
-
-free_func :
-	the GBoxedFreeFunc for the new type
-
-Since 2.26
-G_DEFINE_BOXED_TYPE_WITH_CODE()
-
-#define G_DEFINE_BOXED_TYPE_WITH_CODE(TypeName, type_name, copy_func, free_func, _C_) _G_DEFINE_BOXED_TYPE_BEGIN (TypeName, type_name, copy_func, free_func) {_C_;} _G_DEFINE_TYPE_EXTENDED_END()
-
-A convenience macro for boxed type implementations. Similar to G_DEFINE_BOXED_TYPE(), but allows to insert custom code into the type_name_get_type() function, e.g. to register value transformations with g_value_register_transform_func().
-
-TypeName :
-	The name of the new type, in Camel case.
-
-type_name :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-copy_func :
-	the GBoxedCopyFunc for the new type
-
-free_func :
-	the GBoxedFreeFunc for the new type
-
-_C_ :
-	Custom code that gets inserted in the *_get_type() function.
-
-Since 2.26
-G_DEFINE_POINTER_TYPE()
-
-#define G_DEFINE_POINTER_TYPE(TypeName, type_name) G_DEFINE_POINTER_TYPE_WITH_CODE (TypeName, type_name, {})
-
-A convenience macro for pointer type implementations, which defines a type_name_get_type() function registering the pointer type.
-
-TypeName :
-	The name of the new type, in Camel case.
-
-type_name :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-Since 2.26
-G_DEFINE_POINTER_TYPE_WITH_CODE()
-
-#define G_DEFINE_POINTER_TYPE_WITH_CODE(TypeName, type_name, _C_) _G_DEFINE_POINTER_TYPE_BEGIN (TypeName, type_name) {_C_;} _G_DEFINE_TYPE_EXTENDED_END()
-
-A convenience macro for pointer type implementations. Similar to G_DEFINE_POINTER_TYPE(), but allows to insert custom code into the type_name_get_type() function.
-
-TypeName :
-	The name of the new type, in Camel case.
-
-type_name :
-	The name of the new type, in lowercase, with words separated by '_'.
-
-_C_ :
-	Custom code that gets inserted in the *_get_type() function.
-
-Since 2.26
-G_TYPE_INVALID
-
-#define G_TYPE_INVALID			G_TYPE_MAKE_FUNDAMENTAL (0)
-
-An invalid GType used as error return value in some functions which return a GType.
-G_TYPE_NONE
-
-#define G_TYPE_NONE			G_TYPE_MAKE_FUNDAMENTAL (1)
-
-A fundamental type which is used as a replacement for the C void return type.
-G_TYPE_INTERFACE
-
-#define G_TYPE_INTERFACE		G_TYPE_MAKE_FUNDAMENTAL (2)
-
-The fundamental type from which all interfaces are derived.
-G_TYPE_CHAR
-
-#define G_TYPE_CHAR			G_TYPE_MAKE_FUNDAMENTAL (3)
-
-The fundamental type corresponding to gchar. The type designated by G_TYPE_CHAR is unconditionally an 8-bit signed integer. This may or may not be the same type a the C type "gchar".
-G_TYPE_UCHAR
-
-#define G_TYPE_UCHAR			G_TYPE_MAKE_FUNDAMENTAL (4)
-
-The fundamental type corresponding to guchar.
-G_TYPE_BOOLEAN
-
-#define G_TYPE_BOOLEAN			G_TYPE_MAKE_FUNDAMENTAL (5)
-
-The fundamental type corresponding to gboolean.
-G_TYPE_INT
-
-#define G_TYPE_INT			G_TYPE_MAKE_FUNDAMENTAL (6)
-
-The fundamental type corresponding to gint.
-G_TYPE_UINT
-
-#define G_TYPE_UINT			G_TYPE_MAKE_FUNDAMENTAL (7)
-
-The fundamental type corresponding to guint.
-G_TYPE_LONG
-
-#define G_TYPE_LONG			G_TYPE_MAKE_FUNDAMENTAL (8)
-
-The fundamental type corresponding to glong.
-G_TYPE_ULONG
-
-#define G_TYPE_ULONG			G_TYPE_MAKE_FUNDAMENTAL (9)
-
-The fundamental type corresponding to gulong.
-G_TYPE_INT64
-
-#define G_TYPE_INT64			G_TYPE_MAKE_FUNDAMENTAL (10)
-
-The fundamental type corresponding to gint64.
-G_TYPE_UINT64
-
-#define G_TYPE_UINT64			G_TYPE_MAKE_FUNDAMENTAL (11)
-
-The fundamental type corresponding to guint64.
-G_TYPE_ENUM
-
-#define G_TYPE_ENUM			G_TYPE_MAKE_FUNDAMENTAL (12)
-
-The fundamental type from which all enumeration types are derived.
-
 ;;; ----------------------------------------------------------------------------
-G_TYPE_FLAGS
-
-#define G_TYPE_FLAGS G_TYPE_MAKE_FUNDAMENTAL (13)
-
-The fundamental type from which all flags types are derived.
+;;; g_type_create_instance ()
+;;; 
+;;; GTypeInstance * g_type_create_instance (GType type)
+;;; 
+;;; Creates and initializes an instance of type if type is valid and can be
+;;; instantiated. The type system only performs basic allocation and structure
+;;; setups for instances: actual instance creation should happen through
+;;; functions supplied by the type's fundamental type implementation. So use of
+;;; g_type_create_instance() is reserved for implementators of fundamental types
+;;; only. E.g. instances of the GObject hierarchy should be created via
+;;; g_object_new() and never directly through g_type_create_instance() which
+;;; doesn't handle things like singleton objects or object construction. Note:
+;;; Do not use this function, unless you're implementing a fundamental type.
+;;; Also language bindings should not use this function but g_object_new()
+;;; instead.
+;;; 
+;;; type :
+;;; 	An instantiatable type to create an instance for.
+;;; 
+;;; Returns :
+;;; 	An allocated and initialized instance, subject to further treatment by
+;;;     the fundamental type implementation.
 ;;; ----------------------------------------------------------------------------
 
-G_TYPE_FLOAT
+;;; ----------------------------------------------------------------------------
+;;; g_type_free_instance ()
+;;; 
+;;; void g_type_free_instance (GTypeInstance *instance)
+;;; 
+;;; Frees an instance of a type, returning it to the instance pool for the type,
+;;; if there is one.
+;;; 
+;;; Like g_type_create_instance(), this function is reserved for implementors
+;;; of fundamental types.
+;;; 
+;;; instance :
+;;; 	an instance of a type.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_FLOAT			G_TYPE_MAKE_FUNDAMENTAL (14)
+;;; ----------------------------------------------------------------------------
+;;; g_type_add_class_cache_func ()
+;;; 
+;;; void g_type_add_class_cache_func (gpointer cache_data,
+;;;                                   GTypeClassCacheFunc cache_func);
+;;; 
+;;; Adds a GTypeClassCacheFunc to be called before the reference count of a
+;;; class goes from one to zero. This can be used to prevent premature class
+;;; destruction. All installed GTypeClassCacheFunc functions will be chained
+;;; until one of them returns TRUE. The functions have to check the class id
+;;; passed in to figure whether they actually want to cache the class of this
+;;; type, since all classes are routed through the same GTypeClassCacheFunc
+;;; chain.
+;;; 
+;;; cache_data :
+;;; 	data to be passed to cache_func
+;;; 
+;;; cache_func :
+;;; 	a GTypeClassCacheFunc
+;;; ----------------------------------------------------------------------------
 
-The fundamental type corresponding to gfloat.
-G_TYPE_DOUBLE
+;;; ----------------------------------------------------------------------------
+;;; g_type_remove_class_cache_func ()
+;;; 
+;;; void g_type_remove_class_cache_func (gpointer cache_data,
+;;;                                      GTypeClassCacheFunc cache_func)
+;;; 
+;;; Removes a previously installed GTypeClassCacheFunc. The cache maintained by
+;;; cache_func has to be empty when calling g_type_remove_class_cache_func() to
+;;; avoid leaks.
+;;; 
+;;; cache_data :
+;;; 	data that was given when adding cache_func
+;;; 
+;;; cache_func :
+;;; 	a GTypeClassCacheFunc
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_DOUBLE			G_TYPE_MAKE_FUNDAMENTAL (15)
+;;; ----------------------------------------------------------------------------
+;;; g_type_class_unref_uncached ()
+;;; 
+;;; void g_type_class_unref_uncached (gpointer g_class)
+;;; 
+;;; A variant of g_type_class_unref() for use in GTypeClassCacheFunc
+;;; implementations. It unreferences a class without consulting the chain of
+;;; GTypeClassCacheFuncs, avoiding the recursion which would occur otherwise.
+;;; 
+;;; g_class :
+;;; 	The GTypeClass structure to unreference. [type GObject.TypeClass]
+;;; ----------------------------------------------------------------------------
 
-The fundamental type corresponding to gdouble.
-G_TYPE_STRING
+;;; ----------------------------------------------------------------------------
+;;; g_type_add_interface_check ()
+;;; 
+;;; void g_type_add_interface_check (gpointer check_data,
+;;;                                  GTypeInterfaceCheckFunc check_func)
+;;; 
+;;; Adds a function to be called after an interface vtable is initialized for
+;;; any class (i.e. after the interface_init member of GInterfaceInfo has been
+;;; called).
+;;; 
+;;; This function is useful when you want to check an invariant that depends on
+;;; the interfaces of a class. For instance, the implementation of GObject uses
+;;; this facility to check that an object implements all of the properties that
+;;; are defined on its interfaces.
+;;; 
+;;; check_data :
+;;; 	data to pass to check_func
+;;; 
+;;; check_func :
+;;; 	function to be called after each interface is initialized.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_STRING			G_TYPE_MAKE_FUNDAMENTAL (16)
+;;; ----------------------------------------------------------------------------
+;;; g_type_remove_interface_check ()
+;;; 
+;;; void g_type_remove_interface_check (gpointer check_data,
+;;;                                     GTypeInterfaceCheckFunc check_func)
+;;; 
+;;; Removes an interface check function added with g_type_add_interface_check().
+;;; 
+;;; check_data :
+;;; 	callback data passed to g_type_add_interface_check()
+;;; 
+;;; check_func :
+;;; 	callback function passed to g_type_add_interface_check()
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-The fundamental type corresponding to nul-terminated C strings.
-G_TYPE_POINTER
+;;; ----------------------------------------------------------------------------
+;;; GTypeInterfaceCheckFunc ()
+;;; 
+;;; void (*GTypeInterfaceCheckFunc) (gpointer check_data, gpointer g_iface)
+;;; 
+;;; A callback called after an interface vtable is initialized.
+;;; See g_type_add_interface_check().
+;;; 
+;;; check_data :
+;;; 	data passed to g_type_add_interface_check().
+;;; 
+;;; g_iface :
+;;; 	the interface that has been initialized
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_POINTER			G_TYPE_MAKE_FUNDAMENTAL (17)
+;;; ----------------------------------------------------------------------------
+;;; g_type_value_table_peek ()
+;;; 
+;;; GTypeValueTable *   g_type_value_table_peek             (GType type);
+;;; 
+;;; Returns the location of the GTypeValueTable associated with type. Note that
+;;; this function should only be used from source code that implements or has
+;;; internal knowledge of the implementation of type.
+;;; 
+;;; type :
+;;; 	A GType value.
+;;; 
+;;; Returns :
+;;; 	Location of the GTypeValueTable associated with type or NULL if there is
+;;;     no GTypeValueTable associated with type.
+;;; ----------------------------------------------------------------------------
 
-The fundamental type corresponding to gpointer.
-G_TYPE_BOXED
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_TYPE()
+;;; 
+;;; #define G_DEFINE_TYPE(TN, t_n, T_P)
+;;;         G_DEFINE_TYPE_EXTENDED (TN, t_n, T_P, 0, {})
+;;; 
+;;; A convenience macro for type implementations, which declares a class
+;;; initialization function, an instance initialization function (see GTypeInfo
+;;; for information about these) and a static variable named t_n_parent_class
+;;; pointing to the parent class. Furthermore, it defines a *_get_type()
+;;; function. See G_DEFINE_TYPE_EXTENDED() for an example.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the parent type.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_BOXED			G_TYPE_MAKE_FUNDAMENTAL (18)
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_TYPE_WITH_CODE()
+;;; 
+;;; #define G_DEFINE_TYPE_WITH_CODE(TN, t_n, T_P, _C_)	   
+;;;        _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, 0) {_C_;} 
+;;;        _G_DEFINE_TYPE_EXTENDED_END()
+;;; 
+;;; A convenience macro for type implementations. Similar to G_DEFINE_TYPE(),
+;;; but allows you to insert custom code into the *_get_type() function, e.g.
+;;; interface implementations via G_IMPLEMENT_INTERFACE(). See
+;;; G_DEFINE_TYPE_EXTENDED() for an example.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the parent type.
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the *_get_type() function.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-The fundamental type from which all boxed types are derived.
-G_TYPE_PARAM
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_ABSTRACT_TYPE()
+;;; 
+;;; #define G_DEFINE_ABSTRACT_TYPE(TN, t_n, T_P)		    
+;;;         G_DEFINE_TYPE_EXTENDED (TN, t_n, T_P, G_TYPE_FLAG_ABSTRACT, {})
+;;; 
+;;; A convenience macro for type implementations. Similar to G_DEFINE_TYPE(),
+;;; but defines an abstract type. See G_DEFINE_TYPE_EXTENDED() for an example.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the parent type.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_PARAM			G_TYPE_MAKE_FUNDAMENTAL (19)
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_ABSTRACT_TYPE_WITH_CODE()
+;;; 
+;;; #define G_DEFINE_ABSTRACT_TYPE_WITH_CODE(TN, t_n, T_P, _C_) 
+;;;        _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, G_TYPE_FLAG_ABSTRACT) {_C_;}
+;;;        _G_DEFINE_TYPE_EXTENDED_END()
+;;; 
+;;; A convenience macro for type implementations. Similar to
+;;; G_DEFINE_TYPE_WITH_CODE(), but defines an abstract type and allows you to
+;;; insert custom code into the *_get_type() function, e.g. interface
+;;; implementations via G_IMPLEMENT_INTERFACE(). See G_DEFINE_TYPE_EXTENDED()
+;;; for an example.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the parent type.
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the type_name_get_type() function.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-The fundamental type from which all GParamSpec types are derived.
-G_TYPE_OBJECT
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_INTERFACE()
+;;; 
+;;; #define G_DEFINE_INTERFACE(TN, t_n, T_P)		    
+;;;         G_DEFINE_INTERFACE_WITH_CODE(TN, t_n, T_P, ;)
+;;; 
+;;; A convenience macro for GTypeInterface definitions, which declares a default
+;;; vtable initialization function and defines a *_get_type() function.
+;;; 
+;;; The macro expects the interface initialization function to have the name
+;;; t_n ## _default_init, and the interface structure to have the name TN ##
+;;; Interface.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the prerequisite type for the interface, or 0
+;;;     (G_TYPE_INVALID) for no prerequisite type.
+;;; 
+;;; Since 2.24
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_OBJECT			G_TYPE_MAKE_FUNDAMENTAL (20)
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_INTERFACE_WITH_CODE()
+;;; 
+;;; #define G_DEFINE_INTERFACE_WITH_CODE(TN, t_n, T_P, _C_)     
+;;;        _G_DEFINE_INTERFACE_EXTENDED_BEGIN(TN, t_n, T_P) {_C_;} 
+;;;        _G_DEFINE_INTERFACE_EXTENDED_END()
+;;; 
+;;; A convenience macro for GTypeInterface definitions. Similar to
+;;; G_DEFINE_INTERFACE(), but allows you to insert custom code into the
+;;; *_get_type() function, e.g. additional interface implementations via
+;;; G_IMPLEMENT_INTERFACE(), or additional prerequisite types. See
+;;; G_DEFINE_TYPE_EXTENDED() for a similar example using
+;;; G_DEFINE_TYPE_WITH_CODE().
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the prerequisite type for the interface, or 0
+;;;     (G_TYPE_INVALID) for no prerequisite type.
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the *_get_type() function.
+;;; 
+;;; Since 2.24
+;;; ----------------------------------------------------------------------------
 
-The fundamental type for GObject.
-G_TYPE_GTYPE
+;;; ----------------------------------------------------------------------------
+;;; G_IMPLEMENT_INTERFACE()
+;;; 
+;;; #define G_IMPLEMENT_INTERFACE(TYPE_IFACE, iface_init)
+;;; 
+;;; A convenience macro to ease interface addition in the _C_ section of
+;;; G_DEFINE_TYPE_WITH_CODE() or G_DEFINE_ABSTRACT_TYPE_WITH_CODE(). See
+;;; G_DEFINE_TYPE_EXTENDED() for an example.
+;;; 
+;;; Note that this macro can only be used together with the
+;;; G_DEFINE_TYPE_* macros, since it depends on variable names from those
+;;; macros.
+;;; 
+;;; TYPE_IFACE :
+;;; 	The GType of the interface to add
+;;; 
+;;; iface_init :
+;;; 	The interface init function
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_GTYPE			 (g_gtype_get_type())
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_TYPE_EXTENDED()
+;;; 
+;;; #define G_DEFINE_TYPE_EXTENDED(TN, t_n, T_P, _f_, _C_)
+;;;        _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, _f_) {_C_;} 
+;;;        _G_DEFINE_TYPE_EXTENDED_END()
+;;; 
+;;; The most general convenience macro for type implementations, on which
+;;; G_DEFINE_TYPE(), etc are based.
+;;; 
+;;; 1
+;;; 2
+;;; 3
+;;; 4
+;;; 5
+;;; 6
+;;; 
+;;; 	
+;;; 
+;;; G_DEFINE_TYPE_EXTENDED (GtkGadget,
+;;;                         gtk_gadget,
+;;;                         GTK_TYPE_WIDGET,
+;;;                         0,
+;;;                         G_IMPLEMENT_INTERFACE (TYPE_GIZMO,
+;;;                                                gtk_gadget_gizmo_init));
+;;; 
+;;; expands to
+;;; 
+;;; 1
+;;; 2
+;;; 3
+;;; 4
+;;; 5
+;;; 6
+;;; 7
+;;; 8
+;;; 9
+;;; 10
+;;; 11
+;;; 12
+;;; 13
+;;; 14
+;;; 15
+;;; 16
+;;; 17
+;;; 18
+;;; 19
+;;; 20
+;;; 21
+;;; 22
+;;; 23
+;;; 24
+;;; 25
+;;; 26
+;;; 27
+;;; 28
+;;; 29
+;;; 30
+;;; 31
+;;; 32
+;;; 33
+;;; 
+;;; 	
+;;; 
+;;; static void     gtk_gadget_init       (GtkGadget      *self);
+;;; static void     gtk_gadget_class_init (GtkGadgetClass *klass);
+;;; static gpointer gtk_gadget_parent_class = NULL;
+;;; static void     gtk_gadget_class_intern_init (gpointer klass)
+;;; {
+;;;   gtk_gadget_parent_class = g_type_class_peek_parent (klass);
+;;;   gtk_gadget_class_init ((GtkGadgetClass*) klass);
+;;; }
+;;; 
+;;; GType
+;;; gtk_gadget_get_type (void)
+;;; {
+;;;   static volatile gsize g_define_type_id__volatile = 0;
+;;;   if (g_once_init_enter (&g_define_type_id__volatile))
+;;;     {
+;;;       GType g_define_type_id =
+;;;         g_type_register_static_simple (GTK_TYPE_WIDGET,
+;;;                                        g_intern_static_string ("GtkGadget"),
+;;;                                        sizeof (GtkGadgetClass),
+;;;                                        (GClassInitFunc) gtk_gadget_class_intern_init,
+;;;                                        sizeof (GtkGadget),
+;;;                                        (GInstanceInitFunc) gtk_gadget_init,
+;;;                                        (GTypeFlags) flags);
+;;;       {
+;;;         static const GInterfaceInfo g_implement_interface_info = {
+;;;           (GInterfaceInitFunc) gtk_gadget_gizmo_init
+;;;         };
+;;;         g_type_add_interface_static (g_define_type_id, TYPE_GIZMO, &g_implement_interface_info);
+;;;       }
+;;;       g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+;;;     }
+;;;   return g_define_type_id__volatile;
+;;; }
+;;; 
+;;; The only pieces which have to be manually provided are the definitions of
+;;; the instance and class structure and the definitions of the instance and
+;;; class init functions.
+;;; 
+;;; TN :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; t_n :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; T_P :
+;;; 	The GType of the parent type.
+;;; 
+;;; _f_ :
+;;; 	GTypeFlags to pass to g_type_register_static()
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the *_get_type() function.
+;;; 
+;;; Since 2.4
+;;; ----------------------------------------------------------------------------
 
-The type for GType.
-G_TYPE_VARIANT
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_BOXED_TYPE()
+;;; 
+;;; #define G_DEFINE_BOXED_TYPE(TypeName, type_name, copy_func, free_func)
+;;;         G_DEFINE_BOXED_TYPE_WITH_CODE (TypeName, type_name, copy_func, free_func, {})
+;;; 
+;;; A convenience macro for boxed type implementations, which defines a
+;;; type_name_get_type() function registering the boxed type.
+;;; 
+;;; TypeName :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; type_name :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; copy_func :
+;;; 	the GBoxedCopyFunc for the new type
+;;; 
+;;; free_func :
+;;; 	the GBoxedFreeFunc for the new type
+;;; 
+;;; Since 2.26
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_VARIANT                  G_TYPE_MAKE_FUNDAMENTAL (21)
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_BOXED_TYPE_WITH_CODE()
+;;; 
+;;; #define G_DEFINE_BOXED_TYPE_WITH_CODE(TypeName, type_name, copy_func, free_func, _C_)
+;;;         _G_DEFINE_BOXED_TYPE_BEGIN (TypeName, type_name, copy_func, free_func) {_C_;}
+;;;         _G_DEFINE_TYPE_EXTENDED_END()
+;;; 
+;;; A convenience macro for boxed type implementations. Similar to
+;;; G_DEFINE_BOXED_TYPE(), but allows to insert custom code into the
+;;; type_name_get_type() function, e.g. to register value transformations with
+;;; g_value_register_transform_func().
+;;; 
+;;; TypeName :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; type_name :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; copy_func :
+;;; 	the GBoxedCopyFunc for the new type
+;;; 
+;;; free_func :
+;;; 	the GBoxedFreeFunc for the new type
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the *_get_type() function.
+;;; 
+;;; Since 2.26
+;;; ----------------------------------------------------------------------------
 
-The fundamental type corresponding to GVariant.
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_POINTER_TYPE()
+;;; 
+;;; #define G_DEFINE_POINTER_TYPE(TypeName, type_name)
+;;; G_DEFINE_POINTER_TYPE_WITH_CODE (TypeName, type_name, {})
+;;; 
+;;; A convenience macro for pointer type implementations, which defines a
+;;; type_name_get_type() function registering the pointer type.
+;;; 
+;;; TypeName :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; type_name :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; Since 2.26
+;;; ----------------------------------------------------------------------------
 
-All floating GVariant instances passed through the GType system are consumed.
+;;; ----------------------------------------------------------------------------
+;;; G_DEFINE_POINTER_TYPE_WITH_CODE()
+;;; 
+;;; #define G_DEFINE_POINTER_TYPE_WITH_CODE(TypeName, type_name, _C_)
+;;;         _G_DEFINE_POINTER_TYPE_BEGIN (TypeName, type_name) {_C_;}
+;;;         _G_DEFINE_TYPE_EXTENDED_END()
+;;; 
+;;; A convenience macro for pointer type implementations. Similar to
+;;; G_DEFINE_POINTER_TYPE(), but allows to insert custom code into the
+;;; type_name_get_type() function.
+;;; 
+;;; TypeName :
+;;; 	The name of the new type, in Camel case.
+;;; 
+;;; type_name :
+;;; 	The name of the new type, in lowercase, with words separated by '_'.
+;;; 
+;;; _C_ :
+;;; 	Custom code that gets inserted in the *_get_type() function.
+;;; 
+;;; Since 2.26
+;;; ----------------------------------------------------------------------------
 
-Note that callbacks in closures, and signal handlers for signals of return type G_TYPE_VARIANT, must never return floating variants.
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_INVALID
+;;; 
+;;; #define G_TYPE_INVALID			G_TYPE_MAKE_FUNDAMENTAL (0)
+;;; 
+;;; An invalid GType used as error return value in some functions which return
+;;; a GType.
+;;; ----------------------------------------------------------------------------
 
-Note: GLib 2.24 did include a boxed type with this name. It was replaced with this fundamental type in 2.26.
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_NONE
+;;; 
+;;; #define G_TYPE_NONE			G_TYPE_MAKE_FUNDAMENTAL (1)
+;;; 
+;;; A fundamental type which is used as a replacement for the C void return
+;;; type.
+;;; ----------------------------------------------------------------------------
 
-Since 2.26
-G_TYPE_RESERVED_GLIB_FIRST
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_INTERFACE
+;;; 
+;;; #define G_TYPE_INTERFACE		G_TYPE_MAKE_FUNDAMENTAL (2)
+;;; 
+;;; The fundamental type from which all interfaces are derived.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_RESERVED_GLIB_FIRST (22)
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_CHAR
+;;; 
+;;; #define G_TYPE_CHAR			G_TYPE_MAKE_FUNDAMENTAL (3)
+;;; 
+;;; The fundamental type corresponding to gchar. The type designated by
+;;; G_TYPE_CHAR is unconditionally an 8-bit signed integer. This may or may not
+;;; be the same type a the C type "gchar".
+;;; ----------------------------------------------------------------------------
 
-First fundamental type number to create a new fundamental type id with G_TYPE_MAKE_FUNDAMENTAL() reserved for GLib.
-G_TYPE_RESERVED_GLIB_LAST
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_UCHAR
+;;; 
+;;; #define G_TYPE_UCHAR			G_TYPE_MAKE_FUNDAMENTAL (4)
+;;; 
+;;; The fundamental type corresponding to guchar.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_RESERVED_GLIB_LAST (31)
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_BOOLEAN
+;;; 
+;;; #define G_TYPE_BOOLEAN			G_TYPE_MAKE_FUNDAMENTAL (5)
+;;; 
+;;; The fundamental type corresponding to gboolean.
+;;; ----------------------------------------------------------------------------
 
-Last fundamental type number reserved for GLib.
-G_TYPE_RESERVED_BSE_FIRST
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_INT
+;;; 
+;;; #define G_TYPE_INT			G_TYPE_MAKE_FUNDAMENTAL (6)
+;;; 
+;;; The fundamental type corresponding to gint.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_RESERVED_BSE_FIRST (32)
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_UINT
+;;; 
+;;; #define G_TYPE_UINT			G_TYPE_MAKE_FUNDAMENTAL (7)
+;;; 
+;;; The fundamental type corresponding to guint.
+;;; ----------------------------------------------------------------------------
 
-First fundamental type number to create a new fundamental type id with G_TYPE_MAKE_FUNDAMENTAL() reserved for BSE.
-G_TYPE_RESERVED_BSE_LAST
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_LONG
+;;; 
+;;; #define G_TYPE_LONG			G_TYPE_MAKE_FUNDAMENTAL (8)
+;;; 
+;;; The fundamental type corresponding to glong.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_RESERVED_BSE_LAST (48)
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_ULONG
+;;; 
+;;; #define G_TYPE_ULONG			G_TYPE_MAKE_FUNDAMENTAL (9)
+;;; 
+;;; The fundamental type corresponding to gulong.
+;;; ----------------------------------------------------------------------------
 
-Last fundamental type number reserved for BSE.
-G_TYPE_RESERVED_USER_FIRST
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_INT64
+;;; 
+;;; #define G_TYPE_INT64			G_TYPE_MAKE_FUNDAMENTAL (10)
+;;; 
+;;; The fundamental type corresponding to gint64.
+;;; ----------------------------------------------------------------------------
 
-#define G_TYPE_RESERVED_USER_FIRST (49)
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_UINT64
+;;; 
+;;; #define G_TYPE_UINT64			G_TYPE_MAKE_FUNDAMENTAL (11)
+;;; 
+;;; The fundamental type corresponding to guint64.
+;;; ----------------------------------------------------------------------------
 
-First available fundamental type number to create new fundamental type id with G_TYPE_MAKE_FUNDAMENTAL().
-|#
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_ENUM
+;;; 
+;;; #define G_TYPE_ENUM			G_TYPE_MAKE_FUNDAMENTAL (12)
+;;; 
+;;; The fundamental type from which all enumeration types are derived.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_FLAGS
+;;; 
+;;; #define G_TYPE_FLAGS G_TYPE_MAKE_FUNDAMENTAL (13)
+;;; 
+;;; The fundamental type from which all flags types are derived.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_FLOAT
+;;; 
+;;; #define G_TYPE_FLOAT			G_TYPE_MAKE_FUNDAMENTAL (14)
+;;; 
+;;; The fundamental type corresponding to gfloat.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_DOUBLE
+;;; 
+;;; #define G_TYPE_DOUBLE			G_TYPE_MAKE_FUNDAMENTAL (15)
+;;; 
+;;; The fundamental type corresponding to gdouble.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_STRING
+;;; 
+;;; #define G_TYPE_STRING			G_TYPE_MAKE_FUNDAMENTAL (16)
+;;; 
+;;; The fundamental type corresponding to nul-terminated C strings.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_POINTER
+;;; 
+;;; #define G_TYPE_POINTER			G_TYPE_MAKE_FUNDAMENTAL (17)
+;;; 
+;;; The fundamental type corresponding to gpointer.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_BOXED
+;;; 
+;;; #define G_TYPE_BOXED			G_TYPE_MAKE_FUNDAMENTAL (18)
+;;; 
+;;; The fundamental type from which all boxed types are derived.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_PARAM
+;;; 
+;;; #define G_TYPE_PARAM			G_TYPE_MAKE_FUNDAMENTAL (19)
+;;; 
+;;; The fundamental type from which all GParamSpec types are derived.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_OBJECT
+;;; 
+;;; #define G_TYPE_OBJECT			G_TYPE_MAKE_FUNDAMENTAL (20)
+;;; 
+;;; The fundamental type for GObject.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_GTYPE
+;;; 
+;;; #define G_TYPE_GTYPE			 (g_gtype_get_type())
+;;; 
+;;; The type for GType.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_VARIANT
+;;; 
+;;; #define G_TYPE_VARIANT G_TYPE_MAKE_FUNDAMENTAL (21)
+;;; 
+;;; The fundamental type corresponding to GVariant.
+;;; 
+;;; All floating GVariant instances passed through the GType system are
+;;; consumed.
+;;; 
+;;; Note that callbacks in closures, and signal handlers for signals of return
+;;; type G_TYPE_VARIANT, must never return floating variants.
+;;; 
+;;; Note: GLib 2.24 did include a boxed type with this name. It was replaced
+;;; with this fundamental type in 2.26.
+;;; 
+;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_RESERVED_GLIB_FIRST
+;;; 
+;;; #define G_TYPE_RESERVED_GLIB_FIRST (22)
+;;; 
+;;; First fundamental type number to create a new fundamental type id with
+;;; G_TYPE_MAKE_FUNDAMENTAL() reserved for GLib.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_RESERVED_GLIB_LAST
+;;; 
+;;; #define G_TYPE_RESERVED_GLIB_LAST (31)
+;;; 
+;;; Last fundamental type number reserved for GLib.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_RESERVED_BSE_FIRST
+;;; 
+;;; #define G_TYPE_RESERVED_BSE_FIRST (32)
+;;; 
+;;; First fundamental type number to create a new fundamental type id with
+;;; G_TYPE_MAKE_FUNDAMENTAL() reserved for BSE.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_RESERVED_BSE_LAST
+;;; 
+;;; #define G_TYPE_RESERVED_BSE_LAST (48)
+;;; 
+;;; Last fundamental type number reserved for BSE.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; G_TYPE_RESERVED_USER_FIRST
+;;; 
+;;; #define G_TYPE_RESERVED_USER_FIRST (49)
+;;; 
+;;; First available fundamental type number to create new fundamental type id
+;;; with G_TYPE_MAKE_FUNDAMENTAL().
+;;; ----------------------------------------------------------------------------
+
+;;; --- End of file gobject.type.lisp ------------------------------------------
+
