@@ -279,9 +279,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_time_val_to_iso8601 ()
 ;;; 
-;;; gchar *             g_time_val_to_iso8601               (GTimeVal *time_);
+;;; gchar * g_time_val_to_iso8601 (GTimeVal *time_)
 ;;; 
-;;; Converts time_ into an ISO 8601 encoded string, relative to the Coordinated Universal Time (UTC).
+;;; Converts time_ into an ISO 8601 encoded string, relative to the Coordinated
+;;; Universal Time (UTC).
 ;;; 
 ;;; time_ :
 ;;; 	a GTimeVal
@@ -290,6 +291,9 @@
 ;;; 	a newly allocated string containing an ISO 8601 date
 ;;; 
 ;;; Since 2.12
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_monotonic_time ()
 ;;; 
 ;;; gint64              g_get_monotonic_time                (void);
@@ -1135,4 +1139,4 @@
 ;;; 	TRUE if the weekday is valid
 ;;; ----------------------------------------------------------------------------
 
-;;; End of file glib.date.lisp -------------------------------------------------
+;;; --- End of file glib.date.lisp ---------------------------------------------
