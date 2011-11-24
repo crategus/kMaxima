@@ -109,30 +109,41 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_new()
 ;;; 
-;;; #define             g_new(struct_type, n_structs)
+;;; #define g_new(struct_type, n_structs)
 ;;; 
-;;; Allocates n_structs elements of type struct_type. The returned pointer is cast to a pointer to the given type. If n_structs is 0 it returns NULL. Care is taken to avoid overflow when calculating the size of the allocated block.
+;;; Allocates n_structs elements of type struct_type. The returned pointer is
+;;; cast to a pointer to the given type. If n_structs is 0 it returns NULL. Care
+;;; is taken to avoid overflow when calculating the size of the allocated block.
 ;;; 
-;;; Since the returned pointer is already casted to the right type, it is normally unnecessary to cast it explicitly, and doing so might hide memory allocation errors.
+;;; Since the returned pointer is already casted to the right type, it is
+;;; normally unnecessary to cast it explicitly, and doing so might hide memory
+;;; allocation errors.
 ;;; 
 ;;; struct_type :
-;;; 	the type of the elements to allocate
+;;;     the type of the elements to allocate
 ;;; 
 ;;; n_structs :
-;;; 	the number of elements to allocate
+;;;     the number of elements to allocate
 ;;; 
 ;;; Returns :
-;;; 	a pointer to the allocated memory, cast to a pointer to struct_type
+;;;     a pointer to the allocated memory, cast to a pointer to struct_type
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_new0()
 ;;; 
-;;; #define             g_new0(struct_type, n_structs)
+;;; #define g_new0(struct_type, n_structs)
 ;;; 
-;;; Allocates n_structs elements of type struct_type, initialized to 0's. The returned pointer is cast to a pointer to the given type. If n_structs is 0 it returns NULL. Care is taken to avoid overflow when calculating the size of the allocated block.
+;;; Allocates n_structs elements of type struct_type, initialized to 0's. The
+;;; returned pointer is cast to a pointer to the given type. If n_structs is 0
+;;; it returns NULL. Care is taken to avoid overflow when calculating the size
+;;; of the allocated block.
 ;;; 
-;;; Since the returned pointer is already casted to the right type, it is normally unnecessary to cast it explicitly, and doing so might hide memory allocation errors.
+;;; Since the returned pointer is already casted to the right type, it is
+;;; normally unnecessary to cast it explicitly, and doing so might hide memory
+;;; allocation errors.
 ;;; 
 ;;; struct_type :
 ;;; 	the type of the elements to allocate.
@@ -144,12 +155,17 @@
 ;;; 	a pointer to the allocated memory, cast to a pointer to struct_type.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_renew()
 ;;; 
-;;; #define             g_renew(struct_type, mem, n_structs)
+;;; #define g_renew(struct_type, mem, n_structs)
 ;;; 
-;;; Reallocates the memory pointed to by mem, so that it now has space for n_structs elements of type struct_type. It returns the new address of the memory, which may have been moved. Care is taken to avoid overflow when calculating the size of the allocated block.
+;;; Reallocates the memory pointed to by mem, so that it now has space for
+;;; n_structs elements of type struct_type. It returns the new address of the
+;;; memory, which may have been moved. Care is taken to avoid overflow when
+;;; calculating the size of the allocated block.
 ;;; 
 ;;; struct_type :
 ;;; 	the type of the elements to allocate
@@ -163,13 +179,18 @@
 ;;; Returns :
 ;;; 	a pointer to the new allocated memory, cast to a pointer to struct_type
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_new()
 ;;; 
-;;; #define             g_try_new(struct_type, n_structs)
+;;; #define g_try_new(struct_type, n_structs)
 ;;; 
-;;; Attempts to allocate n_structs elements of type struct_type, and returns NULL on failure. Contrast with g_new(), which aborts the program on failure. The returned pointer is cast to a pointer to the given type. The function returns NULL when n_structs is 0 of if an overflow occurs.
+;;; Attempts to allocate n_structs elements of type struct_type, and returns
+;;; NULL on failure. Contrast with g_new(), which aborts the program on failure.
+;;; The returned pointer is cast to a pointer to the given type. The function
+;;; returns NULL when n_structs is 0 of if an overflow occurs.
 ;;; 
 ;;; struct_type :
 ;;; 	the type of the elements to allocate
@@ -182,13 +203,19 @@
 ;;; 
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_new0()
 ;;; 
-;;; #define             g_try_new0(struct_type, n_structs)
+;;; #define g_try_new0(struct_type, n_structs)
 ;;; 
-;;; Attempts to allocate n_structs elements of type struct_type, initialized to 0's, and returns NULL on failure. Contrast with g_new0(), which aborts the program on failure. The returned pointer is cast to a pointer to the given type. The function returns NULL when n_structs is 0 of if an overflow occurs.
+;;; Attempts to allocate n_structs elements of type struct_type, initialized to
+;;; 0's, and returns NULL on failure. Contrast with g_new0(), which aborts the
+;;; program on failure. The returned pointer is cast to a pointer to the given
+;;; type. The function returns NULL when n_structs is 0 of if an overflow
+;;; occurs.
 ;;; 
 ;;; struct_type :
 ;;; 	the type of the elements to allocate
@@ -202,12 +229,18 @@
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_renew()
 ;;; 
-;;; #define             g_try_renew(struct_type, mem, n_structs)
+;;; #define g_try_renew(struct_type, mem, n_structs)
 ;;; 
-;;; Attempts to reallocate the memory pointed to by mem, so that it now has space for n_structs elements of type struct_type, and returns NULL on failure. Contrast with g_renew(), which aborts the program on failure. It returns the new address of the memory, which may have been moved. The function returns NULL if an overflow occurs.
+;;; Attempts to reallocate the memory pointed to by mem, so that it now has
+;;; space for n_structs elements of type struct_type, and returns NULL on
+;;; failure. Contrast with g_renew(), which aborts the program on failure. It
+;;; returns the new address of the memory, which may have been moved. The
+;;; function returns NULL if an overflow occurs.
 ;;; 
 ;;; struct_type :
 ;;; 	the type of the elements to allocate
@@ -223,6 +256,8 @@
 ;;; 
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_malloc ()
@@ -232,21 +267,22 @@
 ;;; Allocates n_bytes bytes of memory. If n_bytes is 0 it returns NULL.
 ;;; 
 ;;; n_bytes :
-;;; 	the number of bytes to allocate
+;;;     the number of bytes to allocate
 ;;; 
 ;;; Returns :
-;;; 	a pointer to the allocated memory
+;;;     a pointer to the allocated memory
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-malloc "g_malloc0") :pointer
+(defcfun (g-malloc "g_malloc") :pointer
   (n-bytes gsize))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_malloc0 ()
 ;;; 
-;;; gpointer            g_malloc0                           (gsize n_bytes);
+;;; gpointer g_malloc0 (gsize n_bytes)
 ;;; 
-;;; Allocates n_bytes bytes of memory, initialized to 0's. If n_bytes is 0 it returns NULL.
+;;; Allocates n_bytes bytes of memory, initialized to 0's. If n_bytes is 0 it
+;;; returns NULL.
 ;;; 
 ;;; n_bytes :
 ;;; 	the number of bytes to allocate
@@ -255,13 +291,19 @@
 ;;; 	a pointer to the allocated memory
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-malloc0 "g_malloc0") :pointer
+  (n-bytes gsize))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_realloc ()
 ;;; 
-;;; gpointer            g_realloc                           (gpointer mem,
-;;;                                                          gsize n_bytes);
+;;; gpointer g_realloc (gpointer mem, gsize n_bytes)
 ;;; 
-;;; Reallocates the memory pointed to by mem, so that it now has space for n_bytes bytes of memory. It returns the new address of the memory, which may have been moved. mem may be NULL, in which case it's considered to have zero-length. n_bytes may be 0, in which case NULL will be returned and mem will be freed unless it is NULL.
+;;; Reallocates the memory pointed to by mem, so that it now has space for
+;;; n_bytes bytes of memory. It returns the new address of the memory, which may
+;;; have been moved. mem may be NULL, in which case it's considered to have
+;;; zero-length. n_bytes may be 0, in which case NULL will be returned and mem
+;;; will be freed unless it is NULL.
 ;;; 
 ;;; mem :
 ;;; 	the memory to reallocate
@@ -273,12 +315,17 @@
 ;;; 	the new address of the allocated memory
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-realloc "g_realloc") :pointer
+  (mem :pointer)
+  (n-bytes gsize))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_malloc ()
 ;;; 
-;;; gpointer            g_try_malloc                        (gsize n_bytes);
+;;; gpointer g_try_malloc (gsize n_bytes)
 ;;; 
-;;; Attempts to allocate n_bytes, and returns NULL on failure. Contrast with g_malloc(), which aborts the program on failure.
+;;; Attempts to allocate n_bytes, and returns NULL on failure. Contrast with
+;;; g_malloc(), which aborts the program on failure.
 ;;; 
 ;;; n_bytes :
 ;;; 	number of bytes to allocate.
@@ -287,12 +334,15 @@
 ;;; 	the allocated memory, or NULL.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_malloc0 ()
 ;;; 
-;;; gpointer            g_try_malloc0                       (gsize n_bytes);
+;;; gpointer g_try_malloc0 (gsize n_bytes)
 ;;; 
-;;; Attempts to allocate n_bytes, initialized to 0's, and returns NULL on failure. Contrast with g_malloc0(), which aborts the program on failure.
+;;; Attempts to allocate n_bytes, initialized to 0's, and returns NULL on
+;;; failure. Contrast with g_malloc0(), which aborts the program on failure.
 ;;; 
 ;;; n_bytes :
 ;;; 	number of bytes to allocate
@@ -303,13 +353,16 @@
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_realloc ()
 ;;; 
-;;; gpointer            g_try_realloc                       (gpointer mem,
-;;;                                                          gsize n_bytes);
+;;; gpointer g_try_realloc (gpointer mem, gsize n_bytes)
 ;;; 
-;;; Attempts to realloc mem to a new size, n_bytes, and returns NULL on failure. Contrast with g_realloc(), which aborts the program on failure. If mem is NULL, behaves the same as g_try_malloc().
+;;; Attempts to realloc mem to a new size, n_bytes, and returns NULL on failure.
+;;; Contrast with g_realloc(), which aborts the program on failure. If mem is
+;;; NULL, behaves the same as g_try_malloc().
 ;;; 
 ;;; mem :
 ;;; 	previously-allocated memory, or NULL.
@@ -321,13 +374,16 @@
 ;;; 	the allocated memory, or NULL.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_malloc_n ()
 ;;; 
-;;; gpointer            g_malloc_n                          (gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_malloc_n (gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_malloc(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_malloc(), allocating
+;;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;;; overflow during multiplication.
 ;;; 
 ;;; n_blocks :
 ;;; 	the number of blocks to allocate
@@ -340,14 +396,17 @@
 ;;; 
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_malloc0_n ()
 ;;; 
-;;; gpointer            g_malloc0_n                         (gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_malloc0_n (gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_malloc0(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_malloc0(), allocating
+;;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;;; overflow during multiplication.
 ;;; 
 ;;; n_blocks :
 ;;; 	the number of blocks to allocate
@@ -361,14 +420,16 @@
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_realloc_n ()
 ;;; 
-;;; gpointer            g_realloc_n                         (gpointer mem,
-;;;                                                          gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_realloc_n (gpointer mem, gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_realloc(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_realloc(), allocating
+;;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;;; overflow during multiplication.
 ;;; 
 ;;; mem :
 ;;; 	the memory to reallocate
@@ -385,13 +446,16 @@
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_malloc_n ()
 ;;; 
-;;; gpointer            g_try_malloc_n                      (gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_try_malloc_n (gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_try_malloc(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_try_malloc(), allocating
+;;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;;; overflow during multiplication.
 ;;; 
 ;;; n_blocks :
 ;;; 	the number of blocks to allocate
@@ -405,13 +469,16 @@
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_malloc0_n ()
 ;;; 
-;;; gpointer            g_try_malloc0_n                     (gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_try_malloc0_n (gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_try_malloc0(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_try_malloc0(), allocating
+;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;; overflow during multiplication.
 ;;; 
 ;;; n_blocks :
 ;;; 	the number of blocks to allocate
@@ -425,14 +492,16 @@
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_try_realloc_n ()
 ;;; 
-;;; gpointer            g_try_realloc_n                     (gpointer mem,
-;;;                                                          gsize n_blocks,
-;;;                                                          gsize n_block_bytes);
+;;; gpointer g_try_realloc_n (gpointer mem, gsize n_blocks, gsize n_block_bytes)
 ;;; 
-;;; This function is similar to g_try_realloc(), allocating (n_blocks * n_block_bytes) bytes, but care is taken to detect possible overflow during multiplication.
+;;; This function is similar to g_try_realloc(), allocating
+;;; (n_blocks * n_block_bytes) bytes, but care is taken to detect possible
+;;; overflow during multiplication.
 ;;; 
 ;;; mem :
 ;;; 	previously-allocated memory, or NULL.
@@ -449,6 +518,8 @@
 ;;; Since 2.24
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_free ()
 ;;; 
@@ -457,7 +528,7 @@
 ;;; Frees the memory pointed to by mem. If mem is NULL it simply returns.
 ;;; 
 ;;; mem :
-;;; 	the memory to free
+;;;     the memory to free
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-free :void
@@ -471,6 +542,8 @@
 ;;; This variable is TRUE if the G_DEBUG environment variable includes the key
 ;;; gc-friendly.
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_alloca()
@@ -510,6 +583,8 @@
 ;;; 	space for size bytes, allocated on the stack
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_newa()
 ;;; 
@@ -526,6 +601,8 @@
 ;;; Returns :
 ;;; 	Pointer to stack space for n_structs chunks of type struct_type
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_memmove()
@@ -549,6 +626,8 @@
 ;;; 	the number of bytes to copy.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_memdup ()
 ;;; 
@@ -568,20 +647,19 @@
 ;;;     NULL.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; struct GMemVTable
 ;;; 
 ;;; struct GMemVTable {
-;;;   gpointer (*malloc)      (gsize    n_bytes);
-;;;   gpointer (*realloc)     (gpointer mem,
-;;; 			   gsize    n_bytes);
+;;;   gpointer (*malloc)      (gsize n_bytes);
+;;;   gpointer (*realloc)     (gpointer mem, gsize n_bytes);
 ;;;   void     (*free)        (gpointer mem);
 ;;;   /* optional; set to NULL if not used ! */
-;;;   gpointer (*calloc)      (gsize    n_blocks,
-;;; 			   gsize    n_block_bytes);
-;;;   gpointer (*try_malloc)  (gsize    n_bytes);
-;;;   gpointer (*try_realloc) (gpointer mem,
-;;; 			   gsize    n_bytes);
+;;;   gpointer (*calloc)      (gsize n_blocks, gsize n_block_bytes);
+;;;   gpointer (*try_malloc)  (gsize n_bytes);
+;;;   gpointer (*try_realloc) (gpointer mem, gsize n_bytes);
 ;;; };
 ;;; 
 ;;; A set of functions used to perform memory allocation. The same GMemVTable
@@ -607,6 +685,8 @@
 ;;; 	function to use for reallocating memory without a default error handler.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_mem_set_vtable ()
 ;;; 
@@ -623,6 +703,8 @@
 ;;; vtable :
 ;;; 	table of memory allocation routines.
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_mem_is_system_malloc ()
@@ -641,6 +723,8 @@
 ;;; 	if TRUE, malloc() and g_malloc() can be mixed.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; glib_mem_profiler_table
 ;;; 
@@ -650,6 +734,8 @@
 ;;; functions. Use them together with g_mem_profile() in order to get 
 ;;; information about the memory allocation pattern of your program.
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_mem_profile ()
@@ -667,5 +753,6 @@
 ;;; installed the glib_mem_profiler_table with g_mem_set_vtable().
 ;;; ----------------------------------------------------------------------------
 
-;;; --- End of file glib. mem.lisp ---------------------------------------------
+;;; *** NOT IMPLEMENTED ***
 
+;;; --- End of file glib. mem.lisp ---------------------------------------------
