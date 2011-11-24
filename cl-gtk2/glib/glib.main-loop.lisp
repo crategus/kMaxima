@@ -30,7 +30,10 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;;                     GMainLoop;
+;;; struct              GMainLoop;
+;;; struct              GMainContext;
+;;; struct              GPollFD;
+;;;
 ;;; GMainLoop *         g_main_loop_new                     (GMainContext *context,
 ;;;                                                          gboolean is_running);
 ;;; GMainLoop *         g_main_loop_ref                     (GMainLoop *loop);
@@ -51,7 +54,6 @@
 ;;; #define             G_PRIORITY_DEFAULT_IDLE
 ;;; #define             G_PRIORITY_LOW
 ;;; 
-;;;                     GMainContext;
 ;;; GMainContext *      g_main_context_new                  (void);
 ;;; GMainContext *      g_main_context_ref                  (GMainContext *context);
 ;;; void                g_main_context_unref                (GMainContext *context);
@@ -158,7 +160,6 @@
 ;;;                                                          gpointer data,
 ;;;                                                          GDestroyNotify notify);
 ;;; 
-;;; struct              GPollFD;
 ;;; gint                g_poll                              (GPollFD *fds,
 ;;;                                                          guint nfds,
 ;;;                                                          gint timeout);
@@ -217,38 +218,77 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; The main event loop manages all the available sources of events for GLib and GTK+ applications. These events can come from any number of different types of sources such as file descriptors (plain files, pipes or sockets) and timeouts. New types of event sources can also be added using g_source_attach().
+;;; The main event loop manages all the available sources of events for GLib and
+;;; GTK+ applications. These events can come from any number of different types
+;;; of sources such as file descriptors (plain files, pipes or sockets) and
+;;; timeouts. New types of event sources can also be added using
+;;; g_source_attach().
 ;;; 
-;;; To allow multiple independent sets of sources to be handled in different threads, each source is associated with a GMainContext. A GMainContext can only be running in a single thread, but sources can be added to it and removed from it from other threads.
+;;; To allow multiple independent sets of sources to be handled in different
+;;; threads, each source is associated with a GMainContext. A GMainContext can
+;;; only be running in a single thread, but sources can be added to it and
+;;; removed from it from other threads.
 ;;; 
-;;; Each event source is assigned a priority. The default priority, G_PRIORITY_DEFAULT, is 0. Values less than 0 denote higher priorities. Values greater than 0 denote lower priorities. Events from high priority sources are always processed before events from lower priority sources.
+;;; Each event source is assigned a priority. The default priority,
+;;; G_PRIORITY_DEFAULT, is 0. Values less than 0 denote higher priorities.
+;;; Values greater than 0 denote lower priorities. Events from high priority
+;;; sources are always processed before events from lower priority sources.
 ;;; 
-;;; Idle functions can also be added, and assigned a priority. These will be run whenever no events with a higher priority are ready to be processed.
+;;; Idle functions can also be added, and assigned a priority. These will be run
+;;; whenever no events with a higher priority are ready to be processed.
 ;;; 
-;;; The GMainLoop data type represents a main event loop. A GMainLoop is created with g_main_loop_new(). After adding the initial event sources, g_main_loop_run() is called. This continuously checks for new events from each of the event sources and dispatches them. Finally, the processing of an event from one of the sources leads to a call to g_main_loop_quit() to exit the main loop, and g_main_loop_run() returns.
+;;; The GMainLoop data type represents a main event loop. A GMainLoop is created
+;;; with g_main_loop_new(). After adding the initial event sources,
+;;; g_main_loop_run() is called. This continuously checks for new events from
+;;; each of the event sources and dispatches them. Finally, the processing of an
+;;; event from one of the sources leads to a call to g_main_loop_quit() to exit
+;;; the main loop, and g_main_loop_run() returns.
 ;;; 
-;;; It is possible to create new instances of GMainLoop recursively. This is often used in GTK+ applications when showing modal dialog boxes. Note that event sources are associated with a particular GMainContext, and will be checked and dispatched for all main loops associated with that GMainContext.
+;;; It is possible to create new instances of GMainLoop recursively. This is
+;;; often used in GTK+ applications when showing modal dialog boxes. Note that
+;;; event sources are associated with a particular GMainContext, and will be
+;;; checked and dispatched for all main loops associated with that GMainContext.
 ;;; 
-;;; GTK+ contains wrappers of some of these functions, e.g. gtk_main(), gtk_main_quit() and gtk_events_pending().
+;;; GTK+ contains wrappers of some of these functions, e.g. gtk_main(),
+;;; gtk_main_quit() and gtk_events_pending().
 ;;; 
 ;;; Creating new source types
 ;;; 
-;;; One of the unusual features of the GMainLoop functionality is that new types of event source can be created and used in addition to the builtin type of event source. A new event source type is used for handling GDK events. A new source type is created by deriving from the GSource structure. The derived type of source is represented by a structure that has the GSource structure as a first element, and other elements specific to the new source type. To create an instance of the new source type, call g_source_new() passing in the size of the derived structure and a table of functions. These GSourceFuncs determine the behavior of the new source type.
+;;; One of the unusual features of the GMainLoop functionality is that new types
+;;; of event source can be created and used in addition to the builtin type of
+;;; event source. A new event source type is used for handling GDK events. A new
+;;; source type is created by deriving from the GSource structure. The derived
+;;; type of source is represented by a structure that has the GSource structure
+;;; as a first element, and other elements specific to the new source type. To
+;;; create an instance of the new source type, call g_source_new() passing in
+;;; the size of the derived structure and a table of functions. These
+;;; GSourceFuncs determine the behavior of the new source type.
 ;;; 
-;;; New source types basically interact with the main context in two ways. Their prepare function in GSourceFuncs can set a timeout to determine the maximum amount of time that the main loop will sleep before checking the source again. In addition, or as well, the source can add file descriptors to the set that the main context checks using g_source_add_poll().
+;;; New source types basically interact with the main context in two ways. Their
+;;; prepare function in GSourceFuncs can set a timeout to determine the maximum
+;;; amount of time that the main loop will sleep before checking the source
+;;; again. In addition, or as well, the source can add file descriptors to the
+;;; set that the main context checks using g_source_add_poll().
 ;;; 
 ;;; Customizing the main loop iteration
 ;;; 
-;;; Single iterations of a GMainContext can be run with g_main_context_iteration(). In some cases, more detailed control of exactly how the details of the main loop work is desired, for instance, when integrating the GMainLoop with an external main loop. In such cases, you can call the component functions of g_main_context_iteration() directly. These functions are g_main_context_prepare(), g_main_context_query(), g_main_context_check() and g_main_context_dispatch().
+;;; Single iterations of a GMainContext can be run with
+;;; g_main_context_iteration(). In some cases, more detailed control of exactly
+;;; how the details of the main loop work is desired, for instance, when
+;;; integrating the GMainLoop with an external main loop. In such cases, you can
+;;; call the component functions of g_main_context_iteration() directly. These
+;;; functions are g_main_context_prepare(), g_main_context_query(),
+;;; g_main_context_check() and g_main_context_dispatch().
 ;;; 
-;;; The operation of these functions can best be seen in terms of a state diagram, as shown in Figure 1, “States of a Main Context”.
+;;; The operation of these functions can best be seen in terms of a state
+;;; diagram, as shown in Figure 1, “States of a Main Context”.
 ;;; 
 ;;; Figure 1. States of a Main Context
 ;;; States of a Main Context
 ;;; ----------------------------------------------------------------------------
 
 (in-package :glib)
-
+  
 ;;; ----------------------------------------------------------------------------
 ;;; GMainLoop
 ;;; 
@@ -257,6 +297,168 @@
 ;;; The GMainLoop struct is an opaque data type representing the main event
 ;;; loop of a GLib or GTK+ application.
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-main-loop)
+
+;;; ----------------------------------------------------------------------------
+;;; GMainContext
+;;; 
+;;; typedef struct _GMainContext GMainContext;
+;;; 
+;;; The GMainContext struct is an opaque data type representing a set of
+;;; sources to be handled in a main loop.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-main-context)
+
+;;; ----------------------------------------------------------------------------
+;;; struct GPollFD
+;;; 
+;;; struct GPollFD {
+;;; #if defined (G_OS_WIN32) && GLIB_SIZEOF_VOID_P == 8
+;;;   gint64 fd;
+;;; #else
+;;;   gint		fd;
+;;; #endif
+;;;   gushort 	events;
+;;;   gushort 	revents;
+;;; };
+;;; 
+;;; gint64 fd;
+;;; 
+;;; gint fd;
+;;; 
+;;; gushort events;
+;;; 	a bitwise combination from GIOCondition, specifying which events should
+;;;     be polled for. Typically for reading from a file descriptor you would
+;;;     use G_IO_IN | G_IO_HUP | G_IO_ERR, and for writing you would use
+;;;     G_IO_OUT | G_IO_ERR.
+;;; 
+;;; gushort revents;
+;;; 	a bitwise combination of flags from GIOCondition, returned from the
+;;;     poll() function to indicate which events occurred.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-poll-fd
+  (fd :int) ;; TODO: #if defined (G_OS_WIN32) && GLIB_SIZEOF_VOID_P == 8
+  (events :ushort)
+  (revent :ushort))
+
+;;; ---------------------------------------------------------------------------- 
+;;; struct GSource
+;;; 
+;;; struct GSource {
+;;; };
+;;; 
+;;; The GSource struct is an opaque data type representing an event source.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-source)
+
+;;; ----------------------------------------------------------------------------
+;;; struct GSourceFuncs
+;;; 
+;;; struct GSourceFuncs {
+;;;   gboolean (*prepare)  (GSource    *source,
+;;;                         gint       *timeout_);
+;;;   gboolean (*check)    (GSource    *source);
+;;;   gboolean (*dispatch) (GSource    *source,
+;;;                         GSourceFunc callback,
+;;;                         gpointer    user_data);
+;;;   void     (*finalize) (GSource    *source); /* Can be NULL */
+;;; 
+;;;   /* For use by g_source_set_closure */
+;;;   GSourceFunc     closure_callback;        
+;;;   GSourceDummyMarshal closure_marshal; /* Really is of type GClosureMarshal */
+;;; };
+;;; 
+;;; The GSourceFuncs struct contains a table of functions used to handle event
+;;; sources in a generic manner.
+;;; 
+;;; For idle sources, the prepare and check functions always return TRUE to
+;;; indicate that the source is always ready to be processed. The prepare
+;;; function also returns a timeout value of 0 to ensure that the poll() call
+;;; doesn't block (since that would be time wasted which could have been spent
+;;; running the idle function).
+;;; 
+;;; For timeout sources, the prepare and check functions both return TRUE if the
+;;; timeout interval has expired. The prepare function also returns a timeout
+;;; value to ensure that the poll() call doesn't block too long and miss the
+;;; next timeout.
+;;; 
+;;; For file descriptor sources, the prepare function typically returns FALSE,
+;;; since it must wait until poll() has been called before it knows whether any
+;;; events need to be processed. It sets the returned timeout to -1 to indicate
+;;; that it doesn't mind how long the poll() call blocks. In the check function,
+;;; it tests the results of the poll() call to see if the required condition has
+;;; been met, and returns TRUE if so.
+;;; 
+;;; prepare ()
+;;; 	Called before all the file descriptors are polled. If the source can
+;;;     determine that it is ready here (without waiting for the results of the
+;;;     poll() call) it should return TRUE. It can also return a timeout_ value
+;;;     which should be the maximum timeout (in milliseconds) which should be
+;;;     passed to the poll() call. The actual timeout used will be -1 if all
+;;;     sources returned -1, or it will be the minimum of all the
+;;;     timeout_ values returned which were >= 0.
+;;; 
+;;; check ()
+;;; 	Called after all the file descriptors are polled. The source should
+;;;     return TRUE if it is ready to be dispatched. Note that some time may
+;;;     have passed since the previous prepare function was called, so the
+;;;     source should be checked again here.
+;;; 
+;;; dispatch ()
+;;; 	Called to dispatch the event source, after it has returned TRUE in
+;;;     either its prepare or its check function. The dispatch function is
+;;;     passed in a callback function and data. The callback function may be
+;;;     NULL if the source was never connected to a callback using
+;;;     g_source_set_callback(). The dispatch function should call the callback
+;;;     function with user_data and whatever additional parameters are needed
+;;;     for this type of event source.
+;;; 
+;;; finalize ()
+;;; 	Called when the source is finalized.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-source-funcs
+  (prepare :pointer)
+  (check :pointer)
+  (dispatch :pointer)
+  (finalize :pointer)
+  (closure-callback :pointer)
+  (closure-marshal :pointer))
+
+;;; ---------------------------------------------------------------------------- 	
+;;; struct GSourceCallbackFuncs
+;;; 
+;;; struct GSourceCallbackFuncs {
+;;;   void (*ref)   (gpointer     cb_data);
+;;;   void (*unref) (gpointer     cb_data);
+;;;   void (*get)   (gpointer     cb_data,
+;;;                  GSource     *source, 
+;;;                  GSourceFunc *func,
+;;;                  gpointer    *data);
+;;; };
+;;; 
+;;; The GSourceCallbackFuncs struct contains functions for managing callback
+;;; objects.
+;;; 
+;;; ref ()
+;;; 	Called when a reference is added to the callback object
+;;; 
+;;; unref ()
+;;; 	Called when a reference to the callback object is dropped
+;;; 
+;;; get ()
+;;; 	Called to extract the callback function and data from the callback
+;;;     object.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-source-callback-funcs
+  (ref :pointer)
+  (unref :pointer)
+  (get :pointer))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_new ()
@@ -526,14 +728,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defconstant +g-priority-low+ 300)
-
-;;; ----------------------------------------------------------------------------
-;;; GMainContext
-;;; 
-;;; typedef struct _GMainContext GMainContext;
-;;; 
-;;; The GMainContext struct is an opaque data type representing a set of sources to be handled in a main loop.
-;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_new ()
@@ -1858,32 +2052,6 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
-;;; struct GPollFD
-;;; 
-;;; struct GPollFD {
-;;; #if defined (G_OS_WIN32) && GLIB_SIZEOF_VOID_P == 8
-;;;   gint64 fd;
-;;; #else
-;;;   gint		fd;
-;;; #endif
-;;;   gushort 	events;
-;;;   gushort 	revents;
-;;; };
-;;; 
-;;; gint64 fd;
-;;; 	
-;;; 
-;;; gint fd;
-;;; 	
-;;; 
-;;; gushort events;
-;;; 	a bitwise combination from GIOCondition, specifying which events should be polled for. Typically for reading from a file descriptor you would use G_IO_IN | G_IO_HUP | G_IO_ERR, and for writing you would use G_IO_OUT | G_IO_ERR.
-;;; 
-;;; gushort revents;
-;;; 	a bitwise combination of flags from GIOCondition, returned from the poll() function to indicate which events occurred.
-;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
 ;;; g_poll ()
 ;;; 
 ;;; gint                g_poll                              (GPollFD *fds,
@@ -1915,84 +2083,17 @@
 ;;; G_POLLFD_FORMAT
 ;;; 
 ;;; #define G_POLLFD_FORMAT "%#I64x"
-;;; 
-;;; struct GSource
-;;; 
-;;; struct GSource {
-;;; };
-;;; 
-;;; The GSource struct is an opaque data type representing an event source.
-;;; GSourceDummyMarshal ()
-;;; 
-;;; void                (*GSourceDummyMarshal)              (void);
-;;; 
-;;; This is just a placeholder for GClosureMarshal, which cannot be used here for dependency reasons.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
-;;; struct GSourceFuncs
+;;; GSourceDummyMarshal ()
 ;;; 
-;;; struct GSourceFuncs {
-;;;   gboolean (*prepare)  (GSource    *source,
-;;;                         gint       *timeout_);
-;;;   gboolean (*check)    (GSource    *source);
-;;;   gboolean (*dispatch) (GSource    *source,
-;;;                         GSourceFunc callback,
-;;;                         gpointer    user_data);
-;;;   void     (*finalize) (GSource    *source); /* Can be NULL */
+;;; void (*GSourceDummyMarshal) (void)
 ;;; 
-;;;   /* For use by g_source_set_closure */
-;;;   GSourceFunc     closure_callback;        
-;;;   GSourceDummyMarshal closure_marshal; /* Really is of type GClosureMarshal */
-;;; };
-;;; 
-;;; The GSourceFuncs struct contains a table of functions used to handle event sources in a generic manner.
-;;; 
-;;; For idle sources, the prepare and check functions always return TRUE to indicate that the source is always ready to be processed. The prepare function also returns a timeout value of 0 to ensure that the poll() call doesn't block (since that would be time wasted which could have been spent running the idle function).
-;;; 
-;;; For timeout sources, the prepare and check functions both return TRUE if the timeout interval has expired. The prepare function also returns a timeout value to ensure that the poll() call doesn't block too long and miss the next timeout.
-;;; 
-;;; For file descriptor sources, the prepare function typically returns FALSE, since it must wait until poll() has been called before it knows whether any events need to be processed. It sets the returned timeout to -1 to indicate that it doesn't mind how long the poll() call blocks. In the check function, it tests the results of the poll() call to see if the required condition has been met, and returns TRUE if so.
-;;; 
-;;; prepare ()
-;;; 	Called before all the file descriptors are polled. If the source can determine that it is ready here (without waiting for the results of the poll() call) it should return TRUE. It can also return a timeout_ value which should be the maximum timeout (in milliseconds) which should be passed to the poll() call. The actual timeout used will be -1 if all sources returned -1, or it will be the minimum of all the timeout_ values returned which were >= 0.
-;;; 
-;;; check ()
-;;; 	Called after all the file descriptors are polled. The source should return TRUE if it is ready to be dispatched. Note that some time may have passed since the previous prepare function was called, so the source should be checked again here.
-;;; 
-;;; dispatch ()
-;;; 	Called to dispatch the event source, after it has returned TRUE in either its prepare or its check function. The dispatch function is passed in a callback function and data. The callback function may be NULL if the source was never connected to a callback using g_source_set_callback(). The dispatch function should call the callback function with user_data and whatever additional parameters are needed for this type of event source.
-;;; 
-;;; finalize ()
-;;; 	Called when the source is finalized.
-;;; 
-;;; GSourceFunc closure_callback;
-;;; 	
-;;; 
-;;; GSourceDummyMarshal closure_marshal;
-;;; 	
-;;; struct GSourceCallbackFuncs
-;;; 
-;;; struct GSourceCallbackFuncs {
-;;;   void (*ref)   (gpointer     cb_data);
-;;;   void (*unref) (gpointer     cb_data);
-;;;   void (*get)   (gpointer     cb_data,
-;;;                  GSource     *source, 
-;;;                  GSourceFunc *func,
-;;;                  gpointer    *data);
-;;; };
-;;; 
-;;; The GSourceCallbackFuncs struct contains functions for managing callback objects.
-;;; 
-;;; ref ()
-;;; 	Called when a reference is added to the callback object
-;;; 
-;;; unref ()
-;;; 	Called when a reference to the callback object is dropped
-;;; 
-;;; get ()
-;;; 	Called to extract the callback function and data from the callback object.
+;;; This is just a placeholder for GClosureMarshal, which cannot be used here
+;;; for dependency reasons.
 ;;; ----------------------------------------------------------------------------
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_new ()
