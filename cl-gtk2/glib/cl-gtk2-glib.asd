@@ -31,8 +31,7 @@
   :license "LLGPL"
   :serial t
   :components ((:file "glib.package")
-               
-               (:file "glib")
+               (:file "glib.init")
                (:file "glib.mem")
                (:file "glib.date")
                (:file "glib.threads")
@@ -45,9 +44,7 @@
                (:file "glib.error")
                (:file "glib.utils")
                (:file "glib.rand")
-               
-               (:file "glib.lisp")
-               )
+               (:file "glib.lisp"))
   :depends-on (:cffi
                :trivial-garbage
                :iterate
