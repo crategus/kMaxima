@@ -33,8 +33,11 @@
   :components ((:file "glib.package")
                
                (:file "glib")
-               (:file "glib.main-loop")
+               (:file "glib.mem")
+               (:file "glib.date")
                (:file "glib.threads")
+               (:file "glib.main-loop")
+               (:file "glib.spawn")
                (:file "glib.glist")
                (:file "glib.gslist")
                (:file "glib.string")
