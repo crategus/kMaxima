@@ -36,13 +36,18 @@
 ;;; #define   G_THREADS_IMPL
 ;;; #define   G_THREAD_ERROR
 ;;; enum      GThreadE
+;;;
 ;;; struct    GThreadFunctions;
+;;; struct    GCond
+
 ;;; void      g_thread_init                   (GThreadFunctions *vtable);
 ;;; gboolean  g_thread_supported              ();
 ;;; gboolean  g_thread_get_initialized        (v
 ;;; gpointer  (*GThreadFunc)                  (gpointer data);
+;;; 
 ;;; enum      GThreadPrior
-;;; struct    GThr
+;;;
+;;; struct    GThread
 ;;; GThread * g_thread_create                 (GThreadFunc func,
 ;;;                                            gpointer data,
 ;;;                                            gboolean joinable,
@@ -62,13 +67,13 @@
 ;;; void      g_thread_exit                   (gpointer retval);
 ;;; void      g_thread_foreach                (GFunc thread_func,
 ;;;                                            gpointer user_d
-;;;           GMu
+;;;           GMutex
 ;;; GMutex *  g_mutex_new                     ();
 ;;; void      g_mutex_lock                    (GMutex *mutex);
 ;;; gboolean  g_mutex_trylock                 (GMutex *mutex);
 ;;; void      g_mutex_unlock                  (GMutex *mutex);
 ;;; void      g_mutex_free                    (GMutex *mu
-;;;           GStaticMu
+;;;           GStaticMutex
 ;;; #define   G_STATIC_MUTEX_
 ;;; void      g_static_mutex_init             (GStaticMutex *mutex);
 ;;; void      g_static_mutex_lock             (GStaticMutex *mutex);
@@ -102,7 +107,6 @@
 ;;; gboolean  g_static_rw_lock_writer_trylock (GStaticRWLock *lock);
 ;;; void      g_static_rw_lock_writer_unlock  (GStaticRWLock *lock);
 ;;; void      g_static_rw_lock_free           (GStaticRWLock *l
-;;;           GC
 ;;; GCond*    g_cond_new                      ();
 ;;; void      g_cond_signal                   (GCond *cond);
 ;;; void      g_cond_broadcast                (GCond *cond);
@@ -257,6 +261,69 @@
 
 (defcenum g-thread-error
   :g-thread-error-again)
+
+;;; ----------------------------------------------------------------------------
+;;; GCond
+;;; 
+;;; typedef struct _GCond GCond;
+;;; 
+;;; The GCond struct is an opaque data structure that represents a condition.
+;;; Threads can block on a GCond if they find a certain condition to be false.
+;;; If other threads change the state of this condition they signal the GCond,
+;;; and that causes the waiting threads to be woken up.
+;;; 
+;;; Example 8.  Using GCond to block a thread until a condition is satisfied
+;;; 
+;;;  1 GCond* data_cond = NULL; /* Must be initialized somewhere */
+;;;  2 GMutex* data_mutex = NULL; /* Must be initialized somewhere */
+;;;  3 gpointer current_data = NULL;
+;;;  4
+;;;  5 void
+;;;  6 push_data (gpointer data)
+;;;  7 {
+;;;  8   g_mutex_lock (data_mutex);
+;;;  9   current_data = data;
+;;; 10   g_cond_signal (data_cond);
+;;; 11   g_mutex_unlock (data_mutex);
+;;; 12 }
+;;; 13
+;;; 14 gpointer
+;;; 15 pop_data (void)
+;;; 16 {
+;;; 17   gpointer data;
+;;; 18
+;;; 19   g_mutex_lock (data_mutex);
+;;; 20   while (!current_data)
+;;; 21     g_cond_wait (data_cond, data_mutex);
+;;; 22   data = current_data;
+;;; 23   current_data = NULL;
+;;; 24   g_mutex_unlock (data_mutex);
+;;; 25 
+;;; 26   return data;
+;;; 27 }
+;;; 
+;;; Whenever a thread calls pop_data() now, it will wait until current_data is
+;;; non-NULL, i.e. until some other thread has called push_data().
+;;; 
+;;; Note
+;;; 
+;;; It is important to use the g_cond_wait() and g_cond_timed_wait() functions
+;;; only inside a loop which checks for the condition to be true. It is not
+;;; guaranteed that the waiting thread will find the condition fulfilled after
+;;; it wakes up, even if the signaling thread left the condition in that state:
+;;; another thread may have altered the condition before the waiting thread got
+;;; the chance to be woken up, even if the condition itself is protected by a
+;;; GMutex, like above.
+;;; 
+;;; A GCond should only be accessed via the following functions.
+;;; 
+;;; Note
+;;; 
+;;; All of the g_cond_* functions are actually macros. Apart from taking their
+;;; addresses, you can however use them as if they were functions.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-cond)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GThreadFunctions
@@ -524,6 +591,8 @@
 ;;; g_thread_join() is called for that thread.
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-thread)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_create ()
 ;;; 
@@ -753,149 +822,98 @@
 ;;; 
 ;;; typedef struct _GMutex GMutex;
 ;;; 
-;;; The GMutex struct is an opaque data structure to represent a mutex (mutual exclusion). It can be used to protect data against shared access. Take for example the following function:
+;;; The GMutex struct is an opaque data structure to represent a mutex (mutual
+;;; exclusion). It can be used to protect data against shared access. Take for
+;;; example the following function:
 ;;; 
 ;;; Example 2. A function which will not work in a threaded environment
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 
-;;; 	
-;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   static int current_number = 0;
-;;; 
-;;;   /* now do a very complicated calculation to calculate the new
-;;;    * number, this might for example be a random number generator
-;;;    */
-;;;   current_number = calc_next_number (current_number);
-;;; 
-;;;   return current_number;
-;;; }
+;;;  1 int
+;;;  2 give_me_next_number (void)
+;;;  3 {
+;;;  4   static int current_number = 0;
+;;;  5 
+;;;  6   /* now do a very complicated calculation to calculate the new
+;;;  7    * number, this might for example be a random number generator
+;;;  8    */
+;;;  9   current_number = calc_next_number (current_number);
+;;; 10 
+;;; 11   return current_number;
+;;; 12 }
 ;;; 
 ;;; 
-;;; It is easy to see that this won't work in a multi-threaded application. There current_number must be protected against shared access. A first naive implementation would be:
+;;; It is easy to see that this won't work in a multi-threaded application.
+;;; There current_number must be protected against shared access. A first naive
+;;; implementation would be:
 ;;; 
 ;;; Example 3. The wrong way to write a thread-safe function
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
+;;;  1 int
+;;;  2 give_me_next_number (void)
+;;;  3 {
+;;;  4   static int current_number = 0;
+;;;  5   int ret_val;
+;;;  6   static GMutex * mutex = NULL;
+;;;  7 
+;;;  8   if (!mutex) mutex = g_mutex_new ();
+;;;  9
+;;; 10   g_mutex_lock (mutex);
+;;; 11   ret_val = current_number = calc_next_number (current_number);
+;;; 12   g_mutex_unlock (mutex);
+;;; 13 
+;;; 14   return ret_val;
+;;; 15 }
 ;;; 
-;;; 	
-;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   static int current_number = 0;
-;;;   int ret_val;
-;;;   static GMutex * mutex = NULL;
-;;; 
-;;;   if (!mutex) mutex = g_mutex_new ();
-;;; 
-;;;   g_mutex_lock (mutex);
-;;;   ret_val = current_number = calc_next_number (current_number);
-;;;   g_mutex_unlock (mutex);
-;;; 
-;;;   return ret_val;
-;;; }
-;;; 
-;;; 
-;;; This looks like it would work, but there is a race condition while constructing the mutex and this code cannot work reliable. Please do not use such constructs in your own programs! One working solution is:
+;;; This looks like it would work, but there is a race condition while
+;;; constructing the mutex and this code cannot work reliable. Please do not
+;;; use such constructs in your own programs! One working solution is:
 ;;; 
 ;;; Example 4. A correct thread-safe function
-;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
+;;;  
+;;;  1 static GMutex *give_me_next_number_mutex = NULL;
+;;;  2 
+;;;  3 /* this function must be called before any call to
+;;;  4  * give_me_next_number()
+;;;  5  *
+;;;  6  * it must be called exactly once.
+;;;  7  */
+;;;  8 void
+;;;  9 init_give_me_next_number (void)
+;;; 10 {
+;;; 11   g_assert (give_me_next_number_mutex == NULL);
+;;; 12   give_me_next_number_mutex = g_mutex_new ();
+;;; 13 }
 ;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
+;;; 15 int
+;;; 16 give_me_next_number (void)
+;;; 17 {
+;;; 18   static int current_number = 0;
+;;; 19   int ret_val;
+;;; 20 
+;;; 21   g_mutex_lock (give_me_next_number_mutex);
+;;; 22   ret_val = current_number = calc_next_number (current_number);
+;;; 23   g_mutex_unlock (give_me_next_number_mutex);
 ;;; 24
-;;; 25
-;;; 26
-;;; 
-;;; 	
-;;; 
-;;; static GMutex *give_me_next_number_mutex = NULL;
-;;; 
-;;; /* this function must be called before any call to
-;;;  * give_me_next_number()
-;;;  *
-;;;  * it must be called exactly once.
-;;;  */
-;;; void
-;;; init_give_me_next_number (void)
-;;; {
-;;;   g_assert (give_me_next_number_mutex == NULL);
-;;;   give_me_next_number_mutex = g_mutex_new ();
-;;; }
-;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   static int current_number = 0;
-;;;   int ret_val;
-;;; 
-;;;   g_mutex_lock (give_me_next_number_mutex);
-;;;   ret_val = current_number = calc_next_number (current_number);
-;;;   g_mutex_unlock (give_me_next_number_mutex);
-;;; 
-;;;   return ret_val;
-;;; }
-;;; 
+;;; 25   return ret_val;
+;;; 26 }
 ;;; 
 ;;; GStaticMutex provides a simpler and safer way of doing this.
 ;;; 
-;;; If you want to use a mutex, and your code should also work without calling g_thread_init() first, then you cannot use a GMutex, as g_mutex_new() requires that the thread system be initialized. Use a GStaticMutex instead.
+;;; If you want to use a mutex, and your code should also work without calling
+;;; g_thread_init() first, then you cannot use a GMutex, as g_mutex_new()
+;;; requires that the thread system be initialized. Use a GStaticMutex instead.
 ;;; 
 ;;; A GMutex should only be accessed via the following functions.
 ;;; 
 ;;; Note
 ;;; 
-;;; All of the g_mutex_* functions are actually macros. Apart from taking their addresses, you can however use them as if they were functions.
-;;; 
+;;; All of the g_mutex_* functions are actually macros. Apart from taking their
+;;; addresses, you can however use them as if they were functions.
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-mutex)
+
+;;; ---------------------------------------------------------------------------- 
 ;;; g_mutex_new ()
 ;;; 
 ;;; GMutex *            g_mutex_new                         ();
@@ -1436,85 +1454,10 @@
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to be freed.
-;;; GCond
-;;; 
-;;; typedef struct _GCond GCond;
-;;; 
-;;; The GCond struct is an opaque data structure that represents a condition. Threads can block on a GCond if they find a certain condition to be false. If other threads change the state of this condition they signal the GCond, and that causes the waiting threads to be woken up.
-;;; 
-;;; Example 8.  Using GCond to block a thread until a condition is satisfied
-;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
-;;; 24
-;;; 25
-;;; 26
-;;; 27
-;;; 
-;;; 	
-;;; 
-;;; GCond* data_cond = NULL; /* Must be initialized somewhere */
-;;; GMutex* data_mutex = NULL; /* Must be initialized somewhere */
-;;; gpointer current_data = NULL;
-;;; 
-;;; void
-;;; push_data (gpointer data)
-;;; {
-;;;   g_mutex_lock (data_mutex);
-;;;   current_data = data;
-;;;   g_cond_signal (data_cond);
-;;;   g_mutex_unlock (data_mutex);
-;;; }
-;;; 
-;;; gpointer
-;;; pop_data (void)
-;;; {
-;;;   gpointer data;
-;;; 
-;;;   g_mutex_lock (data_mutex);
-;;;   while (!current_data)
-;;;     g_cond_wait (data_cond, data_mutex);
-;;;   data = current_data;
-;;;   current_data = NULL;
-;;;   g_mutex_unlock (data_mutex);
-;;; 
-;;;   return data;
-;;; }
-;;; 
-;;; 
-;;; Whenever a thread calls pop_data() now, it will wait until current_data is non-NULL, i.e. until some other thread has called push_data().
-;;; 
-;;; Note
-;;; 
-;;; It is important to use the g_cond_wait() and g_cond_timed_wait() functions only inside a loop which checks for the condition to be true. It is not guaranteed that the waiting thread will find the condition fulfilled after it wakes up, even if the signaling thread left the condition in that state: another thread may have altered the condition before the waiting thread got the chance to be woken up, even if the condition itself is protected by a GMutex, like above.
-;;; 
-;;; A GCond should only be accessed via the following functions.
-;;; 
-;;; Note
-;;; 
-;;; All of the g_cond_* functions are actually macros. Apart from taking their addresses, you can however use them as if they were functions.
-;;; 
+;;; ----------------------------------------------------------------------------
+
+
+;;; ---------------------------------------------------------------------------- 
 ;;; g_cond_new ()
 ;;; 
 ;;; GCond*              g_cond_new                          ();
@@ -2115,12 +2058,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_pointer_bit_unlock ()
 ;;; 
-;;; void                g_pointer_bit_unlock                (volatile void *address,
-;;;                                                          gint lock_bit);
+;;; void g_pointer_bit_unlock (volatile void *address, gint lock_bit)
 ;;; 
-;;; This is equivalent to g_bit_unlock, but working on pointers (or other pointer-sized values).
+;;; This is equivalent to g_bit_unlock, but working on pointers (or other
+;;; pointer-sized values).
 ;;; 
-;;; For portability reasons, you may only lock on the bottom 32 bits of the pointer.
+;;; For portability reasons, you may only lock on the bottom 32 bits of the
+;;; pointer.
 ;;; 
 ;;; address :
 ;;; 	a pointer to a gpointer-sized value
@@ -2130,3 +2074,5 @@
 ;;; 
 ;;; Since 2.30
 ;;; ----------------------------------------------------------------------------
+
+;;; --- End of file glib.threads.lisp ------------------------------------------
