@@ -31,34 +31,30 @@
 ;;; Synopsis
 ;;; 
 ;;;         GRand;
-;;; GRand * g_rand_new_with_seed       (guint32 seed);
-;;; GRand * g_rand_new_with_seed_array (const guint32 *seed,
-;;;                                     guint seed_length);
-;;; GRand * g_rand_new                 (void);
-;;; GRand * g_rand_copy                (GRand *rand_);
-;;; void    g_rand_free                (GRand *rand_);
-;;; void    g_rand_set_seed            (GRand *rand_,
-;;;                                     guint32 seed);
+;;; GRand * g_rand_new_with_seed       (guint32 seed)
+;;; GRand * g_rand_new_with_seed_array (const guint32 *seed, guint seed_length)
+;;; GRand * g_rand_new                 (void)
+;;; GRand * g_rand_copy                (GRand *rand_)
+;;; void    g_rand_free                (GRand *rand_)
+;;; void    g_rand_set_seed            (GRand *rand_, guint32 seed)
 ;;; void    g_rand_set_seed_array      (GRand *rand_,
 ;;;                                     const guint32 *seed,
-;;;                                     guint seed_length);
+;;;                                     guint seed_length)
 ;;; #define g_rand_boolean             (rand_)
-;;; guint32 g_rand_int                 (GRand *rand_);
+;;; guint32 g_rand_int                 (GRand *rand_)
 ;;; gint32  g_rand_int_range           (GRand *rand_,
 ;;;                                     gint32 begin,
-;;;                                     gint32 end);
-;;; gdouble g_rand_double              (GRand *rand_);
+;;;                                     gint32 end)
+;;; gdouble g_rand_double              (GRand *rand_)
 ;;; gdouble g_rand_double_range        (GRand *rand_,
 ;;;                                     gdouble begin,
-;;;                                     gdouble end);
-;;; void    g_random_set_seed          (guint32 seed);
+;;;                                     gdouble end)
+;;; void    g_random_set_seed          (guint32 seed)
 ;;; #define g_rando
-;;; guint32 g_random_int               (void);
-;;; gint32  g_random_int_range         (gint32 begin,
-;;;                                     gint32 end);
-;;; gdouble g_random_double            (void);
-;;; gdouble g_random_double_range      (gdouble begin,
-;;;                                     gdouble end);
+;;; guint32 g_random_int               (void)
+;;; gint32  g_random_int_range         (gint32 begin, gint32 end)
+;;; gdouble g_random_double            (void)
+;;; gdouble g_random_double_range      (gdouble begin, gdouble end)
 ;;; 
 ;;; Description
 ;;; 
@@ -107,7 +103,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_new_with_seed ()
 ;;; 
-;;; GRand *             g_rand_new_with_seed                (guint32 seed);
+;;; GRand * g_rand_new_with_seed (guint32 seed)
 ;;; 
 ;;; Creates a new random number generator initialized with seed.
 ;;; 
@@ -121,8 +117,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_new_with_seed_array ()
 ;;; 
-;;; GRand *             g_rand_new_with_seed_array          (const guint32 *seed,
-;;;                                                          guint seed_length);
+;;; GRand * g_rand_new_with_seed_array (const guint32 *seed, guint seed_length)
 ;;; 
 ;;; Creates a new random number generator initialized with seed.
 ;;; 
@@ -141,9 +136,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_new ()
 ;;; 
-;;; GRand *             g_rand_new                          (void);
+;;; GRand * g_rand_new (void)
 ;;; 
-;;; Creates a new random number generator initialized with a seed taken either from /dev/urandom (if existing) or from the current time (as a fallback).
+;;; Creates a new random number generator initialized with a seed taken either 
+;;; from /dev/urandom (if existing) or from the current time (as a fallback).
 ;;; 
 ;;; Returns :
 ;;; 	the new GRand.
@@ -152,9 +148,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_copy ()
 ;;; 
-;;; GRand *             g_rand_copy                         (GRand *rand_);
+;;; GRand * g_rand_copy (GRand *rand_)
 ;;; 
-;;; Copies a GRand into a new one with the same exact state as before. This way you can take a snapshot of the random number generator for replaying later.
+;;; Copies a GRand into a new one with the same exact state as before. This way
+;;; you can take a snapshot of the random number generator for replaying later.
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -168,7 +165,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_free ()
 ;;; 
-;;; void                g_rand_free                         (GRand *rand_);
+;;; void g_rand_free (GRand *rand_)
 ;;; 
 ;;; Frees the memory allocated for the GRand.
 ;;; 
@@ -198,11 +195,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_set_seed_array ()
 ;;; 
-;;; void                g_rand_set_seed_array               (GRand *rand_,
-;;;                                                          const guint32 *seed,
-;;;                                                          guint seed_length);
+;;; void g_rand_set_seed_array (GRand *rand_,
+;;;                             const guint32 *seed,
+;;;                             guint seed_length)
 ;;; 
-;;; Initializes the random number generator by an array of longs. Array can be of arbitrary size, though only the first 624 values are taken. This function is useful if you have many low entropy seeds, or if you require more then 32bits of actual entropy for your application.
+;;; Initializes the random number generator by an array of longs. Array can be
+;;; of arbitrary size, though only the first 624 values are taken. This function
+;;; is useful if you have many low entropy seeds, or if you require more then
+;;; 32bits of actual entropy for your application.
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -219,9 +219,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_boolean()
 ;;; 
-;;; #define             g_rand_boolean(rand_)
+;;; #define g_rand_boolean(rand_)
 ;;; 
-;;; Returns a random gboolean from rand_. This corresponds to a unbiased coin toss.
+;;; Returns a random gboolean from rand_. This corresponds to a unbiased coin
+;;; toss.
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -233,9 +234,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_int ()
 ;;; 
-;;; guint32             g_rand_int                          (GRand *rand_);
+;;; guint32 g_rand_int (GRand *rand_)
 ;;; 
-;;; Returns the next random guint32 from rand_ equally distributed over the range [0..2^32-1].
+;;; Returns the next random guint32 from rand_ equally distributed over the
+;;; range [0..2^32-1].
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -247,11 +249,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_int_range ()
 ;;; 
-;;; gint32              g_rand_int_range                    (GRand *rand_,
-;;;                                                          gint32 begin,
-;;;                                                          gint32 end);
+;;; gint32 g_rand_int_range (GRand *rand_, gint32 begin, gint32 end)
 ;;; 
-;;; Returns the next random gint32 from rand_ equally distributed over the range [begin..end-1].
+;;; Returns the next random gint32 from rand_ equally distributed over the
+;;; range [begin..end-1].
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -269,9 +270,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_double ()
 ;;; 
-;;; gdouble             g_rand_double                       (GRand *rand_);
+;;; gdouble g_rand_double (GRand *rand_)
 ;;; 
-;;; Returns the next random gdouble from rand_ equally distributed over the range [0..1).
+;;; Returns the next random gdouble from rand_ equally distributed over the
+;;; range [0..1).
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -283,11 +285,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_double_range ()
 ;;; 
-;;; gdouble             g_rand_double_range                 (GRand *rand_,
-;;;                                                          gdouble begin,
-;;;                                                          gdouble end);
+;;; gdouble g_rand_double_range (GRand *rand_, gdouble begin, gdouble end)
 ;;; 
-;;; Returns the next random gdouble from rand_ equally distributed over the range [begin..end).
+;;; Returns the next random gdouble from rand_ equally distributed over the
+;;; range [begin..end).
 ;;; 
 ;;; rand_ :
 ;;; 	a GRand.
@@ -305,9 +306,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_random_set_seed ()
 ;;; 
-;;; void                g_random_set_seed                   (guint32 seed);
+;;; void g_random_set_seed (guint32 seed)
 ;;; 
-;;; Sets the seed for the global random number generator, which is used by the g_random_* functions, to seed.
+;;; Sets the seed for the global random number generator, which is used by the
+;;; g_random_* functions, to seed.
 ;;; 
 ;;; seed :
 ;;; 	a value to reinitialize the global random number generator.
