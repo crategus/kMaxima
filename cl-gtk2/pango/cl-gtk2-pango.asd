@@ -7,4 +7,4 @@
   :components ((:file "pango.package")
                (:file "pango.init")
                (:file "pango"))
-  :depends-on (:cl-gtk2-glib :iterate))
+  :depends-on (:cl-gtk2-glib :cl-gtk2-gobject :iterate))
