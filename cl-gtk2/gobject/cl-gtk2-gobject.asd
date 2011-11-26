@@ -34,7 +34,8 @@
                
                (:file "gobject.object-function")
                )
-  :depends-on (:cffi
+  :depends-on (:cl-gtk2-glib
+               :cffi
                :trivial-garbage
                :iterate
                :bordeaux-threads
