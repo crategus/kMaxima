@@ -190,8 +190,6 @@
 (defcfun (random-set-seed "g_random_set_seed") :void
   (seed :uint32))
 
-(export 'random-set-seed)
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_rand_set_seed_array ()
 ;;; 
@@ -329,8 +327,6 @@
 (defun random-boolean ()
   (logtest (random-int) #X8000))
 
-(export 'random-boolean)
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_random_int ()
 ;;; 
@@ -343,8 +339,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (random-int "g_random_int") :uint32)
-
-(export 'random-int)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_random_int_range ()
@@ -367,8 +361,6 @@
   (begin :int32)
   (end :int32))
 
-(export 'random-int-range)
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_random_double ()
 ;;; 
@@ -381,8 +373,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (random-double "g_random_double") :double)
-
-(export 'random-double)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_random_double_range ()
@@ -404,7 +394,5 @@
 (defcfun (random-double-range "g_random_double_range") :double
   (begin :double)
   (end :double))
-
-(export 'random-double-range)
 
 ;;; --- End of file glib.rand.lisp ---------------------------------------------
