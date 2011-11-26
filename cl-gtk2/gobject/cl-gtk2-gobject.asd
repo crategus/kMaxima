@@ -10,6 +10,7 @@
                
                (:file "gobject.ffi")
                (:file "gobject.object.high")
+               (:file "gobject.meta")
                
                (:file "gobject.base")
                (:file "gobject.signals")
@@ -26,9 +27,9 @@
                (:file "gobject.stable-pointer")
                (:file "gobject.object.low")
                
-               (:file "gobject.meta")
+               
                (:file "gobject.generating")
-               (:file "gobject.object-defs")
+;               (:file "gobject.object-defs")
                (:file "gobject.cffi-callbacks")
                (:file "gobject.foreign-gobject-subclassing")
                
