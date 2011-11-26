@@ -295,8 +295,6 @@
 (defun get-user-cache-dir ()
   (g-get-user-cache-dir))
 
-(export 'get-user-cache-dir)
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_data_dir ()
 ;;; 
@@ -324,8 +322,6 @@
 (defun get-user-data-dir ()
   (g-get-user-data-dir))
 
-(export 'get-user-data-dir)
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_config_dir ()
 ;;; 
@@ -352,8 +348,6 @@
 
 (defun get-user-config-dir ()
   (g-get-user-config-dir))
-
-(export 'get-user-config-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_runtime_dir ()
@@ -664,8 +658,6 @@
             (until (null-pointer-p str-ptr))
             (g-free str-ptr))
       (g-free arr))))
-
-(export 'build-filename)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_build_filenamev ()
