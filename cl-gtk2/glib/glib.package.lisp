@@ -62,4 +62,15 @@
            #:g-spawn-flags
            #:push-library-version-features
            #:foreign-library-minimum-version-mismatch
-           #:require-library-version))
+           #:require-library-version
+           #:get-user-cache-dir
+           #:get-user-cache-dir
+           #:get-user-config-dir
+           #:build-filename
+           #:random-double-range
+           #:random-double
+           #:random-int-range
+           #:random-int
+           #:random-boolean
+           #:random-set-seed
+    ))
