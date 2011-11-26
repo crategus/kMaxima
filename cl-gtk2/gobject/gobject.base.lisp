@@ -936,23 +936,34 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
-;;; #|
+;;; ----------------------------------------------------------------------------
 ;;; GInitiallyUnowned
 ;;; 
-;;; typedef struct _GObject                  GInitiallyUnowned;
+;;; typedef struct _GObject GInitiallyUnowned;
 ;;; 
-;;; All the fields in the GInitiallyUnowned structure are private to the GInitiallyUnowned implementation and should never be accessed directly.
+;;; All the fields in the GInitiallyUnowned structure are private to the
+;;; GInitiallyUnowned implementation and should never be accessed directly.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GInitiallyUnownedClass
 ;;; 
-;;; typedef struct _GObjectClass             GInitiallyUnownedClass;
+;;; typedef struct _GObjectClass GInitiallyUnownedClass;
 ;;; 
 ;;; The class structure for the GInitiallyUnowned type.
 ;;; G_TYPE_INITIALLY_UNOWNED
 ;;; 
-;;; #define G_TYPE_INITIALLY_UNOWNED	      (g_initially_unowned_get_type())
+;;; #define G_TYPE_INITIALLY_UNOWNED (g_initially_unowned_get_type())
 ;;; 
 ;;; The type for GInitiallyUnowned.
-;;; |#
+;;; ----------------------------------------------------------------------------
+
+(defclass g-initially-unowned (g-object)
+  ()
+  (:metaclass gobject-class)
+  (:g-type-name . "GInitiallyUnowned")
+  (:g-type-initializer . "g_initially_unowned_get_type")
+  (:documentation "Base class that has initial \"floating\" reference."))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_is_floating ()
