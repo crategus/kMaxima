@@ -215,27 +215,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (defcfun g-enum-register-static g-type-designator
   (name :string)
   (static-values (:pointer g-enum-value)))
@@ -684,8 +663,6 @@
 (defcfun g-signal-list-ids (:pointer :uint)
   (type g-type-designator)
   (n-ids (:pointer :uint)))
-
-
 
 (defcstruct g-object-struct
   (:type-instance g-type-instance)
