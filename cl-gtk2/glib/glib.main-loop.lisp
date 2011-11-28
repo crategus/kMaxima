@@ -369,7 +369,7 @@
 ;;; 
 ;;;   /* For use by g_source_set_closure */
 ;;;   GSourceFunc     closure_callback;        
-;;;   GSourceDummyMarshal closure_marshal; /* Really is of type GClosureMarshal */
+;;;   GSourceDummyMarshal closure_marshal; /*Really is of type GClosureMarshal*/
 ;;; };
 ;;; 
 ;;; The GSourceFuncs struct contains a table of functions used to handle event
@@ -590,29 +590,34 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_new()
 ;;; 
-;;; #define             g_main_new(is_running)
+;;; #define g_main_new(is_running)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_main_new has been deprecated since version 2.2 and should not be used in newly-written code. Use g_main_loop_new() instead
+;;; g_main_new has been deprecated since version 2.2 and should not be used
+;;; in newly-written code. Use g_main_loop_new() instead
 ;;; 
 ;;; Creates a new GMainLoop for th default main context.
 ;;; 
 ;;; is_running :
-;;; 	set to TRUE to indicate that the loop is running. This is not very important since calling g_main_run() will set this to TRUE anyway.
+;;; 	set to TRUE to indicate that the loop is running. This is not very
+;;;     important since calling g_main_run() will set this to TRUE anyway.
 ;;; 
 ;;; Returns :
 ;;; 	a new GMainLoop
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_destroy()
 ;;; 
-;;; #define             g_main_destroy(loop)
+;;; #define g_main_destroy(loop)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_main_destroy has been deprecated since version 2.2 and should not be used in newly-written code. Use g_main_loop_unref() instead
+;;; g_main_destroy has been deprecated since version 2.2 and should not be used
+;;; in newly-written code. Use g_main_loop_unref() instead
 ;;; 
 ;;; Frees the memory allocated for the GMainLoop.
 ;;; 
@@ -620,14 +625,17 @@
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_run()
 ;;; 
-;;; #define             g_main_run(loop)
+;;; #define g_main_run(loop)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_main_run has been deprecated since version 2.2 and should not be used in newly-written code. Use g_main_loop_run() instead
+;;; g_main_run has been deprecated since version 2.2 and should not be used
+;;; in newly-written code. Use g_main_loop_run() instead
 ;;; 
 ;;; Runs a main loop until it stops running.
 ;;; 
@@ -635,29 +643,36 @@
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_quit()
 ;;; 
-;;; #define             g_main_quit(loop)
+;;; #define g_main_quit(loop)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_main_quit has been deprecated since version 2.2 and should not be used in newly-written code. Use g_main_loop_quit() instead
+;;; g_main_quit has been deprecated since version 2.2 and should not be used
+;;; in newly-written code. Use g_main_loop_quit() instead
 ;;; 
-;;; Stops the GMainLoop. If g_main_run() was called to run the GMainLoop, it will now return.
+;;; Stops the GMainLoop. If g_main_run() was called to run the GMainLoop, it
+;;; will now return.
 ;;; 
 ;;; loop :
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_is_running()
 ;;; 
-;;; #define             g_main_is_running(loop)
+;;; #define g_main_is_running(loop)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_main_is_running has been deprecated since version 2.2 and should not be used in newly-written code. Use g_main_loop_is_running() instead
+;;; g_main_is_running has been deprecated since version 2.2 and should not be
+;;; used in newly-written code. Use g_main_loop_is_running() instead
 ;;; 
 ;;; Checks if the main loop is running.
 ;;; 
@@ -667,6 +682,8 @@
 ;;; Returns :
 ;;; 	TRUE if the main loop is running
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_PRIORITY_HIGH
@@ -700,7 +717,10 @@
 ;;; 
 ;;; Use this for high priority idle functions.
 ;;; 
-;;; GTK+ uses G_PRIORITY_HIGH_IDLE + 10 for resizing operations, and G_PRIORITY_HIGH_IDLE + 20 for redrawing operations. (This is done to ensure that any pending resizes are processed before any pending redraws, so that widgets are not redrawn twice unnecessarily.)
+;;; GTK+ uses G_PRIORITY_HIGH_IDLE + 10 for resizing operations, and
+;;; G_PRIORITY_HIGH_IDLE + 20 for redrawing operations. (This is done to ensure
+;;; that any pending resizes are processed before any pending redraws, so that
+;;; widgets are not redrawn twice unnecessarily.)
 ;;; ----------------------------------------------------------------------------
 
 (defconstant +g-priority-high-idle+ 100)
@@ -865,7 +885,8 @@
 ;;; 	TRUE if events are pending.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-pending "g_main_context_pending" :library glib) :boolean
+(defcfun (g-main-context-pending "g_main_context_pending" :library glib)
+         :boolean
   (context (:pointer g-main-context)))
 
 ;;; ----------------------------------------------------------------------------
@@ -884,6 +905,8 @@
 ;;; 	TRUE if any events are pending.
 ;;;     Deprected: 2.2: Use g_main_context_pending() instead.
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_find_source_by_id ()
@@ -928,7 +951,9 @@
 ;;; 	the source, if one was found, otherwise NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-find-source-by-user-data "g_main_context_find_source_by_user_data" :library glib) (:pointer g-source)
+(defcfun (g-main-context-find-source-by-user-data "g_main_context_find_source_by_user_data"
+                                                  :library glib)
+         (:pointer g-source)
   (context (:pointer g-main-context))
   (user-data :pointer))
 
@@ -957,7 +982,9 @@
 ;;; 	the source, if one was found, otherwise NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-find-source-by-funcs-user-data "g_main_context_find_source_by_funcs_user_data" :library glib) (:pointer g-source)
+(defcfun (g-main-context-find-source-by-funcs-user-data "g_main_context_find_source_by_funcs_user_data"
+                                                        :library glib)
+         (:pointer g-source)
   (context (:pointer g-main-context))
   (funcs (:pointer g-source-funcs))
   (user-data :pointer))
@@ -1093,7 +1120,8 @@
 ;;; 	TRUE if some source is ready to be dispatched prior to polling.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g_main_context_prepare "g_main_context_prepare" :library glib) :boolean
+(defcfun (g_main_context_prepare "g_main_context_prepare" :library glib)
+         :boolean
   (context (:pointer g-main-context))
   (priority-ret (:pointer :int)))
 
@@ -1222,7 +1250,9 @@
 ;;; 	the poll function
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-get-poll-func "g_main_context_get_poll_func" :library glib) :pointer
+(defcfun (g-main-context-get-poll-func "g_main_context_get_poll_func"
+                                       :library glib)
+         :pointer
   (context (:pointer g-main-context)))
 
 ;;; ----------------------------------------------------------------------------
@@ -1247,6 +1277,8 @@
 ;;; 	the number of GPollFD elements which have events or errors reported,
 ;;;     or -1 if an error occurred.
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_add_poll ()
@@ -1434,6 +1466,8 @@
 ;;; 	the function to call to poll all file descriptors
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_invoke ()
 ;;; 
@@ -1473,20 +1507,26 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_invoke_full ()
 ;;; 
-;;; void                g_main_context_invoke_full          (GMainContext *context,
-;;;                                                          gint priority,
-;;;                                                          GSourceFunc function,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify notify);
+;;; void g_main_context_invoke_full (GMainContext *context,
+;;;                                  gint priority,
+;;;                                  GSourceFunc function,
+;;;                                  gpointer data,
+;;;                                  GDestroyNotify notify)
 ;;; 
-;;; Invokes a function in such a way that context is owned during the invocation of function.
+;;; Invokes a function in such a way that context is owned during the
+;;; invocation of function.
 ;;; 
-;;; This function is the same as g_main_context_invoke() except that it lets you specify the priority incase function ends up being scheduled as an idle and also lets you give a GDestroyNotify for data.
+;;; This function is the same as g_main_context_invoke() except that it lets
+;;; you specify the priority incase function ends up being scheduled as an idle
+;;; and also lets you give a GDestroyNotify for data.
 ;;; 
-;;; notify should not assume that it is called from any particular thread or with any particular context acquired.
+;;; notify should not assume that it is called from any particular thread or
+;;; with any particular context acquired.
 ;;; 
 ;;; context :
 ;;; 	a GMainContext, or NULL. [allow-none]
@@ -1506,29 +1546,58 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_get_thread_default ()
 ;;; 
-;;; GMainContext *      g_main_context_get_thread_default   (void);
+;;; GMainContext * g_main_context_get_thread_default (void)
 ;;; 
-;;; Gets the thread-default GMainContext for this thread. Asynchronous operations that want to be able to be run in contexts other than the default one should call this method to get a GMainContext to add their GSources to. (Note that even in single-threaded programs applications may sometimes want to temporarily push a non-default context, so it is not safe to assume that this will always return NULL if threads are not initialized.)
+;;; Gets the thread-default GMainContext for this thread. Asynchronous
+;;; operations that want to be able to be run in contexts other than the default
+;;; one should call this method to get a GMainContext to add their GSources to.
+;;; (Note that even in single-threaded programs applications may sometimes want
+;;; to temporarily push a non-default context, so it is not safe to assume that
+;;; this will always return NULL if threads are not initialized.)
 ;;; 
 ;;; Returns :
-;;; 	the thread-default GMainContext, or NULL if the thread-default context is the global default context. [transfer none]
+;;; 	the thread-default GMainContext, or NULL if the thread-default context
+;;;     is the global default context. [transfer none]
 ;;; 
 ;;; Since 2.22
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_push_thread_default ()
 ;;; 
-;;; void                g_main_context_push_thread_default  (GMainContext *context);
+;;; void g_main_context_push_thread_default (GMainContext *context)
 ;;; 
-;;; Acquires context and sets it as the thread-default context for the current thread. This will cause certain asynchronous operations (such as most gio-based I/O) which are started in this thread to run under context and deliver their results to its main loop, rather than running under the global default context in the main thread. Note that calling this function changes the context returned by g_main_context_get_thread_default(), not the one returned by g_main_context_default(), so it does not affect the context used by functions like g_idle_add().
+;;; Acquires context and sets it as the thread-default context for the current
+;;; thread. This will cause certain asynchronous operations (such as most
+;;; gio-based I/O) which are started in this thread to run under context and
+;;; deliver their results to its main loop, rather than running under the global
+;;; default context in the main thread. Note that calling this function changes
+;;; the context returned by g_main_context_get_thread_default(), not the one
+;;; returned by g_main_context_default(), so it does not affect the context
+;;; used by functions like g_idle_add().
 ;;; 
-;;; Normally you would call this function shortly after creating a new thread, passing it a GMainContext which will be run by a GMainLoop in that thread, to set a new default context for all async operations in that thread. (In this case, you don't need to ever call g_main_context_pop_thread_default().) In some cases however, you may want to schedule a single operation in a non-default context, or temporarily use a non-default context in the main thread. In that case, you can wrap the call to the asynchronous operation inside a g_main_context_push_thread_default() / g_main_context_pop_thread_default() pair, but it is up to you to ensure that no other asynchronous operations accidentally get started while the non-default context is active.
+;;; Normally you would call this function shortly after creating a new thread,
+;;; passing it a GMainContext which will be run by a GMainLoop in that thread,
+;;; to set a new default context for all async operations in that thread. (In
+;;; this case, you don't need to ever call g_main_context_pop_thread_default().)
+;;; In some cases however, you may want to schedule a single operation in a
+;;; non-default context, or temporarily use a non-default context in the main
+;;; thread. In that case, you can wrap the call to the asynchronous operation
+;;; inside a g_main_context_push_thread_default() / 
+;;; g_main_context_pop_thread_default() pair, but it is up to you to ensure
+;;; that no other asynchronous operations accidentally get started while the
+;;; non-default context is active.
 ;;; 
-;;; Beware that libraries that predate this function may not correctly handle being used from a thread with a thread-default context. Eg, see g_file_supports_thread_contexts().
+;;; Beware that libraries that predate this function may not correctly handle
+;;; being used from a thread with a thread-default context. Eg, see
+;;; g_file_supports_thread_contexts().
 ;;; 
 ;;; context :
 ;;; 	a GMainContext, or NULL for the global default context
@@ -1536,18 +1605,23 @@
 ;;; Since 2.22
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_pop_thread_default ()
 ;;; 
-;;; void                g_main_context_pop_thread_default   (GMainContext *context);
+;;; void g_main_context_pop_thread_default (GMainContext *context)
 ;;; 
-;;; Pops context off the thread-default context stack (verifying that it was on the top of the stack).
+;;; Pops context off the thread-default context stack (verifying that it was
+;;; on the top of the stack).
 ;;; 
 ;;; context :
 ;;; 	a GMainContext object, or NULL
 ;;; 
 ;;; Since 2.22
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_source_new ()
@@ -1569,7 +1643,8 @@
 ;;; 	the newly-created timeout source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-source-new "g_timeout_source_new" :library glib) (:pointer g-source)
+(defcfun (g-timeout-source-new "g_timeout_source_new" :library glib)
+         (:pointer g-source)
   (interval-milliseconds :int))
 
 ;;; ----------------------------------------------------------------------------
@@ -1936,12 +2011,16 @@
 ;;; 
 ;;; A type which is used to hold a process identification.
 ;;; 
-;;; On UNIX, processes are identified by a process id (an integer), while Windows uses process handles (which are pointers).
+;;; On UNIX, processes are identified by a process id (an integer), while
+;;; Windows uses process handles (which are pointers).
+;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
+
+;;; ----------------------------------------------------------------------------
 ;;; GChildWatchFunc ()
 ;;; 
-;;; void                (*GChildWatchFunc)                  (GPid pid,
-;;;                                                          gint status,
-;;;                                                          gpointer user_data);
+;;; void (*GChildWatchFunc) (GPid pid, gint status, gpointer user_data)
 ;;; 
 ;;; The type of functions to be called when a child exists.
 ;;; 
@@ -1949,29 +2028,40 @@
 ;;; 	the process id of the child process
 ;;; 
 ;;; status :
-;;; 	Status information about the child process, see waitpid(2) for more information about this field
+;;; 	Status information about the child process, see waitpid(2) for more
+;;;     information about this field
 ;;; 
 ;;; user_data :
 ;;; 	user data passed to g_child_watch_add()
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_child_watch_source_new ()
 ;;; 
-;;; GSource *           g_child_watch_source_new            (GPid pid);
+;;; GSource * g_child_watch_source_new (GPid pid)
 ;;; 
 ;;; Creates a new child_watch source.
 ;;; 
-;;; The source will not initially be associated with any GMainContext and must be added to one with g_source_attach() before it will be executed.
+;;; The source will not initially be associated with any GMainContext and must
+;;; be added to one with g_source_attach() before it will be executed.
 ;;; 
-;;; Note that child watch sources can only be used in conjunction with g_spawn... when the G_SPAWN_DO_NOT_REAP_CHILD flag is used.
+;;; Note that child watch sources can only be used in conjunction with
+;;; g_spawn... when the G_SPAWN_DO_NOT_REAP_CHILD flag is used.
 ;;; 
-;;; Note that on platforms where GPid must be explicitly closed (see g_spawn_close_pid()) pid must not be closed while the source is still active. Typically, you will want to call g_spawn_close_pid() in the callback function for the source.
+;;; Note that on platforms where GPid must be explicitly closed (see
+;;; g_spawn_close_pid()) pid must not be closed while the source is still
+;;; active. Typically, you will want to call g_spawn_close_pid() in the callback
+;;; function for the source.
 ;;; 
-;;; Note further that using g_child_watch_source_new() is not compatible with calling waitpid(-1) in the application. Calling waitpid() for individual pids will still work fine.
+;;; Note further that using g_child_watch_source_new() is not compatible with
+;;; calling waitpid(-1) in the application. Calling waitpid() for individual
+;;; pids will still work fine.
 ;;; 
 ;;; pid :
-;;; 	process to watch. On POSIX the pid of a child process. On Windows a handle for a process (which doesn't have to be a child).
+;;; 	process to watch. On POSIX the pid of a child process. On Windows a
+;;;     handle for a process (which doesn't have to be a child).
 ;;; 
 ;;; Returns :
 ;;; 	the newly-created child watch source
@@ -1979,25 +2069,36 @@
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_child_watch_add ()
 ;;; 
-;;; guint               g_child_watch_add                   (GPid pid,
-;;;                                                          GChildWatchFunc function,
-;;;                                                          gpointer data);
+;;; guint g_child_watch_add (GPid pid,
+;;;                          GChildWatchFunc function,
+;;;                          gpointer data)
 ;;; 
-;;; Sets a function to be called when the child indicated by pid exits, at a default priority, G_PRIORITY_DEFAULT.
+;;; Sets a function to be called when the child indicated by pid exits, at a
+;;; default priority, G_PRIORITY_DEFAULT.
 ;;; 
-;;; If you obtain pid from g_spawn_async() or g_spawn_async_with_pipes() you will need to pass G_SPAWN_DO_NOT_REAP_CHILD as flag to the spawn function for the child watching to work.
+;;; If you obtain pid from g_spawn_async() or g_spawn_async_with_pipes() you
+;;; will need to pass G_SPAWN_DO_NOT_REAP_CHILD as flag to the spawn function
+;;; for the child watching to work.
 ;;; 
-;;; Note that on platforms where GPid must be explicitly closed (see g_spawn_close_pid()) pid must not be closed while the source is still active. Typically, you will want to call g_spawn_close_pid() in the callback function for the source.
+;;; Note that on platforms where GPid must be explicitly closed (see
+;;; g_spawn_close_pid()) pid must not be closed while the source is still
+;;; active. Typically, you will want to call g_spawn_close_pid() in the callback
+;;; function for the source.
 ;;; 
 ;;; GLib supports only a single callback per process id.
 ;;; 
-;;; This internally creates a main loop source using g_child_watch_source_new() and attaches it to the main loop context using g_source_attach(). You can do these steps manually if you need greater control.
+;;; This internally creates a main loop source using g_child_watch_source_new()
+;;; and attaches it to the main loop context using g_source_attach(). You can do
+;;; these steps manually if you need greater control.
 ;;; 
 ;;; pid :
-;;; 	process id to watch. On POSIX the pid of a child process. On Windows a handle for a process (which doesn't have to be a child).
+;;; 	process id to watch. On POSIX the pid of a child process. On Windows a
+;;;     handle for a process (which doesn't have to be a child).
 ;;; 
 ;;; function :
 ;;; 	function to call
@@ -2011,30 +2112,42 @@
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_child_watch_add_full ()
 ;;; 
-;;; guint               g_child_watch_add_full              (gint priority,
-;;;                                                          GPid pid,
-;;;                                                          GChildWatchFunc function,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify notify);
+;;; guint g_child_watch_add_full (gint priority,
+;;;                               GPid pid,
+;;;                               GChildWatchFunc function,
+;;;                               gpointer data,
+;;;                               GDestroyNotify notify)
 ;;; 
-;;; Sets a function to be called when the child indicated by pid exits, at the priority priority.
+;;; Sets a function to be called when the child indicated by pid exits, at the
+;;; priority priority.
 ;;; 
-;;; If you obtain pid from g_spawn_async() or g_spawn_async_with_pipes() you will need to pass G_SPAWN_DO_NOT_REAP_CHILD as flag to the spawn function for the child watching to work.
+;;; If you obtain pid from g_spawn_async() or g_spawn_async_with_pipes() you
+;;; will need to pass G_SPAWN_DO_NOT_REAP_CHILD as flag to the spawn function
+;;; for the child watching to work.
 ;;; 
-;;; Note that on platforms where GPid must be explicitly closed (see g_spawn_close_pid()) pid must not be closed while the source is still active. Typically, you will want to call g_spawn_close_pid() in the callback function for the source.
+;;; Note that on platforms where GPid must be explicitly closed (see
+;;; g_spawn_close_pid()) pid must not be closed while the source is still
+;;; active. Typically, you will want to call g_spawn_close_pid() in the callback
+;;; function for the source.
 ;;; 
 ;;; GLib supports only a single callback per process id.
 ;;; 
-;;; This internally creates a main loop source using g_child_watch_source_new() and attaches it to the main loop context using g_source_attach(). You can do these steps manually if you need greater control.
+;;; This internally creates a main loop source using g_child_watch_source_new()
+;;; and attaches it to the main loop context using g_source_attach(). You can
+;;; do these steps manually if you need greater control.
 ;;; 
 ;;; priority :
-;;; 	the priority of the idle source. Typically this will be in the range between G_PRIORITY_DEFAULT_IDLE and G_PRIORITY_HIGH_IDLE.
+;;; 	the priority of the idle source. Typically this will be in the range
+;;;     between G_PRIORITY_DEFAULT_IDLE and G_PRIORITY_HIGH_IDLE.
 ;;; 
 ;;; pid :
-;;; 	process to watch. On POSIX the pid of a child process. On Windows a handle for a process (which doesn't have to be a child).
+;;; 	process to watch. On POSIX the pid of a child process. On Windows a
+;;;     handle for a process (which doesn't have to be a child).
 ;;; 
 ;;; function :
 ;;; 	function to call
@@ -2046,23 +2159,34 @@
 ;;; 	function to call when the idle is removed, or NULL
 ;;; 
 ;;; Returns :
-;;; 	the ID (greater than 0) of the event source. Rename to: g_child_watch_add
+;;; 	the ID (greater than 0) of the event source.
+;;;     Rename to: g_child_watch_add
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_poll ()
 ;;; 
-;;; gint                g_poll                              (GPollFD *fds,
-;;;                                                          guint nfds,
-;;;                                                          gint timeout);
+;;; gint g_poll (GPollFD *fds, guint nfds, gint timeout)
 ;;; 
-;;; Polls fds, as with the poll() system call, but portably. (On systems that don't have poll(), it is emulated using select().) This is used internally by GMainContext, but it can be called directly if you need to block until a file descriptor is ready, but don't want to run the full main loop.
+;;; Polls fds, as with the poll() system call, but portably. (On systems that
+;;; don't have poll(), it is emulated using select().) This is used internally
+;;; by GMainContext, but it can be called directly if you need to block until a
+;;; file descriptor is ready, but don't want to run the full main loop.
 ;;; 
-;;; Each element of fds is a GPollFD describing a single file descriptor to poll. The fd field indicates the file descriptor, and the events field indicates the events to poll for. On return, the revents fields will be filled with the events that actually occurred.
+;;; Each element of fds is a GPollFD describing a single file descriptor to
+;;; poll. The fd field indicates the file descriptor, and the events field
+;;; indicates the events to poll for. On return, the revents fields will be
+;;; filled with the events that actually occurred.
 ;;; 
-;;; On POSIX systems, the file descriptors in fds can be any sort of file descriptor, but the situation is much more complicated on Windows. If you need to use g_poll() in code that has to run on Windows, the easiest solution is to construct all of your GPollFDs with g_io_channel_win32_make_pollfd().
+;;; On POSIX systems, the file descriptors in fds can be any sort of file
+;;; descriptor, but the situation is much more complicated on Windows. If you
+;;; need to use g_poll() in code that has to run on Windows, the easiest
+;;; solution is to construct all of your GPollFDs with
+;;; g_io_channel_win32_make_pollfd().
 ;;; 
 ;;; fds :
 ;;; 	file descriptors to poll
@@ -2074,16 +2198,22 @@
 ;;; 	amount of time to wait, in milliseconds, or -1 to wait forever
 ;;; 
 ;;; Returns :
-;;; 	the number of entries in fds whose revents fields were filled in, or 0 if the operation timed out, or -1 on error or if the call was interrupted.
+;;; 	the number of entries in fds whose revents fields were filled in, or 0
+;;;     if the operation timed out, or -1 on error or if the call was
+;;;     interrupted.
 ;;; 
 ;;; Since 2.20
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_POLLFD_FORMAT
 ;;; 
 ;;; #define G_POLLFD_FORMAT "%#I64x"
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; GSourceDummyMarshal ()
@@ -2094,6 +2224,7 @@
 ;;; for dependency reasons.
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_new ()
@@ -2177,10 +2308,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_attach ()
 ;;; 
-;;; guint               g_source_attach                     (GSource *source,
-;;;                                                          GMainContext *context);
+;;; guint g_source_attach (GSource *source, GMainContext *context)
 ;;; 
-;;; Adds a GSource to a context so that it will be executed within that context. Remove it by calling g_source_destroy().
+;;; Adds a GSource to a context so that it will be executed within that context.
+;;; Remove it by calling g_source_destroy().
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2199,9 +2330,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_destroy ()
 ;;; 
-;;; void                g_source_destroy                    (GSource *source);
+;;; void g_source_destroy (GSource *source)
 ;;; 
-;;; Removes a source from its GMainContext, if any, and mark it as destroyed. The source cannot be subsequently added to another context.
+;;; Removes a source from its GMainContext, if any, and mark it as destroyed.
+;;; The source cannot be subsequently added to another context.
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2213,107 +2345,63 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_is_destroyed ()
 ;;; 
-;;; gboolean            g_source_is_destroyed               (GSource *source);
+;;; gboolean g_source_is_destroyed (GSource *source)
 ;;; 
 ;;; Returns whether source has been destroyed.
 ;;; 
-;;; This is important when you operate upon your objects from within idle handlers, but may have freed the object before the dispatch of your idle handler.
-;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
-;;; 24
-;;; 25
-;;; 26
-;;; 27
-;;; 28
-;;; 29
-;;; 
-;;; 	
-;;; 
-;;; static gboolean 
-;;; idle_callback (gpointer data)
-;;; {
-;;;   SomeWidget *self = data;
-;;;    
-;;;   GDK_THREADS_ENTER ();
-;;;   /* do stuff with self */
-;;;   self->idle_id = 0;
-;;;   GDK_THREADS_LEAVE ();
-;;;    
-;;;   return FALSE;
-;;; }
+;;; This is important when you operate upon your objects from within idle
+;;; handlers, but may have freed the object before the dispatch of your idle
+;;; handler.
 ;;;  
-;;; static void 
-;;; some_widget_do_stuff_later (SomeWidget *self)
-;;; {
-;;;   self->idle_id = g_idle_add (idle_callback, self);
-;;; }
-;;;  
-;;; static void 
-;;; some_widget_finalize (GObject *object)
-;;; {
-;;;   SomeWidget *self = SOME_WIDGET (object);
-;;;    
-;;;   if (self->idle_id)
-;;;     g_source_remove (self->idle_id);
-;;;    
-;;;   G_OBJECT_CLASS (parent_class)->finalize (object);
-;;; }
+;;;  1 static gboolean 
+;;;  2 idle_callback (gpointer data)
+;;;  3 {
+;;;  4   SomeWidget *self = data;
+;;;  5    
+;;;  6   GDK_THREADS_ENTER ();
+;;;  7   /* do stuff with self */
+;;;  8   self->idle_id = 0;
+;;;  9   GDK_THREADS_LEAVE ();
+;;; 10   
+;;; 11   return FALSE;
+;;; 12 }
+;;; 13 
+;;; 14 static void 
+;;; 15 some_widget_do_stuff_later (SomeWidget *self)
+;;; 16 {
+;;; 17   self->idle_id = g_idle_add (idle_callback, self);
+;;; 18 }
+;;; 19  
+;;; 20 static void 
+;;; 21 some_widget_finalize (GObject *object)
+;;; 22 {
+;;; 23   SomeWidget *self = SOME_WIDGET (object);
+;;; 24   
+;;; 25   if (self->idle_id)
+;;; 26     g_source_remove (self->idle_id);
+;;; 27   
+;;; 28   G_OBJECT_CLASS (parent_class)->finalize (object);
+;;; 29 }
 ;;; 
-;;; This will fail in a multi-threaded application if the widget is destroyed before the idle handler fires due to the use after free in the callback. A solution, to this particular problem, is to check to if the source has already been destroy within the callback.
+;;; This will fail in a multi-threaded application if the widget is destroyed
+;;; before the idle handler fires due to the use after free in the callback. A
+;;; solution, to this particular problem, is to check to if the source has
+;;; already been destroy within the callback.
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 
-;;; 	
-;;; 
-;;; static gboolean 
-;;; idle_callback (gpointer data)
-;;; {
-;;;   SomeWidget *self = data;
-;;;   
-;;;   GDK_THREADS_ENTER ();
-;;;   if (!g_source_is_destroyed (g_main_current_source ()))
-;;;     {
-;;;       /* do stuff with self */
-;;;     }
-;;;   GDK_THREADS_LEAVE ();
-;;;   
-;;;   return FALSE;
-;;; }
+;;;  1 static gboolean 
+;;;  2 idle_callback (gpointer data)
+;;;  3 {
+;;;  4   SomeWidget *self = data;
+;;;  5   
+;;;  6   GDK_THREADS_ENTER ();
+;;;  7   if (!g_source_is_destroyed (g_main_current_source ()))
+;;;  8     {
+;;;  9       /* do stuff with self */
+;;; 10     }
+;;; 11   GDK_THREADS_LEAVE ();
+;;; 12  
+;;; 13   return FALSE;
+;;; 14 }
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2330,10 +2418,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_priority ()
 ;;; 
-;;; void                g_source_set_priority               (GSource *source,
-;;;                                                          gint priority);
+;;; void g_source_set_priority (GSource *source, gint priority)
 ;;; 
-;;; Sets the priority of a source. While the main loop is being run, a source will be dispatched if it is ready to be dispatched and no sources at a higher (numerically smaller) priority are ready to be dispatched.
+;;; Sets the priority of a source. While the main loop is being run, a source
+;;; will be dispatched if it is ready to be dispatched and no sources at a
+;;; higher (numerically smaller) priority are ready to be dispatched.
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2349,7 +2438,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_priority ()
 ;;; 
-;;; gint                g_source_get_priority               (GSource *source);
+;;; gint g_source_get_priority (GSource *source)
 ;;; 
 ;;; Gets the priority of a source.
 ;;; 
@@ -2366,10 +2455,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_can_recurse ()
 ;;; 
-;;; void                g_source_set_can_recurse            (GSource *source,
-;;;                                                          gboolean can_recurse);
+;;; void g_source_set_can_recurse (GSource *source, gboolean can_recurse)
 ;;; 
-;;; Sets whether a source can be called recursively. If can_recurse is TRUE, then while the source is being dispatched then this source will be processed normally. Otherwise, all processing of this source is blocked until the dispatch function returns.
+;;; Sets whether a source can be called recursively. If can_recurse is TRUE,
+;;; then while the source is being dispatched then this source will be processed
+;;; normally. Otherwise, all processing of this source is blocked until the
+;;; dispatch function returns.
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2386,9 +2477,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_can_recurse ()
 ;;; 
-;;; gboolean            g_source_get_can_recurse            (GSource *source);
+;;; gboolean g_source_get_can_recurse (GSource *source)
 ;;; 
-;;; Checks whether a source is allowed to be called recursively. see g_source_set_can_recurse().
+;;; Checks whether a source is allowed to be called recursively.
+;;; See g_source_set_can_recurse().
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2397,15 +2489,19 @@
 ;;; 	whether recursion is allowed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-can-recurse "g_source_get_can_recurse" :library glib) :boolean
+(defcfun (g-source-get-can-recurse "g_source_get_can_recurse" :library glib)
+         :boolean
   (source (:pointer g-source)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_id ()
 ;;; 
-;;; guint               g_source_get_id                     (GSource *source);
+;;; guint g_source_get_id (GSource *source)
 ;;; 
-;;; Returns the numeric ID for a particular source. The ID of a source is a positive integer which is unique within a particular main loop context. The reverse mapping from ID to source is done by g_main_context_find_source_by_id().
+;;; Returns the numeric ID for a particular source. The ID of a source is a
+;;; positive integer which is unique within a particular main loop context. The
+;;; reverse mapping from ID to source is done by
+;;; g_main_context_find_source_by_id().
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2420,9 +2516,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_name ()
 ;;; 
-;;; const char *        g_source_get_name                   (GSource *source);
+;;; const char * g_source_get_name (GSource *source)
 ;;; 
-;;; Gets a name for the source, used in debugging and profiling. The name may be NULL if it has never been set with g_source_set_name().
+;;; Gets a name for the source, used in debugging and profiling. The name may
+;;; be NULL if it has never been set with g_source_set_name().
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2433,17 +2530,24 @@
 ;;; Since 2.26
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_name ()
 ;;; 
-;;; void                g_source_set_name                   (GSource *source,
-;;;                                                          const char *name);
+;;; void g_source_set_name (GSource *source, const char *name)
 ;;; 
-;;; Sets a name for the source, used in debugging and profiling. The name defaults to NULL.
+;;; Sets a name for the source, used in debugging and profiling. The name
+;;; defaults to NULL.
 ;;; 
-;;; The source name should describe in a human-readable way what the source does. For example, "X11 event queue" or "GTK+ repaint idle handler" or whatever it is.
+;;; The source name should describe in a human-readable way what the source
+;;; does. For example, "X11 event queue" or "GTK+ repaint idle handler" or
+;;; whatever it is.
 ;;; 
-;;; It is permitted to call this function multiple times, but is not recommended due to the potential performance impact. For example, one could change the name in the "check" function of a GSourceFuncs to include details like the event type in the source name.
+;;; It is permitted to call this function multiple times, but is not recommended
+;;; due to the potential performance impact. For example, one could change the
+;;; name in the "check" function of a GSourceFuncs to include details like the
+;;; event type in the source name.
 ;;; 
 ;;; source :
 ;;; 	a GSource
@@ -2454,15 +2558,17 @@
 ;;; Since 2.26
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_name_by_id ()
 ;;; 
-;;; void                g_source_set_name_by_id             (guint tag,
-;;;                                                          const char *name);
+;;; void g_source_set_name_by_id (guint tag, const char *name)
 ;;; 
 ;;; Sets the name of a source using its ID.
 ;;; 
-;;; This is a convenience utility to set source names from the return value of g_idle_add(), g_timeout_add(), etc.
+;;; This is a convenience utility to set source names from the return value of
+;;; g_idle_add(), g_timeout_add(), etc.
 ;;; 
 ;;; tag :
 ;;; 	a GSource ID
@@ -2473,36 +2579,44 @@
 ;;; Since 2.26
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_context ()
 ;;; 
 ;;; GMainContext *      g_source_get_context                (GSource *source);
 ;;; 
-;;; Gets the GMainContext with which the source is associated. Calling this function on a destroyed source is an error.
+;;; Gets the GMainContext with which the source is associated. Calling this
+;;; function on a destroyed source is an error.
 ;;; 
 ;;; source :
 ;;; 	a GSource
 ;;; 
 ;;; Returns :
-;;; 	the GMainContext with which the source is associated, or NULL if the context has not yet been added to a source. [transfer none]
+;;; 	the GMainContext with which the source is associated, or NULL if the
+;;;     context has not yet been added to a source. [transfer none]
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-context "g_source_get_context" :library glib) (:pointer g-main-context)
+(defcfun (g-source-get-context "g_source_get_context" :library glib)
+         (:pointer g-main-context)
   (source (:pointer g-source)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_callback ()
 ;;; 
-;;; void                g_source_set_callback               (GSource *source,
-;;;                                                          GSourceFunc func,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify notify);
+;;; void g_source_set_callback (GSource *source,
+;;;                             GSourceFunc func,
+;;;                             gpointer data,
+;;;                             GDestroyNotify notify)
 ;;; 
-;;; Sets the callback function for a source. The callback for a source is called from the source's dispatch function.
+;;; Sets the callback function for a source. The callback for a source is called
+;;; from the source's dispatch function.
 ;;; 
-;;; The exact type of func depends on the type of source; ie. you should not count on func being called with data as its first parameter.
+;;; The exact type of func depends on the type of source; ie. you should not
+;;; count on func being called with data as its first parameter.
 ;;; 
-;;; Typically, you won't use this function. Instead use functions specific to the type of source you are using.
+;;; Typically, you won't use this function. Instead use functions specific to
+;;; the type of source you are using.
 ;;; 
 ;;; source :
 ;;; 	the source
@@ -2539,6 +2653,8 @@
 ;;; 	FALSE if the source should be removed
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_callback_indirect ()
 ;;; 
@@ -2563,6 +2679,8 @@
 ;;;     and data
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_add_poll ()
 ;;; 
@@ -2577,7 +2695,8 @@
 ;;; 	a GSource
 ;;; 
 ;;; fd :
-;;; 	a GPollFD structure holding information about a file descriptor to watch.
+;;; 	a GPollFD structure holding information about a file descriptor to
+;;;    watch.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (g-source-add-poll "g_source_add_poll" :library glib) :void
@@ -2631,6 +2750,8 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_remove_child_source ()
 ;;; 
@@ -2646,6 +2767,8 @@
 ;;; 
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_time ()
@@ -2669,6 +2792,8 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+;;; *** NOT IMPLEMENTED ***
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_current_time ()
 ;;; 
@@ -2691,7 +2816,8 @@
 ;;; 	GTimeVal structure in which to store current time.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-current-time "g_source_get_current_time" :library glib) :void
+(defcfun (g-source-get-current-time "g_source_get_current_time" :library glib)
+         :void
   (source (:pointer g-source))
   (timeval-ret (:pointer g-time-val)))
 
@@ -2739,7 +2865,9 @@
 ;;; 	TRUE if a source was found and removed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-remove-by-funcs-user-data "g_source_remove_by_funcs_user_data" :library glib) :boolean
+(defcfun (g-source-remove-by-funcs-user-data "g_source_remove_by_funcs_user_data"
+                                             :library glib)
+         :boolean
   (funcs (:pointer g-source-funcs))
   (data :pointer))
 
@@ -2764,4 +2892,4 @@
          :boolean
   (data :pointer))
 
-;;; ----------------------------------------------------------------------------
+;;; --- End of file glib.main-loop.lisp ----------------------------------------
