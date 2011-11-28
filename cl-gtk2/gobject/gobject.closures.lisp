@@ -895,16 +895,27 @@
 ;;; 
 ;;; closure :
 ;;; 	a GClosure
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_source_set_dummy_callback ()
 ;;; 
-;;; void                g_source_set_dummy_callback         (GSource *source);
+;;; void g_source_set_dummy_callback (GSource *source)
 ;;; 
-;;; Sets a dummy callback for source. The callback will do nothing, and if the source expects a gboolean return value, it will return TRUE. (If the source expects any other type of return value, it will return a 0/NULL value; whatever g_value_init() initializes a GValue to for that type.)
+;;; Sets a dummy callback for source. The callback will do nothing, and if the
+;;; source expects a gboolean return value, it will return TRUE. (If the source
+;;; expects any other type of return value, it will return a 0/NULL value;
+;;; whatever g_value_init() initializes a GValue to for that type.)
 ;;; 
-;;; If the source is not one of the standard GLib types, the closure_callback and closure_marshal fields of the GSourceFuncs structure must have been filled in with pointers to appropriate functions.
+;;; If the source is not one of the standard GLib types, the closure_callback
+;;; and closure_marshal fields of the GSourceFuncs structure must have been
+;;; filled in with pointers to appropriate functions.
 ;;; 
 ;;; source :
 ;;; 	the source
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__VOID ()
 ;;; 
 ;;; void                g_cclosure_marshal_VOID__VOID       (GClosure *closure,
