@@ -35,6 +35,8 @@
 ;;; struct              GObject;
 ;;; struct              GObjectClass;
 ;;; struct              GObjectConstructParam;
+;;; struct              GParameter;
+;;;
 ;;; void                (*GObjectGetPropertyFunc)           (GObject *object,
 ;;;                                                          guint property_id,
 ;;;                                                          GValue *value,
@@ -79,7 +81,6 @@
 ;;; gpointer            g_object_newv                       (GType object_type,
 ;;;                                                          guint n_parameters,
 ;;;                                                          GParameter *parameters);
-;;; struct              GParameter;
 ;;; gpointer            g_object_ref                        (gpointer object);
 ;;; void                g_object_unref                      (gpointer object);
 ;;; gpointer            g_object_ref_sink                   (gpointer object);
@@ -354,7 +355,7 @@
 ;;;     class to allow it to complete its initialisation.
 ;;; ----------------------------------------------------------------------------
 
-;;; #|
+;;; ----------------------------------------------------------------------------
 ;;; struct GObjectConstructParam
 ;;; 
 ;;; struct GObjectConstructParam {
@@ -369,26 +370,55 @@
 ;;; 
 ;;; GValue *value;
 ;;; 	the value to set the parameter to
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; struct GParameter
+;;; 
+;;; struct GParameter {
+;;;   const gchar *name;
+;;;   GValue       value;
+;;; };
+;;; 
+;;; The GParameter struct is an auxiliary structure used to hand parameter
+;;; name/value pairs to g_object_newv().
+;;; 
+;;; const gchar *name;
+;;; 	the parameter name
+;;; 
+;;; GValue value;
+;;; 	the parameter value
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-parameter
+  (:name (:string :free-from-foreign nil :free-to-foreign nil))
+  (:value g-value))
+
+;;; ----------------------------------------------------------------------------
 ;;; GObjectGetPropertyFunc ()
 ;;; 
-;;; void                (*GObjectGetPropertyFunc)           (GObject *object,
-;;;                                                          guint property_id,
-;;;                                                          GValue *value,
-;;;                                                          GParamSpec *pspec);
+;;; void (*GObjectGetPropertyFunc) (GObject *object,
+;;;                                 guint property_id,
+;;;                                 GValue *value,
+;;;                                 GParamSpec *pspec)
 ;;; 
 ;;; The type of the get_property function of GObjectClass.
 ;;; 
 ;;; object :
-;;; 	a GObject
+;;;     a GObject
 ;;; 
 ;;; property_id :
-;;; 	the numeric id under which the property was registered with g_object_class_install_property().
+;;; 	the numeric id under which the property was registered with
+;;;     g_object_class_install_property().
 ;;; 
 ;;; value :
 ;;; 	a GValue to return the property value in
 ;;; 
 ;;; pspec :
 ;;; 	the GParamSpec describing the property
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GObjectSetPropertyFunc ()
 ;;; 
 ;;; void                (*GObjectSetPropertyFunc)           (GObject *object,
@@ -845,23 +875,6 @@
   (n-parameter :uint)
   (parameters (:pointer g-parameter)))
 
-;;; #|
-;;; struct GParameter
-;;; 
-;;; struct GParameter {
-;;;   const gchar *name;
-;;;   GValue       value;
-;;; };
-;;; 
-;;; The GParameter struct is an auxiliary structure used to hand parameter name/value pairs to g_object_newv().
-;;; 
-;;; const gchar *name;
-;;; 	the parameter name
-;;; 
-;;; GValue value;
-;;; 	the parameter value
-;;; |#
-
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_ref ()
 ;;;
@@ -869,8 +882,8 @@
 ;;;
 ;;; Increases the reference count of object.
 ;;;
-;;; object  : a GObject.
-;;; Returns : the same object.
+;;;     object  : a GObject.
+;;;     Returns : the same object.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-ref :pointer
@@ -904,8 +917,8 @@
 ;;; If the object is not floating, then this call adds a new normal reference
 ;;; increasing the reference count by one.
 ;;;
-;;; object  : a GObject.
-;;; Returns : object.
+;;;     object  : a GObject.
+;;;     Returns : object.
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -931,7 +944,7 @@
 ;;; A macro is also included that allows this function to be used without
 ;;; pointer casts.
 ;;;
-;;; object_ptr : a pointer to a GObject reference
+;;;     object_ptr : a pointer to a GObject reference
 ;;;
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
@@ -944,6 +957,8 @@
 ;;; All the fields in the GInitiallyUnowned structure are private to the
 ;;; GInitiallyUnowned implementation and should never be accessed directly.
 ;;; ----------------------------------------------------------------------------
+
+(defctype %g-initially-unowned %g-object)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GInitiallyUnownedClass
@@ -972,8 +987,8 @@
 ;;;
 ;;; Checks whether object has a floating reference.
 ;;;
-;;; object  : a GObject.
-;;; Returns : TRUE if object has a floating reference
+;;;     object  : a GObject.
+;;;     Returns : TRUE if object has a floating reference
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -991,7 +1006,7 @@
 ;;; GInitiallyUnowneds are created with a floating reference which usually just
 ;;; needs to be sunken by calling g_object_ref_sink().
 ;;;
-;;; object : a GObject
+;;;     object : a GObject
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -999,20 +1014,22 @@
 (defcfun g-object-force-floating :void
   (object :pointer))
 
-;;; #|
+;;; ----------------------------------------------------------------------------
 ;;; GWeakNotify ()
 ;;; 
-;;; void                (*GWeakNotify)                      (gpointer data,
-;;;                                                          GObject *where_the_object_was);
+;;; void (*GWeakNotify) (gpointer data, GObject *where_the_object_was)
 ;;; 
-;;; A GWeakNotify function can be added to an object as a callback that gets triggered when the object is finalized. Since the object is already being finalized when the GWeakNotify is called, there's not much you could do with the object, apart from e.g. using its address as hash-index or the like.
+;;; A GWeakNotify function can be added to an object as a callback that gets
+;;; triggered when the object is finalized. Since the object is already being
+;;; finalized when the GWeakNotify is called, there's not much you could do with
+;;; the object, apart from e.g. using its address as hash-index or the like.
 ;;; 
 ;;; data :
 ;;; 	data that was provided when the weak reference was established
 ;;; 
 ;;; where_the_object_was :
 ;;; 	the object being finalized
-;;; |#
+;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_weak_ref ()
@@ -1095,50 +1112,88 @@
 ;;; 
 ;;; is_last_ref :
 ;;; 	TRUE if the toggle reference is now the last reference to the object. FALSE if the toggle reference was the last reference and there are now other references.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_add_toggle_ref ()
 ;;; 
-;;; void                g_object_add_toggle_ref             (GObject *object,
-;;;                                                          GToggleNotify notify,
-;;;                                                          gpointer data);
+;;; void g_object_add_toggle_ref (GObject *object,
+;;;                               GToggleNotify notify,
+;;;                               gpointer data)
 ;;; 
-;;; Increases the reference count of the object by one and sets a callback to be called when all other references to the object are dropped, or when this is already the last reference to the object and another reference is established.
+;;; Increases the reference count of the object by one and sets a callback to be
+;;; called when all other references to the object are dropped, or when this is
+;;; already the last reference to the object and another reference is
+;;; established.
 ;;; 
-;;; This functionality is intended for binding object to a proxy object managed by another memory manager. This is done with two paired references: the strong reference added by g_object_add_toggle_ref() and a reverse reference to the proxy object which is either a strong reference or weak reference.
+;;; This functionality is intended for binding object to a proxy object managed
+;;; by another memory manager. This is done with two paired references: the
+;;; strong reference added by g_object_add_toggle_ref() and a reverse reference
+;;; to the proxy object which is either a strong reference or weak reference.
 ;;; 
-;;; The setup is that when there are no other references to object, only a weak reference is held in the reverse direction from object to the proxy object, but when there are other references held to object, a strong reference is held. The notify callback is called when the reference from object to the proxy object should be toggled from strong to weak (is_last_ref true) or weak to strong (is_last_ref false).
+;;; The setup is that when there are no other references to object, only a weak
+;;; reference is held in the reverse direction from object to the proxy object,
+;;; but when there are other references held to object, a strong reference is
+;;; held. The notify callback is called when the reference from object to the
+;;; proxy object should be toggled from strong to weak (is_last_ref true) or
+;;; weak to strong (is_last_ref false).
 ;;; 
-;;; Since a (normal) reference must be held to the object before calling g_object_add_toggle_ref(), the initial state of the reverse link is always strong.
+;;; Since a (normal) reference must be held to the object before calling
+;;; g_object_add_toggle_ref(), the initial state of the reverse link is always
+;;; strong.
 ;;; 
-;;; Multiple toggle references may be added to the same gobject, however if there are multiple toggle references to an object, none of them will ever be notified until all but one are removed. For this reason, you should only ever use a toggle reference if there is important state in the proxy object.
+;;; Multiple toggle references may be added to the same gobject, however if
+;;; there are multiple toggle references to an object, none of them will ever be
+;;; notified until all but one are removed. For this reason, you should only
+;;; ever use a toggle reference if there is important state in the proxy object.
 ;;; 
 ;;; object :
 ;;; 	a GObject
 ;;; 
 ;;; notify :
-;;; 	a function to call when this reference is the last reference to the object, or is no longer the last reference.
+;;; 	a function to call when this reference is the last reference to the
+;;;     object, or is no longer the last reference.
 ;;; 
 ;;; data :
 ;;; 	data to pass to notify
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-add-toggle-ref :void
+  (object :pointer)
+  (notifty :pointer)
+  (data :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_remove_toggle_ref ()
 ;;; 
-;;; void                g_object_remove_toggle_ref          (GObject *object,
-;;;                                                          GToggleNotify notify,
-;;;                                                          gpointer data);
+;;; void g_object_remove_toggle_ref (GObject *object,
+;;;                                  GToggleNotify notify,
+;;;                                  gpointer data)
 ;;; 
-;;; Removes a reference added with g_object_add_toggle_ref(). The reference count of the object is decreased by one.
+;;; Removes a reference added with g_object_add_toggle_ref(). The reference
+;;; count of the object is decreased by one.
 ;;; 
 ;;; object :
 ;;; 	a GObject
 ;;; 
 ;;; notify :
-;;; 	a function to call when this reference is the last reference to the object, or is no longer the last reference.
+;;; 	a function to call when this reference is the last reference to the
+;;;     object, or is no longer the last reference.
 ;;; 
 ;;; data :
 ;;; 	data to pass to notify
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-remove-toggle-ref :void
+  (object :pointer)
+  (notifty :pointer)
+  (data :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_connect ()
 ;;; 
 ;;; gpointer            g_object_connect                    (gpointer object,
@@ -1220,6 +1275,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	object. [transfer none]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_disconnect ()
 ;;; 
 ;;; void                g_object_disconnect                 (gpointer object,
@@ -1238,6 +1296,9 @@
 ;;; 
 ;;; ... :
 ;;; 	GCallback for the first signal, followed by data for the first signal, followed optionally by more signal spec/callback/data triples, followed by NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set ()
 ;;; 
 ;;; void                g_object_set                        (gpointer object,
@@ -1254,6 +1315,9 @@
 ;;; 
 ;;; ... :
 ;;; 	value for the first property, followed optionally by more name/value pairs, followed by NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_get ()
 ;;; 
 ;;; void                g_object_get                        (gpointer object,
@@ -1291,20 +1355,31 @@
 ;;; 
 ;;; ... :
 ;;; 	return location for the first property, followed optionally by more name/return location pairs, followed by NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_notify ()
 ;;; 
-;;; void                g_object_notify                     (GObject *object,
-;;;                                                          const gchar *property_name);
+;;; void g_object_notify (GObject *object, const gchar *property_name)
 ;;; 
 ;;; Emits a "notify" signal for the property property_name on object.
 ;;; 
-;;; When possible, eg. when signaling a property change from within the class that registered the property, you should use g_object_notify_by_pspec() instead.
+;;; When possible, eg. when signaling a property change from within the class
+;;; that registered the property, you should use g_object_notify_by_pspec()
+;;; instead.
 ;;; 
 ;;; object :
 ;;; 	a GObject
 ;;; 
 ;;; property_name :
 ;;; 	the name of a property installed on the class of object.
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-notify :void
+  (object :pointer)
+  (property-name :string))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_notify_by_pspec ()
 ;;; 
 ;;; void                g_object_notify_by_pspec            (GObject *object,
@@ -1362,11 +1437,7 @@
 ;;; 
 ;;; and then notify a change on the "foo" property with:
 ;;; 
-;;; 1
-;;; 
-;;; 	
-;;; 
-;;; g_object_notify_by_pspec (self, properties[PROP_FOO]);
+;;;  1 g_object_notify_by_pspec (self, properties[PROP_FOO]);
 ;;; 
 ;;; object :
 ;;; 	a GObject
@@ -1375,32 +1446,52 @@
 ;;; 	the GParamSpec of a property installed on the class of object.
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_freeze_notify ()
 ;;; 
-;;; void                g_object_freeze_notify              (GObject *object);
+;;; void g_object_freeze_notify (GObject *object)
 ;;; 
-;;; Increases the freeze count on object. If the freeze count is non-zero, the emission of "notify" signals on object is stopped. The signals are queued until the freeze count is decreased to zero.
+;;; Increases the freeze count on object. If the freeze count is non-zero, the
+;;; emission of "notify" signals on object is stopped. The signals are queued
+;;; until the freeze count is decreased to zero.
 ;;; 
-;;; This is necessary for accessors that modify multiple properties to prevent premature notification while the object is still being modified.
+;;; This is necessary for accessors that modify multiple properties to prevent
+;;; premature notification while the object is still being modified.
 ;;; 
 ;;; object :
 ;;; 	a GObject
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-freeze-notify :void
+  (object :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_thaw_notify ()
 ;;; 
-;;; void                g_object_thaw_notify                (GObject *object);
+;;; void g_object_thaw_notify (GObject *object)
 ;;; 
-;;; Reverts the effect of a previous call to g_object_freeze_notify(). The freeze count is decreased on object and when it reaches zero, all queued "notify" signals are emitted.
+;;; Reverts the effect of a previous call to g_object_freeze_notify().
+;;; The freeze count is decreased on object and when it reaches zero, all
+;;; queued "notify" signals are emitted.
 ;;; 
 ;;; It is an error to call this function when the freeze count is zero.
 ;;; 
 ;;; object :
 ;;; 	a GObject
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-thaw-notify :void
+  (object :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_get_data ()
 ;;; 
-;;; gpointer            g_object_get_data                   (GObject *object,
-;;;                                                          const gchar *key);
+;;; gpointer g_object_get_data (GObject *object, const gchar *key)
 ;;; 
-;;; Gets a named field from the objects table of associations (see g_object_set_data()).
+;;; Gets a named field from the objects table of associations (see
+;;; g_object_set_data()).
 ;;; 
 ;;; object :
 ;;; 	GObject containing the associations
@@ -1410,15 +1501,24 @@
 ;;; 
 ;;; Returns :
 ;;; 	the data if found, or NULL if no such data exists. [transfer none]
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-get-data :pointer
+  (object :pointer)
+  (key :string))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_data ()
 ;;; 
-;;; void                g_object_set_data                   (GObject *object,
-;;;                                                          const gchar *key,
-;;;                                                          gpointer data);
+;;; void g_object_set_data (GObject *object,
+;;;                         const gchar *key,
+;;;                         gpointer data)
 ;;; 
-;;; Each object carries around a table of associations from strings to pointers. This function lets you set an association.
+;;; Each object carries around a table of associations from strings to pointers.
+;;; This function lets you set an association.
 ;;; 
-;;; If the object already had an association with that name, the old association will be destroyed.
+;;; If the object already had an association with that name, the old association
+;;; will be destroyed.
 ;;; 
 ;;; object :
 ;;; 	GObject containing the associations.
@@ -1428,14 +1528,24 @@
 ;;; 
 ;;; data :
 ;;; 	data to associate with that key
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-set-data :void
+  (object :pointer)
+  (key :string)
+  (new-value :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_data_full ()
 ;;; 
-;;; void                g_object_set_data_full              (GObject *object,
-;;;                                                          const gchar *key,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify destroy);
+;;; void g_object_set_data_full (GObject *object,
+;;;                              const gchar *key,
+;;;                              gpointer data,
+;;;                              GDestroyNotify destroy)
 ;;; 
-;;; Like g_object_set_data() except it adds notification for when the association is destroyed, either by setting it to a different value or when the object is destroyed.
+;;; Like g_object_set_data() except it adds notification for when the
+;;; association is destroyed, either by setting it to a different value or when
+;;; the object is destroyed.
 ;;; 
 ;;; Note that the destroy callback is not called if data is NULL.
 ;;; 
@@ -1450,12 +1560,21 @@
 ;;; 
 ;;; destroy :
 ;;; 	function to call when the association is destroyed
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-set-data-full :void
+  (object :pointer)
+  (key :string)
+  (data :pointer)
+  (destory :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_steal_data ()
 ;;; 
-;;; gpointer            g_object_steal_data                 (GObject *object,
-;;;                                                          const gchar *key);
+;;; gpointer g_object_steal_data (GObject *object, const gchar *key)
 ;;; 
-;;; Remove a specified datum from the object's data associations, without invoking the association's destroy handler.
+;;; Remove a specified datum from the object's data associations, without
+;;; invoking the association's destroy handler.
 ;;; 
 ;;; object :
 ;;; 	GObject containing the associations
@@ -1465,6 +1584,13 @@
 ;;; 
 ;;; Returns :
 ;;; 	the data if found, or NULL if no such data exists. [transfer full]
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-steal-data :pointer
+  (object :pointer)
+  (key :string))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_get_qdata ()
 ;;; 
 ;;; gpointer            g_object_get_qdata                  (GObject *object,
@@ -1480,6 +1606,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	The user data pointer set, or NULL. [transfer none]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_qdata ()
 ;;; 
 ;;; void                g_object_set_qdata                  (GObject *object,
@@ -1496,14 +1625,20 @@
 ;;; 
 ;;; data :
 ;;; 	An opaque user data pointer
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_qdata_full ()
 ;;; 
-;;; void                g_object_set_qdata_full             (GObject *object,
-;;;                                                          GQuark quark,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify destroy);
+;;; void g_object_set_qdata_full (GObject *object,
+;;;                               GQuark quark,
+;;;                               gpointer data,
+;;;                               GDestroyNotify destroy)
 ;;; 
-;;; This function works like g_object_set_qdata(), but in addition, a void (*destroy) (gpointer) function may be specified which is called with data as argument when the object is finalized, or the data is being overwritten by a call to g_object_set_qdata() with the same quark.
+;;; This function works like g_object_set_qdata(), but in addition, a void
+;;; (*destroy) (gpointer) function may be specified which is called with data
+;;; as argument when the object is finalized, or the data is being overwritten
+;;; by a call to g_object_set_qdata() with the same quark.
 ;;; 
 ;;; object :
 ;;; 	The GObject to set store a user data pointer
@@ -1516,64 +1651,46 @@
 ;;; 
 ;;; destroy :
 ;;; 	Function to invoke with data as argument, when data needs to be freed
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_steal_qdata ()
 ;;; 
-;;; gpointer            g_object_steal_qdata                (GObject *object,
-;;;                                                          GQuark quark);
+;;; gpointer g_object_steal_qdata (GObject *object, GQuark quark)
 ;;; 
-;;; This function gets back user data pointers stored via g_object_set_qdata() and removes the data from object without invoking its destroy() function (if any was set). Usually, calling this function is only required to update user data pointers with a destroy notifier, for example:
+;;; This function gets back user data pointers stored via g_object_set_qdata()
+;;; and removes the data from object without invoking its destroy() function
+;;; (if any was set). Usually, calling this function is only required to update
+;;; user data pointers with a destroy notifier, for example:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
+;;;  1 void
+;;;  2 object_add_to_user_list (GObject     *object,
+;;;  3                          const gchar *new_string)
+;;;  4 {
+;;;  5   // the quark, naming the object data
+;;;  6   GQuark quark_string_list = g_quark_from_static_string ("my-string-list");
+;;;  7   // retrive the old string list
+;;;  8   GList *list = g_object_steal_qdata (object, quark_string_list);
+;;;  9
+;;; 10   // prepend new string
+;;; 11   list = g_list_prepend (list, g_strdup (new_string));
+;;; 12   // this changed 'list', so we need to set it again
+;;; 13   g_object_set_qdata_full (object, quark_string_list, list, free_string_list);
+;;; 14 }
+;;; 15 static void
+;;; 16 free_string_list (gpointer data)
+;;; 17 {
+;;; 18   GList *node, *list = data;
 ;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
+;;; 20   for (node = list; node; node = node->next)
+;;; 21     g_free (node->data);
+;;; 22   g_list_free (list);
+;;; 23 }
 ;;; 
-;;; 	
-;;; 
-;;; void
-;;; object_add_to_user_list (GObject     *object,
-;;;                          const gchar *new_string)
-;;; {
-;;;   // the quark, naming the object data
-;;;   GQuark quark_string_list = g_quark_from_static_string ("my-string-list");
-;;;   // retrive the old string list
-;;;   GList *list = g_object_steal_qdata (object, quark_string_list);
-;;; 
-;;;   // prepend new string
-;;;   list = g_list_prepend (list, g_strdup (new_string));
-;;;   // this changed 'list', so we need to set it again
-;;;   g_object_set_qdata_full (object, quark_string_list, list, free_string_list);
-;;; }
-;;; static void
-;;; free_string_list (gpointer data)
-;;; {
-;;;   GList *node, *list = data;
-;;; 
-;;;   for (node = list; node; node = node->next)
-;;;     g_free (node->data);
-;;;   g_list_free (list);
-;;; }
-;;; 
-;;; Using g_object_get_qdata() in the above example, instead of g_object_steal_qdata() would have left the destroy function set, and thus the partial string list would have been freed upon g_object_set_qdata_full().
+;;; Using g_object_get_qdata() in the above example, instead of
+;;; g_object_steal_qdata() would have left the destroy function set, and thus
+;;; the partial string list would have been freed upon
+;;; g_object_set_qdata_full().
 ;;; 
 ;;; object :
 ;;; 	The GObject to get a stored user data pointer from
@@ -1583,11 +1700,14 @@
 ;;; 
 ;;; Returns :
 ;;; 	The user data pointer set, or NULL. [transfer full]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_property ()
 ;;; 
-;;; void                g_object_set_property               (GObject *object,
-;;;                                                          const gchar *property_name,
-;;;                                                          const GValue *value);
+;;; void g_object_set_property (GObject *object,
+;;;                             const gchar *property_name,
+;;;                             const GValue *value)
 ;;; 
 ;;; Sets a property on an object.
 ;;; 
@@ -1599,17 +1719,29 @@
 ;;; 
 ;;; value :
 ;;; 	the value
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-set-property :void
+  (object :pointer)
+  (property-name :string)
+  (value (:pointer g-value)))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_get_property ()
 ;;; 
-;;; void                g_object_get_property               (GObject *object,
-;;;                                                          const gchar *property_name,
-;;;                                                          GValue *value);
+;;; void g_object_get_property (GObject *object,
+;;;                             const gchar *property_name,
+;;;                             GValue *value)
 ;;; 
-;;; Gets a property of an object. value must have been initialized to the expected type of the property (or a type to which the expected type can be transformed) using g_value_init().
+;;; Gets a property of an object. value must have been initialized to the
+;;; expected type of the property (or a type to which the expected type can be
+;;; transformed) using g_value_init().
 ;;; 
-;;; In general, a copy is made of the property contents and the caller is responsible for freeing the memory by calling g_value_unset().
+;;; In general, a copy is made of the property contents and the caller is
+;;; responsible for freeing the memory by calling g_value_unset().
 ;;; 
-;;; Note that g_object_get_property() is really intended for language bindings, g_object_get() is much more convenient for C programming.
+;;; Note that g_object_get_property() is really intended for language bindings,
+;;; g_object_get() is much more convenient for C programming.
 ;;; 
 ;;; object :
 ;;; 	a GObject
@@ -1619,6 +1751,14 @@
 ;;; 
 ;;; value :
 ;;; 	return location for the property value
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-object-get-property :void
+  (object :pointer)
+  (property-name :string)
+  (value (:pointer g-value)))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_new_valist ()
 ;;; 
 ;;; GObject *           g_object_new_valist                 (GType object_type,
@@ -1640,6 +1780,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new instance of object_type
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_set_valist ()
 ;;; 
 ;;; void                g_object_set_valist                 (GObject *object,
@@ -1656,6 +1799,9 @@
 ;;; 
 ;;; var_args :
 ;;; 	value for the first property, followed optionally by more name/value pairs, followed by NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_get_valist ()
 ;;; 
 ;;; void                g_object_get_valist                 (GObject *object,
