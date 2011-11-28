@@ -486,6 +486,9 @@
 ;;; 
 ;;; G_SIGNAL_MATCH_UNBLOCKED
 ;;; 	Only unblocked signals may matched.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GSignalQuery
 ;;; 
 ;;; struct GSignalQuery {
@@ -524,7 +527,18 @@
 ;;; @return_type callback (gpointer     data1,
 ;;; [param_types param_names,]
 ;;; gpointer     data2);
-;;; 
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-signal-query
+  (:signal-id :uint)
+  (:signal-name :string)
+  (:owner-type g-type-designator)
+  (:signal-flags g-signal-flags)
+  (:return-type (g-type-designator :mangled-p t))
+  (:n-params :uint)
+  (:param-types (:pointer (g-type-designator :mangled-p t))))
+
+;;; ----------------------------------------------------------------------------
 ;;; G_SIGNAL_TYPE_STATIC_SCOPE
 ;;; 
 ;;; #define G_SIGNAL_TYPE_STATIC_SCOPE (G_TYPE_FLAG_RESERVED_ID_BIT)
@@ -669,6 +683,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the signal id
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_new_valist ()
 ;;; 
 ;;; guint               g_signal_new_valist                 (const gchar *signal_name,
@@ -720,24 +737,39 @@
 ;;; 
 ;;; Returns :
 ;;; 	the signal id
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_query ()
 ;;; 
-;;; void                g_signal_query                      (guint signal_id,
-;;;                                                          GSignalQuery *query);
+;;; void g_signal_query (guint signal_id, GSignalQuery *query)
 ;;; 
-;;; Queries the signal system for in-depth information about a specific signal. This function will fill in a user-provided structure to hold signal-specific information. If an invalid signal id is passed in, the signal_id member of the GSignalQuery is 0. All members filled into the GSignalQuery structure should be considered constant and have to be left untouched.
+;;; Queries the signal system for in-depth information about a specific signal.
+;;; This function will fill in a user-provided structure to hold signal-specific
+;;; information. If an invalid signal id is passed in, the signal_id member of
+;;; the GSignalQuery is 0. All members filled into the GSignalQuery structure
+;;; should be considered constant and have to be left untouched.
 ;;; 
 ;;; signal_id :
 ;;; 	The signal id of the signal to query information for.
 ;;; 
 ;;; query :
-;;; 	A user provided structure that is filled in with constant values upon success. [out caller-allocates]
+;;; 	A user provided structure that is filled in with constant values upon
+;;;     success.
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-signal-query :void
+  (signal-id :uint)
+  (query (:pointer g-signal-query)))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_lookup ()
 ;;; 
-;;; guint               g_signal_lookup                     (const gchar *name,
-;;;                                                          GType itype);
+;;; guint g_signal_lookup (const gchar *name, GType itype)
 ;;; 
-;;; Given the name of the signal and the type of object it connects to, gets the signal's identifying integer. Emitting the signal by number is somewhat faster than using the name each time.
+;;; Given the name of the signal and the type of object it connects to, gets
+;;; the signal's identifying integer. Emitting the signal by number is somewhat
+;;; faster than using the name each time.
 ;;; 
 ;;; Also tries the ancestors of the given type.
 ;;; 
@@ -751,6 +783,13 @@
 ;;; 
 ;;; Returns :
 ;;; 	the signal's identifying number, or 0 if no signal was found.
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-signal-lookup :uint
+  (name :string)
+  (type g-type-designator))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_name ()
 ;;; 
 ;;; const gchar *       g_signal_name                       (guint signal_id);
@@ -764,12 +803,16 @@
 ;;; 
 ;;; Returns :
 ;;; 	the signal name, or NULL if the signal number was invalid.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_list_ids ()
 ;;; 
-;;; guint *             g_signal_list_ids                   (GType itype,
-;;;                                                          guint *n_ids);
+;;; guint * g_signal_list_ids (GType itype, guint *n_ids)
 ;;; 
-;;; Lists the signals by id that a certain instance or interface type created. Further information about the signals can be acquired through g_signal_query().
+;;; Lists the signals by id that a certain instance or interface type created.
+;;; Further information about the signals can be acquired through
+;;; g_signal_query().
 ;;; 
 ;;; itype :
 ;;; 	Instance or interface type.
@@ -778,8 +821,12 @@
 ;;; 	Location to store the number of signal ids for itype.
 ;;; 
 ;;; Returns :
-;;; 	Newly allocated array of signal IDs. [array length=n_ids]
+;;; 	Newly allocated array of signal IDs.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-signal-list-ids (:pointer :uint)
+  (type g-type-designator)
+  (n-ids (:pointer :uint)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_signal_emit ()
@@ -840,13 +887,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_signal_emit_by_name ()
 ;;; 
-;;; void                g_signal_emit_by_name               (gpointer instance,
-;;;                                                          const gchar *detailed_signal,
-;;;                                                          ...);
+;;; void g_signal_emit_by_name (gpointer instance,
+;;;                             const gchar *detailed_signal,
+;;;                             ...)
 ;;; 
 ;;; Emits a signal.
 ;;; 
-;;; Note that g_signal_emit_by_name() resets the return value to the default if no handlers are connected, in contrast to g_signal_emitv().
+;;; Note that g_signal_emit_by_name() resets the return value to the default if
+;;; no handlers are connected, in contrast to g_signal_emitv().
 ;;; 
 ;;; instance :
 ;;; 	the instance the signal is being emitted on.
@@ -855,20 +903,28 @@
 ;;; 	a string of the form "signal-name::detail".
 ;;; 
 ;;; ... :
-;;; 	parameters to be passed to the signal, followed by a location for the return value. If the return type of the signal is G_TYPE_NONE, the return value location can be omitted.
+;;; 	parameters to be passed to the signal, followed by a location for the
+;;;     return value. If the return type of the signal is G_TYPE_NONE, the
+;;;     return value location can be omitted.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_emitv ()
 ;;; 
-;;; void                g_signal_emitv                      (const GValue *instance_and_params,
-;;;                                                          guint signal_id,
-;;;                                                          GQuark detail,
-;;;                                                          GValue *return_value);
+;;; void g_signal_emitv (const GValue *instance_and_params,
+;;;                      guint signal_id,
+;;;                      GQuark detail,
+;;;                      GValue *return_value)
 ;;; 
 ;;; Emits a signal.
 ;;; 
-;;; Note that g_signal_emitv() doesn't change return_value if no handlers are connected, in contrast to g_signal_emit() and g_signal_emit_valist().
+;;; Note that g_signal_emitv() doesn't change return_value if no handlers are
+;;; connected, in contrast to g_signal_emit() and g_signal_emit_valist().
 ;;; 
 ;;; instance_and_params :
-;;; 	argument list for the signal emission. The first element in the array is a GValue for the instance the signal is being emitted on. The rest are any arguments to be passed to the signal. [array]
+;;; 	argument list for the signal emission. The first element in the array
+;;;     is a GValue for the instance the signal is being emitted on. The rest
+;;;     are any arguments to be passed to the signal. [array]
 ;;; 
 ;;; signal_id :
 ;;; 	the signal id
@@ -878,6 +934,15 @@
 ;;; 
 ;;; return_value :
 ;;; 	Location to store the return value of the signal emission.
+;;; ----------------------------------------------------------------------------
+
+(defcfun g-signal-emitv :void
+  (instance-and-params (:pointer g-value))
+  (signal-id :uint)
+  (detail g-quark)
+  (return-value (:pointer g-value)))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_emit_valist ()
 ;;; 
 ;;; void                g_signal_emit_valist                (gpointer instance,
@@ -1088,11 +1153,18 @@
 ;;; 	the closure to connect.
 ;;; 
 ;;; after :
-;;; 	whether the handler should be called before or after the default handler of the signal.
+;;; 	whether the handler should be called before or after the default
+;;;     handler of the signal.
 ;;; 
 ;;; Returns :
 ;;; 	the handler id
 ;;; ----------------------------------------------------------------------------
+
+(defcfun g-signal-connect-closure :ulong
+  (instance :pointer)
+  (detailed-signal :string)
+  (closure (:pointer g-closure))
+  (after :boolean))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_signal_connect_closure_by_id ()
