@@ -19,7 +19,7 @@
                (:file "gobject.closures")
                (:file "gobject.boxed")
                
-               (:file "gobject.type-info")
+;               (:file "gobject.type-info")
                (:file "gobject.type-info.object")
                (:file "gobject.type-info.enum")
                (:file "gobject.type-info.signals")
