@@ -179,6 +179,9 @@
 ;;; 
 ;;; prgname :
 ;;; 	the name of the program.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_environ ()
 ;;; 
 ;;; gchar **            g_get_environ                       (void);
@@ -193,6 +196,9 @@
 ;;; 	the list of environment variables. [array zero-terminated=1][transfer full]
 ;;; 
 ;;; Since 2.28
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_getenv ()
 ;;; 
 ;;; const gchar *       g_getenv                            (const gchar *variable);
@@ -204,6 +210,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the value of the environment variable, or NULL if the environment variable is not found. The returned string may be overwritten by the next call to g_getenv(), g_setenv() or g_unsetenv().
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_setenv ()
 ;;; 
 ;;; gboolean            g_setenv                            (const gchar *variable,
@@ -227,6 +236,9 @@
 ;;; 	FALSE if the environment variable couldn't be set.
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_unsetenv ()
 ;;; 
 ;;; void                g_unsetenv                          (const gchar *variable);
@@ -239,6 +251,9 @@
 ;;; 	the environment variable to remove, must not contain '='.
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_listenv ()
 ;;; 
 ;;; gchar **            g_listenv                           (void);
@@ -249,6 +264,9 @@
 ;;; 	a NULL-terminated list of strings which must be freed with g_strfreev(). Programs that want to be portable to Windows should typically use this function and g_getenv() instead of using the environ array from the C library directly. On Windows, the strings in the environ array are in system codepage encoding, while in most of the typical use cases for environment variables in GLib-using programs you want the UTF-8 encoding that this function and g_getenv() provide. [array zero-terminated=1][transfer full]
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_user_name ()
 ;;; 
 ;;; const gchar *       g_get_user_name                     (void);
@@ -257,6 +275,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the user name of the current user.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_real_name ()
 ;;; 
 ;;; const gchar *       g_get_real_name                     (void);
@@ -411,6 +432,9 @@
 ;;; 	the number of enum values
 ;;; 
 ;;; Since 2.14
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_user_special_dir ()
 ;;; 
 ;;; const gchar *       g_get_user_special_dir              (GUserDirectory directory);
@@ -428,6 +452,9 @@
 ;;; 	the path to the specified special directory, or NULL if the logical id was not found. The returned string is owned by GLib and should not be modified or freed.
 ;;; 
 ;;; Since 2.14
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_system_data_dirs ()
 ;;; 
 ;;; const gchar * const * g_get_system_data_dirs            (void);
@@ -450,6 +477,9 @@
 ;;; 	a NULL-terminated array of strings owned by GLib that must not be modified or freed. [array zero-terminated=1][transfer none]
 ;;; 
 ;;; Since 2.6
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_system_config_dirs ()
 ;;; 
 ;;; const gchar * const * g_get_system_config_dirs          (void);
@@ -464,6 +494,9 @@
 ;;; 	a NULL-terminated array of strings owned by GLib that must not be modified or freed. [array zero-terminated=1][transfer none]
 ;;; 
 ;;; Since 2.6
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_reload_user_special_dirs_cache ()
 ;;; 
 ;;; void                g_reload_user_special_dirs_cache    (void);
@@ -473,6 +506,9 @@
 ;;; Due to threadsafety issues this may cause leaking of strings that were previously returned from g_get_user_special_dir() that can't be freed. We ensure to only leak the data for the directories that actually changed value though.
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_host_name ()
 ;;; 
 ;;; const gchar *       g_get_host_name                     (void);
@@ -485,6 +521,9 @@
 ;;; 	the host name of the machine.
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_home_dir ()
 ;;; 
 ;;; const gchar *       g_get_home_dir                      (void);
@@ -512,6 +551,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the current user's home directory
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_tmp_dir ()
 ;;; 
 ;;; const gchar *       g_get_tmp_dir                       (void);
@@ -520,6 +562,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the directory to use for temporary files.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_get_current_dir ()
 ;;; 
 ;;; gchar *             g_get_current_dir                   (void);
@@ -528,6 +573,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the current directory.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_basename ()
 ;;; 
 ;;; const gchar *       g_basename                          (const gchar *file_name);
@@ -543,6 +591,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the name of the file without any leading directory components.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_dirname
 ;;; 
 ;;; #define             g_dirname
@@ -558,6 +609,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the directory components of the file
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_path_is_absolute ()
 ;;; 
 ;;; gboolean            g_path_is_absolute                  (const gchar *file_name);
@@ -577,6 +631,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if file_name is absolute.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_path_skip_root ()
 ;;; 
 ;;; const gchar *       g_path_skip_root                    (const gchar *file_name);
@@ -588,6 +645,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	a pointer into file_name after the root component.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_path_get_basename ()
 ;;; 
 ;;; gchar *             g_path_get_basename                 (const gchar *file_name);
@@ -599,6 +659,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	a newly allocated string containing the last component of the filename.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_path_get_dirname ()
 ;;; 
 ;;; gchar *             g_path_get_dirname                  (const gchar *file_name);
@@ -710,6 +773,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	a newly-allocated string that must be freed with g_free().
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_build_pathv ()
 ;;; 
 ;;; gchar *             g_build_pathv                       (const gchar *separator,
@@ -727,6 +793,9 @@
 ;;; 	a newly-allocated string that must be freed with g_free().
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_format_size ()
 ;;; 
 ;;; gchar *             g_format_size                       (guint64 size);
@@ -746,6 +815,9 @@
 ;;; 	a newly-allocated formatted string containing a human readable file size.
 ;;; 
 ;;; Since 2.30
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GFormatSizeFlags
 ;;; 
 ;;; typedef enum {
@@ -764,6 +836,9 @@
 ;;; 
 ;;; G_FORMAT_SIZE_IEC_UNITS
 ;;; 	use IEC (base 1024) units with "KiB"-style suffixes. IEC units should only be used for reporting things with a strong "power of 2" basis, like RAM sizes or RAID stripe sizes. Network and storage sizes should be reported in the normal SI units.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_format_size_full ()
 ;;; 
 ;;; gchar *             g_format_size_full                  (guint64 size,
@@ -783,6 +858,9 @@
 ;;; 	a newly-allocated formatted string containing a human readable file size.
 ;;; 
 ;;; Since 2.30
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_format_size_for_display ()
 ;;; 
 ;;; char *              g_format_size_for_display           (goffset size);
@@ -804,6 +882,9 @@
 ;;; 	a newly-allocated formatted string containing a human readable file size.
 ;;; 
 ;;; Since 2.16
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_find_program_in_path ()
 ;;; 
 ;;; gchar *             g_find_program_in_path              (const gchar *program);
@@ -817,6 +898,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	absolute path, or NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_bit_nth_lsf ()
 ;;; 
 ;;; gint                g_bit_nth_lsf                       (gulong mask,
@@ -832,6 +916,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the index of the first bit set which is higher than nth_bit
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_bit_nth_msf ()
 ;;; 
 ;;; gint                g_bit_nth_msf                       (gulong mask,
@@ -847,6 +934,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the index of the first bit set which is lower than nth_bit
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_bit_storage ()
 ;;; 
 ;;; guint               g_bit_storage                       (gulong number);
@@ -858,6 +948,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the number of bits used to hold number
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_spaced_primes_closest ()
 ;;; 
 ;;; guint               g_spaced_primes_closest             (guint num);
@@ -871,6 +964,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the smallest prime number from a built-in array of primes which is larger than num
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_atexit ()
 ;;; 
 ;;; void                g_atexit                            (GVoidFunc func);
@@ -891,6 +987,9 @@
 ;;; 
 ;;; func :
 ;;; 	the function to call on normal program termination. [scope async]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_parse_debug_string ()
 ;;; 
 ;;; guint               g_parse_debug_string                (const gchar *string,
@@ -912,6 +1011,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the combined set of bit flags.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GDebugKey
 ;;; 
 ;;; struct GDebugKey {
@@ -926,28 +1028,40 @@
 ;;; 
 ;;; guint value;
 ;;; 	the flag
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GVoidFunc ()
 ;;; 
-;;; void                (*GVoidFunc)                        (void);
+;;; void (*GVoidFunc) (void)
 ;;; 
-;;; Declares a type of function which takes no arguments and has no return value. It is used to specify the type function passed to g_atexit().
+;;; Declares a type of function which takes no arguments and has no return
+;;; value. It is used to specify the type function passed to g_atexit().
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GFreeFunc ()
 ;;; 
-;;; void                (*GFreeFunc)                        (gpointer data);
+;;; void (*GFreeFunc) (gpointer data)
 ;;; 
-;;; Declares a type of function which takes an arbitrary data pointer argument and has no return value. It is not currently used in GLib or GTK+.
+;;; Declares a type of function which takes an arbitrary data pointer argument
+;;; and has no return value. It is not currently used in GLib or GTK+.
 ;;; 
 ;;; data :
 ;;; 	a data pointer
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_qsort_with_data ()
 ;;; 
-;;; void                g_qsort_with_data                   (gconstpointer pbase,
-;;;                                                          gint total_elems,
-;;;                                                          gsize size,
-;;;                                                          GCompareDataFunc compare_func,
-;;;                                                          gpointer user_data);
+;;; void g_qsort_with_data (gconstpointer pbase,
+;;;                         gint total_elems,
+;;;                         gsize size,
+;;;                         GCompareDataFunc compare_func,
+;;;                         gpointer user_data)
 ;;; 
-;;; This is just like the standard C qsort() function, but the comparison routine accepts a user data argument.
+;;; This is just like the standard C qsort() function, but the comparison
+;;; routine accepts a user data argument.
 ;;; 
 ;;; pbase :
 ;;; 	start of array to sort
@@ -963,11 +1077,17 @@
 ;;; 
 ;;; user_data :
 ;;; 	data to pass to compare_func
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_nullify_pointer ()
 ;;; 
-;;; void                g_nullify_pointer                   (gpointer *nullify_location);
+;;; void g_nullify_pointer (gpointer *nullify_location)
 ;;; 
 ;;; Set the pointer at the specified location to NULL.
 ;;; 
 ;;; nullify_location :
 ;;; 	the memory address of the pointer.
+;;; ----------------------------------------------------------------------------
+
+;;; --- End of file glib.utils.lisp --------------------------------------------
