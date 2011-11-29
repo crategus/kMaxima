@@ -916,7 +916,7 @@
 ;;; ---------------------------------------------------------------------------- 
 ;;; g_mutex_new ()
 ;;; 
-;;; GMutex *            g_mutex_new                         ();
+;;; GMutex * g_mutex_new ();
 ;;; 
 ;;; Creates a new GMutex.
 ;;; 
@@ -926,50 +926,73 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new GMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_mutex_lock ()
 ;;; 
-;;; void                g_mutex_lock                        (GMutex *mutex);
+;;; void g_mutex_lock (GMutex *mutex)
 ;;; 
-;;; Locks mutex. If mutex is already locked by another thread, the current thread will block until mutex is unlocked by the other thread.
+;;; Locks mutex. If mutex is already locked by another thread, the current
+;;; thread will block until mutex is unlocked by the other thread.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will do nothing.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will do nothing.
 ;;; 
 ;;; Note
 ;;; 
-;;; GMutex is neither guaranteed to be recursive nor to be non-recursive, i.e. a thread could deadlock while calling g_mutex_lock(), if it already has locked mutex. Use GStaticRecMutex, if you need recursive mutexes.
+;;; GMutex is neither guaranteed to be recursive nor to be non-recursive, i.e.
+;;; a thread could deadlock while calling g_mutex_lock(), if it already has
+;;; locked mutex. Use GStaticRecMutex, if you need recursive mutexes.
 ;;; 
 ;;; mutex :
 ;;; 	a GMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_mutex_trylock ()
 ;;; 
-;;; gboolean            g_mutex_trylock                     (GMutex *mutex);
+;;; gboolean g_mutex_trylock (GMutex *mutex)
 ;;; 
-;;; Tries to lock mutex. If mutex is already locked by another thread, it immediately returns FALSE. Otherwise it locks mutex and returns TRUE.
+;;; Tries to lock mutex. If mutex is already locked by another thread, it
+;;; immediately returns FALSE. Otherwise it locks mutex and returns TRUE.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will immediately return TRUE.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will immediately return TRUE.
 ;;; 
 ;;; Note
 ;;; 
-;;; GMutex is neither guaranteed to be recursive nor to be non-recursive, i.e. the return value of g_mutex_trylock() could be both FALSE or TRUE, if the current thread already has locked mutex. Use GStaticRecMutex, if you need recursive mutexes.
+;;; GMutex is neither guaranteed to be recursive nor to be non-recursive, i.e.
+;;; the return value of g_mutex_trylock() could be both FALSE or TRUE, if the
+;;; current thread already has locked mutex. Use GStaticRecMutex, if you need
+;;; recursive mutexes.
 ;;; 
 ;;; mutex :
 ;;; 	a GMutex.
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if mutex could be locked.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_mutex_unlock ()
 ;;; 
-;;; void                g_mutex_unlock                      (GMutex *mutex);
+;;; void g_mutex_unlock (GMutex *mutex)
 ;;; 
-;;; Unlocks mutex. If another thread is blocked in a g_mutex_lock() call for mutex, it will be woken and can lock mutex itself.
+;;; Unlocks mutex. If another thread is blocked in a g_mutex_lock() call for
+;;; mutex, it will be woken and can lock mutex itself.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will do nothing.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will do nothing.
 ;;; 
 ;;; mutex :
 ;;; 	a GMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_mutex_free ()
 ;;; 
-;;; void                g_mutex_free                        (GMutex *mutex);
+;;; void g_mutex_free (GMutex *mutex)
 ;;; 
 ;;; Destroys mutex.
 ;;; 
@@ -979,86 +1002,96 @@
 ;;; 
 ;;; mutex :
 ;;; 	a GMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GStaticMutex
 ;;; 
 ;;; typedef struct _GStaticMutex GStaticMutex;
 ;;; 
-;;; A GStaticMutex works like a GMutex, but it has one significant advantage. It doesn't need to be created at run-time like a GMutex, but can be defined at compile-time. Here is a shorter, easier and safer version of our give_me_next_number() example:
+;;; A GStaticMutex works like a GMutex, but it has one significant advantage.
+;;; It doesn't need to be created at run-time like a GMutex, but can be defined
+;;; at compile-time. Here is a shorter, easier and safer version of our
+;;; give_me_next_number() example:
 ;;; 
 ;;; Example 5.  Using GStaticMutex to simplify thread-safe programming
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
+;;;  1 int
+;;;  2 give_me_next_number (void)
+;;;  3 {
+;;;  4   static int current_number = 0;
+;;;  5   int ret_val;
+;;;  6   static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+;;;  7
+;;;  8   g_static_mutex_lock (&mutex);
+;;;  9   ret_val = current_number = calc_next_number (current_number);
+;;; 10  g_static_mutex_unlock (&mutex);
 ;;; 11
-;;; 12
-;;; 13
+;;; 12  return ret_val;
+;;; 13 }
 ;;; 
-;;; 	
+;;; Sometimes you would like to dynamically create a mutex. If you don't want to
+;;; require prior calling to g_thread_init(), because your code should also be
+;;; usable in non-threaded programs, you are not able to use g_mutex_new() and
+;;; thus GMutex, as that requires a prior call to g_thread_init(). In theses
+;;; cases you can also use a GStaticMutex. It must be initialized with
+;;; g_static_mutex_init() before using it and freed with with
+;;; g_static_mutex_free() when not needed anymore to free up any allocated
+;;; resources.
 ;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   static int current_number = 0;
-;;;   int ret_val;
-;;;   static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+;;; Even though GStaticMutex is not opaque, it should only be used with the
+;;; following functions, as it is defined differently on different platforms.
 ;;; 
-;;;   g_static_mutex_lock (&mutex);
-;;;   ret_val = current_number = calc_next_number (current_number);
-;;;   g_static_mutex_unlock (&mutex);
-;;; 
-;;;   return ret_val;
-;;; }
-;;; 
-;;; 
-;;; Sometimes you would like to dynamically create a mutex. If you don't want to require prior calling to g_thread_init(), because your code should also be usable in non-threaded programs, you are not able to use g_mutex_new() and thus GMutex, as that requires a prior call to g_thread_init(). In theses cases you can also use a GStaticMutex. It must be initialized with g_static_mutex_init() before using it and freed with with g_static_mutex_free() when not needed anymore to free up any allocated resources.
-;;; 
-;;; Even though GStaticMutex is not opaque, it should only be used with the following functions, as it is defined differently on different platforms.
-;;; 
-;;; All of the g_static_mutex_* functions apart from g_static_mutex_get_mutex can also be used even if g_thread_init() has not yet been called. Then they do nothing, apart from g_static_mutex_trylock, which does nothing but returning TRUE.
+;;; All of the g_static_mutex_* functions apart from g_static_mutex_get_mutex
+;;; can also be used even if g_thread_init() has not yet been called. Then they
+;;; do nothing, apart from g_static_mutex_trylock, which does nothing but
+;;; returning TRUE.
 ;;; 
 ;;; Note
 ;;; 
-;;; All of the g_static_mutex_* functions are actually macros. Apart from taking their addresses, you can however use them as if they were functions.
-;;; 
+;;; All of the g_static_mutex_* functions are actually macros. Apart from taking
+;;; their addresses, you can however use them as if they were functions.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_STATIC_MUTEX_INIT
 ;;; 
 ;;; #define G_STATIC_MUTEX_INIT
 ;;; 
-;;; A GStaticMutex must be initialized with this macro, before it can be used. This macro can used be to initialize a variable, but it cannot be assigned to a variable. In that case you have to use g_static_mutex_init().
+;;; A GStaticMutex must be initialized with this macro, before it can be used.
+;;; This macro can used be to initialize a variable, but it cannot be assigned
+;;; to a variable. In that case you have to use g_static_mutex_init().
 ;;; 
-;;; 1
-;;; 
-;;; 	
-;;; 
-;;; GStaticMutex my_mutex = G_STATIC_MUTEX_INIT;
-;;; 
+;;;  1 GStaticMutex my_mutex = G_STATIC_MUTEX_INIT;
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_init ()
 ;;; 
-;;; void                g_static_mutex_init                 (GStaticMutex *mutex);
+;;; void g_static_mutex_init (GStaticMutex *mutex)
 ;;; 
-;;; Initializes mutex. Alternatively you can initialize it with G_STATIC_MUTEX_INIT.
+;;; Initializes mutex. Alternatively you can initialize it with
+;;; G_STATIC_MUTEX_INIT.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticMutex to be initialized.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_lock ()
 ;;; 
-;;; void                g_static_mutex_lock                 (GStaticMutex *mutex);
+;;; void g_static_mutex_lock (GStaticMutex *mutex)
 ;;; 
 ;;; Works like g_mutex_lock(), but for a GStaticMutex.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_trylock ()
 ;;; 
-;;; gboolean            g_static_mutex_trylock              (GStaticMutex *mutex);
+;;; gboolean g_static_mutex_trylock (GStaticMutex *mutex)
 ;;; 
 ;;; Works like g_mutex_trylock(), but for a GStaticMutex.
 ;;; 
@@ -1067,82 +1100,93 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if the GStaticMutex could be locked.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_unlock ()
 ;;; 
-;;; void                g_static_mutex_unlock               (GStaticMutex *mutex);
+;;; void g_static_mutex_unlock (GStaticMutex *mutex)
 ;;; 
 ;;; Works like g_mutex_unlock(), but for a GStaticMutex.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_get_mutex ()
 ;;; 
-;;; GMutex *            g_static_mutex_get_mutex            (GStaticMutex *mutex);
+;;; GMutex * g_static_mutex_get_mutex (GStaticMutex *mutex)
 ;;; 
-;;; For some operations (like g_cond_wait()) you must have a GMutex instead of a GStaticMutex. This function will return the corresponding GMutex for mutex.
+;;; For some operations (like g_cond_wait()) you must have a GMutex instead of
+;;; a GStaticMutex. This function will return the corresponding GMutex for
+;;; mutex.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticMutex.
 ;;; 
 ;;; Returns :
 ;;; 	the GMutex corresponding to mutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_mutex_free ()
 ;;; 
-;;; void                g_static_mutex_free                 (GStaticMutex *mutex);
+;;; void g_static_mutex_free (GStaticMutex *mutex)
 ;;; 
 ;;; Releases all resources allocated to mutex.
 ;;; 
-;;; You don't have to call this functions for a GStaticMutex with an unbounded lifetime, i.e. objects declared 'static', but if you have a GStaticMutex as a member of a structure and the structure is freed, you should also free the GStaticMutex.
+;;; You don't have to call this functions for a GStaticMutex with an unbounded
+;;; lifetime, i.e. objects declared 'static', but if you have a GStaticMutex as
+;;; a member of a structure and the structure is freed, you should also free the
+;;; GStaticMutex.
 ;;; 
 ;;; Note
 ;;; 
-;;; Calling g_static_mutex_free() on a locked mutex may result in undefined behaviour.
+;;; Calling g_static_mutex_free() on a locked mutex may result in undefined
+;;; behaviour.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticMutex to be freed.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_LOCK_DEFINE()
 ;;; 
 ;;; #define G_LOCK_DEFINE(name)    
 ;;; 
-;;; The G_LOCK_* macros provide a convenient interface to GStaticMutex with the advantage that they will expand to nothing in programs compiled against a thread-disabled GLib, saving code and memory there. G_LOCK_DEFINE defines a lock. It can appear anywhere variable definitions may appear in programs, i.e. in the first block of a function or outside of functions. The name parameter will be mangled to get the name of the GStaticMutex. This means that you can use names of existing variables as the parameter - e.g. the name of the variable you intent to protect with the lock. Look at our give_me_next_number() example using the G_LOCK_* macros:
+;;; The G_LOCK_* macros provide a convenient interface to GStaticMutex with the
+;;; advantage that they will expand to nothing in programs compiled against a
+;;; thread-disabled GLib, saving code and memory there. G_LOCK_DEFINE defines
+;;; a lock. It can appear anywhere variable definitions may appear in programs,
+;;; i.e. in the first block of a function or outside of functions. The name
+;;; parameter will be mangled to get the name of the GStaticMutex. This means
+;;; that you can use names of existing variables as the parameter - e.g. the
+;;; name of the variable you intent to protect with the lock. Look at our
+;;; give_me_next_number() example using the G_LOCK_* macros:
 ;;; 
 ;;; Example 6. Using the G_LOCK_* convenience macros
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 
-;;; 	
-;;; 
-;;; G_LOCK_DEFINE (current_number);
-;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   static int current_number = 0;
-;;;   int ret_val;
-;;; 
-;;;   G_LOCK (current_number);
-;;;   ret_val = current_number = calc_next_number (current_number);
-;;;   G_UNLOCK (current_number);
-;;; 
-;;;   return ret_val;
-;;; }
-;;; 
+;;;  1 G_LOCK_DEFINE (current_number);
+;;;  2 
+;;;  3 int
+;;;  4 give_me_next_number (void)
+;;;  5 {
+;;;  6   static int current_number = 0;
+;;;  7   int ret_val;
+;;;  8 
+;;;  9   G_LOCK (current_number);
+;;; 10   ret_val = current_number = calc_next_number (current_number);
+;;; 11   G_UNLOCK (current_number);
+;;; 12 
+;;; 13   return ret_val;
+;;; 14 }
 ;;; 
 ;;; name :
 ;;; 	the name of the lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_LOCK_DEFINE_STATIC()
 ;;; 
 ;;; #define G_LOCK_DEFINE_STATIC(name)
@@ -1151,6 +1195,9 @@
 ;;; 
 ;;; name :
 ;;; 	the name of the lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_LOCK_EXTERN()
 ;;; 
 ;;; #define G_LOCK_EXTERN(name)    
@@ -1159,6 +1206,9 @@
 ;;; 
 ;;; name :
 ;;; 	the name of the lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_LOCK()
 ;;; 
 ;;; #define G_LOCK(name)
@@ -1167,6 +1217,9 @@
 ;;; 
 ;;; name :
 ;;; 	the name of the lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_TRYLOCK()
 ;;; 
 ;;; #define G_TRYLOCK(name)
@@ -1178,6 +1231,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if the lock could be locked.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_UNLOCK()
 ;;; 
 ;;; #define G_UNLOCK(name)
@@ -1186,67 +1242,104 @@
 ;;; 
 ;;; name :
 ;;; 	the name of the lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GStaticRecMutex
 ;;; 
 ;;; struct GStaticRecMutex {
 ;;; };
 ;;; 
-;;; A GStaticRecMutex works like a GStaticMutex, but it can be locked multiple times by one thread. If you enter it n times, you have to unlock it n times again to let other threads lock it. An exception is the function g_static_rec_mutex_unlock_full(): that allows you to unlock a GStaticRecMutex completely returning the depth, (i.e. the number of times this mutex was locked). The depth can later be used to restore the state of the GStaticRecMutex by calling g_static_rec_mutex_lock_full().
+;;; A GStaticRecMutex works like a GStaticMutex, but it can be locked multiple
+;;; times by one thread. If you enter it n times, you have to unlock it n times
+;;; again to let other threads lock it. An exception is the function
+;;; g_static_rec_mutex_unlock_full(): that allows you to unlock a
+;;; GStaticRecMutex completely returning the depth, (i.e. the number of times
+;;; this mutex was locked). The depth can later be used to restore the state of
+;;; the GStaticRecMutex by calling g_static_rec_mutex_lock_full().
 ;;; 
-;;; Even though GStaticRecMutex is not opaque, it should only be used with the following functions.
+;;; Even though GStaticRecMutex is not opaque, it should only be used with the
+;;; following functions.
 ;;; 
-;;; All of the g_static_rec_mutex_* functions can be used even if g_thread_init() has not been called. Then they do nothing, apart from g_static_rec_mutex_trylock, which does nothing but returning TRUE.
+;;; All of the g_static_rec_mutex_* functions can be used even if
+;;; g_thread_init() has not been called. Then they do nothing, apart from
+;;; g_static_rec_mutex_trylock, which does nothing but returning TRUE.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_STATIC_REC_MUTEX_INIT
 ;;; 
 ;;; #define G_STATIC_REC_MUTEX_INIT { G_STATIC_MUTEX_INIT, 0, {{0, 0, 0, 0}} }
 ;;; 
-;;; A GStaticRecMutex must be initialized with this macro before it can be used. This macro can used be to initialize a variable, but it cannot be assigned to a variable. In that case you have to use g_static_rec_mutex_init().
+;;; A GStaticRecMutex must be initialized with this macro before it can be used.
+;;; This macro can used be to initialize a variable, but it cannot be assigned
+;;; to a variable. In that case you have to use g_static_rec_mutex_init().
 ;;; 
-;;; 1
-;;; 
-;;; 	
-;;; 
-;;; GStaticRecMutex my_mutex = G_STATIC_REC_MUTEX_INIT;
-;;; 
+;;;  1 GStaticRecMutex my_mutex = G_STATIC_REC_MUTEX_INIT;
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_init ()
 ;;; 
-;;; void                g_static_rec_mutex_init             (GStaticRecMutex *mutex);
+;;; void g_static_rec_mutex_init (GStaticRecMutex *mutex)
 ;;; 
-;;; A GStaticRecMutex must be initialized with this function before it can be used. Alternatively you can initialize it with G_STATIC_REC_MUTEX_INIT.
+;;; A GStaticRecMutex must be initialized with this function before it can be
+;;; used. Alternatively you can initialize it with G_STATIC_REC_MUTEX_INIT.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to be initialized.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_lock ()
 ;;; 
-;;; void                g_static_rec_mutex_lock             (GStaticRecMutex *mutex);
+;;; void g_static_rec_mutex_lock (GStaticRecMutex *mutex)
 ;;; 
-;;; Locks mutex. If mutex is already locked by another thread, the current thread will block until mutex is unlocked by the other thread. If mutex is already locked by the calling thread, this functions increases the depth of mutex and returns immediately.
+;;; Locks mutex. If mutex is already locked by another thread, the current
+;;; thread will block until mutex is unlocked by the other thread. If mutex is
+;;; already locked by the calling thread, this functions increases the depth of
+;;; mutex and returns immediately.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to lock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_trylock ()
 ;;; 
-;;; gboolean            g_static_rec_mutex_trylock          (GStaticRecMutex *mutex);
+;;; gboolean g_static_rec_mutex_trylock (GStaticRecMutex *mutex)
 ;;; 
-;;; Tries to lock mutex. If mutex is already locked by another thread, it immediately returns FALSE. Otherwise it locks mutex and returns TRUE. If mutex is already locked by the calling thread, this functions increases the depth of mutex and immediately returns TRUE.
+;;; Tries to lock mutex. If mutex is already locked by another thread, it
+;;; immediately returns FALSE. Otherwise it locks mutex and returns TRUE. If
+;;; mutex is already locked by the calling thread, this functions increases the
+;;; depth of mutex and immediately returns TRUE.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to lock.
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if mutex could be locked.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_unlock ()
 ;;; 
-;;; void                g_static_rec_mutex_unlock           (GStaticRecMutex *mutex);
+;;; void g_static_rec_mutex_unlock (GStaticRecMutex *mutex)
 ;;; 
-;;; Unlocks mutex. Another thread will be allowed to lock mutex only when it has been unlocked as many times as it had been locked before. If mutex is completely unlocked and another thread is blocked in a g_static_rec_mutex_lock() call for mutex, it will be woken and can lock mutex itself.
+;;; Unlocks mutex. Another thread will be allowed to lock mutex only when it has
+;;; been unlocked as many times as it had been locked before. If mutex is
+;;; completely unlocked and another thread is blocked in a
+;;; g_static_rec_mutex_lock() call for mutex, it will be woken and can lock
+;;; mutex itself.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to unlock.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_lock_full ()
 ;;; 
-;;; void                g_static_rec_mutex_lock_full        (GStaticRecMutex *mutex,
-;;;                                                          guint depth);
+;;; void g_static_rec_mutex_lock_full (GStaticRecMutex *mutex, guint depth)
 ;;; 
 ;;; Works like calling g_static_rec_mutex_lock() for mutex depth times.
 ;;; 
@@ -1255,214 +1348,269 @@
 ;;; 
 ;;; depth :
 ;;; 	number of times this mutex has to be unlocked to be completely unlocked.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_unlock_full ()
 ;;; 
-;;; guint               g_static_rec_mutex_unlock_full      (GStaticRecMutex *mutex);
+;;; guint g_static_rec_mutex_unlock_full (GStaticRecMutex *mutex)
 ;;; 
-;;; Completely unlocks mutex. If another thread is blocked in a g_static_rec_mutex_lock() call for mutex, it will be woken and can lock mutex itself. This function returns the number of times that mutex has been locked by the current thread. To restore the state before the call to g_static_rec_mutex_unlock_full() you can call g_static_rec_mutex_lock_full() with the depth returned by this function.
+;;; Completely unlocks mutex. If another thread is blocked in a
+;;; g_static_rec_mutex_lock() call for mutex, it will be woken and can lock
+;;; mutex itself. This function returns the number of times that mutex has been
+;;; locked by the current thread. To restore the state before the call to
+;;; g_static_rec_mutex_unlock_full() you can call g_static_rec_mutex_lock_full()
+;;; with the depth returned by this function.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to completely unlock.
 ;;; 
 ;;; Returns :
 ;;; 	number of times mutex has been locked by the current thread.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rec_mutex_free ()
 ;;; 
-;;; void                g_static_rec_mutex_free             (GStaticRecMutex *mutex);
+;;; void g_static_rec_mutex_free (GStaticRecMutex *mutex)
 ;;; 
 ;;; Releases all resources allocated to a GStaticRecMutex.
 ;;; 
-;;; You don't have to call this functions for a GStaticRecMutex with an unbounded lifetime, i.e. objects declared 'static', but if you have a GStaticRecMutex as a member of a structure and the structure is freed, you should also free the GStaticRecMutex.
+;;; You don't have to call this functions for a GStaticRecMutex with an
+;;; unbounded lifetime, i.e. objects declared 'static', but if you have a
+;;; GStaticRecMutex as a member of a structure and the structure is freed, you
+;;; should also free the GStaticRecMutex.
 ;;; 
 ;;; mutex :
 ;;; 	a GStaticRecMutex to be freed.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GStaticRWLock
 ;;; 
 ;;; struct GStaticRWLock {
 ;;; };
 ;;; 
-;;; The GStaticRWLock struct represents a read-write lock. A read-write lock can be used for protecting data that some portions of code only read from, while others also write. In such situations it is desirable that several readers can read at once, whereas of course only one writer may write at a time. Take a look at the following example:
+;;; The GStaticRWLock struct represents a read-write lock. A read-write lock can
+;;; be used for protecting data that some portions of code only read from, while
+;;; others also write. In such situations it is desirable that several readers
+;;; can read at once, whereas of course only one writer may write at a time.
+;;; Take a look at the following example:
 ;;; 
 ;;; Example 7. An array with access functions
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
+;;;  1 GStaticRWLock rwlock = G_STATIC_RW_LOCK_INIT;
+;;;  2 GPtrArray *array;
+;;;  3 
+;;;  4 gpointer
+;;;  5 my_array_get (guint index)
+;;;  6 {
+;;;  7   gpointer retval = NULL;
+;;;  8 
+;;;  9   if (!array)
+;;; 10     return NULL;
+;;; 11 
+;;; 12   g_static_rw_lock_reader_lock (&rwlock);
+;;; 13   if (index < array->len)
+;;; 14     retval = g_ptr_array_index (array, index);
+;;; 15   g_static_rw_lock_reader_unlock (&rwlock);
+;;; 16 
+;;; 17   return retval;
+;;; 18 }
 ;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
-;;; 24
-;;; 25
-;;; 26
-;;; 27
-;;; 28
-;;; 29
-;;; 30
-;;; 31
-;;; 32
-;;; 33
+;;; 20 void
+;;; 21 my_array_set (guint index, gpointer data)
+;;; 22 {
+;;; 23   g_static_rw_lock_writer_lock (&rwlock);
+;;; 24 
+;;; 25   if (!array)
+;;; 26     array = g_ptr_array_new ();
+;;; 27 
+;;; 28   if (index >= array->len)
+;;; 29     g_ptr_array_set_size (array, index+1);
+;;; 30   g_ptr_array_index (array, index) = data;
+;;; 31 
+;;; 32   g_static_rw_lock_writer_unlock (&rwlock);
+;;; 33 }
 ;;; 
-;;; 	
+;;; This example shows an array which can be accessed by many readers (the
+;;; my_array_get() function) simultaneously, whereas the writers (the
+;;; my_array_set() function) will only be allowed once at a time and only if no
+;;; readers currently access the array. This is because of the potentially
+;;; dangerous resizing of the array. Using these functions is fully multi-thread
+;;; safe now.
 ;;; 
-;;; GStaticRWLock rwlock = G_STATIC_RW_LOCK_INIT;
-;;; GPtrArray *array;
+;;; Most of the time, writers should have precedence over readers. That means,
+;;; for this implementation, that as soon as a writer wants to lock the data, no
+;;; other reader is allowed to lock the data, whereas, of course, the readers
+;;; that already have locked the data are allowed to finish their operation. As
+;;; soon as the last reader unlocks the data, the writer will lock it.
 ;;; 
-;;; gpointer
-;;; my_array_get (guint index)
-;;; {
-;;;   gpointer retval = NULL;
+;;; Even though GStaticRWLock is not opaque, it should only be used with the
+;;; following functions.
 ;;; 
-;;;   if (!array)
-;;;     return NULL;
-;;; 
-;;;   g_static_rw_lock_reader_lock (&rwlock);
-;;;   if (index < array->len)
-;;;     retval = g_ptr_array_index (array, index);
-;;;   g_static_rw_lock_reader_unlock (&rwlock);
-;;; 
-;;;   return retval;
-;;; }
-;;; 
-;;; void
-;;; my_array_set (guint index, gpointer data)
-;;; {
-;;;   g_static_rw_lock_writer_lock (&rwlock);
-;;; 
-;;;   if (!array)
-;;;     array = g_ptr_array_new ();
-;;; 
-;;;   if (index >= array->len)
-;;;     g_ptr_array_set_size (array, index+1);
-;;;   g_ptr_array_index (array, index) = data;
-;;; 
-;;;   g_static_rw_lock_writer_unlock (&rwlock);
-;;; }
-;;; 
-;;; 
-;;; This example shows an array which can be accessed by many readers (the my_array_get() function) simultaneously, whereas the writers (the my_array_set() function) will only be allowed once at a time and only if no readers currently access the array. This is because of the potentially dangerous resizing of the array. Using these functions is fully multi-thread safe now.
-;;; 
-;;; Most of the time, writers should have precedence over readers. That means, for this implementation, that as soon as a writer wants to lock the data, no other reader is allowed to lock the data, whereas, of course, the readers that already have locked the data are allowed to finish their operation. As soon as the last reader unlocks the data, the writer will lock it.
-;;; 
-;;; Even though GStaticRWLock is not opaque, it should only be used with the following functions.
-;;; 
-;;; All of the g_static_rw_lock_* functions can be used even if g_thread_init() has not been called. Then they do nothing, apart from g_static_rw_lock_*_trylock, which does nothing but returning TRUE.
+;;; All of the g_static_rw_lock_* functions can be used even if g_thread_init()
+;;; has not been called. Then they do nothing, apart from
+;;; g_static_rw_lock_*_trylock, which does nothing but returning TRUE.
 ;;; 
 ;;; Note
 ;;; 
-;;; A read-write lock has a higher overhead than a mutex. For example, both g_static_rw_lock_reader_lock() and g_static_rw_lock_reader_unlock() have to lock and unlock a GStaticMutex, so it takes at least twice the time to lock and unlock a GStaticRWLock that it does to lock and unlock a GStaticMutex. So only data structures that are accessed by multiple readers, and which keep the lock for a considerable time justify a GStaticRWLock. The above example most probably would fare better with a GStaticMutex.
-;;; 
+;;; A read-write lock has a higher overhead than a mutex. For example, both
+;;; g_static_rw_lock_reader_lock() and g_static_rw_lock_reader_unlock() have to
+;;; lock and unlock a GStaticMutex, so it takes at least twice the time to lock
+;;; and unlock a GStaticRWLock that it does to lock and unlock a GStaticMutex.
+;;; So only data structures that are accessed by multiple readers, and which
+;;; keep the lock for a considerable time justify a GStaticRWLock. The above
+;;; example most probably would fare better with a GStaticMutex.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_STATIC_RW_LOCK_INIT
 ;;; 
-;;; #define G_STATIC_RW_LOCK_INIT { G_STATIC_MUTEX_INIT, NULL, NULL, 0, FALSE, 0, 0 }
+;;; #define G_STATIC_RW_LOCK_INIT
+;;;         { G_STATIC_MUTEX_INIT, NULL, NULL, 0, FALSE, 0, 0 }
 ;;; 
-;;; A GStaticRWLock must be initialized with this macro before it can be used. This macro can used be to initialize a variable, but it cannot be assigned to a variable. In that case you have to use g_static_rw_lock_init().
+;;; A GStaticRWLock must be initialized with this macro before it can be used.
+;;; This macro can used be to initialize a variable, but it cannot be assigned
+;;; to a variable. In that case you have to use g_static_rw_lock_init().
 ;;; 
-;;; 1
-;;; 
-;;; 	
-;;; 
-;;; GStaticRWLock my_lock = G_STATIC_RW_LOCK_INIT;
-;;; 
+;;;  1 GStaticRWLock my_lock = G_STATIC_RW_LOCK_INIT;
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_init ()
 ;;; 
-;;; void                g_static_rw_lock_init               (GStaticRWLock *lock);
+;;; void g_static_rw_lock_init (GStaticRWLock *lock)
 ;;; 
-;;; A GStaticRWLock must be initialized with this function before it can be used. Alternatively you can initialize it with G_STATIC_RW_LOCK_INIT.
+;;; A GStaticRWLock must be initialized with this function before it can be
+;;; used. Alternatively you can initialize it with G_STATIC_RW_LOCK_INIT.
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to be initialized.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_reader_lock ()
 ;;; 
-;;; void                g_static_rw_lock_reader_lock        (GStaticRWLock *lock);
+;;; void g_static_rw_lock_reader_lock (GStaticRWLock *lock)
 ;;; 
-;;; Locks lock for reading. There may be unlimited concurrent locks for reading of a GStaticRWLock at the same time. If lock is already locked for writing by another thread or if another thread is already waiting to lock lock for writing, this function will block until lock is unlocked by the other writing thread and no other writing threads want to lock lock. This lock has to be unlocked by g_static_rw_lock_reader_unlock().
+;;; Locks lock for reading. There may be unlimited concurrent locks for reading
+;;; of a GStaticRWLock at the same time. If lock is already locked for writing
+;;; by another thread or if another thread is already waiting to lock lock for
+;;; writing, this function will block until lock is unlocked by the other
+;;; writing thread and no other writing threads want to lock lock. This lock has
+;;; to be unlocked by g_static_rw_lock_reader_unlock().
 ;;; 
-;;; GStaticRWLock is not recursive. It might seem to be possible to recursively lock for reading, but that can result in a deadlock, due to writer preference.
+;;; GStaticRWLock is not recursive. It might seem to be possible to recursively
+;;; lock for reading, but that can result in a deadlock, due to writer
+;;; preference.
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to lock for reading.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_reader_trylock ()
 ;;; 
-;;; gboolean            g_static_rw_lock_reader_trylock     (GStaticRWLock *lock);
+;;; gboolean g_static_rw_lock_reader_trylock (GStaticRWLock *lock)
 ;;; 
-;;; Tries to lock lock for reading. If lock is already locked for writing by another thread or if another thread is already waiting to lock lock for writing, immediately returns FALSE. Otherwise locks lock for reading and returns TRUE. This lock has to be unlocked by g_static_rw_lock_reader_unlock().
+;;; Tries to lock lock for reading. If lock is already locked for writing by
+;;; another thread or if another thread is already waiting to lock lock for
+;;; writing, immediately returns FALSE. Otherwise locks lock for reading and
+;;; returns TRUE. This lock has to be unlocked by
+;;; g_static_rw_lock_reader_unlock().
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to lock for reading.
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if lock could be locked for reading.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_reader_unlock ()
 ;;; 
-;;; void                g_static_rw_lock_reader_unlock      (GStaticRWLock *lock);
+;;; void g_static_rw_lock_reader_unlock (GStaticRWLock *lock)
 ;;; 
-;;; Unlocks lock. If a thread waits to lock lock for writing and all locks for reading have been unlocked, the waiting thread is woken up and can lock lock for writing.
+;;; Unlocks lock. If a thread waits to lock lock for writing and all locks for
+;;; reading have been unlocked, the waiting thread is woken up and can lock
+;;; lock for writing.
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to unlock after reading.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_writer_lock ()
 ;;; 
-;;; void                g_static_rw_lock_writer_lock        (GStaticRWLock *lock);
+;;; void g_static_rw_lock_writer_lock (GStaticRWLock *lock)
 ;;; 
-;;; Locks lock for writing. If lock is already locked for writing or reading by other threads, this function will block until lock is completely unlocked and then lock lock for writing. While this functions waits to lock lock, no other thread can lock lock for reading. When lock is locked for writing, no other thread can lock lock (neither for reading nor writing). This lock has to be unlocked by g_static_rw_lock_writer_unlock().
+;;; Locks lock for writing. If lock is already locked for writing or reading by
+;;; other threads, this function will block until lock is completely unlocked
+;;; and then lock lock for writing. While this functions waits to lock lock, no
+;;; other thread can lock lock for reading. When lock is locked for writing, no
+;;; other thread can lock lock (neither for reading nor writing). This lock has
+;;; to be unlocked by g_static_rw_lock_writer_unlock().
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to lock for writing.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_writer_trylock ()
 ;;; 
-;;; gboolean            g_static_rw_lock_writer_trylock     (GStaticRWLock *lock);
+;;; gboolean g_static_rw_lock_writer_trylock (GStaticRWLock *lock)
 ;;; 
-;;; Tries to lock lock for writing. If lock is already locked (for either reading or writing) by another thread, it immediately returns FALSE. Otherwise it locks lock for writing and returns TRUE. This lock has to be unlocked by g_static_rw_lock_writer_unlock().
+;;; Tries to lock lock for writing. If lock is already locked (for either
+;;; reading or writing) by another thread, it immediately returns FALSE.
+;;; Otherwise it locks lock for writing and returns TRUE. This lock has to be
+;;; unlocked by g_static_rw_lock_writer_unlock().
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to lock for writing.
 ;;; 
 ;;; Returns :
 ;;; 	TRUE, if lock could be locked for writing.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_writer_unlock ()
 ;;; 
-;;; void                g_static_rw_lock_writer_unlock      (GStaticRWLock *lock);
+;;; void g_static_rw_lock_writer_unlock (GStaticRWLock *lock)
 ;;; 
-;;; Unlocks lock. If a thread is waiting to lock lock for writing and all locks for reading have been unlocked, the waiting thread is woken up and can lock lock for writing. If no thread is waiting to lock lock for writing, and some thread or threads are waiting to lock lock for reading, the waiting threads are woken up and can lock lock for reading.
+;;; Unlocks lock. If a thread is waiting to lock lock for writing and all locks
+;;; for reading have been unlocked, the waiting thread is woken up and can lock
+;;; lock for writing. If no thread is waiting to lock lock for writing, and some
+;;; thread or threads are waiting to lock lock for reading, the waiting threads
+;;; are woken up and can lock lock for reading.
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to unlock after writing.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_rw_lock_free ()
 ;;; 
-;;; void                g_static_rw_lock_free               (GStaticRWLock *lock);
+;;; void g_static_rw_lock_free (GStaticRWLock *lock)
 ;;; 
 ;;; Releases all resources allocated to lock.
 ;;; 
-;;; You don't have to call this functions for a GStaticRWLock with an unbounded lifetime, i.e. objects declared 'static', but if you have a GStaticRWLock as a member of a structure, and the structure is freed, you should also free the GStaticRWLock.
+;;; You don't have to call this functions for a GStaticRWLock with an unbounded
+;;; lifetime, i.e. objects declared 'static', but if you have a GStaticRWLock as
+;;; a member of a structure, and the structure is freed, you should also free
+;;; the GStaticRWLock.
 ;;; 
 ;;; lock :
 ;;; 	a GStaticRWLock to be freed.
 ;;; ----------------------------------------------------------------------------
 
-
 ;;; ---------------------------------------------------------------------------- 
 ;;; g_cond_new ()
 ;;; 
-;;; GCond*              g_cond_new                          ();
+;;; GCond* g_cond_new ()
 ;;; 
-;;; Creates a new GCond. This function will abort, if g_thread_init() has not been called yet.
+;;; Creates a new GCond. This function will abort, if g_thread_init() has not
+;;; been called yet.
 ;;; 
 ;;; Returns :
 ;;; 	a new GCond.
@@ -1471,11 +1619,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cond_signal ()
 ;;; 
-;;; void                g_cond_signal                       (GCond *cond);
+;;; void g_cond_signal (GCond *cond)
 ;;; 
-;;; If threads are waiting for cond, exactly one of them is woken up. It is good practice to hold the same lock as the waiting thread while calling this function, though not required.
+;;; If threads are waiting for cond, exactly one of them is woken up. It is good
+;;; practice to hold the same lock as the waiting thread while calling this
+;;; function, though not required.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will do nothing.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will do nothing.
 ;;; 
 ;;; cond :
 ;;; 	a GCond.
@@ -1484,11 +1635,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cond_broadcast ()
 ;;; 
-;;; void                g_cond_broadcast                    (GCond *cond);
+;;; void g_cond_broadcast (GCond *cond)
 ;;; 
-;;; If threads are waiting for cond, all of them are woken up. It is good practice to lock the same mutex as the waiting threads, while calling this function, though not required.
+;;; If threads are waiting for cond, all of them are woken up. It is good
+;;; practice to lock the same mutex as the waiting threads, while calling this
+;;; function, though not required.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will do nothing.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will do nothing.
 ;;; 
 ;;; cond :
 ;;; 	a GCond.
@@ -1497,12 +1651,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cond_wait ()
 ;;; 
-;;; void                g_cond_wait                         (GCond *cond,
-;;;                                                          GMutex *mutex);
+;;; void g_cond_wait (GCond *cond, GMutex *mutex)
 ;;; 
-;;; Waits until this thread is woken up on cond. The mutex is unlocked before falling asleep and locked again before resuming.
+;;; Waits until this thread is woken up on cond. The mutex is unlocked before
+;;; falling asleep and locked again before resuming.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will immediately return.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will immediately return.
 ;;; 
 ;;; cond :
 ;;; 	a GCond.
@@ -1514,17 +1669,19 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cond_timed_wait ()
 ;;; 
-;;; gboolean            g_cond_timed_wait                   (GCond *cond,
-;;;                                                          GMutex *mutex,
-;;;                                                          GTimeVal *abs_time);
+;;; gboolean g_cond_timed_wait (GCond *cond, GMutex *mutex, GTimeVal *abs_time)
 ;;; 
-;;; Waits until this thread is woken up on cond, but not longer than until the time specified by abs_time. The mutex is unlocked before falling asleep and locked again before resuming.
+;;; Waits until this thread is woken up on cond, but not longer than until the
+;;; time specified by abs_time. The mutex is unlocked before falling asleep and
+;;; locked again before resuming.
 ;;; 
 ;;; If abs_time is NULL, g_cond_timed_wait() acts like g_cond_wait().
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will immediately return TRUE.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will immediately return TRUE.
 ;;; 
-;;; To easily calculate abs_time a combination of g_get_current_time() and g_time_val_add() can be used.
+;;; To easily calculate abs_time a combination of g_get_current_time() and
+;;; g_time_val_add() can be used.
 ;;; 
 ;;; cond :
 ;;; 	a GCond.
@@ -1542,12 +1699,15 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cond_free ()
 ;;; 
-;;; void                g_cond_free                         (GCond *cond);
+;;; void g_cond_free (GCond *cond)
 ;;; 
 ;;; Destroys the GCond.
 ;;; 
 ;;; cond :
 ;;; 	a GCond.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GPrivate
 ;;; 
 ;;; typedef struct _GPrivate GPrivate;
@@ -1556,69 +1716,57 @@
 ;;; 
 ;;; GStaticPrivate is a better choice for most uses.
 ;;; 
-;;; The GPrivate struct is an opaque data structure to represent a thread private data key. Threads can thereby obtain and set a pointer which is private to the current thread. Take our give_me_next_number() example from above. Suppose we don't want current_number to be shared between the threads, but instead to be private to each thread. This can be done as follows:
+;;; The GPrivate struct is an opaque data structure to represent a thread
+;;; private data key. Threads can thereby obtain and set a pointer which is
+;;; private to the current thread. Take our give_me_next_number() example from
+;;; above. Suppose we don't want current_number to be shared between the
+;;; threads, but instead to be private to each thread. This can be done as
+;;; follows:
 ;;; 
 ;;; Example 9. Using GPrivate for per-thread data
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
+;;;  1 GPrivate* current_number_key = NULL; /* Must be initialized somewhere
+;;;  2                                         with g_private_new (g_free); */
+;;;  3 
+;;;  4 int
+;;;  5 give_me_next_number (void)
+;;;  6 {
+;;;  7   int *current_number = g_private_get (current_number_key);
+;;;  8 
+;;;  9   if (!current_number)
+;;; 10     {
+;;; 11       current_number = g_new (int, 1);
+;;; 12       *current_number = 0;
+;;; 13       g_private_set (current_number_key, current_number);
+;;; 14     }
 ;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
+;;; 16   *current_number = calc_next_number (*current_number);
+;;; 17 
+;;; 18   return *current_number;
+;;; 19 } 
 ;;; 
-;;; 	
-;;; 
-;;; GPrivate* current_number_key = NULL; /* Must be initialized somewhere
-;;;                                         with g_private_new (g_free); */
-;;; 
-;;; int
-;;; give_me_next_number (void)
-;;; {
-;;;   int *current_number = g_private_get (current_number_key);
-;;; 
-;;;   if (!current_number)
-;;;     {
-;;;       current_number = g_new (int, 1);
-;;;       *current_number = 0;
-;;;       g_private_set (current_number_key, current_number);
-;;;     }
-;;; 
-;;;   *current_number = calc_next_number (*current_number);
-;;; 
-;;;   return *current_number;
-;;; }
-;;; 
-;;; 
-;;; Here the pointer belonging to the key current_number_key is read. If it is NULL, it has not been set yet. Then get memory for an integer value, assign this memory to the pointer and write the pointer back. Now we have an integer value that is private to the current thread.
+;;; Here the pointer belonging to the key current_number_key is read. If it is
+;;; NULL, it has not been set yet. Then get memory for an integer value, assign
+;;; this memory to the pointer and write the pointer back. Now we have an
+;;; integer value that is private to the current thread.
 ;;; 
 ;;; The GPrivate struct should only be accessed via the following functions.
 ;;; 
 ;;; Note
 ;;; 
-;;; All of the g_private_* functions are actually macros. Apart from taking their addresses, you can however use them as if they were functions.
-;;; 
+;;; All of the g_private_* functions are actually macros. Apart from taking
+;;; their addresses, you can however use them as if they were functions.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_private_new ()
 ;;; 
-;;; GPrivate*           g_private_new                       (GDestroyNotify destructor);
+;;; GPrivate* g_private_new (GDestroyNotify destructor)
 ;;; 
-;;; Creates a new GPrivate. If destructor is non-NULL, it is a pointer to a destructor function. Whenever a thread ends and the corresponding pointer keyed to this instance of GPrivate is non-NULL, the destructor is called with this pointer as the argument.
+;;; Creates a new GPrivate. If destructor is non-NULL, it is a pointer to a
+;;; destructor function. Whenever a thread ends and the corresponding pointer
+;;; keyed to this instance of GPrivate is non-NULL, the destructor is called
+;;; with this pointer as the argument.
 ;;; 
 ;;; Note
 ;;; 
@@ -1630,7 +1778,8 @@
 ;;; 
 ;;; Note
 ;;; 
-;;; A GPrivate cannot be freed. Reuse it instead, if you can, to avoid shortage, or use GStaticPrivate.
+;;; A GPrivate cannot be freed. Reuse it instead, if you can, to avoid shortage,
+;;; or use GStaticPrivate.
 ;;; 
 ;;; Note
 ;;; 
@@ -1646,11 +1795,18 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_private_get ()
 ;;; 
-;;; gpointer            g_private_get                       (GPrivate *private_key);
+;;; gpointer g_private_get (GPrivate *private_key)
 ;;; 
-;;; Returns the pointer keyed to private_key for the current thread. If g_private_set() hasn't been called for the current private_key and thread yet, this pointer will be NULL.
+;;; Returns the pointer keyed to private_key for the current thread. If
+;;; g_private_set() hasn't been called for the current private_key and thread
+;;; yet, this pointer will be NULL.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will return the value of private_key casted to gpointer. Note however, that private data set before g_thread_init() will not be retained after the call. Instead, NULL will be returned in all threads directly after g_thread_init(), regardless of any g_private_set() calls issued before threading system intialization.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will return the value of private_key casted to gpointer.
+;;; Note however, that private data set before g_thread_init() will not be
+;;; retained after the call. Instead, NULL will be returned in all threads
+;;; directly after g_thread_init(), regardless of any g_private_set() calls
+;;; issued before threading system intialization.
 ;;; 
 ;;; private_key :
 ;;; 	a GPrivate.
@@ -1662,71 +1818,61 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_private_set ()
 ;;; 
-;;; void                g_private_set                       (GPrivate *private_key,
-;;;                                                          gpointer data);
+;;; void g_private_set (GPrivate *private_key, gpointer data)
 ;;; 
 ;;; Sets the pointer keyed to private_key for the current thread.
 ;;; 
-;;; This function can be used even if g_thread_init() has not yet been called, and, in that case, will set private_key to data casted to GPrivate*. See g_private_get() for resulting caveats.
+;;; This function can be used even if g_thread_init() has not yet been called,
+;;; and, in that case, will set private_key to data casted to GPrivate*. See
+;;; g_private_get() for resulting caveats.
 ;;; 
 ;;; private_key :
 ;;; 	a GPrivate.
 ;;; 
 ;;; data :
 ;;; 	the new pointer.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GStaticPrivate
 ;;; 
 ;;; struct GStaticPrivate {
 ;;; };
 ;;; 
-;;; A GStaticPrivate works almost like a GPrivate, but it has one significant advantage. It doesn't need to be created at run-time like a GPrivate, but can be defined at compile-time. This is similar to the difference between GMutex and GStaticMutex. Now look at our give_me_next_number() example with GStaticPrivate:
+;;; A GStaticPrivate works almost like a GPrivate, but it has one significant
+;;; advantage. It doesn't need to be created at run-time like a GPrivate, but
+;;; can be defined at compile-time. This is similar to the difference between
+;;; GMutex and GStaticMutex. Now look at our give_me_next_number() example with
+;;; GStaticPrivate:
 ;;; 
 ;;; Example 10. Using GStaticPrivate for per-thread data
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 
-;;; 	
-;;; 
-;;; int
-;;; give_me_next_number ()
-;;; {
-;;;   static GStaticPrivate current_number_key = G_STATIC_PRIVATE_INIT;
-;;;   int *current_number = g_static_private_get (&current_number_key);
-;;; 
-;;;   if (!current_number)
-;;;     {
-;;;       current_number = g_new (int,1);
-;;;       *current_number = 0;
-;;;       g_static_private_set (&current_number_key, current_number, g_free);
-;;;     }
-;;; 
-;;;   *current_number = calc_next_number (*current_number);
-;;; 
-;;;   return *current_number;
-;;; }
-;;; 
-;;; 
+;;;  1 int
+;;;  2 give_me_next_number ()
+;;;  3 {
+;;;  4   static GStaticPrivate current_number_key = G_STATIC_PRIVATE_INIT;
+;;;  5   int *current_number = g_static_private_get (&current_number_key);
+;;;  6
+;;;  7   if (!current_number)
+;;;  8     {
+;;;  9       current_number = g_new (int,1);
+;;; 10       *current_number = 0;
+;;; 11       g_static_private_set (&current_number_key, current_number, g_free);
+;;; 12     }
+;;; 13 
+;;; 14   *current_number = calc_next_number (*current_number);
+;;; 15 
+;;; 16   return *current_number;
+;;; 17 }
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_STATIC_PRIVATE_INIT
 ;;; 
 ;;; #define G_STATIC_PRIVATE_INIT 
 ;;; 
-;;; Every GStaticPrivate must be initialized with this macro, before it can be used.
+;;; Every GStaticPrivate must be initialized with this macro, before it can be
+;;; used.
 ;;; 
 ;;; 1 GStaticPrivate my_private = G_STATIC_PRIVATE_INIT;
 ;;; ----------------------------------------------------------------------------
@@ -1734,15 +1880,19 @@
 ;;; ---------------------------------------------------------------------------- 
 ;;; g_static_private_init ()
 ;;; 
-;;; void                g_static_private_init               (GStaticPrivate *private_key);
+;;; void g_static_private_init (GStaticPrivate *private_key)
 ;;; 
-;;; Initializes private_key. Alternatively you can initialize it with G_STATIC_PRIVATE_INIT.
+;;; Initializes private_key. Alternatively you can initialize it with
+;;; G_STATIC_PRIVATE_INIT.
 ;;; 
 ;;; private_key :
 ;;; 	a GStaticPrivate to be initialized.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_private_get ()
 ;;; 
-;;; gpointer            g_static_private_get                (GStaticPrivate *private_key);
+;;; gpointer g_static_private_get (GStaticPrivate *private_key)
 ;;; 
 ;;; Works like g_private_get() only for a GStaticPrivate.
 ;;; 
@@ -1758,13 +1908,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_static_private_set ()
 ;;; 
-;;; void                g_static_private_set                (GStaticPrivate *private_key,
-;;;                                                          gpointer data,
-;;;                                                          GDestroyNotify notify);
+;;; void g_static_private_set (GStaticPrivate *private_key,
+;;;                            gpointer data,
+;;;                            GDestroyNotify notify)
 ;;; 
-;;; Sets the pointer keyed to private_key for the current thread and the function notify to be called with that pointer (NULL or non-NULL), whenever the pointer is set again or whenever the current thread ends.
+;;; Sets the pointer keyed to private_key for the current thread and the
+;;; function notify to be called with that pointer (NULL or non-NULL), whenever
+;;; the pointer is set again or whenever the current thread ends.
 ;;; 
-;;; This function works even if g_thread_init() has not yet been called. If g_thread_init() is called later, the data keyed to private_key will be inherited only by the main thread, i.e. the one that called g_thread_init().
+;;; This function works even if g_thread_init() has not yet been called. If
+;;; g_thread_init() is called later, the data keyed to private_key will be
+;;; inherited only by the main thread, i.e. the one that called g_thread_init().
 ;;; 
 ;;; Note
 ;;; 
@@ -1777,17 +1931,27 @@
 ;;; 	the new pointer.
 ;;; 
 ;;; notify :
-;;; 	a function to be called with the pointer whenever the current thread ends or sets this pointer again.
+;;; 	a function to be called with the pointer whenever the current thread
+;;;     ends or sets this pointer again.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_static_private_free ()
 ;;; 
-;;; void                g_static_private_free               (GStaticPrivate *private_key);
+;;; void g_static_private_free (GStaticPrivate *private_key)
 ;;; 
 ;;; Releases all resources allocated to private_key.
 ;;; 
-;;; You don't have to call this functions for a GStaticPrivate with an unbounded lifetime, i.e. objects declared 'static', but if you have a GStaticPrivate as a member of a structure and the structure is freed, you should also free the GStaticPrivate.
+;;; You don't have to call this functions for a GStaticPrivate with an unbounded
+;;; lifetime, i.e. objects declared 'static', but if you have a GStaticPrivate
+;;; as a member of a structure and the structure is freed, you should also free
+;;; the GStaticPrivate.
 ;;; 
 ;;; private_key :
 ;;; 	a GStaticPrivate to be freed.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GOnce
 ;;; 
 ;;; struct GOnce {
@@ -1795,13 +1959,15 @@
 ;;;   volatile gpointer retval;
 ;;; };
 ;;; 
-;;; A GOnce struct controls a one-time initialization function. Any one-time initialization function must have its own unique GOnce struct.
+;;; A GOnce struct controls a one-time initialization function. Any one-time
+;;; initialization function must have its own unique GOnce struct.
 ;;; 
 ;;; volatile GOnceStatus status;
 ;;; 	the status of the GOnce
 ;;; 
 ;;; volatile gpointer retval;
-;;; 	the value returned by the call to the function, if status is G_ONCE_STATUS_READY
+;;; 	the value returned by the call to the function, if status is
+;;;     G_ONCE_STATUS_READY
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1827,17 +1993,16 @@
 ;;; 	the function has been called.
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_ONCE_INIT
 ;;; 
 ;;; #define G_ONCE_INIT { G_ONCE_STATUS_NOTCALLED, NULL }
 ;;; 
 ;;; A GOnce must be initialized with this macro before it can be used.
 ;;; 
-;;; 1
-;;; 
-;;; 	
-;;; 
-;;; GOnce my_once = G_ONCE_INIT;
+;;;  1 GOnce my_once = G_ONCE_INIT;
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1845,43 +2010,40 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_once()
 ;;; 
-;;; #define             g_once(once, func, arg)
+;;; #define g_once(once, func, arg)
 ;;; 
-;;; The first call to this routine by a process with a given GOnce struct calls func with the given argument. Thereafter, subsequent calls to g_once() with the same GOnce struct do not call func again, but return the stored result of the first call. On return from g_once(), the status of once will be G_ONCE_STATUS_READY.
+;;; The first call to this routine by a process with a given GOnce struct calls
+;;; func with the given argument. Thereafter, subsequent calls to g_once() with
+;;; the same GOnce struct do not call func again, but return the stored result
+;;; of the first call. On return from g_once(), the status of once will be
+;;; G_ONCE_STATUS_READY.
 ;;; 
-;;; For example, a mutex or a thread-specific data key must be created exactly once. In a threaded environment, calling g_once() ensures that the initialization is serialized across multiple threads.
+;;; For example, a mutex or a thread-specific data key must be created exactly
+;;; once. In a threaded environment, calling g_once() ensures that the
+;;; initialization is serialized across multiple threads.
 ;;; 
 ;;; Note
 ;;; 
-;;; Calling g_once() recursively on the same GOnce struct in func will lead to a deadlock.
+;;; Calling g_once() recursively on the same GOnce struct in func will lead to
+;;; a deadlock.
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 
-;;; 	
-;;; 
-;;; gpointer
-;;; get_debug_flags (void)
-;;; {
-;;;   static GOnce my_once = G_ONCE_INIT;
-;;; 
-;;;   g_once (&my_once, parse_debug_flags, NULL);
-;;; 
-;;;   return my_once.retval;
-;;; }
+;;;  1 gpointer
+;;;  2 get_debug_flags (void)
+;;;  3 {
+;;;  4   static GOnce my_once = G_ONCE_INIT;
+;;;  5 
+;;;  6   g_once (&my_once, parse_debug_flags, NULL);
+;;;  7 
+;;;  8   return my_once.retval;
+;;;  9 }
 ;;; 
 ;;; once :
 ;;; 	a GOnce structure
 ;;; 
 ;;; func :
-;;; 	the GThreadFunc function associated to once. This function is called only once, regardless of the number of times it and its associated GOnce struct are passed to g_once().
+;;; 	the GThreadFunc function associated to once. This function is called
+;;;     only once, regardless of the number of times it and its associated GOnce
+;;;     struct are passed to g_once().
 ;;; 
 ;;; arg :
 ;;; 	data to be passed to func
@@ -1892,39 +2054,34 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_once_init_enter ()
 ;;; 
-;;; gboolean            g_once_init_enter                   (volatile gsize *value_location);
+;;; gboolean g_once_init_enter (volatile gsize *value_location)
 ;;; 
-;;; Function to be called when starting a critical initialization section. The argument value_location must point to a static 0-initialized variable that will be set to a value other than 0 at the end of the initialization section. In combination with g_once_init_leave() and the unique address value_location, it can be ensured that an initialization section will be executed only once during a program's life time, and that concurrent threads are blocked until initialization completed. To be used in constructs like this:
+;;; Function to be called when starting a critical initialization section. The
+;;; argument value_location must point to a static 0-initialized variable that
+;;; will be set to a value other than 0 at the end of the initialization
+;;; section. In combination with g_once_init_leave() and the unique address
+;;; value_location, it can be ensured that an initialization section will be
+;;; executed only once during a program's life time, and that concurrent threads
+;;; are blocked until initialization completed. To be used in constructs like
+;;; this:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 
-;;; 	
-;;; 
-;;; static gsize initialization_value = 0;
-;;; 
-;;; if (g_once_init_enter (&initialization_value))
-;;;   {
-;;;     gsize setup_value = 42; /* initialization code here */
-;;; 
-;;;     g_once_init_leave (&initialization_value, setup_value);
-;;;   }
-;;; 
-;;; /* use initialization_value here */
+;;;  1 static gsize initialization_value = 0;
+;;;  2 
+;;;  3 if (g_once_init_enter (&initialization_value))
+;;;  4   {
+;;;  5     gsize setup_value = 42; /* initialization code here */
+;;;  6 
+;;;  7     g_once_init_leave (&initialization_value, setup_value);
+;;;  8   }
+;;;  9 
+;;; 10 /* use initialization_value here */
 ;;; 
 ;;; value_location :
-;;; 	location of a static initializable variable containing 0.
+;;;     location of a static initializable variable containing 0.
 ;;; 
 ;;; Returns :
-;;; 	TRUE if the initialization section should be entered, FALSE and blocks otherwise
+;;;     TRUE if the initialization section should be entered, FALSE and blocks
+;;;     otherwise
 ;;; 
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
@@ -1932,10 +2089,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_once_init_leave ()
 ;;; 
-;;; void                g_once_init_leave                   (volatile gsize *value_location,
-;;;                                                          gsize initialization_value);
+;;; void g_once_init_leave (volatile gsize *value_location,
+;;;                         gsize initialization_value)
 ;;; 
-;;; Counterpart to g_once_init_enter(). Expects a location of a static 0-initialized initialization variable, and an initialization value other than 0. Sets the variable to the initialization value, and releases concurrent threads blocking in g_once_init_enter() on this initialization variable.
+;;; Counterpart to g_once_init_enter(). Expects a location of a static
+;;; 0-initialized initialization variable, and an initialization value other
+;;; than 0. Sets the variable to the initialization value, and releases
+;;; concurrent threads blocking in g_once_init_enter() on this initialization
+;;; variable.
 ;;; 
 ;;; value_location :
 ;;; 	location of a static initializable variable containing 0.
@@ -1949,16 +2110,19 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_lock ()
 ;;; 
-;;; void                g_bit_lock                          (volatile gint *address,
-;;;                                                          gint lock_bit);
+;;; void g_bit_lock (volatile gint *address, gint lock_bit)
 ;;; 
-;;; Sets the indicated lock_bit in address. If the bit is already set, this call will block until g_bit_unlock() unsets the corresponding bit.
+;;; Sets the indicated lock_bit in address. If the bit is already set, this
+;;; call will block until g_bit_unlock() unsets the corresponding bit.
 ;;; 
-;;; Attempting to lock on two different bits within the same integer is not supported and will very probably cause deadlocks.
+;;; Attempting to lock on two different bits within the same integer is not
+;;; supported and will very probably cause deadlocks.
 ;;; 
-;;; The value of the bit that is set is (1u << bit). If bit is not between 0 and 31 then the result is undefined.
+;;; The value of the bit that is set is (1u << bit). If bit is not between 0
+;;; and 31 then the result is undefined.
 ;;; 
-;;; This function accesses address atomically. All other accesses to address must be atomic in order for this function to work reliably.
+;;; This function accesses address atomically. All other accesses to address
+;;; must be atomic in order for this function to work reliably.
 ;;; 
 ;;; address :
 ;;; 	a pointer to an integer
@@ -1972,16 +2136,19 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_trylock ()
 ;;; 
-;;; gboolean            g_bit_trylock                       (volatile gint *address,
-;;;                                                          gint lock_bit);
+;;; gboolean g_bit_trylock (volatile gint *address, gint lock_bit)
 ;;; 
-;;; Sets the indicated lock_bit in address, returning TRUE if successful. If the bit is already set, returns FALSE immediately.
+;;; Sets the indicated lock_bit in address, returning TRUE if successful. If
+;;; the bit is already set, returns FALSE immediately.
 ;;; 
-;;; Attempting to lock on two different bits within the same integer is not supported.
+;;; Attempting to lock on two different bits within the same integer is not
+;;; supported.
 ;;; 
-;;; The value of the bit that is set is (1u << bit). If bit is not between 0 and 31 then the result is undefined.
+;;; The value of the bit that is set is (1u << bit). If bit is not between 0
+;;; and 31 then the result is undefined.
 ;;; 
-;;; This function accesses address atomically. All other accesses to address must be atomic in order for this function to work reliably.
+;;; This function accesses address atomically. All other accesses to address
+;;; must be atomic in order for this function to work reliably.
 ;;; 
 ;;; address :
 ;;; 	a pointer to an integer
@@ -1998,12 +2165,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_unlock ()
 ;;; 
-;;; void                g_bit_unlock                        (volatile gint *address,
-;;;                                                          gint lock_bit);
+;;; void g_bit_unlock (volatile gint *address, gint lock_bit)
 ;;; 
-;;; Clears the indicated lock_bit in address. If another thread is currently blocked in g_bit_lock() on this same bit then it will be woken up.
+;;; Clears the indicated lock_bit in address. If another thread is currently
+;;; blocked in g_bit_lock() on this same bit then it will be woken up.
 ;;; 
-;;; This function accesses address atomically. All other accesses to address must be atomic in order for this function to work reliably.
+;;; This function accesses address atomically. All other accesses to address
+;;; must be atomic in order for this function to work reliably.
 ;;; 
 ;;; address :
 ;;; 	a pointer to an integer
@@ -2017,12 +2185,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_pointer_bit_lock ()
 ;;; 
-;;; void                g_pointer_bit_lock                  (volatile void *address,
-;;;                                                          gint lock_bit);
+;;; void g_pointer_bit_lock (volatile void *address, gint lock_bit)
 ;;; 
-;;; This is equivalent to g_bit_lock, but working on pointers (or other pointer-sized values).
+;;; This is equivalent to g_bit_lock, but working on pointers (or other
+;;; pointer-sized values).
 ;;; 
-;;; For portability reasons, you may only lock on the bottom 32 bits of the pointer.
+;;; For portability reasons, you may only lock on the bottom 32 bits of the
+;;; pointer.
 ;;; 
 ;;; address :
 ;;; 	a pointer to a gpointer-sized value
@@ -2036,12 +2205,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_pointer_bit_trylock ()
 ;;; 
-;;; gboolean            g_pointer_bit_trylock               (volatile void *address,
-;;;                                                          gint lock_bit);
+;;; gboolean g_pointer_bit_trylock (volatile void *address, gint lock_bit)
 ;;; 
-;;; This is equivalent to g_bit_trylock, but working on pointers (or other pointer-sized values).
+;;; This is equivalent to g_bit_trylock, but working on pointers (or other
+;;; pointer-sized values).
 ;;; 
-;;; For portability reasons, you may only lock on the bottom 32 bits of the pointer.
+;;; For portability reasons, you may only lock on the bottom 32 bits of the
+;;; pointer.
 ;;; 
 ;;; address :
 ;;; 	a pointer to a gpointer-sized value
