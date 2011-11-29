@@ -644,19 +644,28 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_internal ()
 ;;; 
-;;; gpointer            g_param_spec_internal               (GType param_type,
-;;;                                                          const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GParamFlags flags);
+;;; gpointer g_param_spec_internal (GType param_type,
+;;;                                 const gchar *name,
+;;;                                 const gchar *nick,
+;;;                                 const gchar *blurb,
+;;;                                 GParamFlags flags)
 ;;; 
 ;;; Creates a new GParamSpec instance.
 ;;; 
-;;; A property name consists of segments consisting of ASCII letters and digits, separated by either the '-' or '_' character. The first character of a property name must be a letter. Names which violate these rules lead to undefined behaviour.
+;;; A property name consists of segments consisting of ASCII letters and digits,
+;;; separated by either the '-' or '_' character. The first character of a
+;;; property name must be a letter. Names which violate these rules lead to
+;;; undefined behaviour.
 ;;; 
-;;; When creating and looking up a GParamSpec, either separator can be used, but they cannot be mixed. Using '-' is considerably more efficient and in fact required when using property names as detail strings for signals.
+;;; When creating and looking up a GParamSpec, either separator can be used,
+;;; but they cannot be mixed. Using '-' is considerably more efficient and in
+;;; fact required when using property names as detail strings for signals.
 ;;; 
-;;; Beyond the name, GParamSpecs have two more descriptive strings associated with them, the nick, which should be suitable for use as a label for the property in a property editor, and the blurb, which should be a somewhat longer description, suitable for e.g. a tooltip. The nick and blurb should ideally be localized.
+;;; Beyond the name, GParamSpecs have two more descriptive strings associated
+;;; with them, the nick, which should be suitable for use as a label for the
+;;; property in a property editor, and the blurb, which should be a somewhat
+;;; longer description, suitable for e.g. a tooltip. The nick and blurb should
+;;; ideally be localized.
 ;;; 
 ;;; param_type :
 ;;; 	the GType for the property; must be derived from G_TYPE_PARAM
