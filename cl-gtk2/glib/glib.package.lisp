@@ -27,14 +27,7 @@
 (defpackage :glib
   (:use :cl :cffi :iter)
   (:export #:at-init
-           #:gsize
-           #:gssize
-           #:goffset
-           #:*glib-major-version*
-           #:*glib-minor-version*
-           #:*glib-micro-version*
-           #:*glib-binary-age*
-           #:*glib-interface-age*
+           
            #:g-free
            #:glist
            #:gstrv
