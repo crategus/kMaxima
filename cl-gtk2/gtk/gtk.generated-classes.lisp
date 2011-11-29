@@ -2745,11 +2745,7 @@
                         (value spin-button-value "value" "gdouble" t t)
                         (wrap spin-button-wrap "wrap" "gboolean" t t)))
 
-(define-g-object-class "GtkHSV" h-s-v
-                       (:superclass widget :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_hsv_get_type")
-                       nil)
+
 
 (define-g-object-class "GtkInvisible" invisible
                        (:superclass widget :export t :interfaces
