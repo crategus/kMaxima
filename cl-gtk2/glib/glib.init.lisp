@@ -98,14 +98,16 @@
 (at-init ()
   (eval-when (:compile-toplevel :load-toplevel :execute)
     (define-foreign-library glib
-      ((:and :unix (:not :darwin)) (:or "libglib-2.0.so.0" "libglib-2.0.so"))
+      ((:and :unix (:not :darwin))
+       (:or "libglib-2.0.so.0" "libglib-2.0.so"))
       (:darwin (:or "libglib-2.0.0.dylib" "libglib-2.0.dylib"))
       (:windows "libglib-2.0-0.dll")
       (t (:default "libglib-2.0"))))
   
   (eval-when (:compile-toplevel :load-toplevel :execute)
     (define-foreign-library gthread
-      ((:and :unix (:not :darwin))  (:or "libgthread-2.0.so.0"  "libgthread-2.0.so"))
+      ((:and :unix (:not :darwin))
+       (:or "libgthread-2.0.so.0"  "libgthread-2.0.so"))
       (:darwin (:or "libgthread-2.0.0.dylib"  "libgthread-2.0.dylib"))
       (:windows "libgthread-2.0-0.dll")
       (t "libgthread-2.0")))
@@ -151,38 +153,10 @@
       (ignore () :report "Ignore version requirement" nil))))
 
 ;;; ----------------------------------------------------------------------------
-;;; Fundamentals - Basic types
-;;;
-;;; TODO: not sure about these: for amd64 they are ok
-;;; ----------------------------------------------------------------------------
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (cond
-    ((cffi-features:cffi-feature-p :x86-64) (defctype gsize :uint64))
-    ((cffi-features:cffi-feature-p :x86) (defctype gsize :ulong))
-    ((cffi-features:cffi-feature-p :ppc32) (defctype gsize :uint32))
-    ((cffi-features:cffi-feature-p :ppc64) (defctype gsize :uint64))
-    (t (error "Can not define 'gsize', unknown CPU architecture (known are x86 and x86-64)"))))
-
-(defctype gssize :long)
-(defctype goffset :uint64)
-
-;;; ----------------------------------------------------------------------------
 ;;; Fundamentals - Version information
 ;;; ----------------------------------------------------------------------------
 
-(defcvar (*glib-major-version* "glib_major_version" :read-only t :library glib)
-         :uint)
-(defcvar (*glib-minor-version* "glib_minor_version" :read-only t :library glib)
-         :uint)
-(defcvar (*glib-micro-version* "glib_micro_version" :read-only t :library glib)
-         :uint)
-(defcvar (*glib-binary-age* "glib_binary_age" :read-only t :library glib)
-         :uint)
-(defcvar (*glib-interface-age* "glib_interface_age" :read-only t :library glib)
-         :uint)
-
-(push-library-version-features glib *glib-major-version* *glib-micro-version*
+(push-library-version-features glib *major-version* *micro-version*
   2 2
   2 4
   2 6
@@ -195,6 +169,6 @@
   2 20
   2 22)
 
-(require-library-version "Glib" 2 20 *glib-major-version* *glib-minor-version*)
+(require-library-version "Glib" 2 20 *major-version* *minor-version*)
 
 ;;; --- End of file glib.init.lisp --------------------------------------------- 
