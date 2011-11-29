@@ -15,6 +15,7 @@
      (unwind-protect
           (progn ,@body)
        (gdk-threads-leave))))
+
 (export 'with-gdk-threads-lock)
 
 ;; ignored:
