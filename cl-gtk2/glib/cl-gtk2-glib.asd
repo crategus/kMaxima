@@ -31,6 +31,9 @@
   :license "LLGPL"
   :serial t
   :components ((:file "glib.package")
+               (:file "glib.version")
+               (:file "glib.basic-types")
+               
                (:file "glib.init")
                (:file "glib.mem")
                (:file "glib.date")
