@@ -9,6 +9,8 @@
                (:file "gobject.type")
                
                (:file "gobject.ffi")
+               (:file "gobject.gvalue")
+               (:file "gobject.foreign")
                (:file "gobject.object.high")
                (:file "gobject.meta")
                
@@ -24,8 +26,8 @@
                (:file "gobject.type-info.enum")
                (:file "gobject.type-info.signals")
                
-               (:file "gobject.gvalue")
-               (:file "gobject.foreign")
+;               (:file "gobject.gvalue")
+;               (:file "gobject.foreign")
                (:file "gobject.stable-pointer")
                (:file "gobject.object.low")
                
