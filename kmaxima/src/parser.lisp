@@ -1209,23 +1209,29 @@
   (let ((x))
     (if (or (and rbp (not (integerp (setq x rbp))))
             (and lbp (not (integerp (setq x lbp)))))
-        (merror
-          "syntax extension: binding powers must be integers; found: ~A"
-          x))
-    (if (stringp op) (setq op (define-symbol op)))
+        (merror "syntax extension: binding powers must be integers; found: ~A"
+                x))
+    (when (stringp op)
+      (cond ((not (every 'alphabetp (coerce op 'list)))
+             (setq op (define-symbol op)))
+            (t
+             (setq op (symbolconc '$ (maybe-invert-string op))))))
+    (when (not (symbolp op))
+      (merror "syntax extension: first argument must be a string or a symbol;~
+               found: ~A"
+              op))
     (op-setup op)
     (let ((noun ($nounify op))
           (dissym (cdr (exploden op))))
-      (cond
-        ((not match)
-         (setq dissym
-               (append (if sp1 '(#\space)) dissym (if sp2 '(#\space)))))
-        (t
-         (if (stringp match) (setq match (define-symbol match)))
-         (op-setup match)
-         (putprop op match 'match)
-         (putprop match 5 'lbp)
-         (setq dissym (cons dissym (cdr (exploden match))))))
+      (cond ((not match)
+             (setq dissym
+                   (append (if sp1 '(#\space)) dissym (if sp2 '(#\space)))))
+            (t
+             (if (stringp match) (setq match (define-symbol match)))
+             (op-setup match)
+             (putprop op match 'match)
+             (putprop match 5 'lbp)
+             (setq dissym (cons dissym (cdr (exploden match))))))
       (putprop op pos 'pos)
       (putprop op (cdr parse-data) (car parse-data))
       (putprop op grind-fn 'grind)
