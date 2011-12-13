@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 10.04.2011
-@c Revision : 26.08.2011
+@c Revision : 12.12.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -1028,9 +1028,41 @@ bisher formatierte linke und rechte Seite des Ausdrucks.
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{msize-nofix}
 @deffn {Funktion} msize-nofix x l r
+
+Das Argument @var{x} ist ein Ausdruck mit einem Nofix-Operator.  Die Argumente
+@var{l} und @var{r} sind jeweils die bisher auf der linken und der rechten
+Seite formatierten Ausdr@"ucke.
+
+@code{msize-nofix} ruft rekursiv die Funktion @mref{msize} auf, wobei das
+interne Symbol des Nofix-Operators als erstes Argument zur Formatierung
+@"ubergeben wird.  Die weiteren Argumente sind @var{l} und @var{r}.  Die
+n@"achsten Argumente sind die aktuell links und rechts vorliegenden Operatoren.
+Der linksseitige Operator wird zum Nofix-Operator.
+
+Siehe auch die Funktion @mrefcomma{$nofix} um einen Nofix-Operator zu
+definieren.
+
+@emph{Beispiel:}
+
+kMaxima kennt keinen Nofix-Operator.  Daher wird zun@"achst ein Nofix-Operator
+@code{new} definiert.
+
+@example
+(%i1) nofix(new);
+(%o1)                          new
+(%i2) quit();
+0
+@end example
+
+Jetzt wird ein Ausdruck mit dem Nofix-Operator @code{new} formatiert.
+
+@example
+* (msize-nofix '(($new)) nil nil)
+(3 #\n #\e #\w)
+@end example
 
 @emph{Quelltext:}
 @lisp
