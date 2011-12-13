@@ -30,8 +30,6 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; #include <glib.h>
-;;; 
 ;;; const gchar *       g_get_application_name              (void);
 ;;; void                g_set_application_name              (const gchar *application_name);
 ;;; gchar *             g_get_prgname                       (void);
@@ -832,21 +830,25 @@
 ;;; 	behave the same as g_format_size()
 ;;; 
 ;;; G_FORMAT_SIZE_LONG_FORMAT
-;;; 	include the exact number of bytes as part of the returned string. For example, "45.6 kB (45,612 bytes)".
+;;; 	include the exact number of bytes as part of the returned string. For
+;;;     example, "45.6 kB (45,612 bytes)".
 ;;; 
 ;;; G_FORMAT_SIZE_IEC_UNITS
-;;; 	use IEC (base 1024) units with "KiB"-style suffixes. IEC units should only be used for reporting things with a strong "power of 2" basis, like RAM sizes or RAID stripe sizes. Network and storage sizes should be reported in the normal SI units.
+;;; 	use IEC (base 1024) units with "KiB"-style suffixes. IEC units should
+;;;     only be used for reporting things with a strong "power of 2" basis,
+;;;     like RAM sizes or RAID stripe sizes. Network and storage sizes should
+;;;     be reported in the normal SI units.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_format_size_full ()
 ;;; 
-;;; gchar *             g_format_size_full                  (guint64 size,
-;;;                                                          GFormatSizeFlags flags);
+;;; gchar * g_format_size_full (guint64 size, GFormatSizeFlags flags)
 ;;; 
 ;;; Formats a size.
 ;;; 
-;;; This function is similar to g_format_size() but allows for flags that modify the output. See GFormatSizeFlags.
+;;; This function is similar to g_format_size() but allows for flags that modify
+;;; the output. See GFormatSizeFlags.
 ;;; 
 ;;; size :
 ;;; 	a size in bytes
@@ -855,7 +857,8 @@
 ;;; 	GFormatSizeFlags to modify the output
 ;;; 
 ;;; Returns :
-;;; 	a newly-allocated formatted string containing a human readable file size.
+;;; 	a newly-allocated formatted string containing a human readable file
+;;;     size.
 ;;; 
 ;;; Since 2.30
 ;;; ----------------------------------------------------------------------------
@@ -863,13 +866,18 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_format_size_for_display ()
 ;;; 
-;;; char *              g_format_size_for_display           (goffset size);
+;;; char * g_format_size_for_display (goffset size)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_format_size_for_display has been deprecated since version 2.30 and should not be used in newly-written code. This function is broken due to its use of SI suffixes to denote IEC units. Use g_format_size() instead.
+;;; g_format_size_for_display has been deprecated since version 2.30 and should
+;;; not be used in newly-written code. This function is broken due to its use of
+;;; SI suffixes to denote IEC units. Use g_format_size() instead.
 ;;; 
-;;; Formats a size (for example the size of a file) into a human readable string. Sizes are rounded to the nearest size prefix (KB, MB, GB) and are displayed rounded to the nearest tenth. E.g. the file size 3292528 bytes will be converted into the string "3.1 MB".
+;;; Formats a size (for example the size of a file) into a human readable
+;;; string. Sizes are rounded to the nearest size prefix (KB, MB, GB) and are
+;;; displayed rounded to the nearest tenth. E.g. the file size 3292528 bytes
+;;; will be converted into the string "3.1 MB".
 ;;; 
 ;;; The prefix units base is 1024 (i.e. 1 KB is 1024 bytes).
 ;;; 
@@ -879,7 +887,8 @@
 ;;; 	a size in bytes.
 ;;; 
 ;;; Returns :
-;;; 	a newly-allocated formatted string containing a human readable file size.
+;;; 	a newly-allocated formatted string containing a human readable file
+;;;     size.
 ;;; 
 ;;; Since 2.16
 ;;; ----------------------------------------------------------------------------
@@ -887,11 +896,22 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_find_program_in_path ()
 ;;; 
-;;; gchar *             g_find_program_in_path              (const gchar *program);
+;;; gchar * g_find_program_in_path (const gchar *program)
 ;;; 
-;;; Locates the first executable named program in the user's path, in the same way that execvp() would locate it. Returns an allocated string with the absolute path name, or NULL if the program is not found in the path. If program is already an absolute path, returns a copy of program if program exists and is executable, and NULL otherwise. On Windows, if program does not have a file type suffix, tries with the suffixes .exe, .cmd, .bat and .com, and the suffixes in the PATHEXT environment variable.
+;;; Locates the first executable named program in the user's path, in the same
+;;; way that execvp() would locate it. Returns an allocated string with the
+;;; absolute path name, or NULL if the program is not found in the path. If
+;;; program is already an absolute path, returns a copy of program if program
+;;; exists and is executable, and NULL otherwise. On Windows, if program does
+;;; not have a file type suffix, tries with the suffixes .exe, .cmd, .bat and
+;;; .com, and the suffixes in the PATHEXT environment variable.
 ;;; 
-;;; On Windows, it looks for the file in the same way as CreateProcess() would. This means first in the directory where the executing program was loaded from, then in the current directory, then in the Windows 32-bit system directory, then in the Windows directory, and finally in the directories in the PATH environment variable. If the program is found, the return value contains the full name including the type suffix.
+;;; On Windows, it looks for the file in the same way as CreateProcess() would.
+;;; This means first in the directory where the executing program was loaded
+;;; from, then in the current directory, then in the Windows 32-bit system
+;;; directory, then in the Windows directory, and finally in the directories in
+;;; the PATH environment variable. If the program is found, the return value
+;;; contains the full name including the type suffix.
 ;;; 
 ;;; program :
 ;;; 	a program name in the GLib file name encoding
@@ -903,10 +923,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_nth_lsf ()
 ;;; 
-;;; gint                g_bit_nth_lsf                       (gulong mask,
-;;;                                                          gint nth_bit);
+;;; gint g_bit_nth_lsf (gulong mask, gint nth_bit)
 ;;; 
-;;; Find the position of the first bit set in mask, searching from (but not including) nth_bit upwards. Bits are numbered from 0 (least significant) to sizeof(gulong) * 8 - 1 (31 or 63, usually). To start searching from the 0th bit, set nth_bit to -1.
+;;; Find the position of the first bit set in mask, searching from (but not
+;;; including) nth_bit upwards. Bits are numbered from 0 (least significant) to
+;;; sizeof(gulong) * 8 - 1 (31 or 63, usually). To start searching from the 0th
+;;; bit, set nth_bit to -1.
 ;;; 
 ;;; mask :
 ;;; 	a gulong containing flags
@@ -921,10 +943,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_nth_msf ()
 ;;; 
-;;; gint                g_bit_nth_msf                       (gulong mask,
-;;;                                                          gint nth_bit);
+;;; gint g_bit_nth_msf (gulong mask, gint nth_bit)
 ;;; 
-;;; Find the position of the first bit set in mask, searching from (but not including) nth_bit downwards. Bits are numbered from 0 (least significant) to sizeof(gulong) * 8 - 1 (31 or 63, usually). To start searching from the last bit, set nth_bit to -1 or GLIB_SIZEOF_LONG * 8.
+;;; Find the position of the first bit set in mask, searching from (but not
+;;; including) nth_bit downwards. Bits are numbered from 0 (least significant)
+;;; to sizeof(gulong) * 8 - 1 (31 or 63, usually). To start searching from the
+;;; last bit, set nth_bit to -1 or GLIB_SIZEOF_LONG * 8.
 ;;; 
 ;;; mask :
 ;;; 	a gulong containing flags
@@ -939,9 +963,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_bit_storage ()
 ;;; 
-;;; guint               g_bit_storage                       (gulong number);
+;;; guint g_bit_storage (gulong number)
 ;;; 
-;;; Gets the number of bits used to hold number, e.g. if number is 4, 3 bits are needed.
+;;; Gets the number of bits used to hold number, e.g. if number is 4, 3 bits
+;;; are needed.
 ;;; 
 ;;; number :
 ;;; 	a guint
@@ -953,58 +978,80 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_spaced_primes_closest ()
 ;;; 
-;;; guint               g_spaced_primes_closest             (guint num);
+;;; guint g_spaced_primes_closest (guint num)
 ;;; 
-;;; Gets the smallest prime number from a built-in array of primes which is larger than num. This is used within GLib to calculate the optimum size of a GHashTable.
+;;; Gets the smallest prime number from a built-in array of primes which is
+;;; larger than num. This is used within GLib to calculate the optimum size of a
+;;; GHashTable.
 ;;; 
-;;; The built-in array of primes ranges from 11 to 13845163 such that each prime is approximately 1.5-2 times the previous prime.
+;;; The built-in array of primes ranges from 11 to 13845163 such that each prime
+;;; is approximately 1.5-2 times the previous prime.
 ;;; 
 ;;; num :
 ;;; 	a guint
 ;;; 
 ;;; Returns :
-;;; 	the smallest prime number from a built-in array of primes which is larger than num
+;;; 	the smallest prime number from a built-in array of primes which is
+;;;     larger than num
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_atexit ()
 ;;; 
-;;; void                g_atexit                            (GVoidFunc func);
+;;; void g_atexit (GVoidFunc func)
 ;;; 
 ;;; Specifies a function to be called at normal program termination.
 ;;; 
-;;; Since GLib 2.8.2, on Windows g_atexit() actually is a preprocessor macro that maps to a call to the atexit() function in the C library. This means that in case the code that calls g_atexit(), i.e. atexit(), is in a DLL, the function will be called when the DLL is detached from the program. This typically makes more sense than that the function is called when the GLib DLL is detached, which happened earlier when g_atexit() was a function in the GLib DLL.
+;;; Since GLib 2.8.2, on Windows g_atexit() actually is a preprocessor macro
+;;; that maps to a call to the atexit() function in the C library. This means
+;;; that in case the code that calls g_atexit(), i.e. atexit(), is in a DLL, the
+;;; function will be called when the DLL is detached from the program. This
+;;; typically makes more sense than that the function is called when the GLib
+;;; DLL is detached, which happened earlier when g_atexit() was a function in
+;;; the GLib DLL.
 ;;; 
-;;; The behaviour of atexit() in the context of dynamically loaded modules is not formally specified and varies wildly.
+;;; The behaviour of atexit() in the context of dynamically loaded modules is
+;;; not formally specified and varies wildly.
 ;;; 
-;;; On POSIX systems, calling g_atexit() (or atexit()) in a dynamically loaded module which is unloaded before the program terminates might well cause a crash at program exit.
+;;; On POSIX systems, calling g_atexit() (or atexit()) in a dynamically loaded
+;;; module which is unloaded before the program terminates might well cause a
+;;; crash at program exit.
 ;;; 
-;;; Some POSIX systems implement atexit() like Windows, and have each dynamically loaded module maintain an own atexit chain that is called when the module is unloaded.
+;;; Some POSIX systems implement atexit() like Windows, and have each
+;;; dynamically loaded module maintain an own atexit chain that is called when
+;;; the module is unloaded.
 ;;; 
-;;; On other POSIX systems, before a dynamically loaded module is unloaded, the registered atexit functions (if any) residing in that module are called, regardless where the code that registered them resided. This is presumably the most robust approach.
+;;; On other POSIX systems, before a dynamically loaded module is unloaded, the
+;;; registered atexit functions (if any) residing in that module are called,
+;;; regardless where the code that registered them resided. This is presumably
+;;; the most robust approach.
 ;;; 
-;;; As can be seen from the above, for portability it's best to avoid calling g_atexit() (or atexit()) except in the main executable of a program.
+;;; As can be seen from the above, for portability it's best to avoid calling
+;;; g_atexit() (or atexit()) except in the main executable of a program.
 ;;; 
 ;;; func :
-;;; 	the function to call on normal program termination. [scope async]
+;;; 	the function to call on normal program termination.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_parse_debug_string ()
 ;;; 
-;;; guint               g_parse_debug_string                (const gchar *string,
-;;;                                                          const GDebugKey *keys,
-;;;                                                          guint nkeys);
+;;; guint g_parse_debug_string (const gchar *string,
+;;;                             const GDebugKey *keys,
+;;;                             guint nkeys)
 ;;; 
-;;; Parses a string containing debugging options into a guint containing bit flags. This is used within GDK and GTK+ to parse the debug options passed on the command line or through environment variables.
+;;; Parses a string containing debugging options into a guint containing bit
+;;; flags. This is used within GDK and GTK+ to parse the debug options passed on
+;;; the command line or through environment variables.
 ;;; 
-;;; If string is equal to "all", all flags are set. If string is equal to "help", all the available keys in keys are printed out to standard error.
+;;; If string is equal to "all", all flags are set. If string is equal to
+;;; "help", all the available keys in keys are printed out to standard error.
 ;;; 
 ;;; string :
-;;; 	a list of debug options separated by colons, spaces, or commas, or NULL. [allow-none]
+;;; 	a list of debug options separated by colons, spaces, or commas, or NULL.
 ;;; 
 ;;; keys :
-;;; 	pointer to an array of GDebugKey which associate strings with bit flags. [array length=nkeys]
+;;; 	pointer to an array of GDebugKey which associate strings with bit flags.
 ;;; 
 ;;; nkeys :
 ;;; 	the number of GDebugKeys in the array.

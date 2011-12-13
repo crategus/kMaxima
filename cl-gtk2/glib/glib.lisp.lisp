@@ -28,65 +28,59 @@
 
 ;;; ----------------------------------------------------------------------------
 
-;;; Lisp support for GList
+;;; Check Version information
 
-(define-foreign-type glist-type ()
-  ((type :reader glist-type-type :initarg :type :initform :pointer)
-   (free-from-foreign :reader glist-type-free-from-foreign :initarg :free-from-foreign :initform t)
-   (free-to-foreign :reader glist-type-free-to-foreign :initarg :free-to-foreign :initform t))
-  (:actual-type :pointer))
+(defmacro push-library-version-features (library-name
+                                         major-version-var
+                                         minor-version-var
+                                         &body versions)
+  `(eval-when (:load-toplevel :execute)
+     ,@(iter (for (major minor) on versions by #'cddr)
+             (collect
+                 `(when (or (and (= ,major-version-var ,major)
+                                 (>= ,minor-version-var ,minor))
+                            (> ,major-version-var ,major))
+                    (pushnew ,(intern (format nil "~A-~A.~A"
+                                              (string library-name)
+                                              major minor)
+                                      (find-package :keyword))
+                             *features*))))))
 
-(define-parse-method glist (type &key (free-from-foreign t) (free-to-foreign t))
-  (make-instance 'glist-type
-                 :type type
-                 :free-from-foreign free-from-foreign
-                 :free-to-foreign free-to-foreign))
+(define-condition foreign-library-minimum-version-mismatch (error)
+  ((library :initarg :library :reader .library)
+   (minimum-version :initarg :minimum-version :reader .minimum-version)
+   (actual-version :initarg :actual-version :reader .actual-version))
+  (:report (lambda (c s)
+             (format s "Library ~A has too old version: it is ~A but required to be at least ~A"
+                     (.library c)
+                     (.actual-version c)
+                     (.minimum-version c)))))
 
-(defmethod translate-from-foreign (pointer (type glist-type))
-  (prog1
-      (iter (for c initially pointer then (g-list-next c))
-            (until (null-pointer-p c))
-            (collect (convert-from-foreign (foreign-slot-value c 'g-list 'data) (glist-type-type type))))
-    (when (glist-type-free-from-foreign type)
-      (g-list-free pointer))))
+(defun require-library-version (library min-major-version min-minor-version major-version minor-version)
+  (unless (or (> major-version min-major-version)
+              (and (= major-version min-major-version)
+                   (>= minor-version min-minor-version)))
+    (restart-case
+        (error 'foreign-library-minimum-version-mismatch
+               :library library
+               :minimum-version (format nil "~A.~A" min-major-version min-minor-version)
+               :actual-version (format nil "~A.~A" major-version minor-version))
+      (ignore () :report "Ignore version requirement" nil))))
 
-;;; ----------------------------------------------------------------------------
+(push-library-version-features glib *major-version* *micro-version*
+  2 2
+  2 4
+  2 6
+  2 8
+  2 10
+  2 12
+  2 14
+  2 16
+  2 18
+  2 20
+  2 22)
 
-;;; Lisp support for GSList
-
-(define-foreign-type gslist-type ()
-  ((type :reader gslist-type-type :initarg :type :initform :pointer)
-   (free-from-foreign :reader gslist-type-free-from-foreign :initarg :free-from-foreign :initform t)
-   (free-to-foreign :reader gslist-type-free-to-foreign :initarg :free-to-foreign :initform t))
-  (:actual-type :pointer))
-
-(define-parse-method gslist (type &key (free-from-foreign t) (free-to-foreign t))
-  (make-instance 'gslist-type
-                 :type type
-                 :free-from-foreign free-from-foreign
-                 :free-to-foreign free-to-foreign))
-
-(defmethod translate-from-foreign (pointer (type gslist-type))
-  (prog1
-      (iter (for c initially pointer then (g-slist-next c))
-            (until (null-pointer-p c))
-            (collect (convert-from-foreign (foreign-slot-value c 'g-slist 'data) (gslist-type-type type))))
-    (when (gslist-type-free-from-foreign type)
-      (g-slist-free pointer))))
-
-(defmethod translate-to-foreign (list (type gslist-type))
-  (let ((result (null-pointer)) last)
-    (iter (for item in list)
-          (for n = (g-slist-alloc))
-          (for ptr = (convert-to-foreign item (gslist-type-type type)))
-          (setf (foreign-slot-value n 'g-slist 'data) ptr)
-          (setf (foreign-slot-value n 'g-slist 'next) (null-pointer))
-          (when last
-            (setf (foreign-slot-value last 'g-slist 'next) n))
-          (setf last n)
-          (when (first-iteration-p)
-            (setf result n)))
-    result))
+(require-library-version "Glib" 2 20 *major-version* *minor-version*)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -160,9 +154,6 @@
     result))
 
 ;;; ----------------------------------------------------------------------------
-
-;;; Lisp support for threads
-
 
 ;;; Initialize threads
 

@@ -31,85 +31,71 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; struct              GList;
-;;; 
-;;; GList *             g_list_append                       (GList *list,
-;;;                                                          gpointer data);
-;;; GList *             g_list_prepend                      (GList *list,
-;;;                                                          gpointer data);
-;;; GList *             g_list_insert                       (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          gint position);
-;;; GList *             g_list_insert_before                (GList *list,
-;;;                                                          GList *sibling,
-;;;                                                          gpointer data);
-;;; GList *             g_list_insert_sorted                (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          GCompareFunc func);
-;;; GList *             g_list_remove                       (GList *list,
-;;;                                                          gconstpointer data);
-;;; GList *             g_list_remove_link                  (GList *list,
-;;;                                                          GList *llink);
-;;; GList *             g_list_delete_link                  (GList *list,
-;;;                                                          GList *link_);
-;;; GList *             g_list_remove_all                   (GList *list,
-;;;                                                          gconstpointer data);
-;;; void                g_list_free                         (GList *list);
-;;; void                g_list_free_full                    (GList *list,
-;;;                                                          GDestroyNotify free_func);
-;;; 
-;;; GList *             g_list_alloc                        (void);
-;;; void                g_list_free_1                       (GList *list);
-;;; #define             g_list_free1
-;;; 
-;;; guint               g_list_length                       (GList *list);
-;;; GList *             g_list_copy                         (GList *list);
-;;; GList *             g_list_reverse                      (GList *list);
-;;; GList *             g_list_sort                         (GList *list,
-;;;                                                          GCompareFunc compare_func);
-;;; gint                (*GCompareFunc)                     (gconstpointer a,
-;;;                                                          gconstpointer b);
-;;; GList *             g_list_insert_sorted_with_data      (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          GCompareDataFunc func,
-;;;                                                          gpointer user_data);
-;;; GList *             g_list_sort_with_data               (GList *list,
-;;;                                                          GCompareDataFunc compare_func,
-;;;                                                          gpointer user_data);
-;;; gint                (*GCompareDataFunc)                 (gconstpointer a,
-;;;                                                          gconstpointer b,
-;;;                                                          gpointer user_data);
-;;; GList *             g_list_concat                       (GList *list1,
-;;;                                                          GList *list2);
-;;; void                g_list_foreach                      (GList *list,
-;;;                                                          GFunc func,
-;;;                                                          gpointer user_data);
-;;; void                (*GFunc)                            (gpointer data,
-;;;                                                          gpointer user_data);
-;;; 
-;;; GList *             g_list_first                        (GList *list);
-;;; GList *             g_list_last                         (GList *list);
-;;; #define             g_list_previous                     (list)
-;;; #define             g_list_next                         (list)
-;;; GList *             g_list_nth                          (GList *list,
-;;;                                                          guint n);
-;;; gpointer            g_list_nth_data                     (GList *list,
-;;;                                                          guint n);
-;;; GList *             g_list_nth_prev                     (GList *list,
-;;;                                                          guint n);
-;;; 
-;;; GList *             g_list_find                         (GList *list,
-;;;                                                          gconstpointer data);
-;;; GList *             g_list_find_custom                  (GList *list,
-;;;                                                          gconstpointer data,
-;;;                                                          GCompareFunc func);
-;;; gint                g_list_position                     (GList *list,
-;;;                                                          GList *llink);
-;;; gint                g_list_index                        (GList *list,
-;;;                                                          gconstpointer data);
-;;; 
-;;; void                g_list_push_allocator               (gpointer allocator);
-;;; void                g_list_pop_allocator                (void);
+;;; struct   GList;
+;;;          
+;;; GList*  g_list_append        (GList *list, gpointer data)
+;;; GList*  g_list_prepend       (GList *list, gpointer data)
+;;; GList*  g_list_insert        (GList *list, gpointer data, gint position)
+;;; GList*  g_list_insert_before (GList *list, GList *sibling, gpointer data)
+;;; GList*  g_list_insert_sorted (GList *list, gpointer data, GCompareFunc func)
+;;; GList*  g_list_remove        (GList *list, gconstpointer data)
+;;; GList*  g_list_remove_link   (GList *list, GList *llink)
+;;; GList*  g_list_delete_link   (GList *list, GList *link_)
+;;; GList*  g_list_remove_all    (GList *list, gconstpointer data)
+;;; void    g_list_free          (GList *list)
+;;; void    g_list_free_full     (GList *list, GDestroyNotify free_func)
+;;;                                         
+;;; GList*  g_list_alloc         (void)
+;;; void    g_list_free_1        (GList *list)
+;;; #define g_list_free1                     
+;;;                                          
+;;; guint   g_list_length        (GList *list)
+;;; GList*  g_list_copy          (GList *list)
+;;; GList*  g_list_reverse       (GList *list)
+;;; GList*  g_list_sort          (GList *list, GCompareFunc compare_func)
+;;;
+;;; gint    (*GCompareFunc)      (gconstpointer a, gconstpointer b)
+;;; GList*  g_list_insert_sorted_with_data (GList *list,
+;;;                                          gpointer data,
+;;;                                          GCompareDataFunc func,
+;;;                                          gpointer user_data);
+;;; GList *  g_list_sort_with_data          (GList *list,
+;;;                                          GCompareDataFunc compare_func,
+;;;                                          gpointer user_data);
+;;; gint     (*GCompareDataFunc)            (gconstpointer a,
+;;;                                          gconstpointer b,
+;;;                                          gpointer user_data);
+;;; GList *  g_list_concat                  (GList *list1,
+;;;                                          GList *list2);
+;;; void     g_list_foreach                 (GList *list,
+;;;                                          GFunc func,
+;;;                                          gpointer user_data);
+;;; void     (*GFunc)                       (gpointer data,
+;;;                                          gpointer user_data);
+;;;                                         
+;;; GList *  g_list_first                   (GList *list);
+;;; GList *  g_list_last                    (GList *list);
+;;; #define  g_list_previous                (list)
+;;; #define  g_list_next                    (list)
+;;; GList *  g_list_nth                     (GList *list,
+;;;                                          guint n);
+;;; gpointer g_list_nth_data                (GList *list,
+;;;                                          guint n);
+;;; GList *  g_list_nth_prev                (GList *list,
+;;;                                          guint n);
+;;;                                         
+;;; GList *  g_list_find                    (GList *list,
+;;;                                          gconstpointer data);
+;;; GList *  g_list_find_custom             (GList *list,
+;;;                                          gconstpointer data,
+;;;                                          GCompareFunc func);
+;;; gint     g_list_position                (GList *list,
+;;;                                          GList *llink);
+;;; gint     g_list_index                   (GList *list,
+;;;                                          gconstpointer data);
+;;;                                         
+;;; void     g_list_push_allocator          (gpointer allocator);
+;;; void     g_list_pop_allocator           (void);
 ;;; 
 ;;; Description
 ;;; 
@@ -181,6 +167,35 @@
   (prev :pointer))
 
 ;;; ----------------------------------------------------------------------------
+
+(define-foreign-type glist-type ()
+  ((type :reader glist-type-type
+         :initarg :type
+         :initform :pointer)
+   (free-from-foreign :reader glist-type-free-from-foreign 
+                      :initarg :free-from-foreign
+                      :initform t)
+   (free-to-foreign :reader glist-type-free-to-foreign 
+                    :initarg :free-to-foreign
+                    :initform t))
+  (:actual-type :pointer))
+
+(define-parse-method glist (type &key (free-from-foreign t) (free-to-foreign t))
+  (make-instance 'glist-type
+                 :type type
+                 :free-from-foreign free-from-foreign
+                 :free-to-foreign free-to-foreign))
+
+(defmethod translate-from-foreign (pointer (type glist-type))
+  (prog1
+      (iter (for c initially pointer then (g-list-next c))
+            (until (null-pointer-p c))
+            (collect (convert-from-foreign (foreign-slot-value c 'g-list 'data)
+                                           (glist-type-type type))))
+    (when (glist-type-free-from-foreign type)
+      (g-list-free pointer))))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_list_append ()
 ;;; 
 ;;; GList * g_list_append (GList *list, gpointer data)
@@ -209,6 +224,11 @@
 ;;;  8 /* This is a list of integers. */
 ;;;  9 number_list = g_list_append (number_list, GINT_TO_POINTER (27));
 ;;; 10 number_list = g_list_append (number_list, GINT_TO_POINTER (14));
+;;;
+;;;   (cffi:with-foreign-objects ((ptr :pointer)
+;;;                               (str :string))
+;;;     (setf (cffi:mem-aref str :string) "first)
+;;;     (setf (cffi:mem-aref ptr :pointer) (glib:list-append ptr str)))
 ;;; 
 ;;; list :
 ;;; 	a pointer to a GList
@@ -220,9 +240,11 @@
 ;;; 	the new start of the GList
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-list-append (:pointer g-list)
+(defcfun (list-append "g_list_append") (:pointer g-list)
   (list (:pointer g-list))
   (data :pointer))
+
+(export 'list-append)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_prepend ()
@@ -254,9 +276,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_insert ()
 ;;; 
-;;; GList *             g_list_insert                       (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          gint position);
+;;; GList * g_list_insert (GList *list, gpointer data, gint position)
 ;;; 
 ;;; Inserts a new element into the list at the given position.
 ;;; 
@@ -267,7 +287,9 @@
 ;;; 	the data for the new element
 ;;; 
 ;;; position :
-;;; 	the position to insert the element. If this is negative, or is larger than the number of elements in the list, the new element is added on to the end of the list.
+;;; 	the position to insert the element. If this is negative, or is larger
+;;;     than the number of elements in the list, the new element is added on to
+;;;     the end of the list.
 ;;; 
 ;;; Returns :
 ;;; 	the new start of the GList
@@ -276,9 +298,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_insert_before ()
 ;;; 
-;;; GList *             g_list_insert_before                (GList *list,
-;;;                                                          GList *sibling,
-;;;                                                          gpointer data);
+;;; GList * g_list_insert_before (GList *list, GList *sibling, gpointer data)
 ;;; 
 ;;; Inserts a new element into the list before the given position.
 ;;; 
@@ -286,7 +306,8 @@
 ;;; 	a pointer to a GList
 ;;; 
 ;;; sibling :
-;;; 	the list element before which the new element is inserted or NULL to insert at the end of the list
+;;; 	the list element before which the new element is inserted or NULL to
+;;;     insert at the end of the list
 ;;; 
 ;;; data :
 ;;; 	the data for the new element
@@ -298,11 +319,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_insert_sorted ()
 ;;; 
-;;; GList *             g_list_insert_sorted                (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          GCompareFunc func);
+;;; GList * g_list_insert_sorted (GList *list, gpointer data, GCompareFunc func)
 ;;; 
-;;; Inserts a new element into the list, using the given comparison function to determine its position.
+;;; Inserts a new element into the list, using the given comparison function to
+;;; determine its position.
 ;;; 
 ;;; list :
 ;;; 	a pointer to a GList
@@ -311,7 +331,9 @@
 ;;; 	the data for the new element
 ;;; 
 ;;; func :
-;;; 	the function to compare elements in the list. It should return a number > 0 if the first parameter comes after the second parameter in the sort order.
+;;; 	the function to compare elements in the list. It should return a number
+;;;     > 0 if the first parameter comes after the second parameter in the sort
+;;;     order.
 ;;; 
 ;;; Returns :
 ;;; 	the new start of the GList
@@ -320,10 +342,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_remove ()
 ;;; 
-;;; GList *             g_list_remove                       (GList *list,
-;;;                                                          gconstpointer data);
+;;; GList * g_list_remove (GList *list, gconstpointer data)
 ;;; 
-;;; Removes an element from a GList. If two elements contain the same data, only the first is removed. If none of the elements contain the data, the GList is unchanged.
+;;; Removes an element from a GList. If two elements contain the same data, only
+;;; the first is removed. If none of the elements contain the data, the GList is
+;;; unchanged.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -338,10 +361,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_remove_link ()
 ;;; 
-;;; GList *             g_list_remove_link                  (GList *list,
-;;;                                                          GList *llink);
+;;; GList * g_list_remove_link (GList *list, GList *llink)
 ;;; 
-;;; Removes an element from a GList, without freeing the element. The removed element's prev and next links are set to NULL, so that it becomes a self-contained list with one element.
+;;; Removes an element from a GList, without freeing the element. The removed
+;;; element's prev and next links are set to NULL, so that it becomes a
+;;; self-contained list with one element.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -356,10 +380,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_delete_link ()
 ;;; 
-;;; GList *             g_list_delete_link                  (GList *list,
-;;;                                                          GList *link_);
+;;; GList * g_list_delete_link (GList *list, GList *link_)
 ;;; 
-;;; Removes the node link_ from the list and frees it. Compare this to g_list_remove_link() which removes the node without freeing it.
+;;; Removes the node link_ from the list and frees it. Compare this to
+;;; g_list_remove_link() which removes the node without freeing it.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -374,10 +398,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_remove_all ()
 ;;; 
-;;; GList *             g_list_remove_all                   (GList *list,
-;;;                                                          gconstpointer data);
+;;; GList * g_list_remove_all (GList *list, gconstpointer data)
 ;;; 
-;;; Removes all list nodes with data equal to data. Returns the new head of the list. Contrast with g_list_remove() which removes only the first node matching the given data.
+;;; Removes all list nodes with data equal to data. Returns the new head of the
+;;; list. Contrast with g_list_remove() which removes only the first node
+;;; matching the given data.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -412,10 +437,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_free_full ()
 ;;; 
-;;; void                g_list_free_full                    (GList *list,
-;;;                                                          GDestroyNotify free_func);
+;;; void g_list_free_full (GList *list, GDestroyNotify free_func)
 ;;; 
-;;; Convenience method, which frees all the memory used by a GList, and calls the specified destroy function on every element's data.
+;;; Convenience method, which frees all the memory used by a GList, and calls
+;;; the specified destroy function on every element's data.
 ;;; 
 ;;; list :
 ;;; 	a pointer to a GList
@@ -429,9 +454,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_alloc ()
 ;;; 
-;;; GList *             g_list_alloc                        (void);
+;;; GList * g_list_alloc (void)
 ;;; 
-;;; Allocates space for one GList element. It is called by g_list_append(), g_list_prepend(), g_list_insert() and g_list_insert_sorted() and so is rarely used on its own.
+;;; Allocates space for one GList element. It is called by
+;;; g_list_append(), g_list_prepend(), g_list_insert() and
+;;; g_list_insert_sorted() and so is rarely used on its own.
 ;;; 
 ;;; Returns :
 ;;; 	a pointer to the newly-allocated GList element.
@@ -440,7 +467,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_free_1 ()
 ;;; 
-;;; void                g_list_free_1                       (GList *list);
+;;; void g_list_free_1 (GList *list)
 ;;; 
 ;;; Frees one GList element. It is usually used after g_list_remove_link().
 ;;; 
@@ -451,7 +478,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_free1
 ;;; 
-;;; #define             g_list_free1
+;;; #define g_list_free1
 ;;; 
 ;;; Another name for g_list_free_1().
 ;;; ----------------------------------------------------------------------------
@@ -459,7 +486,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_length ()
 ;;; 
-;;; guint               g_list_length                       (GList *list);
+;;; guint g_list_length (GList *list)
 ;;; 
 ;;; Gets the number of elements in a GList.
 ;;; 
@@ -477,13 +504,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_copy ()
 ;;; 
-;;; GList *             g_list_copy                         (GList *list);
+;;; GList * g_list_copy (GList *list)
 ;;; 
 ;;; Copies a GList.
 ;;; 
 ;;; Note
 ;;; 
-;;; Note that this is a "shallow" copy. If the list elements consist of pointers to data, the pointers are copied but the actual data is not.
+;;; Note that this is a "shallow" copy. If the list elements consist of pointers
+;;; to data, the pointers are copied but the actual data is not.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -495,9 +523,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_reverse ()
 ;;; 
-;;; GList *             g_list_reverse                      (GList *list);
+;;; GList * g_list_reverse (GList *list)
 ;;; 
-;;; Reverses a GList. It simply switches the next and prev pointers of each element.
+;;; Reverses a GList. It simply switches the next and prev pointers of each
+;;; element.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -509,8 +538,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_sort ()
 ;;; 
-;;; GList *             g_list_sort                         (GList *list,
-;;;                                                          GCompareFunc compare_func);
+;;; GList * g_list_sort (GList *list, GCompareFunc compare_func)
 ;;; 
 ;;; Sorts a GList using the given comparison function.
 ;;; 
@@ -518,7 +546,10 @@
 ;;; 	a GList
 ;;; 
 ;;; compare_func :
-;;; 	the comparison function used to sort the GList. This function is passed the data from 2 elements of the GList and should return 0 if they are equal, a negative value if the first element comes before the second, or a positive value if the first element comes after the second.
+;;; 	the comparison function used to sort the GList. This function is passed
+;;;     the data from 2 elements of the GList and should return 0 if they are
+;;;     equal, a negative value if the first element comes before the second, or
+;;;     a positive value if the first element comes after the second.
 ;;; 
 ;;; Returns :
 ;;; 	the start of the sorted GList
@@ -527,10 +558,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GCompareFunc ()
 ;;; 
-;;; gint                (*GCompareFunc)                     (gconstpointer a,
-;;;                                                          gconstpointer b);
+;;; gint (*GCompareFunc) (gconstpointer a, gconstpointer b)
 ;;; 
-;;; Specifies the type of a comparison function used to compare two values. The function should return a negative integer if the first value comes before the second, 0 if they are equal, or a positive integer if the first value comes after the second.
+;;; Specifies the type of a comparison function used to compare two values. The
+;;; function should return a negative integer if the first value comes before
+;;; the second, 0 if they are equal, or a positive integer if the first value
+;;; comes after the second.
 ;;; 
 ;;; a :
 ;;; 	a value.
@@ -545,12 +578,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_insert_sorted_with_data ()
 ;;; 
-;;; GList *             g_list_insert_sorted_with_data      (GList *list,
-;;;                                                          gpointer data,
-;;;                                                          GCompareDataFunc func,
-;;;                                                          gpointer user_data);
+;;; GList * g_list_insert_sorted_with_data (GList *list,
+;;;                                         gpointer data,
+;;;                                         GCompareDataFunc func,
+;;;                                         gpointer user_data)
 ;;; 
-;;; Inserts a new element into the list, using the given comparison function to determine its position.
+;;; Inserts a new element into the list, using the given comparison function to
+;;; determine its position.
 ;;; 
 ;;; list :
 ;;; 	a pointer to a GList
@@ -559,7 +593,9 @@
 ;;; 	the data for the new element
 ;;; 
 ;;; func :
-;;; 	the function to compare elements in the list. It should return a number > 0 if the first parameter comes after the second parameter in the sort order.
+;;; 	the function to compare elements in the list. It should return a number
+;;;     > 0 if the first parameter comes after the second parameter in the sort
+;;;     order.
 ;;; 
 ;;; user_data :
 ;;; 	user data to pass to comparison function.
@@ -573,11 +609,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_sort_with_data ()
 ;;; 
-;;; GList *             g_list_sort_with_data               (GList *list,
-;;;                                                          GCompareDataFunc compare_func,
-;;;                                                          gpointer user_data);
+;;; GList * g_list_sort_with_data (GList *list,
+;;;                                GCompareDataFunc compare_func,
+;;;                                gpointer user_data)
 ;;; 
-;;; Like g_list_sort(), but the comparison function accepts a user data argument.
+;;; Like g_list_sort(), but the comparison function accepts a user data
+;;; argument.
 ;;; 
 ;;; list :
 ;;; 	a GList
@@ -595,11 +632,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GCompareDataFunc ()
 ;;; 
-;;; gint                (*GCompareDataFunc)                 (gconstpointer a,
-;;;                                                          gconstpointer b,
-;;;                                                          gpointer user_data);
+;;; gint (*GCompareDataFunc) (gconstpointer a,
+;;;                           gconstpointer b,
+;;;                           gpointer user_data)
 ;;; 
-;;; Specifies the type of a comparison function used to compare two values. The function should return a negative integer if the first value comes before the second, 0 if they are equal, or a positive integer if the first value comes after the second.
+;;; Specifies the type of a comparison function used to compare two values. The
+;;; function should return a negative integer if the first value comes before
+;;; the second, 0 if they are equal, or a positive integer if the first value
+;;; comes after the second.
 ;;; 
 ;;; a :
 ;;; 	a value.
@@ -617,10 +657,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_concat ()
 ;;; 
-;;; GList *             g_list_concat                       (GList *list1,
-;;;                                                          GList *list2);
+;;; GList * g_list_concat (GList *list1, GList *list2)
 ;;; 
-;;; Adds the second GList onto the end of the first GList. Note that the elements of the second GList are not copied. They are used directly.
+;;; Adds the second GList onto the end of the first GList. Note that the
+;;; elements of the second GList are not copied. They are used directly.
 ;;; 
 ;;; list1 :
 ;;; 	a GList
@@ -635,9 +675,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_foreach ()
 ;;; 
-;;; void                g_list_foreach                      (GList *list,
-;;;                                                          GFunc func,
-;;;                                                          gpointer user_data);
+;;; void g_list_foreach (GList *list, GFunc func, gpointer user_data)
 ;;; 
 ;;; Calls a function for each element of a GList.
 ;;; 
@@ -654,10 +692,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GFunc ()
 ;;; 
-;;; void                (*GFunc)                            (gpointer data,
-;;;                                                          gpointer user_data);
+;;; void (*GFunc) (gpointer data, gpointer user_data)
 ;;; 
-;;; Specifies the type of functions passed to g_list_foreach() and g_slist_foreach().
+;;; Specifies the type of functions passed to g_list_foreach() and
+;;; g_slist_foreach().
 ;;; 
 ;;; data :
 ;;; 	the element's data.
@@ -669,7 +707,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_first ()
 ;;; 
-;;; GList *             g_list_first                        (GList *list);
+;;; GList * g_list_first (GList *list)
 ;;; 
 ;;; Gets the first element in a GList.
 ;;; 
@@ -685,7 +723,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_last ()
 ;;; 
-;;; GList *             g_list_last                         (GList *list);
+;;; GList * g_list_last (GList *list)
 ;;; 
 ;;; Gets the last element in a GList.
 ;;; 
@@ -699,7 +737,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_previous()
 ;;; 
-;;; #define             g_list_previous(list)
+;;; #define g_list_previous(list)
 ;;; 
 ;;; A convenience macro to get the previous element in a GList.
 ;;; 
@@ -713,7 +751,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_next()
 ;;; 
-;;; #define             g_list_next(list)
+;;; #define g_list_next(list)
 ;;; 
 ;;; A convenience macro to get the next element in a GList.
 ;;; 
@@ -732,8 +770,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_nth ()
 ;;; 
-;;; GList *             g_list_nth                          (GList *list,
-;;;                                                          guint n);
+;;; GList * g_list_nth (GList *list,guint n)
 ;;; 
 ;;; Gets the element at the given position in a GList.
 ;;; 
@@ -750,8 +787,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_list_nth_data ()
 ;;; 
-;;; gpointer            g_list_nth_data                     (GList *list,
-;;;                                                          guint n);
+;;; gpointer g_list_nth_data (GList *list, guint n)
 ;;; 
 ;;; Gets the data of the element at the given position.
 ;;; 
@@ -900,3 +936,5 @@
 ;;; Note that this function is not available if GLib has been compiled with
 ;;; --disable-mem-pools
 ;;; ----------------------------------------------------------------------------
+
+;;; --- End of file glib.glist.lisp --------------------------------------------

@@ -30,9 +30,6 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; #include <glib.h>
-;;; #include <glib/gprintf.h>
-;;; 
 ;;; gchar *             g_strdup                            (const gchar *str);
 ;;; gchar *             g_strndup                           (const gchar *str,
 ;;;                                                          gsize n);
@@ -193,12 +190,25 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; This section describes a number of utility functions for creating, duplicating, and manipulating strings.
+;;; This section describes a number of utility functions for creating,
+;;; duplicating, and manipulating strings.
 ;;; 
-;;; Note that the functions g_printf(), g_fprintf(), g_sprintf(), g_snprintf(), g_vprintf(), g_vfprintf(), g_vsprintf() and g_vsnprintf() are declared in the header gprintf.h which is not included in glib.h (otherwise using glib.h would drag in stdio.h), so you'll have to explicitly include <glib/gprintf.h> in order to use the GLib printf() functions.
+;;; Note that the functions g_printf(), g_fprintf(), g_sprintf(), g_snprintf(),
+;;; g_vprintf(), g_vfprintf(), g_vsprintf() and g_vsnprintf() are declared in
+;;; the header gprintf.h which is not included in glib.h (otherwise using
+;;; glib.h would drag in stdio.h), so you'll have to explicitly include
+;;; <glib/gprintf.h> in order to use the GLib printf() functions.
 ;;; 
-;;; While you may use the printf() functions to format UTF-8 strings, notice that the precision of a %Ns parameter is interpreted as the number of bytes, not characters to print. On top of that, the GNU libc implementation of the printf() functions has the "feature" that it checks that the string given for the %Ns parameter consists of a whole number of characters in the current encoding. So, unless you are sure you are always going to be in an UTF-8 locale or your know your text is restricted to ASCII, avoid using %Ns. If your intention is to format strings for a certain number of columns, then %Ns is not a correct solution anyway, since it fails to take wide characters (see g_unichar_iswide()) into account.
-;;; Details
+;;; While you may use the printf() functions to format UTF-8 strings, notice
+;;; that the precision of a %Ns parameter is interpreted as the number of bytes,
+;;; not characters to print. On top of that, the GNU libc implementation of the
+;;; printf() functions has the "feature" that it checks that the string given
+;;; for the %Ns parameter consists of a whole number of characters in the
+;;; current encoding. So, unless you are sure you are always going to be in an
+;;; UTF-8 locale or your know your text is restricted to ASCII, avoid using %Ns.
+;;; If your intention is to format strings for a certain number of columns, then
+;;; %Ns is not a correct solution anyway, since it fails to take wide characters
+;;; (see g_unichar_iswide()) into account.
 ;;; ----------------------------------------------------------------------------
 
 (in-package :glib)
@@ -1445,26 +1455,45 @@
 ;;; 	length of str_array.
 ;;; 
 ;;; Since 2.6
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_strerror ()
 ;;; 
-;;; const gchar *       g_strerror                          (gint errnum);
+;;; const gchar * g_strerror (gint errnum)
 ;;; 
-;;; Returns a string corresponding to the given error code, e.g. "no such process". You should use this function in preference to strerror(), because it returns a string in UTF-8 encoding, and since not all platforms support the strerror() function.
+;;; Returns a string corresponding to the given error code, e.g. "no such
+;;; process". You should use this function in preference to strerror(), because
+;;; it returns a string in UTF-8 encoding, and since not all platforms support
+;;; the strerror() function.
 ;;; 
 ;;; errnum :
 ;;; 	the system error number. See the standard C errno documentation
 ;;; 
 ;;; Returns :
-;;; 	a UTF-8 string describing the error code. If the error code is unknown, it returns "unknown error (<code>)". The string can only be used until the next call to g_strerror()
+;;; 	a UTF-8 string describing the error code. If the error code is unknown,
+;;;     it returns "unknown error (<code>)". The string can only be used until
+;;;     the next call to g_strerror()
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_strsignal ()
 ;;; 
-;;; const gchar *       g_strsignal                         (gint signum);
+;;; const gchar * g_strsignal (gint signum)
 ;;; 
-;;; Returns a string describing the given signal, e.g. "Segmentation fault". You should use this function in preference to strsignal(), because it returns a string in UTF-8 encoding, and since not all platforms support the strsignal() function.
+;;; Returns a string describing the given signal, e.g. "Segmentation fault".
+;;; You should use this function in preference to strsignal(), because it
+;;; returns a string in UTF-8 encoding, and since not all platforms support the
+;;; strsignal() function.
 ;;; 
 ;;; signum :
 ;;; 	the signal number. See the signal documentation
 ;;; 
 ;;; Returns :
-;;; 	a UTF-8 string describing the signal. If the signal is unknown, it returns "unknown signal (<signum>)". The string can only be used until the next call to g_strsignal()
+;;; 	a UTF-8 string describing the signal. If the signal is unknown, it
+;;;     returns "unknown signal (<signum>)". The string can only be used until
+;;;     the next call to g_strsignal()
 ;;; 
+;;; ----------------------------------------------------------------------------
+
+;;; --- End of file glib.string.lisp -------------------------------------------

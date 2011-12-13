@@ -151,6 +151,46 @@
   (next :pointer))
 
 ;;; ----------------------------------------------------------------------------
+
+(define-foreign-type gslist-type ()
+  ((type :reader gslist-type-type :initarg :type :initform :pointer)
+   (free-from-foreign :reader gslist-type-free-from-foreign
+                      :initarg :free-from-foreign
+                      :initform t)
+   (free-to-foreign :reader gslist-type-free-to-foreign
+                    :initarg :free-to-foreign
+                    :initform t))
+  (:actual-type :pointer))
+
+(define-parse-method gslist (type &key (free-from-foreign t) (free-to-foreign t))
+  (make-instance 'gslist-type
+                 :type type
+                 :free-from-foreign free-from-foreign
+                 :free-to-foreign free-to-foreign))
+
+(defmethod translate-from-foreign (pointer (type gslist-type))
+  (prog1
+      (iter (for c initially pointer then (g-slist-next c))
+            (until (null-pointer-p c))
+            (collect (convert-from-foreign (foreign-slot-value c 'g-slist 'data) (gslist-type-type type))))
+    (when (gslist-type-free-from-foreign type)
+      (g-slist-free pointer))))
+
+(defmethod translate-to-foreign (list (type gslist-type))
+  (let ((result (null-pointer)) last)
+    (iter (for item in list)
+          (for n = (g-slist-alloc))
+          (for ptr = (convert-to-foreign item (gslist-type-type type)))
+          (setf (foreign-slot-value n 'g-slist 'data) ptr)
+          (setf (foreign-slot-value n 'g-slist 'next) (null-pointer))
+          (when last
+            (setf (foreign-slot-value last 'g-slist 'next) n))
+          (setf last n)
+          (when (first-iteration-p)
+            (setf result n)))
+    result))
+
+;;; ----------------------------------------------------------------------------
 ;;; g_slist_alloc ()
 ;;; 
 ;;; GSList * g_slist_alloc (void)

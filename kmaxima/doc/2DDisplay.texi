@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 09.08.2011
-@c Revision : 10.08.2011
+@c Revision : 12.12.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -78,15 +78,15 @@ Standardwert: @code{"["}
 Standardwert: @code{"]"}
 @end defvr
 
-@c -----------------------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{$stardisp}
 @defvr {Optionsvariable} $stardisp
 Standardwert: @code{nil}
 
 @emph{Bemerkung:}
 
-Die Optionsvariable hat eine @code{assign}-Funktion mit dem Namen
-@mrefdot{stardisp}  Die @code{assign}-Funktion wird mit dem Kommando
+Die Optionsvariable @code{$stardisp} hat eine @code{assign}-Funktion mit dem
+Namen @mrefdot{stardisp}  Die @code{assign}-Funktion wird mit dem Kommando
 @code{(defprop $stardisp stardisp assign)} der Optionsvariablen zugewiesen.
 Wird der Optionsvariablen @code{$stardisp} der Wert @code{t} zugewiesen, wird
 das Zeichen f@"ur die Ausgabe der Multiplikation auf den Wert @code{'(#\*)}
@@ -883,9 +883,36 @@ Standardwert: @code{'dimension-list}
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{dimension-nofix}
 @deffn {Funktion} dimension-nofix form result
+
+Das erste Argument @var{form} ist ein Ausdruck mit einem Nofix-Operator und
+das Argument @var{result} enth@"alt die bisher formatierten Ausdr@"ucke.
+Die R@"uckgabe ist das bisherige Result @var{result}, erg@"anzt um den
+formatierten Nofix-Operator.
+
+Die globale Variable @mref{*width*} erh@"alt als neuen Wert die Anzahl der
+Zeichen des Nofix-Operators.
+
+@emph{Beispiel:}
+
+Da kMaxima keinen Nofix-Operator kennt, wird zun@"achst ein Nofix-Operator
+@code{new} definiert.
+
+@example
+(%i1) nofix(new);
+(%o1)                          new
+(%i2) quit();
+0
+@end example
+
+Jetzt wird ein Ausdruck mit dem Nofix-Operator formatiert.
+
+@example
+* (dimension-nofix '(($new)) nil)
+(#\w #\e #\n)
+@end example
 
 @emph{Quelltext:}
 @lisp
@@ -894,6 +921,11 @@ Standardwert: @code{'dimension-list}
         *width* (length form))
   (revappend form result))
 @end lisp
+
+@emph{Bemerkung:}
+
+Wieso wird von der Funktion @code{dimension-nofix} die Anzahl der Zeichen nicht
+zur globale Variablen @code{*width*} hinzu addiert?
 @end deffn
 
 @c -----------------------------------------------------------------------------

@@ -27,14 +27,14 @@
 (defsystem :cl-gtk2-glib
   :name :cl-gtk2-glib
   :version "0.1.1"
-  :author "Kalyanov Dmitry <Kalyanov.Dmitry@gmail.com>"
+  :author "Dr. Dieter Kaiser"
   :license "LLGPL"
   :serial t
   :components ((:file "glib.package")
+               (:file "glib.init")
+               
                (:file "glib.version")
                (:file "glib.basic-types")
-               
-               (:file "glib.init")
                (:file "glib.mem")
                (:file "glib.date")
                (:file "glib.threads")
@@ -47,6 +47,7 @@
                (:file "glib.error")
                (:file "glib.utils")
                (:file "glib.rand")
+               
                (:file "glib.lisp"))
   :depends-on (:cffi
                :trivial-garbage
