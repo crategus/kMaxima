@@ -1,5 +1,5 @@
 ;;; ----------------------------------------------------------------------------
-;;; gobject.glist.lisp
+;;; gobject.boxed.lisp
 ;;;
 ;;; Copyright (C) 2011 Dr. Dieter Kaiser
 ;;;

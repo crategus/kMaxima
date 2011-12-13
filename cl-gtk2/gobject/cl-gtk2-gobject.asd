@@ -1,11 +1,12 @@
 (defsystem :cl-gtk2-gobject
   :name :cl-gtk2-gobject
   :version "0.1.1"
-  :author "Kalyanov Dmitry <Kalyanov.Dmitry@gmail.com>"
+  :author "Dr. Dieter Kaiser"
   :license "LLGPL"
   :serial t
   :components ((:file "gobject.package")
                (:file "gobject.init")
+               
                (:file "gobject.type")
                
                (:file "gobject.ffi")
@@ -20,14 +21,11 @@
                (:file "gobject.signals")
                (:file "gobject.closures")
                (:file "gobject.boxed")
-               
-;               (:file "gobject.type-info")
+
                (:file "gobject.type-info.object")
                (:file "gobject.type-info.enum")
                (:file "gobject.type-info.signals")
                
-;               (:file "gobject.gvalue")
-;               (:file "gobject.foreign")
                (:file "gobject.stable-pointer")
                (:file "gobject.object.low")
                

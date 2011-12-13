@@ -10,8 +10,6 @@
 
 (at-init nil (g-closure-get-type))
 
-
-
 (defcstruct %g-object
   (:type-instance g-type-instance)
   (:ref-count :uint)
