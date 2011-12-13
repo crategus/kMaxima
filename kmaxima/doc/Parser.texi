@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 05.11.2011
+@c Revision : 12.12.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -307,15 +307,27 @@ als Symbole @"ubergeben, zum Beispiel als Liste @code{'(|+| |-| ...)}.  Das
 Makro ruft die Funktion @code{define-initial-symbols*} auf und initialisiert
 die globalen Variablen @code{*symbols-defined*} und @code{*maxima-operators*}.
 
-@c --- 29.09.2011 --------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{*symbols-defined*}
 @defvr {Globale Variable} *symbols-defined*
 Standardwert: @code{nil}
 
 Eine globale Liste mit den Symbolen, die vom Parser als Operator eingelesen
-werden.  Die Liste wird von der Funktion @mref{define-initial-symbols*}
+werden.  Die Liste wird von der Funktion @mref{define-initial-symbols*}@w{}
 initialisiert.  Weiterhin wird diese Liste verwendet, um die globale
 Liste @mref{*maxima-operators*} zu initialisieren.
+
+@emph{Hinweis:}
+
+Nicht alle Operatoren werden der Liste @code{*symbols-defined*} hinzugef@"ugt.
+In der Liste sind nur solche Operatoren enthalten, die nicht-alphabetische
+Zeichen enthalten.  Der Parser pr@"uft beim Einlesen mit der Funktion
+@mrefcomma{scan-operator-token} ob ein Operator mit nicht-alphabetischen
+Zeichen vorliegt.
+
+Siehe auch die Funktion @mref{def-operator} mit der neue Operatoren definiert
+werden, die der Liste @code{*symbols-defined*} hinzugef@"ugt werden, wenn diese
+nicht-alphabetische Zeichen enthalten.
 
 @emph{Beispiel:}
 
@@ -327,12 +339,6 @@ Symbole.
 (+ - * ^ < = > |(| |)| [ ] |,| |:| ! |#| |'| $ |;| ** ^^ |:=| |::| <= >= |''|
    && |::=|)
 @end example
-
-@emph{Bemerkung:}
-
-Nicht alle von kMaxima definierten Operatoren sind in der Liste
-@code{*symbols-defined*} enthalten.  So fehlen zum Beispiel die logischen
-Operatoren.  Dieser Unterschied muss noch einmal ausgearbeitet werden.
 @end defvr
 
 @c --- 29.09.2011 --------------------------------------------------------------
@@ -2613,21 +2619,37 @@ rechtsseitigen Vorrang des Operators @var{op} aufgerufen.
 @end lisp
 @end deffn
 
-@c --- 05.10.2011 --------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{parse-nofix}
 @deffn {Funktion} parse-nofix op
 
 Das Argument @var{op} ist ein Nofix-Operator.  Die R@"uckgabe der Funktion
 @code{parse-nofix} ist eine Liste mit der Wortart des Operators als erstes
-Element und dem Symbol des Operators als zweites Element.
+Element und einer Liste als zweites Element, die als Element die interne
+Bezeichnung des Operators hat.
+
+Siehe auch die Funktion @mrefcomma{$nofix} um einen Nofix-Operator zu
+definieren.
+
+@emph{Beispiel:}
+
+kMaxima kennt keinen Nofix-Operator.  Daher wird zun@"achst als Beispiel
+ein Nofix-Operator @code{quit} definiert.
+
+@example
+(%i1) nofix(quit);
+(%o1)                         quit
+(%i2) quit;
+0
+* (parse-nofix '$quit)
+($ANY ($QUIT))
+@end example
 
 @emph{Quelltext:}
 @lisp
-@group
 (defun parse-nofix (op)
   (list (pos op)
         (mheader op)))
-@end group
 @end lisp
 @end deffn
 
@@ -3652,6 +3674,17 @@ label && a+b;
 @section Nutzerdefinierte Operatoren
 @c -----------------------------------------------------------------------------
 
+Nutzerdefinierte Operatoren erlauben die Erweiterung der Syntax des Parsers.
+Der Parser unterscheidet Prefix-, Postfix-, Infix- Nary-, Matchfix- und
+Nofix-Operatoren und bietet dem Nutzer f@"ur jeden Typ eine entsprechende
+Funktion @mrefcomma{$prefix} @mrefcomma{$postfix} @mrefcomma{$infix}@w{}
+@mrefcomma{$nary} @mref{$matchfix} und @mref{$nofix} an, um einen Operator mit
+geeigneten Standardwerten zu definieren.  Alle diese Funktionen rufen die
+Funktion @mref{def-operator} auf, die die eigentliche Definition des Operators
+ausf@"uhrt.  Weiterhin k@"onnen mit den vorgenannten Funktionen bereits
+vorhandene, einschlie@ss{}lich der von kMaxima definierten Operatoren,
+umdefiniert werden.
+
 @c -----------------------------------------------------------------------------
 @anchor{$prefix}
 @deffn {Funktion} $prefix operator &optional rbp rpos pos
@@ -3735,26 +3768,126 @@ label && a+b;
 @anchor{$nofix}
 @deffn {Funktion} $nofix operator &optional pos
 
+Mit der Funktion @code{$nofix} wird ein Operator definiert, der kein Argument
+hat.  @code{$nofix} ruft die Funktion @mref{def-operator} mit Standardwerten
+f@"ur die meisten Argumente auf.  Die folgende Liste zeigt, mit welchen
+Werten die Funktion @code{def-operator} von @code{$nofix} aufgerufen wird, um
+den Operator zu initialisieren.
+
+@table @code
+@item op
+Als Bezeichner des neuen Operators wird das Argument @var{operator} @"ubergeben,
+das ein Symbol oder eine Zeichenkette sein kann.
+
+@item pos
+Die Wortart der R@"uckgabe des Operators ist das optionale Argument @var{pos},
+das den Standardwert @code{any} hat.
+
+@item lbp
+Der linksseitige Vorrang des Operators erh@"alt den Wert @code{nil}.
+
+@item lpos
+Die Wortart des linksseitigen Argumentes des Operators erh@"alt den Wert
+@code{nil}.
+
+@item rbp
+Der rechtsseitige Vorrang des Operators erh@"alt den Wert @code{nil}.
+
+@item rpos
+Die Wortart des rechtsseitigen Argumentes des Operators erh@"alt den Wert
+@code{nil}.
+
+@item sp1
+Hat @code{sp1} einen von @code{nil} verschiedenen Wert, wird dem Operator in
+der Anzeige ein Leerzeichen vorangestellt.  Ein Nofix-Operator wird mit dem
+Wert @code{nil} initialisiert.
+
+@item sp2
+Hat @code{sp2} einen von @code{nil} verschiedenen Wert, wird dem Operator in
+der Anzeige ein Leerzeichen nachgestellt.  Ein Nofix-Operator wird mit dem 
+Wert @code{nil} initialisiert.
+
+@item parse-data
+Eine Liste deren @code{car} entweder @code{led} oder @code{nud} ist und deren
+@code{cdr} die entsprechende @code{led-} oder @code{nud}-Funktion bezeichnet.
+Ein Nofix-Operator wird mit @code{'(nud . parse-nofix)} initialisiert.
+Siehe die Funktion @mrefdot{parse-nofix}
+
+@item grind-fn
+Eine Funktion, die den Operator und seine Operanden f@"ur die lineare Anzeige
+formatiert.  Ein Nofix-Operator wird mit dem Werg @code{'msize-nofix}
+initialisiert.  Siehe die Funktion @mrefdot{msize-nofix}
+
+@item dim-fn
+Eine Funktion, die den Operator und seine Operanden f@"ur die zweidimensionale
+Anzeige formatiert.  Ein Nofix-Operator wird mit dem Wert
+@code{'dimension-nofix} initialisiert.  Siehe die Funktion
+@mrefdot{dimension-nofix}
+
+@item match
+Wenn @code{op} ein @code{$matchfix}-Operator ist, bezeichnet @code{match} das
+Symbol, mit dem die Eingabe beendet wird.  Ein Nofix-Operator wird mit dem
+Wert @code{nil} initialisiert.
+@end table
+
+kMaxima hat keinen eigenen Nofix-Operator.
+
+@emph{Beispiel:}
+
+Ein Beispiel ist die Definition eines Nofix-Operators @code{quit}, der die
+Funktion @mref{$quit} aufruft.
+
+@example
+(%i1) quit;
+(%o1)                         quit
+(%i2) nofix(quit);
+(%o2)                         quit
+(%i3) quit;
+0
+@end example
+
+Der Operator hat den Namen @code{"quit"}, der von der Funktion @mref{getop}@w{}
+zur@"uckgegeben wird.  Umgekehrt gibt die Funktion @mref{getopr} zum Namen
+@code{"quit"} das interne kMaxima-Symbol @code{$quit} als Ergebnis zur@"uck.
+
+@example
+* (getop '$quit)
+"quit"
+* (getopr "quit")
+$QUIT
+@end example
+
+Sowohl die Eigenschaftsliste des Symbols @code{$quit} als auch die Liste der
+Noun-Form @code{%quit} erhalten Eintr@"age, die f@"ur das Parsen der Eingabe
+und der Ausgabe des Operators notwendig sind.
+
+@example
+* (symbol-plist '$quit)
+(DISSYM (#\q #\u #\i #\t) DIMENSION DIMENSION-NOFIX GRIND MSIZE-NOFIX NUD
+ PARSE-NOFIX POS $ANY VERB %QUIT OP "quit")
+* (symbol-plist '%quit)
+(DISSYM (#\q #\u #\i #\t) DIMENSION DIMENSION-NOFIX NOUN $QUIT)
+@end example
+
 @emph{Quelltext:}
 @lisp
-@group
 (defun $nofix (operator &optional (pos '$any))
   (def-operator operator pos () () () () () ()
                 '(nud . parse-nofix) 'msize-nofix 'dimension-nofix ())
   operator)
-@end group
 @end lisp
 @end deffn
 
-@c -----------------------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{def-operator}
 @deffn {Funktion} def-operator op pos lbp lpos rbp rpos sp1 sp2 parse-data grind-fn dim-fn match
 
 Die Funktion @code{def-operator} wird von den Funktionen @mrefcomma{$prefix}@w{}
 @mrefcomma{$postfix} @mrefcomma{$infix} @mrefcomma{$nary} @mref{$matchfix} und
-@mref{$nofix} aufgerufen, um einen nutzerdefinierten Operator zu definieren.
-Die Argumente werden von den genannten Funktionen mit geeigneten Standardwerten
-belegt und haben die folgende Bedeutung:
+@mref{$nofix} mit Standardwerten f@"ur die einzelnen Argumente aufgerufen, um
+einen nutzerdefinierten Operator zu definieren oder einen vorhandenen Operator
+neu zu definieren.  Die Argumente werden von den genannten Funktionen mit
+geeigneten Standardwerten belegt und haben die folgende Bedeutung:
 
 @table @code
 @item op
@@ -3801,35 +3934,46 @@ Wenn @code{op} ein @code{$matchfix}-Operator ist, bezeichnet @code{match} das
 Symbol, mit dem die Eingabe beendet wird.
 @end table
 
+@emph{Hinweis:}
+
+Im Unterschied zum Original Maxima werden in kMaxima Namen von Operatoren nur
+dann der Liste @mref{*symbols-defined*} hinzugef@"ugt, wenn der Name eine
+Zeichenkette ist und diese nicht-alphabetische Zeichen enth@"alt, da Namen mit
+nicht-alphabetischen Zeichen auf besondere Weise eingelesen werden m@"ussen.
+Wird eine Zeichenkette als Argument @var{op} @"ubergeben, die nur alphabetische
+Zeichen enth@"alt, wird die Zeichenkette in ein Symbol umgewandelt, das nicht
+der Liste @code{*symbols-defined*} hinzugef@"ugt wird.
+
 @emph{Quelltext:}
 @lisp
-@group
-(defun def-operator (op pos lbp lpos rbp rpos sp1 sp2 
+(defun def-operator (op pos lbp lpos rbp rpos sp1 sp2
                         parse-data grind-fn dim-fn match)
   (let ((x))
     (if (or (and rbp (not (integerp (setq x rbp))))
             (and lbp (not (integerp (setq x lbp)))))
-        (merror 
-          "syntax extension: binding powers must be integers; found: ~A" 
-          x))
-    (if (stringp op) (setq op (define-symbol op)))
+        (merror "syntax extension: binding powers must be integers; found: ~A"
+                x))
+    (when (stringp op)
+      (cond ((not (every 'alphabetp (coerce op 'list)))
+             (setq op (define-symbol op)))
+            (t
+             (setq op (symbolconc '$ (maybe-invert-string op))))))
+    (when (not (symbolp op))
+      (merror "syntax extension: first argument must be a string or a symbol;~
+               found: ~A"
+              op))
     (op-setup op)
-@end group
-@group
     (let ((noun ($nounify op))
           (dissym (cdr (exploden op))))
-      (cond
-        ((not match)
-         (setq dissym 
-               (append (if sp1 '(#\space)) dissym (if sp2 '(#\space)))))
-        (t
-         (if (stringp match) (setq match (define-symbol match)))
-         (op-setup match)
-         (putprop op match 'match)
-         (putprop match 5 'lbp)
-         (setq dissym (cons dissym (cdr (exploden match))))))
-@end group
-@group
+      (cond ((not match)
+             (setq dissym
+                   (append (if sp1 '(#\space)) dissym (if sp2 '(#\space)))))
+            (t
+             (if (stringp match) (setq match (define-symbol match)))
+             (op-setup match)
+             (putprop op match 'match)
+             (putprop match 5 'lbp)
+             (setq dissym (cons dissym (cdr (exploden match))))))
       (putprop op pos 'pos)
       (putprop op (cdr parse-data) (car parse-data))
       (putprop op grind-fn 'grind)
@@ -3837,8 +3981,6 @@ Symbol, mit dem die Eingabe beendet wird.
       (putprop noun dim-fn 'dimension)
       (putprop op dissym 'dissym)
       (putprop noun dissym 'dissym)
-@end group
-@group
       (when rbp
         (putprop op rbp 'rbp)
         (putprop noun rbp 'rbp))
@@ -3848,11 +3990,18 @@ Symbol, mit dem die Eingabe beendet wird.
       (when lpos (putprop op lpos 'lpos))
       (when rpos (putprop op rpos 'rpos))
       (getopr op))))
-@end group
 @end lisp
+
+@emph{Bemerkung:}
+
+Der linksseitige Vorrang f@"ur einen Matchfix-Operator wird in der Funktion
+@code{def-operator} mit dem Wert @code{5} initialisiert.  Die Zahl @code{5}
+f@"allt hier vom Himmel und verhindert gegebenenfalls eine komplette
+Umdefinition der Vorr@"ange aller Operatoren oder der Definition von
+Matchfix-Operatoren mit einem besonderen linken Vorrang.
 @end deffn
 
-@c --- 10.08.2011 --------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{*mopl*}
 @defvr {Globale Variable} *mopl*
 Standardwert: @code{nil}
@@ -3865,7 +4014,7 @@ Siehe die Funktion @mrefcomma{op-setup} die die Namen von internen Operatoren
 in die Liste @code{*mopl*} schreibt.
 @end defvr
 
-@c --- 10.08.2011 --------------------------------------------------------------
+@c --- 12.12.2011 --------------------------------------------------------------
 @anchor{op-setup}
 @deffn {Funktion} op-setup op
 
@@ -3892,18 +4041,16 @@ modifizieren.
 
 @emph{Quelltext:}
 @lisp
-@group
 (defun op-setup (op)
   (declare (special *mopl* $props))
   (let ((opr (or (getprop op 'op)
-                   (coerce (makestring1 op) 'string))))
+                 (coerce (makestring1 op) 'string))))
     (putprop op opr 'op)
     (putopr opr op)
     (if (and (operatorp1 op)
              (not (member opr (cdr $props) :test #'eq)))
         (push opr *mopl*))
     (add2lnc opr $props)))
-@end group
 @end lisp
 @end deffn
 
