@@ -10,23 +10,9 @@
 
 (at-init nil (g-closure-get-type))
 
-(defcstruct %g-object
-  (:type-instance g-type-instance)
-  (:ref-count :uint)
-  (:data :pointer))
 
-(defcstruct g-object-class
-  (:type-class g-type-class)
-  (:construct-properties :pointer)
-  (:constructor :pointer)
-  (:set-property :pointer)
-  (:get-property :pointer)
-  (:dispose :pointer)
-  (:finalize :pointer)
-  (:dispatch-properties-changed :pointer)
-  (:notify :pointer)
-  (:constructed :pointer)
-  (:pdummy :pointer :count 7))
+
+
 
 (defbitfield g-param-flags
   :readable

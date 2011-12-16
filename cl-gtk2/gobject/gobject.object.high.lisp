@@ -1,21 +1,6 @@
 (in-package :gobject)
 
-(defclass g-object ()
-  ((pointer
-    :type (or null cffi:foreign-pointer)
-    :initarg :pointer
-    :accessor pointer
-    :initform nil)
-   (has-reference
-    :type boolean
-    :accessor g-object-has-reference
-    :initform nil)
-   (signal-handlers
-    :type (array t *)
-    :initform (make-array 0 :adjustable t :fill-pointer t)
-    :reader g-object-signal-handlers))
-  (:documentation
-   "Base class for GObject classes hierarchy."))
+
 
 (defvar *foreign-gobjects-weak* (make-weak-hash-table :test 'equal :weakness :value))
 (defvar *foreign-gobjects-strong* (make-hash-table :test 'equal))
@@ -155,14 +140,18 @@
   (g-object-unref (pointer obj)))
 
 (defvar *registered-object-types* (make-hash-table :test 'equal))
+
 (defun register-object-type (name type)
   (setf (gethash name *registered-object-types*) type))
+
 (defun registered-object-type-by-name (name)
   (gethash name *registered-object-types*))
+
 (defun get-g-object-lisp-type (g-type)
   (setf g-type (gtype g-type))
   (iter (while (not (null g-type)))
-        (for lisp-type = (gethash (gtype-name g-type) *registered-object-types*))
+        (for lisp-type = (gethash (gtype-name g-type)
+                                  *registered-object-types*))
         (when lisp-type
           (return lisp-type))
         (setf g-type (g-type-parent g-type))))

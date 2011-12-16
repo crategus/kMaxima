@@ -12,4 +12,3 @@
      (t "libgobject-2.0")))
 
  (cffi:use-foreign-library gobject))
-

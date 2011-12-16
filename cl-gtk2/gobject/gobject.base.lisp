@@ -245,6 +245,11 @@
 ;;; implementation and should never be accessed directly.
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct %g-object
+  (:type-instance g-type-instance)
+  (:ref-count :uint)
+  (:data :pointer))
+
 ;;; ----------------------------------------------------------------------------
 ;;; struct GObjectClass
 ;;;
@@ -304,6 +309,36 @@
 ;;; 20   return object;
 ;;; 21 }
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-object-class
+  (:type-class g-type-class)
+  (:construct-properties :pointer)
+  (:constructor :pointer)
+  (:set-property :pointer)
+  (:get-property :pointer)
+  (:dispose :pointer)
+  (:finalize :pointer)
+  (:dispatch-properties-changed :pointer)
+  (:notify :pointer)
+  (:constructed :pointer)
+  (:pdummy :pointer :count 7))
+
+(defclass g-object ()
+  ((pointer
+    :type (or null cffi:foreign-pointer)
+    :initarg :pointer
+    :accessor pointer
+    :initform nil)
+   (has-reference
+    :type boolean
+    :accessor g-object-has-reference
+    :initform nil)
+   (signal-handlers
+    :type (array t *)
+    :initform (make-array 0 :adjustable t :fill-pointer t)
+    :reader g-object-signal-handlers))
+  (:documentation
+   "Base class for GObject classes hierarchy."))
 
 ;;; ----------------------------------------------------------------------------
 ;;; GTypeClass g_type_class;
@@ -458,14 +493,23 @@
 ;;; 
 ;;; Returns :
 ;;; 	FALSE or TRUE, indicating whether type is a G_TYPE_OBJECT.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT()
 ;;; 
-;;; #define G_OBJECT(object)            (G_TYPE_CHECK_INSTANCE_CAST ((object), G_TYPE_OBJECT, GObject))
+;;; #define G_OBJECT(object) (G_TYPE_CHECK_INSTANCE_CAST ((object),
+;;;                           G_TYPE_OBJECT, GObject))
 ;;; 
-;;; Casts a GObject or derived pointer into a (GObject*) pointer. Depending on the current debugging level, this function may invoke certain runtime checks to identify invalid casts.
+;;; Casts a GObject or derived pointer into a (GObject*) pointer. Depending on
+;;; the current debugging level, this function may invoke certain runtime
+;;; checks to identify invalid casts.
 ;;; 
 ;;; object :
 ;;; 	Object which is subject to casting.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_IS_OBJECT()
 ;;; 
 ;;; #define G_IS_OBJECT(object)         (G_TYPE_CHECK_INSTANCE_TYPE ((object), G_TYPE_OBJECT))
