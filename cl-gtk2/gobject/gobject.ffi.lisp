@@ -14,37 +14,13 @@
 
 
 
-(defbitfield g-param-flags
-  :readable
-  :writable
-  :construct
-  :construct-only
-  :lax-validation
-  :static-name
-  :nick
-  :blurb)
 
-(defcstruct g-param-spec
-  (:type-instance g-type-instance)
-  (:name (:string :free-from-foreign nil :free-to-foreign nil))
-  (:flags g-param-flags)
-  (:value-type g-type-designator)
-  (:owner-type g-type-designator))
 
-(defcunion g-value-data
-  (:int :int)
-  (:uint :uint)
-  (:long :long)
-  (:ulong :ulong)
-  (:int64 :int64)
-  (:uint64 :uint64)
-  (:float :float)
-  (:double :double)
-  (:pointer :pointer))
 
-(defcstruct g-value
-  (:type g-type-designator)
-  (:data g-value-data :count 2))
+
+
+
+
 
 (defcstruct g-object-construct-param
   (:param-spec (:pointer g-param-spec))
@@ -207,7 +183,3 @@
 (defbitfield g-signal-flags
   :run-first :run-last :run-cleanup :no-recurse :detailed :action :no-hooks)
 
-(defcstruct g-object-struct
-  (:type-instance g-type-instance)
-  (:ref-count :uint)
-  (:qdata :pointer))

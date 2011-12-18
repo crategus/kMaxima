@@ -27,7 +27,6 @@
 (defpackage :glib
   (:use :cl :cffi :iter)
   (:export #:at-init
-           
            #:g-free
            #:glist
            #:gstrv

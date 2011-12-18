@@ -392,14 +392,7 @@
   (:w 7)
   (:e 8))
 
-(define-g-enum "GtkAssistantPageType"
-    assistant-page-type
-    (:export t :type-initializer "gtk_assistant_page_type_get_type")
-  (:content 0)
-  (:intro 1)
-  (:confirm 2)
-  (:summary 3)
-  (:progress 4))
+
 
 (define-g-enum "GtkBuilderError"
     builder-error
@@ -704,20 +697,20 @@
   (:write 5)
   (:unknown 6))
 
-(define-g-enum "GtkResponseType"
-    response-type
-    (:export t :type-initializer "gtk_response_type_get_type")
-  (:none -1)
-  (:reject -2)
-  (:accept -3)
-  (:delete-event -4)
-  (:ok -5)
-  (:cancel -6)
-  (:close -7)
-  (:yes -8)
-  (:no -9)
-  (:apply -10)
-  (:help -11))
+;(define-g-enum "GtkResponseType"
+;    response-type
+;    (:export t :type-initializer "gtk_response_type_get_type")
+;  (:none -1)
+;  (:reject -2)
+;  (:accept -3)
+;  (:delete-event -4)
+;  (:ok -5)
+;  (:cancel -6)
+;  (:close -7)
+;  (:yes -8)
+;  (:no -9)
+;  (:apply -10)
+;  (:help -11))
 
 (define-g-enum "GtkScrollStep"
     scroll-step
@@ -913,12 +906,12 @@
   (:drop 4)
   (:all 7))
 
-(define-g-flags "GtkDialogFlags"
-    dialog-flags
-    (:export t :type-initializer "gtk_dialog_flags_get_type")
-  (:modal 1)
-  (:destroy-with-parent 2)
-  (:no-separator 4))
+;(define-g-flags "GtkDialogFlags"
+;    dialog-flags
+;    (:export t :type-initializer "gtk_dialog_flags_get_type")
+;  (:modal 1)
+;  (:destroy-with-parent 2)
+;  (:no-separator 4))
 
 (define-g-flags "GtkFileFilterFlags"
     file-filter-flags
@@ -2065,61 +2058,20 @@
                         (:cffi keep-below gtk-window-keep-below :boolean nil
                          "gtk_window_set_keep_below")))
 
-(define-g-object-class "GtkAssistant" assistant
-                       (:superclass gtk-window :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_assistant_get_type")
-                       ((:cffi current-page assistant-current-page :int
-                         "gtk_assistant_get_current_page"
-                         "gtk_assistant_set_current_page")
-                        (:cffi n-pages assistant-n-pages :int
-                         "gtk_assistant_get_n_pages" nil)
-                        (:cffi forward-page-function
-                         assistant-forward-page-function nil nil
-                         set-assistant-forward-page-function)))
 
-(define-g-object-class "GtkDialog" dialog
-                       (:superclass gtk-window :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_dialog_get_type")
-                       ((has-separator dialog-has-separator "has-separator"
-                         "gboolean" t t)
-                        (:cffi content-area dialog-content-area
-                         (g-object v-box) "gtk_dialog_get_content_area" nil)
-                        (:cffi action-area dialog-action-area (g-object widget)
-                         "gtk_dialog_get_action_area" nil)
-                        (:cffi default-response dialog-default-response
-                         response-type nil "gtk_dialog_set_default_response")))
+;(define-g-object-class "GtkDialog" dialog
+;                       (:superclass gtk-window :export t :interfaces
+;                        ("AtkImplementorIface" "GtkBuildable")
+;                        :type-initializer "gtk_dialog_get_type")
+;                       ((has-separator dialog-has-separator "has-separator"
+;                         "gboolean" t t)
+;                        (:cffi content-area dialog-content-area
+;                         (g-object v-box) "gtk_dialog_get_content_area" nil)
+;                        (:cffi action-area dialog-action-area (g-object widget)
+;                         "gtk_dialog_get_action_area" nil)
+;                        (:cffi default-response dialog-default-response
+;                         response-type nil "gtk_dialog_set_default_response")))
 
-(define-g-object-class "GtkAboutDialog" about-dialog
-                       (:superclass dialog :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_about_dialog_get_type")
-                       ((artists about-dialog-artists "artists" "GStrv" t t)
-                        (authors about-dialog-authors "authors" "GStrv" t t)
-                        (comments about-dialog-comments "comments" "gchararray"
-                         t t)
-                        (copyright about-dialog-copyright "copyright"
-                         "gchararray" t t)
-                        (documenters about-dialog-documenters "documenters"
-                         "GStrv" t t)
-                        (license about-dialog-license "license" "gchararray" t
-                         t)
-                        (logo about-dialog-logo "logo" "GdkPixbuf" t t)
-                        (logo-icon-name about-dialog-logo-icon-name
-                         "logo-icon-name" "gchararray" t t)
-                        (program-name about-dialog-program-name "program-name"
-                         "gchararray" t t)
-                        (translator-credits about-dialog-translator-credits
-                         "translator-credits" "gchararray" t t)
-                        (version about-dialog-version "version" "gchararray" t
-                         t)
-                        (website about-dialog-website "website" "gchararray" t
-                         t)
-                        (website-label about-dialog-website-label
-                         "website-label" "gchararray" t t)
-                        (wrap-license about-dialog-wrap-license "wrap-license"
-                         "gboolean" t t)))
 
 (define-g-object-class "GtkColorSelectionDialog" color-selection-dialog
                        (:superclass dialog :export t :interfaces
@@ -2168,23 +2120,6 @@
                         :type-initializer "gtk_input_dialog_get_type")
                        nil)
 
-(define-g-object-class "GtkMessageDialog" message-dialog
-                       (:superclass dialog :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_message_dialog_get_type")
-                       ((buttons message-dialog-buttons "buttons"
-                         "GtkButtonsType" nil nil)
-                        (image message-dialog-image "image" "GtkWidget" t t)
-                        (message-type message-dialog-message-type
-                         "message-type" "GtkMessageType" t t)
-                        (secondary-text message-dialog-secondary-text
-                         "secondary-text" "gchararray" t t)
-                        (secondary-use-markup
-                         message-dialog-secondary-use-markup
-                         "secondary-use-markup" "gboolean" t t)
-                        (text message-dialog-text "text" "gchararray" t t)
-                        (use-markup message-dialog-use-markup "use-markup"
-                         "gboolean" t t)))
 
 (define-g-object-class "GtkPageSetupUnixDialog" page-setup-unix-dialog
                        (:superclass dialog :export t :interfaces
@@ -2747,11 +2682,7 @@
 
 
 
-(define-g-object-class "GtkInvisible" invisible
-                       (:superclass widget :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_invisible_get_type")
-                       ((screen invisible-screen "screen" "GdkScreen" t t)))
+
 
 (define-g-object-class "GtkMisc" misc
                        (:superclass widget :export t :interfaces
@@ -2792,53 +2723,7 @@
                         (storage-type image-storage-type "storage-type"
                          "GtkImageType" t nil)))
 
-(define-g-object-class "GtkLabel" label
-                       (:superclass misc :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_label_get_type")
-                       ((angle label-angle "angle" "gdouble" t t)
-                        (attributes label-attributes "attributes"
-                         "PangoAttrList" t t)
-                        (cursor-position label-cursor-position
-                         "cursor-position" "gint" t nil)
-                        (ellipsize label-ellipsize "ellipsize"
-                         "PangoEllipsizeMode" t t)
-                        (justify label-justify "justify" "GtkJustification" t
-                         t)
-                        (label label-label "label" "gchararray" t t)
-                        (max-width-chars label-max-width-chars
-                         "max-width-chars" "gint" t t)
-                        (mnemonic-keyval label-mnemonic-keyval
-                         "mnemonic-keyval" "guint" t nil)
-                        (mnemonic-widget label-mnemonic-widget
-                         "mnemonic-widget" "GtkWidget" t t)
-                        (pattern label-pattern "pattern" "gchararray" nil t)
-                        (selectable label-selectable "selectable" "gboolean" t
-                         t)
-                        (selection-bound label-selection-bound
-                         "selection-bound" "gint" t nil)
-                        (single-line-mode label-single-line-mode
-                         "single-line-mode" "gboolean" t t)
-                        (use-markup label-use-markup "use-markup" "gboolean" t
-                         t)
-                        (use-underline label-use-underline "use-underline"
-                         "gboolean" t t)
-                        (width-chars label-width-chars "width-chars" "gint" t
-                         t)
-                        (wrap label-wrap "wrap" "gboolean" t t)
-                        (wrap-mode label-wrap-mode "wrap-mode" "PangoWrapMode"
-                         t t)
-                        (:cffi line-wrap label-line-wrap :boolean
-                         "gtk_label_get_line_wrap" "gtk_label_set_line_wrap")
-                        (:cffi line-wrap-mode label-line-wrap-mode
-                         pango-wrap-mode "gtk_label_get_line_wrap_mode"
-                         "gtk_label_set_line_wrap_mode")
-                        (:cffi layout label-layout g-object
-                         "gtk_label_get_layout" nil)
-                        (:cffi selection-bounds label-selection-bounds nil
-                         gtk-label-get-selection-bounds nil)
-                        (:cffi layout-offsets label-layout-offsets nil
-                         gtk-label-get-layout-offsets nil)))
+
 
 (define-g-object-class "GtkAccelLabel" accel-label
                        (:superclass label :export t :interfaces

@@ -14,7 +14,5 @@
 (in-package :gtk)
 
 (defun get-major-version ()
-  gdk:*gtk-major-version*)
-
-(export 'get-major-version)
+  gdk::*gtk-major-version*)
 

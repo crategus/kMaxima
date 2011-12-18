@@ -28,4 +28,3 @@
   (required_major :uint)
   (required_minor :uint)
   (required_micro :uint))
-

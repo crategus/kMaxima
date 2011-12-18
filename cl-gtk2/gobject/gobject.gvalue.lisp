@@ -29,6 +29,8 @@
 ;;; A polymorphic type that can hold values of any other type
 ;;; 	
 ;;; Synopsis
+;;;
+;;;          GValue;    
 ;;; 
 ;;; #define  G_VALUE_INIT                        
 ;;; #define  G_VALUE_HOLDS                   (value, type)
@@ -37,7 +39,7 @@
 ;;; #define  G_TYPE_IS_VALUE                 (type)
 ;;; #define  G_TYPE_IS_VALUE_ABSTRACT        (type)
 ;;; #define  G_IS_VALUE                      (value)
-;;;          GValue;                         
+;;;                     
 ;;; #define  G_TYPE_VALUE                    
 ;;; #define  G_TYPE_VALUE_ARRAY              
 ;;; GValue * g_value_init                    (GValue *value, GType g_type)
@@ -138,8 +140,6 @@
   (loop
      for i from 0 below (foreign-type-size 'g-value)
      do (setf (mem-ref g-value :uchar i) 0)))
-
-
 
 (defmacro ev-case (keyform &body clauses)
   "Macro that is an analogue of CASE except that it evaluates keyforms"
@@ -300,6 +300,36 @@
     (g-value-set-flags gvalue (convert-to-foreign value flags-type))))
 
 ;;; ----------------------------------------------------------------------------
+;;; GValue
+;;; 
+;;; typedef struct {
+;;; } GValue;
+;;; 
+;;; An opaque structure used to hold different types of values. The data within
+;;; the structure has protected scope: it is accessible only to functions within
+;;; a GTypeValueTable structure, or implementations of the g_value_*() API. That
+;;; is, code portions which implement new fundamental types. GValue users cannot
+;;; make any assumptions about how data is stored within the 2 element data
+;;; union, and the g_type member should only be accessed through the
+;;; G_VALUE_TYPE() macro.
+;;; ----------------------------------------------------------------------------
+
+(defcunion g-value-data
+  (:int :int)
+  (:uint :uint)
+  (:long :long)
+  (:ulong :ulong)
+  (:int64 :int64)
+  (:uint64 :uint64)
+  (:float :float)
+  (:double :double)
+  (:pointer :pointer))
+
+(defcstruct g-value
+  (:type g-type-designator)
+  (:data g-value-data :count 2))
+
+;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_INIT
 ;;; 
 ;;; #define G_VALUE_INIT  { 0, { { 0 } } }
@@ -408,21 +438,6 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE on success.
-;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
-;;; GValue
-;;; 
-;;; typedef struct {
-;;; } GValue;
-;;; 
-;;; An opaque structure used to hold different types of values. The data within
-;;; the structure has protected scope: it is accessible only to functions within
-;;; a GTypeValueTable structure, or implementations of the g_value_*() API. That
-;;; is, code portions which implement new fundamental types. GValue users cannot
-;;; make any assumptions about how data is stored within the 2 element data
-;;; union, and the g_type member should only be accessed through the
-;;; G_VALUE_TYPE() macro.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------

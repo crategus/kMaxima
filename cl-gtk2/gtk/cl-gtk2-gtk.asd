@@ -51,24 +51,65 @@
                (:file "gtk.object")
                (:file "gtk.objects")
                
-               (:file "gtk.hsv")
-               
-
                (:file "gtk.functions")
                (:file "gtk.base-classes")
-               (:file "gtk.dialog")
-               (:file "gtk.about-dialog")
-               (:file "gtk.window")
-               (:file "gtk.window-group")
+
+               ;; Windows
+               (:file "gtk.dialog")           ; GtkDialog
+               (:file "gtk.invisible")        ; GtkInvisible
+               (:file "gtk.message-dialog")   ; GtkMessageDialog
+               (:file "gtk.window")           ; GtkWindow
+               (:file "gtk.window-group")     ; GtkWindowGroup
+               (:file "gtk.about-dialog")     ; GtkAboutDialog
+               (:file "gtk.assistant")        ; GtkAssistant
+               ;; GtkOffscreenWindow not implemented
+               
+               ;; Display Widgets
+               (:file "gtk.accel-label")      ; GtkAccelLabel
+               (:file "gtk.image")            ; GtkImage
+               (:file "gtk.label")            ; GtkLabel
+               (:file "gtk.progress-bar")     ; GtkProgessBar
+               (:file "gtk.status-bar")       ; GTKStatusBar
+               ;; GtkInfoBar not implemented
+               (:file "gtk.status-icon")      ; GtkStatusIcon
+               ;; GtkSpinner not implemented
+               
+               ;; Buttons and Toggles
+               (:file "gtk.button")           ; GtkButton
+               (:file "gtk.check-button")     ; GtkCheckButton
+               (:file "gtk.radio-button")     ; GtkRadioButton
+               (:file "gtk.toggle-button")    ; GtkToggleButton
+               (:file "gtk.link-button")      ; GtkLinkButton
+               (:file "gtk.scale-button")     ; GtkScaleButton
+               (:file "gtk.volume-button")    ; GtkVolumeButton
+               ;; GtkSwitch not implemented
+               ;; GtkLockButton not implemented
+               
+               ;; Numeric/Text Data Entry
+               (:file "gtk.entry")            ; GtkEntry
+               ;; GtkEntryBuffer not implemented
+               (:file "gtk.entry-completion") ; GtkEntryCompletion
+               (:file "gtk.scale")            ; GtkScale
+               (:file "gtk.h-scale")          ; GtkHScale
+               (:file "gtk.v-scale")          ; GtkVScale
+               (:file "gtk.spin-button")      ; GtkSpinButton
+               (:file "gtk.editable")         ; GtkEditable
+               
+               ;; Multiline Text Editor
+               (:file "gtk.text-iter")        ; GtkTextIter
+               (:file "gtk.text-mark")        ; GtkTextMark
+               (:file "gtk.text-buffer")      ; GtkTextBuffer
+               (:file "gtk.text-tag")         ; GtkTextTag
+               (:file "gtk.text-tag-table")   ; GtkTextTagTable
+               (:file "gtk.text-view")        ; GtkTextView
+               
+               
+               
+               (:file "gtk.hsv")              ; GtkHSV
+               
                (:file "gtk.icon-factory")
-               (:file "gtk.image")
-               (:file "gtk.label")
-               (:file "gtk.progress-bar")
-               (:file "gtk.status-bar")
-               (:file "gtk.status-icon")
-               (:file "gtk.scale-button")
-               (:file "gtk.entry")
-               (:file "gtk.spin-button")
+               
+               
                (:file "gtk.selections")
                (:file "gtk.dnd")
                (:file "gtk.text")
@@ -98,8 +139,8 @@
                (:file "gtk.widget")
                (:file "gtk.tree-view-dnd")
                (:file "gtk.builder")
-               (:file "gtk.assistant")
-               (:file "gtk.link-button")
+               
+               
                (:file "gtk.list-store")
                (:file "gtk.tree-store")
                (:file "gtk.tree-model-filter")

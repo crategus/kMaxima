@@ -26,63 +26,55 @@
 ;;;
 ;;; Type Information
 ;;;
-;;; Type Information — The GLib Runtime type identification and management
-;;; system
+;;; The GLib Runtime type identification and management system.
 ;;;	
 ;;; Synopsis
 ;;;
-;;; typedef             GType;
-;;; #define             G_TYPE_FUNDAMENTAL                  (type)
-;;; #define             G_TYPE_FUNDAMENTAL_MAX
-;;; #define             G_TYPE_MAKE_FUNDAMENTAL             (x)
-;;; #define             G_TYPE_IS_ABSTRACT                  (type)
-;;; #define             G_TYPE_IS_DERIVED                   (type)
-;;; #define             G_TYPE_IS_FUNDAMENTAL               (type)
-;;; #define             G_TYPE_IS_VALUE_TYPE                (type)
-;;; #define             G_TYPE_HAS_VALUE_TABLE              (type)
-;;; #define             G_TYPE_IS_CLASSED                   (type)
-;;; #define             G_TYPE_IS_INSTANTIATABLE            (type)
-;;; #define             G_TYPE_IS_DERIVABLE                 (type)
-;;; #define             G_TYPE_IS_DEEP_DERIVABLE            (type)
-;;; #define             G_TYPE_IS_INTERFACE                 (type)
-;;; struct              GTypeInterface;
-;;; struct              GTypeClass;
-;;; struct              GTypeInstance;
-;;; struct              GTypeInfo;
-;;; struct              GTypeFundamentalInfo;
-;;; struct              GInterfaceInfo;
-;;; struct              GTypeValueTable;
-;;; #define             G_TYPE_FROM_INSTANCE                (instance)
-;;; #define             G_TYPE_FROM_CLASS                   (g_class)
-;;; #define             G_TYPE_FROM_INTERFACE               (g_iface)
-;;; #define             G_TYPE_INSTANCE_GET_CLASS           (instance,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_INSTANCE_GET_INTERFACE       (instance,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_INSTANCE_GET_PRIVATE         (instance,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_CLASS_GET_PRIVATE            (klass,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_CHECK_INSTANCE               (instance)
-;;; #define             G_TYPE_CHECK_INSTANCE_CAST          (instance,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_CHECK_INSTANCE_TYPE          (instance,
-;;;                                                         g_type)
-;;; #define             G_TYPE_CHECK_CLASS_CAST             (g_class,
-;;;                                                         g_type,
-;;;                                                         c_type)
-;;; #define             G_TYPE_CHECK_CLASS_TYPE             (g_class,
-;;;                                                         g_type)
-;;; #define             G_TYPE_CHECK_VALUE                  (value)
-;;; #define             G_TYPE_CHECK_VALUE_TYPE             (value,
-;;;                                                         g_type)
-;;; #define             G_TYPE_FLAG_RESERVED_ID_BIT
+;;; typedef        GType;
+;;;
+;;; #define        G_TYPE_FUNDAMENTAL       (type)
+;;; #define        G_TYPE_FUNDAMENTAL_MAX   
+;;; #define        G_TYPE_MAKE_FUNDAMENTAL  (x)
+;;; #define        G_TYPE_IS_ABSTRACT       (type)
+;;; #define        G_TYPE_IS_DERIVED        (type)
+;;; #define        G_TYPE_IS_FUNDAMENTAL    (type)
+;;; #define        G_TYPE_IS_VALUE_TYPE     (type)
+;;; #define        G_TYPE_HAS_VALUE_TABLE   (type)
+;;; #define        G_TYPE_IS_CLASSED        (type)
+;;; #define        G_TYPE_IS_INSTANTIATABLE (type)
+;;; #define        G_TYPE_IS_DERIVABLE      (type)
+;;; #define        G_TYPE_IS_DEEP_DERIVABLE (type)
+;;; #define        G_TYPE_IS_INTERFACE      (type)
+;;;
+;;; enum           GTypeFlags;
+;;; enum           GTypeFundamentalFlags;
+;;;
+;;; struct         GTypeInterface;
+;;; struct         GTypeClass;
+;;; struct         GTypeInstance;
+;;; struct         GTypeInfo;
+;;; struct         GTypeFundamentalInfo;
+;;; struct         GInterfaceInfo;
+;;; struct         GTypeValueTable;
+;;;                
+;;; #define        G_TYPE_FROM_INSTANCE               (instance)
+;;; #define        G_TYPE_FROM_CLASS                  (g_class)
+;;; #define        G_TYPE_FROM_INTERFACE              (g_iface)
+;;; #define        G_TYPE_INSTANCE_GET_CLASS          (instance, g_type, c_type)
+;;; #define        G_TYPE_INSTANCE_GET_INTERFACE      (instance, g_type, c_type)
+;;; #define        G_TYPE_INSTANCE_GET_PRIVATE        (instance, g_type, c_type)
+;;; #define        G_TYPE_CLASS_GET_PRIVATE           (klass, g_type, c_type)
+;;; #define        G_TYPE_CHECK_INSTANCE              (instance)
+;;; #define        G_TYPE_CHECK_INSTANCE_CAST         (instance, g_type, c_type)
+;;; #define        G_TYPE_CHECK_INSTANCE_TYPE         (instance, g_type)
+;;; #define        G_TYPE_CHECK_CLASS_CAST            (g_class, g_type, c_type)
+;;; #define        G_TYPE_CHECK_CLASS_TYPE            (g_class, g_type)
+;;; #define        G_TYPE_CHECK_VALUE                 (value)
+;;; #define        G_TYPE_CHECK_VALUE_TYPE            (value, g_type)
+;;; #define        G_TYPE_FLAG_RESERVED_ID_BIT
+;;;
 ;;; void                g_type_init                         (void);
+;;;
 ;;; enum                GTypeDebugFlags;
 ;;; void                g_type_init_with_debug_flags        (GTypeDebugFlags debug_flags);
 ;;; const gchar *       g_type_name                         (GType type);
@@ -137,8 +129,7 @@
 ;;;                                                          gpointer iface_data);
 ;;; gboolean            (*GTypeClassCacheFunc)              (gpointer cache_data,
 ;;;                                                          GTypeClass *g_class);
-;;; enum                GTypeFlags;
-;;; enum                GTypeFundamentalFlags;
+;;;
 ;;; GType               g_type_register_static              (GType parent_type,
 ;;;                                                          const gchar *type_name,
 ;;;                                                          const GTypeInfo *info,
@@ -300,40 +291,11 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defbitfield g-type-flags
-  (:abstract #. (ash 1 4))
-  :value-abstract)
+
 
 ;;; ----------------------------------------------------------------------------
 
-(define-foreign-type g-type-designator ()
-  ((mangled-p :initarg :mangled-p
-              :reader g-type-designator-mangled-p
-              :initform nil
-              :documentation
-              "Whether the type designator is mangled with
-               G_SIGNAL_TYPE_STATIC_SCOPE flag"))
-  (:documentation
-    "Values of this CFFI foreign type identify the GType. GType is designated by
-     a its name (a string) or a numeric identifier. Functions accept GType
-     designators as a string or integer and return them as a string. Functions
-     @fun{g-type-name} and @fun{g-type-from-name} are used to convert between
-     name and numeric identifier.
-     Numeric identifier of GType may be different between different program
-     runs. But string identifier of GType does not change.")
-  (:actual-type g-type)
-  (:simple-parser g-type-designator))
 
-(defun g-type-unmangle (g-type)
-  (logxor g-type (ldb (byte 1 0) g-type))) ; subtract the G_SIGNAL_TYPE_STATIC_SCOPE
-
-(defmethod translate-from-foreign (value (type g-type-designator))
-  (gtype (if (g-type-designator-mangled-p type)
-             (g-type-unmangle value)
-             value)))
-
-(defmethod translate-to-foreign (value (type g-type-designator))
-  (gtype-id (gtype value)))
 
 ;;; ----------------------------------------------------------------------------
 
@@ -379,29 +341,6 @@
 
 (defun warn-unknown-gtype (name)
   (warn "GType ~A is not known to GObject" name))
-
-(defun gtype-from-name (name)
-  (declare (optimize (safety 0) (speed 3)))
-  (when (null name) (return-from gtype-from-name nil))
-  (bt:with-lock-held (*gtype-lock*)
-    (let ((type (gethash name *name-to-gtype*)))
-      (when type
-        (when (null (gtype-%id type))
-          (let ((n (%g-type-from-name name)))
-            (if (zerop n)
-                (warn-unknown-gtype name)
-                (progn
-                  (setf (gtype-%id type) n
-                        (gethash n *id-to-gtype*) type)))))
-        (return-from gtype-from-name type)))
-    (let ((n (%g-type-from-name name)))
-      (when (zerop n)
-        (warn-unknown-gtype name)
-        (setf n nil))
-      (let ((type (make-gtype :name (copy-seq name) :%id n)))
-        (setf (gethash n *id-to-gtype*) type
-              (gethash name *name-to-gtype*) type)
-        (return-from gtype-from-name type)))))
 
 (defun gtype-from-id (id)
   (declare (optimize (safety 0) (speed 3)))
@@ -456,9 +395,7 @@
 (defun g-type/= (type-1 type-2)
   (not (eq (gtype type-1) (gtype type-2))))
 
-(defcfun (%g-type-init "g_type_init") :void)
 
-(at-init () (%g-type-init))
 
 ;;; ----------------------------------------------------------------------------
 ;;; GType
@@ -466,6 +403,35 @@
 ;;; A numerical value which represents the unique identifier of a registered
 ;;; type.
 ;;; ----------------------------------------------------------------------------
+
+(define-foreign-type g-type-designator ()
+  ((mangled-p :initarg :mangled-p
+              :reader g-type-designator-mangled-p
+              :initform nil
+              :documentation
+              "Whether the type designator is mangled with
+               G_SIGNAL_TYPE_STATIC_SCOPE flag"))
+  (:documentation
+    "Values of this CFFI foreign type identify the GType. GType is designated by
+     a its name (a string) or a numeric identifier. Functions accept GType
+     designators as a string or integer and return them as a string. Functions
+     g-type-name and g-type-from-name are used to convert between
+     name and numeric identifier.
+     Numeric identifier of GType may be different between different program
+     runs. But string identifier of GType does not change.")
+  (:actual-type g-type)
+  (:simple-parser g-type-designator))
+
+(defun g-type-unmangle (g-type)
+  (logxor g-type (ldb (byte 1 0) g-type)))
+
+(defmethod translate-from-foreign (value (type g-type-designator))
+  (gtype (if (g-type-designator-mangled-p type)
+             (g-type-unmangle value)
+             value)))
+
+(defmethod translate-to-foreign (value (type g-type-designator))
+  (gtype-id (gtype value)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_FUNDAMENTAL()
@@ -521,8 +487,11 @@
 ;;; Checks if type is an abstract type. An abstract type cannot be instantiated
 ;;; and is normally used as an abstract base class for derived classes.
 ;;;
-;;; type    : A GType value.
-;;; Returns : TRUE on success.
+;;; type :
+;;;     A GType value.
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -555,9 +524,15 @@
 ;;;
 ;;; Checks if type is a value type and can be used with g_value_init().
 ;;;
-;;; type    : A GType value.
-;;; Returns : TRUE on success.
+;;; type :
+;;;     A GType value.
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-type-is-value-type "g_type_check_is_value_type") g-type-designator
+  (type g-type-designator))
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_HAS_VALUE_TABLE()
@@ -638,6 +613,61 @@
 ;;; type    : A GType value.
 ;;; Returns : TRUE on success.
 ;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;; enum GTypeFlags
+;;;
+;;; typedef enum {
+;;;   G_TYPE_FLAG_ABSTRACT       = (1 << 4),
+;;;   G_TYPE_FLAG_VALUE_ABSTRACT = (1 << 5)
+;;; } GTypeFlags;
+;;;
+;;; Bit masks used to check or determine characteristics of a type.
+;;;
+;;; G_TYPE_FLAG_ABSTRACT
+;;;     Indicates an abstract type. No instances can be created for an abstract
+;;;     type.
+;;;
+;;; G_TYPE_FLAG_VALUE_ABSTRACT
+;;;     Indicates an abstract value type, i.e. a type that introduces a value
+;;;     table, but can't be used for g_value_init().
+;;; ----------------------------------------------------------------------------
+
+(defbitfield g-type-flags
+  (:abstract #. (ash 1 4))
+  :value-abstract)
+
+;;; ----------------------------------------------------------------------------
+;;; enum GTypeFundamentalFlags
+;;;
+;;; typedef enum {
+;;;   G_TYPE_FLAG_CLASSED           = (1 << 0),
+;;;   G_TYPE_FLAG_INSTANTIATABLE    = (1 << 1),
+;;;   G_TYPE_FLAG_DERIVABLE         = (1 << 2),
+;;;   G_TYPE_FLAG_DEEP_DERIVABLE    = (1 << 3)
+;;; } GTypeFundamentalFlags;
+;;;
+;;; Bit masks used to check or determine specific characteristics of a
+;;; fundamental type.
+;;;
+;;; G_TYPE_FLAG_CLASSED
+;;;     Indicates a classed type.
+;;;
+;;; G_TYPE_FLAG_INSTANTIATABLE
+;;;     Indicates an instantiable type (implies classed).
+;;;
+;;; G_TYPE_FLAG_DERIVABLE
+;;;     Indicates a flat derivable type.
+;;;
+;;; G_TYPE_FLAG_DEEP_DERIVABLE
+;;;     Indicates a deep derivable type (implies derivable).
+;;; ----------------------------------------------------------------------------
+
+(defbitfield g-type-fundamental-flags
+  :classed
+  :instantiatable
+  :derivable
+  :deep-derivable)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GTypeInterface
@@ -778,12 +808,6 @@
 ;;;     GTypeFundamentalFlags describing the characteristics of the fundamental
 ;;;     type
 ;;; ----------------------------------------------------------------------------
-
-(defbitfield g-type-fundamental-flags
-  :classed
-  :instantiatable
-  :derivable
-  :deep-derivable)
 
 (defcstruct g-type-fundamental-info
   (:type-flags g-type-fundamental-flags))
@@ -1247,6 +1271,10 @@
 ;;; Since version 2.24 this also initializes the thread system
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (%g-type-init "g_type_init") :void)
+
+(at-init () (%g-type-init))
+
 ;;; ----------------------------------------------------------------------------
 ;;; enum GTypeDebugFlags
 ;;;
@@ -1327,8 +1355,8 @@
 ;;; GType g_type_from_name (const gchar *name)
 ;;;
 ;;; Lookup the type ID from a given type name, returning 0 if no type has been
-;;; registered under this name (this is the preferred method to find out by name
-;;; whether a specific type has been registered yet).
+;;; registered under this name (this is the preferred method to find out by
+;;; name whether a specific type has been registered yet).
 ;;;
 ;;; name :
 ;;;     Type name to lookup.
@@ -1339,6 +1367,29 @@
 
 (defcfun (%g-type-from-name "g_type_from_name") g-type
   (name :string))
+
+(defun gtype-from-name (name)
+  (declare (optimize (safety 0) (speed 3)))
+  (when (null name) (return-from gtype-from-name nil))
+  (bt:with-lock-held (*gtype-lock*)
+    (let ((type (gethash name *name-to-gtype*)))
+      (when type
+        (when (null (gtype-%id type))
+          (let ((n (%g-type-from-name name)))
+            (if (zerop n)
+                (warn-unknown-gtype name)
+                (progn
+                  (setf (gtype-%id type) n
+                        (gethash n *id-to-gtype*) type)))))
+        (return-from gtype-from-name type)))
+    (let ((n (%g-type-from-name name)))
+      (when (zerop n)
+        (warn-unknown-gtype name)
+        (setf n nil))
+      (let ((type (make-gtype :name (copy-seq name) :%id n)))
+        (setf (gethash n *id-to-gtype*) type
+              (gethash name *name-to-gtype*) type)
+        (return-from gtype-from-name type)))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_parent ()
@@ -2039,51 +2090,6 @@
 ;;; g_class    : The GTypeClass structure which is unreferenced
 ;;; Returns    : TRUE to stop further GTypeClassCacheFuncs from being called,
 ;;;              FALSE to continue.
-;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
-;;; enum GTypeFlags
-;;;
-;;; typedef enum {
-;;;   G_TYPE_FLAG_ABSTRACT       = (1 << 4),
-;;;   G_TYPE_FLAG_VALUE_ABSTRACT = (1 << 5)
-;;; } GTypeFlags;
-;;;
-;;; Bit masks used to check or determine characteristics of a type.
-;;;
-;;; G_TYPE_FLAG_ABSTRACT
-;;;     Indicates an abstract type. No instances can be created for an abstract
-;;;     type.
-;;;
-;;; G_TYPE_FLAG_VALUE_ABSTRACT
-;;;     Indicates an abstract value type, i.e. a type that introduces a value
-;;;     table, but can't be used for g_value_init().
-;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
-;;; enum GTypeFundamentalFlags
-;;;
-;;; typedef enum {
-;;;   G_TYPE_FLAG_CLASSED           = (1 << 0),
-;;;   G_TYPE_FLAG_INSTANTIATABLE    = (1 << 1),
-;;;   G_TYPE_FLAG_DERIVABLE         = (1 << 2),
-;;;   G_TYPE_FLAG_DEEP_DERIVABLE    = (1 << 3)
-;;; } GTypeFundamentalFlags;
-;;;
-;;; Bit masks used to check or determine specific characteristics of a
-;;; fundamental type.
-;;;
-;;; G_TYPE_FLAG_CLASSED
-;;;     Indicates a classed type.
-;;;
-;;; G_TYPE_FLAG_INSTANTIATABLE
-;;;     Indicates an instantiable type (implies classed).
-;;;
-;;; G_TYPE_FLAG_DERIVABLE
-;;;     Indicates a flat derivable type.
-;;;
-;;; G_TYPE_FLAG_DEEP_DERIVABLE
-;;;     Indicates a deep derivable type (implies derivable).
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------

@@ -41,8 +41,10 @@
 ;;; #define             G_PARAM_SPEC_TYPE                   (pspec)
 ;;; #define             G_PARAM_SPEC_TYPE_NAME              (pspec)
 ;;; #define             G_PARAM_SPEC_VALUE_TYPE             (pspec)
+;;;
 ;;; struct              GParamSpec;
 ;;; struct              GParamSpecClass;
+;;;
 ;;; enum                GParamFlags;
 ;;; #define             G_PARAM_READWRITE
 ;;; #define             G_PARAM_STATIC_STRINGS
@@ -118,20 +120,29 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_IS_PARAM()
 ;;; 
-;;; #define G_TYPE_IS_PARAM(type)		(G_TYPE_FUNDAMENTAL (type) == G_TYPE_PARAM)
+;;; #define G_TYPE_IS_PARAM(type) (G_TYPE_FUNDAMENTAL (type) == G_TYPE_PARAM)
 ;;; 
 ;;; Checks whether type "is a" G_TYPE_PARAM.
 ;;; 
 ;;; type :
 ;;; 	a GType ID
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC()
 ;;; 
-;;; #define G_PARAM_SPEC(pspec)		(G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM, GParamSpec))
+;;; #define G_PARAM_SPEC(pspec)	(G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                              G_TYPE_PARAM,
+;;;                              GParamSpec))
 ;;; 
-;;; Casts a derived GParamSpec object (e.g. of type GParamSpecInt) into a GParamSpec object.
+;;; Casts a derived GParamSpec object (e.g. of type GParamSpecInt) into a
+;;; GParamSpec object.
 ;;; 
 ;;; pspec :
 ;;; 	a valid GParamSpec
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC()
 ;;; 
 ;;; #define G_IS_PARAM_SPEC(pspec)		(G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM))
@@ -188,18 +199,20 @@
 ;;; 
 ;;; pspec :
 ;;; 	a valid GParamSpec
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpec
 ;;; 
 ;;; struct GParamSpec {
 ;;;   GTypeInstance  g_type_instance;
 ;;; 
-;;;   const gchar   *name;          /* interned string */
-;;;   GParamFlags    flags;
-;;;   GType		 value_type;
-;;;   GType		 owner_type; /* class or interface using this property */
+;;;   const gchar  *name;          /* interned string */
+;;;   GParamFlags  flags;
+;;;   GType        value_type;
+;;;   GType        owner_type; /* class or interface using this property */
 ;;; };
 ;;; 
-;;; All other fields of the GParamSpec struct are private and should not be used directly.
+;;; All other fields of the GParamSpec struct are private and should not be
+;;; used directly.
 ;;; 
 ;;; GTypeInstance g_type_instance;
 ;;; 	private GTypeInstance portion
@@ -215,6 +228,26 @@
 ;;; 
 ;;; GType owner_type;
 ;;; 	GType type that uses (introduces) this parameter
+;;; ----------------------------------------------------------------------------
+
+(defbitfield g-param-flags
+  :readable
+  :writable
+  :construct
+  :construct-only
+  :lax-validation
+  :static-name
+  :nick
+  :blurb)
+
+(defcstruct g-param-spec
+  (:type-instance g-type-instance)
+  (:name (:string :free-from-foreign nil :free-to-foreign nil))
+  (:flags g-param-flags)
+  (:value-type g-type-designator)
+  (:owner-type g-type-designator))
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecClass
 ;;; 
 ;;; struct GParamSpecClass {

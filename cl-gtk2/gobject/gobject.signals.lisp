@@ -45,9 +45,11 @@
 ;;; enum                GSignalFlags;
 ;;; enum                GSignalMatchType;
 ;;; struct              GSignalQuery;
+;;;
 ;;; #define             G_SIGNAL_TYPE_STATIC_SCOPE
 ;;; #define             G_SIGNAL_MATCH_MASK
 ;;; #define             G_SIGNAL_FLAGS_MASK
+;;;
 ;;; guint               g_signal_new                        (const gchar *signal_name,
 ;;;                                                          GType itype,
 ;;;                                                          GSignalFlags signal_flags,

@@ -1,7 +1,8 @@
 (in-package :gobject)
 
 (defvar *lisp-name-package* nil
-  "For internal use (used by class definitions generator). Specifies the package in which symbols are interned.")
+  "For internal use (used by class definitions generator).
+  Specifies the package in which symbols are interned.")
 (defvar *strip-prefix* "")
 (defvar *lisp-name-exceptions* nil)
 (defvar *generation-exclusions* nil)
@@ -167,18 +168,26 @@
                                  (&rest properties))
   (setf properties (mapcar #'parse-property properties))
   `(progn
-     (defclass ,name (,@(when (and superclass (not (eq superclass 'g-object))) (list superclass)) ,@(mapcar #'interface->lisp-class-name interfaces))
-       (,@(mapcar (lambda (property) (meta-property->slot name property)) properties))
+     (defclass ,name (,@(when (and superclass
+                                   (not (eq superclass 'g-object)))
+                          (list superclass))
+                      ,@(mapcar #'interface->lisp-class-name interfaces))
+       (,@(mapcar (lambda (property)
+                    (meta-property->slot name property))
+                  properties))
        (:metaclass gobject-class)
        (:g-type-name . ,g-type-name)
        ,@(when type-initializer
-               (list `(:g-type-initializer . ,type-initializer))))
+           (list `(:g-type-initializer . ,type-initializer))))
      ,@(when export
-             (cons `(export ',name (find-package ,(package-name (symbol-package name))))
-                   (mapcar (lambda (property)
-                             `(export ',(intern (format nil "~A-~A" (symbol-name name) (property-name property)) (symbol-package name))
-                                      (find-package ,(package-name (symbol-package name)))))
-                           properties)))))
+         (cons `(export ',name (find-package ,(package-name (symbol-package name))))
+               (mapcar (lambda (property)
+                         `(export ',(intern (format nil "~A-~A"
+                                                    (symbol-name name)
+                                                    (property-name property))
+                                            (symbol-package name))
+                                  (find-package ,(package-name (symbol-package name)))))
+                       properties)))))
 
 (defmacro define-g-interface (g-type-name name (&key (export t) type-initializer) &body properties)
   (setf properties (mapcar #'parse-property properties))

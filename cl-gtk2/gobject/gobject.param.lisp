@@ -2265,9 +2265,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_FLAGS()
 ;;; 
-;;; #define G_VALUE_HOLDS_FLAGS(value)     (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_FLAGS))
+;;; #define G_VALUE_HOLDS_FLAGS(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_FLAGS))
 ;;; 
-;;; Checks whether the given GValue can hold values derived from type G_TYPE_FLAGS.
+;;; Checks whether the given GValue can hold values derived from type
+;;; G_TYPE_FLAGS.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue structure

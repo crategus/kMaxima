@@ -61,8 +61,6 @@
 
 (defcvar (*major-version* "glib_major_version" :read-only t) :uint)
 
-(export '*major-version*)
-
 ;;; ---------------------------------------------------------------------------- 
 ;;; glib_minor_version
 ;;; 
@@ -70,8 +68,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcvar (*minor-version* "glib_minor_version" :read-only t) :uint)
-
-(export '*minor-version*)
 
 ;;; ----------------------------------------------------------------------------
 ;;; glib_micro_version
@@ -81,8 +77,6 @@
 
 (defcvar (*micro-version* "glib_micro_version" :read-only t) :uint)
 
-(export '*micro-version*)
-
 ;;; ----------------------------------------------------------------------------
 ;;; glib_binary_age
 ;;; 
@@ -91,8 +85,6 @@
 
 (defcvar (*binary-age* "glib_binary_age" :read-only t) :uint)
 
-(export '*binary-age*)
-
 ;;; ---------------------------------------------------------------------------- 
 ;;; glib_interface_age
 ;;; 
@@ -100,8 +92,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcvar (*interface-age* "glib_interface_age" :read-only t) :uint)
-
-(export '*interface-age*)
 
 ;;; ----------------------------------------------------------------------------
 ;;; glib_check_version ()
@@ -143,8 +133,6 @@
   (required-major :uint)
   (required-minor :uint)
   (required-micro :uint))
-
-(export 'check-version)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GLIB_MAJOR_VERSION
@@ -216,4 +204,3 @@
 ;;; *** NOT IMPLEMENTED ***
 
 ;;; --- End of file glib.version.lisp ------------------------------------------
-

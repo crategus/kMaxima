@@ -14,11 +14,13 @@
 
 (export 'pango-ellipsize-mode)
 
-(define-g-object-class "PangoLayout" pango-layout (:type-initializer "pango_layout_get_type") ())
+(define-g-object-class "PangoLayout" pango-layout
+  (:type-initializer "pango_layout_get_type") ())
 
 (export 'pango-layout)
 
-(define-g-enum "PangoUnderline" pango-underline (:export t :type-initializer "pango_underline_get_type")
+(define-g-enum "PangoUnderline" pango-underline
+    (:export t :type-initializer "pango_underline_get_type")
   (:none 0)
   (:single 1)
   (:double 2)

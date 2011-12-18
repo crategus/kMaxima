@@ -36,6 +36,7 @@
 ;;;                                                          gpointer data);
 ;;; struct              GtkRequisition;
 ;;; typedef             GtkAllocation;
+;;;
 ;;;                     GtkSelectionData;
 ;;; struct              GtkWidgetAuxInfo;
 ;;; enum                GtkWidgetHelpType;
@@ -474,7 +475,9 @@
 ;;; 
 ;;; Known Derived Interfaces
 ;;; 
-;;; GtkWidget is required by GtkAppChooser, GtkCellEditable, GtkFileChooser and GtkToolShell.
+;;; GtkWidget is required by GtkAppChooser, GtkCellEditable, GtkFileChooser and
+;;; GtkToolShell.
+;;;
 ;;; Implemented Interfaces
 ;;; 
 ;;; GtkWidget implements AtkImplementorIface and GtkBuildable.
@@ -635,17 +638,51 @@
 ;;; sizes it is generally done in two initial passes in the GtkSizeRequestMode
 ;;; chosen by the toplevel.
 ;;; 
-;;; For example, when queried in the normal GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH mode: First, the default minimum and natural width for each widget in the interface will be computed using gtk_widget_get_preferred_width(). Because the preferred widths for each container depend on the preferred widths of their children, this information propagates up the hierarchy, and finally a minimum and natural width is determined for the entire toplevel. Next, the toplevel will use the minimum width to query for the minimum height contextual to that width using gtk_widget_get_preferred_height_for_width(), which will also be a highly recursive operation. The minimum height for the minimum width is normally used to set the minimum size constraint on the toplevel (unless gtk_window_set_geometry_hints() is explicitly used instead).
+;;; For example, when queried in the normal GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH
+;;; mode: First, the default minimum and natural width for each widget in the
+;;; interface will be computed using gtk_widget_get_preferred_width(). Because
+;;; the preferred widths for each container depend on the preferred widths of
+;;; their children, this information propagates up the hierarchy, and finally a
+;;; minimum and natural width is determined for the entire toplevel. Next, the
+;;; toplevel will use the minimum width to query for the minimum height
+;;; contextual to that width using gtk_widget_get_preferred_height_for_width(),
+;;; which will also be a highly recursive operation. The minimum height for the
+;;; minimum width is normally used to set the minimum size constraint on the
+;;; toplevel (unless gtk_window_set_geometry_hints() is explicitly used
+;;; instead).
 ;;; 
-;;; After the toplevel window has initially requested its size in both dimensions it can go on to allocate itself a reasonable size (or a size previously specified with gtk_window_set_default_size()). During the recursive allocation process it's important to note that request cycles will be recursively executed while container widgets allocate their children. Each container widget, once allocated a size, will go on to first share the space in one orientation among its children and then request each child's height for its target allocated width or its width for allocated height, depending. In this way a GtkWidget will typically be requested its size a number of times before actually being allocated a size. The size a widget is finally allocated can of course differ from the size it has requested. For this reason, GtkWidget caches a small number of results to avoid re-querying for the same sizes in one allocation cycle.
+;;; After the toplevel window has initially requested its size in both
+;;; dimensions it can go on to allocate itself a reasonable size (or a size
+;;; previously specified with gtk_window_set_default_size()). During the
+;;; recursive allocation process it's important to note that request cycles will
+;;; be recursively executed while container widgets allocate their children.
+;;; Each container widget, once allocated a size, will go on to first share the
+;;; space in one orientation among its children and then request each child's
+;;; height for its target allocated width or its width for allocated height,
+;;; depending. In this way a GtkWidget will typically be requested its size a
+;;; number of times before actually being allocated a size. The size a widget
+;;; is finally allocated can of course differ from the size it has requested.
+;;; For this reason, GtkWidget caches a small number of results to avoid
+;;; re-querying for the same sizes in one allocation cycle.
 ;;; 
-;;; See GtkContainer's geometry management section to learn more about how height-for-width allocations are performed by container widgets.
+;;; See GtkContainer's geometry management section to learn more about how
+;;; height-for-width allocations are performed by container widgets.
 ;;; 
-;;; If a widget does move content around to intelligently use up the allocated size then it must support the request in both GtkSizeRequestModes even if the widget in question only trades sizes in a single orientation.
+;;; If a widget does move content around to intelligently use up the allocated
+;;; size then it must support the request in both GtkSizeRequestModes even if
+;;; the widget in question only trades sizes in a single orientation.
 ;;; 
-;;; For instance, a GtkLabel that does height-for-width word wrapping will not expect to have GtkWidgetClass.get_preferred_height() called because that call is specific to a width-for-height request. In this case the label must return the height required for its own minimum possible width. By following this rule any widget that handles height-for-width or width-for-height requests will always be allocated at least enough space to fit its own content.
+;;; For instance, a GtkLabel that does height-for-width word wrapping will not
+;;; expect to have GtkWidgetClass.get_preferred_height() called because that
+;;; call is specific to a width-for-height request. In this case the label must
+;;; return the height required for its own minimum possible width. By following
+;;; this rule any widget that handles height-for-width or width-for-height
+;;; requests will always be allocated at least enough space to fit its own
+;;; content.
 ;;; 
-;;; Here are some examples of how a GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH widget generally deals with width-for-height requests, for GtkWidgetClass.get_preferred_height() it will do:
+;;; Here are some examples of how a GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH widget
+;;; generally deals with width-for-height requests, for
+;;; GtkWidgetClass.get_preferred_height() it will do:
 ;;; 
 ;;; static void
 ;;; foo_widget_get_preferred_height (GtkWidget *widget, gint *min_height, gint *nat_height)
@@ -665,7 +702,8 @@
 ;;;      }
 ;;; }
 ;;; 
-;;; And in GtkWidgetClass.get_preferred_width_for_height() it will simply return the minimum and natural width:
+;;; And in GtkWidgetClass.get_preferred_width_for_height() it will simply
+;;; return the minimum and natural width:
 ;;; 
 ;;; static void
 ;;; foo_widget_get_preferred_width_for_height (GtkWidget *widget, gint for_height,
@@ -683,102 +721,89 @@
 ;;;      }
 ;;; }
 ;;; 
-;;; Often a widget needs to get its own request during size request or allocation. For example, when computing height it may need to also compute width. Or when deciding how to use an allocation, the widget may need to know its natural size. In these cases, the widget should be careful to call its virtual methods directly, like this:
+;;; Often a widget needs to get its own request during size request or
+;;; allocation. For example, when computing height it may need to also compute
+;;; width. Or when deciding how to use an allocation, the widget may need to
+;;; know its natural size. In these cases, the widget should be careful to call
+;;; its virtual methods directly, like this:
 ;;; 
 ;;; Example 101. Widget calling its own size request method.
 ;;; 
-;;; 1
-;;; 2
+;;;  1 GTK_WIDGET_GET_CLASS(widget)->get_preferred_width (widget),
+;;;  2                                  &min, &natural);
 ;;; 
-;;; 	
+;;; It will not work to use the wrapper functions, such as
+;;; gtk_widget_get_preferred_width() inside your own size request
+;;; implementation. These return a request adjusted by GtkSizeGroup and by the
+;;; GtkWidgetClass.adjust_size_request() virtual method. If a widget used the
+;;; wrappers inside its virtual method implementations, then the adjustments
+;;; (such as widget margins) would be applied twice. GTK+ therefore does not
+;;; allow this and will warn if you try to do it.
 ;;; 
-;;; GTK_WIDGET_GET_CLASS(widget)->get_preferred_width (widget),
-;;;                                  &min, &natural);
-;;; 
-;;; 
-;;; It will not work to use the wrapper functions, such as gtk_widget_get_preferred_width() inside your own size request implementation. These return a request adjusted by GtkSizeGroup and by the GtkWidgetClass.adjust_size_request() virtual method. If a widget used the wrappers inside its virtual method implementations, then the adjustments (such as widget margins) would be applied twice. GTK+ therefore does not allow this and will warn if you try to do it.
-;;; 
-;;; Of course if you are getting the size request for another widget, such as a child of a container, you must use the wrapper APIs. Otherwise, you would not properly consider widget margins, GtkSizeGroup, and so forth.
+;;; Of course if you are getting the size request for another widget, such as a
+;;; child of a container, you must use the wrapper APIs. Otherwise, you would
+;;; not properly consider widget margins, GtkSizeGroup, and so forth.
 ;;; 
 ;;; Style Properties
 ;;; 
-;;; GtkWidget introduces style properties - these are basically object properties that are stored not on the object, but in the style object associated to the widget. Style properties are set in resource files. This mechanism is used for configuring such things as the location of the scrollbar arrows through the theme, giving theme authors more control over the look of applications without the need to write a theme engine in C.
+;;; GtkWidget introduces style properties - these are basically object
+;;; properties that are stored not on the object, but in the style object
+;;; associated to the widget. Style properties are set in resource files. This
+;;; mechanism is used for configuring such things as the location of the
+;;; scrollbar arrows through the theme, giving theme authors more control over
+;;; the look of applications without the need to write a theme engine in C.
 ;;; 
-;;; Use gtk_widget_class_install_style_property() to install style properties for a widget class, gtk_widget_class_find_style_property() or gtk_widget_class_list_style_properties() to get information about existing style properties and gtk_widget_style_get_property(), gtk_widget_style_get() or gtk_widget_style_get_valist() to obtain the value of a style property.
+;;; Use gtk_widget_class_install_style_property() to install style properties
+;;; for a widget class, gtk_widget_class_find_style_property() or
+;;; gtk_widget_class_list_style_properties() to get information about existing
+;;; style properties and gtk_widget_style_get_property(), gtk_widget_style_get()
+;;; or gtk_widget_style_get_valist() to obtain the value of a style property.
 ;;; 
 ;;; GtkWidget as GtkBuildable
 ;;; 
-;;; The GtkWidget implementation of the GtkBuildable interface supports a custom <accelerator> element, which has attributes named key, modifiers and signal and allows to specify accelerators.
+;;; The GtkWidget implementation of the GtkBuildable interface supports a custom
+;;; <accelerator> element, which has attributes named key, modifiers and signal
+;;; and allows to specify accelerators.
 ;;; 
 ;;; Example 102. A UI definition fragment specifying an accelerator
 ;;; 
-;;; 1
-;;; 2
-;;; 3
+;;;  1 <object class="GtkButton">
+;;;  2   <accelerator key="q" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+;;;  3 </object>
 ;;; 
-;;; 	
-;;; 
-;;; <object class="GtkButton">
-;;;   <accelerator key="q" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
-;;; </object>
-;;; 
-;;; 
-;;; In addition to accelerators, GtkWidget also support a custom <accessible> element, which supports actions and relations. Properties on the accessible implementation of an object can be set by accessing the internal child "accessible" of a GtkWidget.
+;;; In addition to accelerators, GtkWidget also support a custom <accessible>
+;;; element, which supports actions and relations. Properties on the accessible
+;;; implementation of an object can be set by accessing the internal child
+;;; "accessible" of a GtkWidget.
 ;;; 
 ;;; Example 103. A UI definition fragment specifying an accessible
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 
-;;; 	
-;;; 
-;;; <object class="GtkButton" id="label1"/>
-;;;   <property name="label">I am a Label for a Button</property>
-;;; </object>
-;;; <object class="GtkButton" id="button1">
-;;;   <accessibility>
-;;;     <action action_name="click" translatable="yes">Click the button.</action>
-;;;     <relation target="label1" type="labelled-by"/>
-;;;   </accessibility>
-;;;   <child internal-child="accessible">
-;;;     <object class="AtkObject" id="a11y-button1">
-;;;       <property name="AtkObject::name">Clickable Button</property>
-;;;     </object>
-;;;   </child>
-;;; </object>
-;;; 
-;;; 
-;;; Finally, GtkWidget allows style information such as style classes to be associated with widgets, using the custom <style> element:
+;;;  1 <object class="GtkButton" id="label1"/>
+;;;  2   <property name="label">I am a Label for a Button</property>
+;;;  3 </object>
+;;;  4 <object class="GtkButton" id="button1">
+;;;  5   <accessibility>
+;;;  6     <action action_name="click" translatable="yes">Click the button.</action>
+;;;  7     <relation target="label1" type="labelled-by"/>
+;;;  8   </accessibility>
+;;;  9   <child internal-child="accessible">
+;;; 10     <object class="AtkObject" id="a11y-button1">
+;;; 11       <property name="AtkObject::name">Clickable Button</property>
+;;; 12     </object>
+;;; 13   </child>
+;;; 14 </object>
+;;;  
+;;; Finally, GtkWidget allows style information such as style classes to be
+;;; associated with widgets, using the custom <style> element:
 ;;; 
 ;;; Example 104. A UI definition fragment specifying an style class
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 
-;;; 	
-;;; 
-;;; <object class="GtkButton" id="button1">
-;;;   <style>
-;;;     <class name="my-special-button-class"/>
-;;;     <class name="dark-button"/>
-;;;   </style>
-;;; </object>
+;;;  1 <object class="GtkButton" id="button1">
+;;;  2   <style>
+;;;  3     <class name="my-special-button-class"/>
+;;;  4     <class name="dark-button"/>
+;;;  5   </style>
+;;;  6 </object>
 ;;; ---------------------------------------------------------------------------- 
 
 (in-package :gtk)
@@ -855,90 +880,13 @@
 (widget-p-fn :no-show-all)
 
 
-
-(defcfun gtk-widget-show :void
-  (widget g-object))
-
-(defcfun gtk-widget-show-all :void
-  (widget g-object))
-
-(defun widget-show (widget &key (all t))
-  (if all
-      (gtk-widget-show-all widget)
-      (gtk-widget-show widget)))
-
-(export 'widget-show)
-
-
-
-(defcfun gtk-widget-hide :void
-  (widget g-object))
-
-(defcfun gtk-widget-hide-all :void
-  (widget g-object))
-
-(defun widget-hide (widget &key (all t))
-  (if all
-      (gtk-widget-hide-all widget)
-      (gtk-widget-hide widget)))
-
-(export 'widget-hide)
-
-
 ; TODO: gtk_widget_get_child_requisition
 ; TODO: gtk_widget_size_allocate
 ; TODO: gtk_widget_list_accel_closures
 
-(defcfun gtk-widget-can-activate-accel :boolean
-  (widget g-object)
-  (signal-id :uint))
-
-(defun widget-can-activate-accel (widget signal)
-  (when (stringp signal) (setf signal (g-signal-lookup signal (g-type-from-object widget))))
-  (gtk-widget-can-activate-accel widget signal))
-
-(export 'widget-can-activate-accel)
 
 
-(defcfun gtk-widget-intersect :boolean
-  (widget g-object)
-  (area (g-boxed-foreign rectangle))
-  (intersection (g-boxed-foreign rectangle)))
 
-(defun widget-intersect (widget rectangle)
-  (let ((result (make-rectangle)))
-    (when (gtk-widget-intersect widget rectangle result)
-      result)))
-
-(export 'widget-intersect)
-
-(defcfun gtk-widget-get-pointer :void
-  (widget g-object)
-  (x (:pointer :int))
-  (y (:pointer :int)))
-
-(defun widget-pointer (widget)
-  (with-foreign-objects ((x :int) (y :int))
-    (gtk-widget-get-pointer widget x y)
-    (values (mem-ref x :int) (mem-ref y :int))))
-
-(export 'widget-pointer)
-
-(defcfun gtk-widget-translate-coordinates :boolean
-  (src-widget g-object)
-  (dst-widget g-object)
-  (src-x :int)
-  (src-y :int)
-  (dst-x (:pointer :int))
-  (dst-y (:pointer :int)))
-
-(defun widget-translate-coordinates (src-widget dst-widget src-x src-y)
-  (with-foreign-objects ((dst-x :int) (dst-y :int))
-    (gtk-widget-translate-coordinates src-widget dst-widget src-x src-y dst-x dst-y)
-    (values (mem-ref dst-x :int)
-            (mem-ref dst-y :int))))
-
-(export 'widget-translate-coordinates)
 
 
 (defcfun (widget-push-colormap "gtk_widget_push_colormap") :void
@@ -1002,16 +950,6 @@
     (mem-ref path '(g-string :free-from-foreign t))))
 
 (export 'widget-path)
-
-
-
-
-
-
-
-
-
-
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1126,12 +1064,7 @@
 
 (export 'widget-style-property-value)
 
-
-
-
-
 ;;; ----------------------------------------------------------------------------
-
 
 (defcfun (widget-action "gtk_widget_get_action") g-object
   (widget g-object))
@@ -1757,17 +1690,36 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_show ()
 ;;; 
-;;; void                gtk_widget_show                     (GtkWidget *widget);
+;;; void gtk_widget_show (GtkWidget *widget)
 ;;; 
-;;; Flags a widget to be displayed. Any widget that isn't shown will not appear on the screen. If you want to show all the widgets in a container, it's easier to call gtk_widget_show_all() on the container, instead of individually showing the widgets.
+;;; Flags a widget to be displayed. Any widget that isn't shown will not appear
+;;; on the screen. If you want to show all the widgets in a container, it's
+;;; easier to call gtk_widget_show_all() on the container, instead of
+;;; individually showing the widgets.
 ;;; 
-;;; Remember that you have to show the containers containing a widget, in addition to the widget itself, before it will appear onscreen.
+;;; Remember that you have to show the containers containing a widget, in
+;;; addition to the widget itself, before it will appear onscreen.
 ;;; 
-;;; When a toplevel container is shown, it is immediately realized and mapped; other shown widgets are realized and mapped when their toplevel container is realized and mapped.
+;;; When a toplevel container is shown, it is immediately realized and mapped;
+;;; other shown widgets are realized and mapped when their toplevel container
+;;; is realized and mapped.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
 ;;; ----------------------------------------------------------------------------
+
+(defcfun gtk-widget-show :void
+  (widget g-object))
+
+(defcfun gtk-widget-show-all :void
+  (widget g-object))
+
+(defun widget-show (widget &key (all t))
+  (if all
+      (gtk-widget-show-all widget)
+      (gtk-widget-show widget)))
+
+(export 'widget-show)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_show_now ()
@@ -1791,20 +1743,35 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_hide ()
 ;;; 
-;;; void                gtk_widget_hide                     (GtkWidget *widget);
+;;; void gtk_widget_hide (GtkWidget *widget)
 ;;; 
-;;; Reverses the effects of gtk_widget_show(), causing the widget to be hidden (invisible to the user).
+;;; Reverses the effects of gtk_widget_show(), causing the widget to be hidden
+;;; (invisible to the user).
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
 ;;; ----------------------------------------------------------------------------
 
+(defcfun gtk-widget-hide :void
+  (widget g-object))
+
+(defcfun gtk-widget-hide-all :void
+  (widget g-object))
+
+(defun widget-hide (widget &key (all t))
+  (if all
+      (gtk-widget-hide-all widget)
+      (gtk-widget-hide widget)))
+
+(export 'widget-hide)
+
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_show_all ()
 ;;; 
-;;; void                gtk_widget_show_all                 (GtkWidget *widget);
+;;; void gtk_widget_show_all (GtkWidget *widget)
 ;;; 
-;;; Recursively shows a widget, and any child widgets (if the widget is a container).
+;;; Recursively shows a widget, and any child widgets (if the widget is a
+;;; container).
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -2183,10 +2150,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_can_activate_accel ()
 ;;; 
-;;; gboolean            gtk_widget_can_activate_accel       (GtkWidget *widget,
-;;;                                                          guint signal_id);
+;;; gboolean gtk_widget_can_activate_accel (GtkWidget *widget, guint signal_id)
 ;;; 
-;;; Determines whether an accelerator that activates the signal identified by signal_id can currently be activated. This is done by emitting the "can-activate-accel" signal on widget; if the signal isn't overridden by a handler or in a derived widget, then the default check is that the widget must be sensitive, and the widget and all its ancestors mapped.
+;;; Determines whether an accelerator that activates the signal identified by
+;;; signal_id can currently be activated. This is done by emitting the
+;;; "can-activate-accel" signal on widget; if the signal isn't overridden by a
+;;; handler or in a derived widget, then the default check is that the widget
+;;; must be sensitive, and the widget and all its ancestors mapped.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -2199,6 +2169,17 @@
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
+
+(defcfun gtk-widget-can-activate-accel :boolean
+  (widget g-object)
+  (signal-id :uint))
+
+(defun widget-can-activate-accel (widget signal)
+  (when (stringp signal)
+    (setf signal (g-signal-lookup signal (g-type-from-object widget))))
+  (gtk-widget-can-activate-accel widget signal))
+
+(export 'widget-can-activate-accel)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_event ()
@@ -2274,11 +2255,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_intersect ()
 ;;; 
-;;; gboolean            gtk_widget_intersect                (GtkWidget *widget,
-;;;                                                          const GdkRectangle *area,
-;;;                                                          GdkRectangle *intersection);
+;;; gboolean gtk_widget_intersect (GtkWidget *widget,
+;;;                                const GdkRectangle *area,
+;;;                                GdkRectangle *intersection)
 ;;; 
-;;; Computes the intersection of a widget's area and area, storing the intersection in intersection, and returns TRUE if there was an intersection. intersection may be NULL if you're only interested in whether there was an intersection.
+;;; Computes the intersection of a widget's area and area, storing the
+;;; intersection in intersection, and returns TRUE if there was an intersection.
+;;; intersection may be NULL if you're only interested in whether there was an
+;;; intersection.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -2292,6 +2276,18 @@
 ;;; Returns :
 ;;; 	TRUE if there was an intersection
 ;;; ----------------------------------------------------------------------------
+
+(defcfun gtk-widget-intersect :boolean
+  (widget g-object)
+  (area (g-boxed-foreign rectangle))
+  (intersection (g-boxed-foreign rectangle)))
+
+(defun widget-intersect (widget rectangle)
+  (let ((result (make-rectangle)))
+    (when (gtk-widget-intersect widget rectangle result)
+      result)))
+
+(export 'widget-intersect)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_is_focus ()
@@ -2722,21 +2718,35 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_get_pointer ()
 ;;; 
-;;; void                gtk_widget_get_pointer              (GtkWidget *widget,
-;;;                                                          gint *x,
-;;;                                                          gint *y);
+;;; void gtk_widget_get_pointer (GtkWidget *widget, gint *x, gint *y)
 ;;; 
-;;; Obtains the location of the mouse pointer in widget coordinates. Widget coordinates are a bit odd; for historical reasons, they are defined as widget->window coordinates for widgets that are not GTK_NO_WINDOW widgets, and are relative to widget->allocation.x, widget->allocation.y for widgets that are GTK_NO_WINDOW widgets.
+;;; Obtains the location of the mouse pointer in widget coordinates. Widget
+;;; coordinates are a bit odd; for historical reasons, they are defined as
+;;; widget->window coordinates for widgets that are not GTK_NO_WINDOW widgets,
+;;; and are relative to widget->allocation.x, widget->allocation.y for widgets
+;;; that are GTK_NO_WINDOW widgets.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
 ;;; 
 ;;; x :
-;;; 	return location for the X coordinate, or NULL. [out][allow-none]
+;;; 	return location for the X coordinate, or NULL.
 ;;; 
 ;;; y :
-;;; 	return location for the Y coordinate, or NULL. [out][allow-none]
+;;; 	return location for the Y coordinate, or NULL.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun gtk-widget-get-pointer :void
+  (widget g-object)
+  (x (:pointer :int))
+  (y (:pointer :int)))
+
+(defun widget-pointer (widget)
+  (with-foreign-objects ((x :int) (y :int))
+    (gtk-widget-get-pointer widget x y)
+    (values (mem-ref x :int) (mem-ref y :int))))
+
+(export 'widget-pointer)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_is_ancestor ()
@@ -2766,14 +2776,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_translate_coordinates ()
 ;;; 
-;;; gboolean            gtk_widget_translate_coordinates    (GtkWidget *src_widget,
-;;;                                                          GtkWidget *dest_widget,
-;;;                                                          gint src_x,
-;;;                                                          gint src_y,
-;;;                                                          gint *dest_x,
-;;;                                                          gint *dest_y);
+;;; gboolean gtk_widget_translate_coordinates (GtkWidget *src_widget,
+;;;                                            GtkWidget *dest_widget,
+;;;                                            gint src_x,
+;;;                                            gint src_y,
+;;;                                            gint *dest_x,
+;;;                                            gint *dest_y)
 ;;; 
-;;; Translate coordinates relative to src_widget's allocation to coordinates relative to dest_widget's allocations. In order to perform this operation, both widgets must be realized, and must share a common toplevel.
+;;; Translate coordinates relative to src_widget's allocation to coordinates
+;;; relative to dest_widget's allocations. In order to perform this operation,
+;;; both widgets must be realized, and must share a common toplevel.
 ;;; 
 ;;; src_widget :
 ;;; 	a GtkWidget
@@ -2788,21 +2800,44 @@
 ;;; 	Y position relative to src_widget
 ;;; 
 ;;; dest_x :
-;;; 	location to store X position relative to dest_widget. [out]
+;;; 	location to store X position relative to dest_widget.
 ;;; 
 ;;; dest_y :
-;;; 	location to store Y position relative to dest_widget. [out]
+;;; 	location to store Y position relative to dest_widget.
 ;;; 
 ;;; Returns :
-;;; 	FALSE if either widget was not realized, or there was no common ancestor. In this case, nothing is stored in *dest_x and *dest_y. Otherwise TRUE.
+;;; 	FALSE if either widget was not realized, or there was no common
+;;;     ancestor. In this case, nothing is stored in *dest_x and *dest_y.
+;;;     Otherwise TRUE.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun gtk-widget-translate-coordinates :boolean
+  (src-widget g-object)
+  (dst-widget g-object)
+  (src-x :int)
+  (src-y :int)
+  (dst-x (:pointer :int))
+  (dst-y (:pointer :int)))
+
+(defun widget-translate-coordinates (src-widget dst-widget src-x src-y)
+  (with-foreign-objects ((dst-x :int) (dst-y :int))
+    (gtk-widget-translate-coordinates src-widget dst-widget src-x src-y dst-x dst-y)
+    (values (mem-ref dst-x :int)
+            (mem-ref dst-y :int))))
+
+(export 'widget-translate-coordinates)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_hide_on_delete ()
 ;;; 
-;;; gboolean            gtk_widget_hide_on_delete           (GtkWidget *widget);
+;;; gboolean gtk_widget_hide_on_delete (GtkWidget *widget)
 ;;; 
-;;; Utility function; intended to be connected to the "delete-event" signal on a GtkWindow. The function calls gtk_widget_hide() on its argument, then returns TRUE. If connected to ::delete-event, the result is that clicking the close button for a window (on the window frame, top right corner usually) will hide but not destroy the window. By default, GTK+ destroys windows when ::delete-event is received.
+;;; Utility function; intended to be connected to the "delete-event" signal on
+;;; a GtkWindow. The function calls gtk_widget_hide() on its argument, then
+;;; returns TRUE. If connected to ::delete-event, the result is that clicking
+;;; the close button for a window (on the window frame, top right corner
+;;; usually) will hide but not destroy the window. By default, GTK+ destroys
+;;; windows when ::delete-event is received.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -4996,12 +5031,23 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_get_allocation ()
 ;;; 
-;;; void                gtk_widget_get_allocation           (GtkWidget *widget,
-;;;                                                          GtkAllocation *allocation);
+;;; void gtk_widget_get_allocation (GtkWidget *widget,
+;;;                                 GtkAllocation *allocation)
 ;;; 
 ;;; Retrieves the widget's allocation.
 ;;; 
-;;; Note, when implementing a GtkContainer: a widget's allocation will be its "adjusted" allocation, that is, the widget's parent container typically calls gtk_widget_size_allocate() with an allocation, and that allocation is then adjusted (to handle margin and alignment for example) before assignment to the widget. gtk_widget_get_allocation() returns the adjusted allocation that was actually assigned to the widget. The adjusted allocation is guaranteed to be completely contained within the gtk_widget_size_allocate() allocation, however. So a GtkContainer is guaranteed that its children stay inside the assigned bounds, but not that they have exactly the bounds the container assigned. There is no way to get the original allocation assigned by gtk_widget_size_allocate(), since it isn't stored; if a container implementation needs that information it will have to track it itself.
+;;; Note, when implementing a GtkContainer: a widget's allocation will be its
+;;; "adjusted" allocation, that is, the widget's parent container typically
+;;; calls gtk_widget_size_allocate() with an allocation, and that allocation is
+;;; then adjusted (to handle margin and alignment for example) before assignment
+;;; to the widget. gtk_widget_get_allocation() returns the adjusted allocation
+;;; that was actually assigned to the widget. The adjusted allocation is
+;;; guaranteed to be completely contained within the gtk_widget_size_allocate()
+;;; allocation, however. So a GtkContainer is guaranteed that its children stay
+;;; inside the assigned bounds, but not that they have exactly the bounds the
+;;; container assigned. There is no way to get the original allocation assigned
+;;; by gtk_widget_size_allocate(), since it isn't stored; if a container
+;;; implementation needs that information it will have to track it itself.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -5015,12 +5061,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_set_allocation ()
 ;;; 
-;;; void                gtk_widget_set_allocation           (GtkWidget *widget,
-;;;                                                          const GtkAllocation *allocation);
+;;; void gtk_widget_set_allocation (GtkWidget *widget,
+;;;                                 const GtkAllocation *allocation);
 ;;; 
-;;; Sets the widget's allocation. This should not be used directly, but from within a widget's size_allocate method.
+;;; Sets the widget's allocation. This should not be used directly, but from
+;;; within a widget's size_allocate method.
 ;;; 
-;;; The allocation set should be the "adjusted" or actual allocation. If you're implementing a GtkContainer, you want to use gtk_widget_size_allocate() instead of gtk_widget_set_allocation(). The GtkWidgetClass::adjust_size_allocation virtual method adjusts the allocation inside gtk_widget_size_allocate() to create an adjusted allocation.
+;;; The allocation set should be the "adjusted" or actual allocation. If you're
+;;; implementing a GtkContainer, you want to use gtk_widget_size_allocate()
+;;; instead of gtk_widget_set_allocation(). The
+;;; GtkWidgetClass::adjust_size_allocation virtual method adjusts the allocation
+;;; inside gtk_widget_size_allocate() to create an adjusted allocation.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -5034,9 +5085,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_get_app_paintable ()
 ;;; 
-;;; gboolean            gtk_widget_get_app_paintable        (GtkWidget *widget);
+;;; gboolean gtk_widget_get_app_paintable (GtkWidget *widget)
 ;;; 
-;;; Determines whether the application intends to draw on the widget in an "draw" handler.
+;;; Determines whether the application intends to draw on the widget in an
+;;; "draw" handler.
 ;;; 
 ;;; See gtk_widget_set_app_paintable()
 ;;; 
@@ -5052,9 +5104,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_get_can_default ()
 ;;; 
-;;; gboolean            gtk_widget_get_can_default          (GtkWidget *widget);
+;;; gboolean gtk_widget_get_can_default (GtkWidget *widget)
 ;;; 
-;;; Determines whether widget can be a default widget. See gtk_widget_set_can_default().
+;;; Determines whether widget can be a default widget. See
+;;; gtk_widget_set_can_default().
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -5068,10 +5121,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_set_can_default ()
 ;;; 
-;;; void                gtk_widget_set_can_default          (GtkWidget *widget,
-;;;                                                          gboolean can_default);
+;;; void gtk_widget_set_can_default (GtkWidget *widget, gboolean can_default)
 ;;; 
-;;; Specifies whether widget can be a default widget. See gtk_widget_grab_default() for details about the meaning of "default".
+;;; Specifies whether widget can be a default widget.
+;;; See gtk_widget_grab_default() for details about the meaning of "default".
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -5080,11 +5133,15 @@
 ;;; 	whether or not widget can be a default widget.
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_get_can_focus ()
 ;;; 
-;;; gboolean            gtk_widget_get_can_focus            (GtkWidget *widget);
+;;; gboolean gtk_widget_get_can_focus (GtkWidget *widget)
 ;;; 
-;;; Determines whether widget can own the input focus. See gtk_widget_set_can_focus().
+;;; Determines whether widget can own the input focus.
+;;; See gtk_widget_set_can_focus().
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
@@ -5093,6 +5150,9 @@
 ;;; 	TRUE if widget can own the input focus, FALSE otherwise
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_set_can_focus ()
 ;;; 
 ;;; void                gtk_widget_set_can_focus            (GtkWidget *widget,
@@ -7973,11 +8033,12 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Returns :
-;;; 	TRUE to stop other handlers from being invoked for the event. FALSE to propagate the event further.
+;;; 	TRUE to stop other handlers from being invoked for the event. FALSE to
+;;;     propagate the event further.
+;;;
 ;;; The "unrealize" signal
 ;;; 
-;;; void                user_function                      (GtkWidget *widget,
-;;;                                                         gpointer   user_data)      : Run Last
+;;; void user_function (GtkWidget *widget, gpointer user_data)      : Run Last
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
