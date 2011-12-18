@@ -1026,25 +1026,11 @@
 (def-lpos      |$,| $any)
 (def-mheader   |$,| ($ev))
 
-(def-nud-equiv $then parse-delim-err)
-(def-lbp $then 5)
-(def-rbp $then 25)
+;;; ----------------------------------------------------------------------------
 
-(def-nud-equiv $else parse-delim-err)
-(def-lbp $else 5)
-(def-rbp $else 25)
-
-(def-nud-equiv $elseif parse-delim-err)
-(def-lbp  $elseif 5)
-(def-rbp  $elseif 45)
-(def-pos  $elseif $any)
-(def-rpos $elseif $clause)
-
-;No LBP - Default as high as possible
 (def-rbp     $if 45)
 (def-pos     $if $any)
 (def-rpos    $if $clause)
-;No LPOS
 (def-mheader $if (mcond))
 
 (def-nud ($if) (op)
@@ -1058,10 +1044,23 @@
              (parse '$any (rbp (scan-one-token)))
              (mread-synerr "Missing `then'"))
          (case (peek-one-token)
-           (($else)   (list t (parse '$any (rbp (scan-one-token)))))
+           (($else) (list t (parse '$any (rbp (scan-one-token)))))
            (($elseif) (parse-condition (scan-one-token)))
-           (t ; Note: $false instead of () makes DISPLA suppress display!
-            (list t '$false)))))
+           (t (list t nil)))))
+
+(def-nud-equiv $then parse-delim-err)
+(def-lbp $then 5)
+(def-rbp $then 25)
+
+(def-nud-equiv $else parse-delim-err)
+(def-lbp $else 5)
+(def-rbp $else 25)
+
+(def-nud-equiv $elseif parse-delim-err)
+(def-lbp  $elseif 5)
+(def-rbp  $elseif 45)
+(def-pos  $elseif $any)
+(def-rpos $elseif $clause)
 
 ;;; ----------------------------------------------------------------------------
 
