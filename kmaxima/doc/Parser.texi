@@ -4,7 +4,7 @@
 @c Language : German
 @c Author   : Dr. Dieter Kaiser
 @c Date     : 05.03.2011
-@c Revision : 12.12.2011
+@c Revision : 13.12.2011
 @c 
 @c Copyright (C) 2011 by Dr. Dieter Kaiser
 @c -----------------------------------------------------------------------------
@@ -25,15 +25,168 @@
 In @ref{Implementierung der Funktion maxima-toplevel-loop} wurde eine
 Lisp-@code{read}-@code{eval}-Schleife eingef@"uhrt, um Eingaben des Nutzers
 zu lesen und auszuwerten.  Die Lisp-Funktion @code{eval} ist durch die Funktion
-@code{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
-In diesem Kapitel wird nun der Parser implementiert.  Die Funktion @code{mread}
-ist die zentrale Funktion des Parsers, die die Lisp-Funkion @code{read} ersetzt.
-@code{mread} liest mathematische Ausdr@"ucke, Kommandos, Programme und setzt
-diese in kMaxima-Ausdr@"ucke um.  Die hier vorgestellten Funktionen entsprechen
-im wesentlichen dem Code des Originals Maxima.
+@mref{meval} ersetzt worden, siehe @ref{Implementierung des ersten Evaluators}.
+In diesem Kapitel wird nun der Parser implementiert.  Die Funktion
+@mref{mread} ist die zentrale Funktion des Parsers, die die Lisp-Funkion
+@code{read} ersetzt.  @code{mread} liest mathematische Ausdr@"ucke, Kommandos,
+Programme und wandelt diese in interne kMaxima-Ausdr@"ucke um.  Die hier
+vorgestellten Funktionen entsprechen im wesentlichen dem Code des Originals
+Maxima.
 
-Die folgende Tabelle zeigt die Operatoren, die kMaxima zu Beginn kennt,
-den dazu geh@"orenden Operator sowie einen Ausdruck, der den Operator anwendet.
+Auf der untersten Ebene liest der Parser Zeichen von einem Stream.  Dies wird
+von den f@"unf Routinen @mrefcomma{tyi} @mrefcomma{parse-tyi-init}@w{}
+@mrefcomma{parse-tyi} @mref{parse-tyipeek} und @mref{unparse-tyi} geleistet.
+Die einzelnen Zeichen werden zu Token zusammengesetzt.  kMaxima unterscheidet
+die folgenden Token:
+
+@table @emph
+@item Operator
+Operatoren sind zum Beispiel die Zeichen f@"ur die Addition "+" oder
+Multiplikation "*".  Operatoren werden von der Funktion
+@mref{scan-operator-token} eingelesen.  Die Operatoren die von dieser Funktion
+behandelt werden, sind in der Liste @mref{*maxima-operators*} enthalten.
+
+@item Zahlen
+kMaxima liest ganze Zahlen oder Gleitkommazahlen mit den Funktionen
+@mrefcomma{scan-number-before-dot} @mrefcomma{scan-number-after-dot}@w{}
+@mref{scan-number-exponent} und @mref{scan-number-rest} ein.  Weitere
+Funktionen sind @mref{scan-digits} und @mrefdot{make-number}
+
+@item Zeichenkette
+Zeichenketten werden von den Funktionen @mref{scan-string} eingelesen.
+
+@item kMaxima Token
+Liest einen Maxima-Bezeichner mit der Funktion @mref{scan-maxima-token} ein.
+Maxima-Bezeichner erhalten einen @code{$}-Zeichen als Pr@"afix.  Auch kMaxima
+Token k@"onnen Operatoren bezeichnen, die jedoch nicht in der Liste
+@mref{*maxima-operators*} enthalten sind.
+
+@item Lisp Token
+Lisp-Bezeichner werden von der Funktion @mref{scan-lisp-token} eingelesen.  Im
+Unterschied zu kMaxima Token erhalten Lisp Token keinen Pr@"afix.
+
+@item Lisp Keyword
+Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
+@mref{scan-keyword-token} eingelesen.
+@end table
+
+Der Parser implementiert eine besonderen Algorithmus, um Operatoren einzulesen.
+Operatoren unterscheiden sich zun@"achst in Postfix-, Prefix-, Infix-, Nary-,
+Matchfix- oder Nofix-Operatoren.  Den Operatoren sind @code{nud}- und
+@code{led}-Funktionen zugeordnet, die jeweils die Argumente auf der linken oder
+rechten Seite eines Operators einlesen.  Weiterhin werden f@"ur einen Operator
+Vorr@"ange gegen@"uber anderen Operatoren sowie Wortarten festgelegt, die den Typ
+der Argumente und des Operators festlegen.  Im Folgenden sind die einzelnen
+Eigenschaften beschrieben, die ein Operator erhalten kann:
+
+@table @emph
+@item @code{nud}-Funktion
+Ein Prefix-Operator hat das Argument auf der rechten Seite des Operators.
+Trifft der Parser auf einen Prefix-Operator wird seine nud-Funktion aufgerufen,
+um das Argument auf der rechten Seite zu lesen.  Vordefinierte nud-Funktionen
+sind @mrefcomma{parse-prefix} @mref{parse-matchfix} und @mrefdot{parse-nofix}
+
+@item @code{led}-Funktion
+Postfix-Operatoren haben ihr Argument auf der linken Seite.  Infix-Operatoren
+auf der linken und rechten Seite.  Um das Argument auf der linken Seite zu holen
+wird vom Parser die led-Funktion des Operators aufgerufen.  Vordefinierte
+led-Funktionen sind @mrefcomma{parse-postfix} @mref{parse-infix} und
+@mrefdot{parse-nary}
+
+@item rbp
+Die rechte Bindungskraft des Operators.  Ist die rechte Bindungskraft eines
+Operators gr@"o@ss{}er als die linke Bindungskraft des folgenden Operators, zum 
+Beispiel ist im Ausdruck @code{2*x+3} die rechte Bindungskraft der 
+Multiplikation gr@"o@ss{}er als die linke Bindungskraft der Addition, wird die 
+gesamte linke Seite als Argument des nachfolgenden Operators betrachtet.  In 
+diesem Beispiel ist @code{2*x} das linke Argument der Addition.  Der Ausdruck 
+wird also als @code{(2*x)+3} gelesen.
+
+@item lbp
+Die linke Bindungskraft des Operators.  Solange die linke Bindungskraft des 
+nachfolgenden Operators gr@"o@ss{}er ist als die rechte Bindungskraft des 
+vorhergehenden Operators, f@"ahrt der Parser mit dem Einlesen von Token fort.
+In dem Beispiel @code{3+2*x} wird die Ziffer @code{2} nicht als nachfolgendes
+Argument der Addition eingelesen, da die linksseitige Bindungskraft der 
+Multiplikation gr@"o@ss{}er als die rechtsseitige Bindungskraft der Addition.
+Der Parser f@"ahrt fort und liest den Ausdruck @code{2*x} vollst@"andig ein.
+Der Ausdruck wird also @code{3+(2*x)} gelesen.
+
+@item pos
+@code{pos} meint "Part of Speach" was mit Wortart @"ubersetzt werden kann.
+Damit kann der Typ des Operators festgelegt werden.  Es werden die Wortarten 
+@code{any} f@"ur einen beliebigen Typ, @code{clause} f@"ur einen logischen Typ 
+und @code{expr} f@"ur einen Ausdruck unterschieden.  Anhand der Wortart kann der
+Parser feststellen, ob der eingelesene Ausdruck die korrekte Syntax hat.  Diese
+Funktionalit@"at ist jedoch nur sehr begrenzt implementiert.
+
+@item lpos
+@code{lpos} ist die Wortart des Arguments die auf der linken Seiten des 
+Operators vom Parser erwartet wird.
+
+@item rpos
+@code{rpos} ist die Wortart des Arguments die auf der linken Seiten des 
+Operators vom Parser erwartet wird.
+@end table
+
+Der Parser definiert die folgenden Operatoren:
+
+@verbatim
+Operator  nud        led        header       lbp  rbp  pos   lpos  rpos
+------------------------------------------------------------------------
+[       matchfix     function  (mlist)       200       any   any        
+]       delim-err    erb-err                   5                        
+(       function     function  (mprogn)                                 
+)       delim-err    erb-err                   5                        
+'       function               (mquote)                                 
+''      function                                                              
+:                    infix     (msetq)       180   20  any   any   any  
+::                   infix     (mset)        180   20  any   any   any 
+:=                   infix     (mdefine)     180   20  any   any   any 
+::=                  infix     (mdefmacro)   180   20  any   any   any 
+!                    postfix   (mfactorial)  160       expr  expr      
+!!                   function  ($genfact)    160                       
+^                    function  (mexpt)       140  139  expr  expr  expr
+^^                   function  (mncexpt)     140  139  expr  expr  expr
+.                    infix     (mnctimes)    130  129  expr  expr  expr
+*                    nary      (mtimes)      120       expr  
+**                                                           
+/       prefix                 (mquotient)   120  120  expr  expr  expr
++       prefix       function  (mplus)       100  134  expr        expr
+-       prefix                 (mminus)      100  134  expr        expr
+=                    infix     (mequal)       80   80 clause expr  expr
+>                    infix     (mgreaterp)    80   80 clause expr  expr
+>=                   infix     (mgeqp)        80   80 clause expr  expr
+<                    infix     (mlessp)       80   80 clause expr  expr
+<=                   infix     (mleqp)        80   80 clause expr  expr
+$       premterm-err           (nodisplay)    -1                   
+;       premterm-err           (display)      -1                    
+&&      delim-err                             -1                    
+#                    infix     (mnotequal)    80   80 clause  expr  expr
+,                    nary      ($ev)          10       any    any   
+                                                                    
+not     prefix                 (mnot)              70 clause clause clause
+and                  nary      (mand)         65      clause clause 
+or                   nary      (mor)          60      clause clause 
+                                                                     
+then    delim-err                              5   25                           
+else    delim-err                              5   25        
+elseif  delim-err                              5   45  any   clause
+if      function               (mcond)       200   45  any   clause
+                                                             
+do      parse-$do              (mdo)          25   25        any
+for     parse-$do                             25  200        any
+from    parse-$do                             25   95        any
+in                                                 95        
+step    parse-$do                             25   95        expr
+next    parse-$do                             25   45        any
+thru    parse-$do                             25   95        expr
+unless  parse-$do                             25   45        clause
+while   parse-$do                             25   45        clause
+@end verbatim
+
+Die folgende Tabelle zeigt die Operatoren, die nicht-alphabetische Zeichen
+enthalten und vom Parser auf besondere Weise behandelt werden.
 
 @verbatim
    Name   Symbole             Beispiel
@@ -110,6 +263,40 @@ Eigenschaftsliste haben, werden die Namen der Operatoren mit ihrem
 dazugeh@"orenden internen Symbol in eine Hash-Tabelle abgelegt, die lokal zu
 den Funktionen @code{getopr0}, @code{putopr} und @code{remopr} definiert ist.
 
+Die folgende Tabelle zeigt die Namen der kMaxima-Operatoren und deren interne
+Symbole, die mit den Funktionen @code{putopr} und @code{putprop} Eintr@"age in
+die Hash-Tabelle und die Eigenschaftsliste erhalten.
+
+@verbatim
+   "+"   mplus    
+   "-"   mminus   
+   "*"   mtimes   
+   "**"  mexpt         
+   "^"   mexpt         
+   "."   mnctimes 
+   "/"   rat         
+   "/"   mquotient
+   "^^"  mncexpt
+   "="   mequal     
+   ">"   mgreaterp 
+   "<"   mlessp
+   "<="  mleqp
+   ">="  mgeqp
+   "#"   mnotequal
+   "and" mand
+   "or"  mor
+   "not" mnot 
+   ":"   msetq 
+   ":="  mdefine 
+   "::=" mdefmacro 
+   "'"   mquote
+   "["   mlist
+   "::"  mset 
+   "!"   mfactorial 
+   "("   mprogn
+   "if"  mcond
+@end verbatim
+
 Mit den folgenden Funktionen werden die Namen oder Symbole von Operatoren
 geholt, in die Eigenschaftsliste oder in eine Hash-Tabelle eingetragen oder
 wieder entfernt.
@@ -121,12 +308,12 @@ wieder entfernt.
 Die Funktion @code{getopr0} holt das interne Symbol, das einen Operator
 bezeichnet.  Das Argument @var{x} ist der Name des Operators, der als eine
 Zeichenkette angegeben werden muss.  Die R@"uckgabe ist das interne Symbol,
-das den Operator bezeichnet, oder @code{nil}, wenn das Argument @var{x} keinen
-Operator bezeichnet.
+das den Operator bezeichnet, oder @code{nil}, wenn das Argument @var{x} nicht
+der Name eines Operators ist.
 
 @code{opr-table} ist eine zu den Funktionen @code{getopr0}, @code{putopr} und
 @code{remopr} lokale Hash-Tabelle, die zu den Namen der Operatoren die
-entsprechenden internen Symbole der Operatoren enth@"alt.
+entsprechenden internen Symbole enth@"alt.
 
 Siehe die Funktion @mrefcomma{putopr} um zu einem Namen das interne Symbol
 des Operators abzulegen und die Funktion @mrefcomma{remopr} um einen Eintrag
@@ -156,12 +343,10 @@ Zeichenkette als Namen haben.
 
 @emph{Quelltext:}
 @lisp
-@group
 (defun getopr0 (x)
   (or (getprop x 'opr)
       (and (stringp x)
            (gethash x opr-table))))
-@end group
 @end lisp
 @end deffn
 
@@ -188,11 +373,9 @@ Zeichenkette.
 
 @emph{Quelltext:}
 @lisp
-@group
 (defun putopr (x y)
   (or (and (symbolp x) (putprop x y 'opr))
       (and (stringp x) (setf (gethash x opr-table) y))))
-@end group
 @end lisp
 @end deffn
 
@@ -231,11 +414,9 @@ Zeichenkette.
 
 @emph{Quelltext:}
 @lisp
-@group
 (defun remopr (x)
   (or (and (symbolp x) (remprop x 'opr))
       (and (stringp x) (remhash x opr-table))))
-@end group
 @end lisp
 @end deffn
 
@@ -1626,38 +1807,6 @@ in den Puffer @mref{*parse-tyi*} zur@"uckgeschrieben.
 @subsubsection Einf@"uhrung in Einlesen der Token
 @c -----------------------------------------------------------------------------
 
-Jetzt werden die Funktionen definiert, um ein Token einzulesen.  kMaxima
-unterscheidet die folgenden Token:
-
-@table @emph
-@item Operator
-Operatoren sind zum Beispiel die Zeichen f@"ur die Addition "+" oder
-Multiplikation "*".  Operatoren werden von der Funktion
-@mref{scan-operator-token} eingelesen.  Die Operatoren die von dieser Funktion
-behandelt werden, sind in der Liste @mref{*maxima-operators*} enthalten.
-
-@item Zahlen
-kMaxima liest ganze Zahlen oder Gleitkommazahlen mit den Funktionen
-@mrefcomma{scan-number-before-dot} @mrefcomma{scan-number-after-dot}@w{}
-@mref{scan-number-exponent} und @mref{scan-number-rest} ein.  Weitere
-Funktionen sind @mref{scan-digits} und @mrefdot{make-number}
-
-@item Zeichenkette
-Zeichenketten werden von den Funktionen @mref{scan-string} eingelesen.
-
-@item kMaxima Token
-Liest einen Maxima-Bezeichner mit der Funktion @mref{scan-maxima-token} ein.
-Maxima-Bezeichner erhalten einen @code{$}-Zeichen als Pr@"afix.
-
-@item Lisp Token
-Lisp-Bezeichner werden von der Funktion @mref{scan-lisp-token} eingelesen.  Im
-Unterschied zu kMaxima Token erhalten Lisp Token keinen Pr@"afix.
-
-@item Lisp Keyword
-Ein Lisp-Keyword hat den Pr@"afix @code{:} und wird von der Funktion
-@mref{scan-keyword-token} eingelesen.
-@end table
-
 @c -----------------------------------------------------------------------------
 @node Hauptroutine f@"ur das Einlesen der Token, Einlesen von Operatoren, Einf@"uhrung in Einlesen der Token, Einlesen der Token
 @subsubsection Hauptroutine f@"ur das Einlesen der Token
@@ -2268,112 +2417,6 @@ Gleitkommazahlen.
 @node Parsen der Eingabe, , Einlesen der Token, Funktionen und Makros des Parsers
 @subsection Parsen der Eingabe
 @c -----------------------------------------------------------------------------
-
-@table @emph
-@item @code{nud}-Funktion
-Ein Prefix-Operator hat das Argument auf der rechten Seite des Operators.
-Trifft der Parser auf einen Prefix-Operator wird seine nud-Funktion aufgerufen,
-um das Argument auf der rechten Seite zu lesen.  Vordefinierte nud-Funktionen
-sind @code{parse-prefix}, @code{parse-matchfix} und @code{parse-nofix}.
-
-@item @code{led}-Funktion
-Postfix-Operatoren haben ihr Argument auf der linken Seite.  Infix-Operatoren
-auf der linken und rechten Seite.  Um das Argument auf der linken Seite zu holen
-wird vom Parser die led-Funktion des Operators aufgerufen.  Vordefinierte
-led-Funktionen sind @code{parse-postfix}, @code{parse-infix} und 
-@code{parse-nary}.
-
-@item rbp
-Die rechte Bindungskraft des Operators.  Ist die rechte Bindungskraft eines
-Operators gr@"o@ss{}er als die linke Bindungskraft des folgenden Operators, zum 
-Beispiel ist im Ausdruck @code{2*x+3} die rechte Bindungskraft der 
-Multiplikation gr@"o@ss{}er als die linke Bindungskraft der Addition, wird die 
-gesamte linke Seite als Argument des nachfolgenden Operators betrachtet.  In 
-diesem Beispiel ist @code{2*x} das linke Argument der Addition.  Der Ausdruck 
-wird also als @code{(2*x)+3} gelesen.
-
-@item lbp
-Die linke Bindungskraft des Operators.  Solange die linke Bindungskraft des 
-nachfolgenden Operators gr@"o@ss{}er ist als die rechte Bindungskraft des 
-vorhergehenden Operators, f@"ahrt der Parser mit dem Einlesen von Token fort.
-In dem Beispiel @code{3+2*x} wird die Ziffer @code{2} nicht als nachfolgendes
-Argument der Addition eingelesen, da die linksseitige Bindungskraft der 
-Multiplikation gr@"o@ss{}er als die rechtsseitige Bindungskraft der Addition.
-Der Parser f@"ahrt fort und liest den Ausdruck @code{2*x} vollst@"andig ein.
-Der Ausdruck wird also @code{3+(2*x)} gelesen.
-
-@item pos
-@code{pos} meint "Part of Speach" was mit Wortart @"ubersetzt werden kann.
-Damit kann der Typ des Operators festgelegt werden.  Es werden die Wortarten 
-@code{any} f@"ur einen beliebigen Typ, @code{clause} f@"ur einen logischen Typ 
-und @code{expr} f@"ur einen Ausdruck unterschieden.  Anhand der Wortart kann der
-Parser feststellen, ob der eingelesene Ausdruck die korrekte Syntax hat.  Diese
-Funktionalit@"at ist jedoch nur sehr begrenzt implementiert.
-
-@item lpos
-@code{lpos} ist die Wortart des Arguments die auf der linken Seiten des 
-Operators vom Parser erwartet wird.
-
-@item rpos
-@code{rpos} ist die Wortart des Arguments die auf der linken Seiten des 
-Operators vom Parser erwartet wird.
-@end table
-
-Der Parser definiert die folgenden Operatoren:
-
-@verbatim
-Operator  nud        led        header       lbp  rbp  pos   lpos  rpos
-------------------------------------------------------------------------
-[       matchfix     function  (mlist)       200       any   any        
-]       delim-err    erb-err                   5                        
-(       function     function  (mprogn)                                 
-)       delim-err    erb-err                   5                        
-'       function               (mquote)                                 
-''      function                                                              
-:                    infix     (msetq)       180   20  any   any   any  
-::                   infix     (mset)        180   20  any   any   any 
-:=                   infix     (mdefine)     180   20  any   any   any 
-::=                  infix     (mdefmacro)   180   20  any   any   any 
-!                    postfix   (mfactorial)  160       expr  expr      
-!!                   function  ($genfact)    160                       
-^                    function  (mexpt)       140  139  expr  expr  expr
-^^                   function  (mncexpt)     140  139  expr  expr  expr
-.                    infix     (mnctimes)    130  129  expr  expr  expr
-*                    nary      (mtimes)      120       expr  
-**                                                           
-/       prefix                 (mquotient)   120  120  expr  expr  expr
-+       prefix       function  (mplus)       100  134  expr        expr
--       prefix                 (mminus)      100  134  expr        expr
-=                    infix     (mequal)       80   80 clause expr  expr
->                    infix     (mgreaterp)    80   80 clause expr  expr
->=                   infix     (mgeqp)        80   80 clause expr  expr
-<                    infix     (mlessp)       80   80 clause expr  expr
-<=                   infix     (mleqp)        80   80 clause expr  expr
-$       premterm-err           (nodisplay)    -1                   
-;       premterm-err           (display)      -1                    
-&&      delim-err                             -1                    
-#                    infix     (mnotequal)    80   80 clause  expr  expr
-,                    nary      ($ev)          10       any    any   
-                                                                    
-not     prefix                 (mnot)              70 clause clause clause
-and                  nary      (mand)         65      clause clause 
-or                   nary      (mor)          60      clause clause 
-                                                                     
-then    delim-err                              5   25                           
-else    delim-err                              5   25        
-elseif  delim-err                              5   45  any   clause
-if      function               (mcond)       200   45  any   clause
-                                                             
-do      parse-$do              (mdo)          25   25        any
-for     parse-$do                             25  200        any
-from    parse-$do                             25   95        any
-in                                                 95        
-step    parse-$do                             25   95        expr
-next    parse-$do                             25   45        any
-thru    parse-$do                             25   95        expr
-unless  parse-$do                             25   45        clause
-while   parse-$do                             25   45        clause
-@end verbatim
 
 @c --- 16.10.2011 --------------------------------------------------------------
 @anchor{*mread-prompt*}
@@ -3406,64 +3449,80 @@ Der Komma-Operator trennt die Elemente einer Liste.
 @end lisp
 @end defvr
 
-@c --- 06.10.2011 --------------------------------------------------------------
+@c --- 15.12.2011 --------------------------------------------------------------
 @anchor{$if}
+@anchor{$then}
+@anchor{$else}
+@anchor{$elseif}
 @defvr  {Operator} $if
 @defvrx {Operator} $then
 @defvrx {Operator} $else
 @defvrx {Operator} $elseif
 
-Operatoren f@"ur die Definition von Programmverzweigungen.
+Die Operatoren f@"ur die Definition von Programmverzweigungen.
+
+@emph{Beispiele:}
+
+Die Beispiele zeigen die Syntax verschiedener Programmverzweigungen und die
+interne Darstellung.
+
+@example
+* (caddr (mread *standard-input*))
+if x then y;
+((MCOND) $X $Y T $FALSE)
+* (caddr (mread *standard-input*))
+if x then y else z;
+((MCOND) $X $Y T $Z)
+* (caddr (mread *standard-input*))
+if x then y elseif z then w;
+((MCOND) $X $Y $Z $W T $FALSE)
+* (caddr (mread *standard-input*))
+if x then y elseif z then w else v;
+((MCOND) $X $Y $Z $W T $V)
+@end example
 
 @emph{Quelltext:}
 @lisp
-@group
 (def-rbp     $if 45)
 (def-pos     $if $any)
 (def-rpos    $if $clause)
 (def-mheader $if (mcond))
-@end group
 
-@group
 (def-nud ($if) (op)
   (list* (pos op)
          (mheader op)
          (parse-condition op)))
-@end group
 
-@group
 (defun parse-condition (op)
   (list* (parse (rpos op) (rbp op))
          (if (eq (peek-one-token) '$then)
              (parse '$any (rbp (scan-one-token)))
              (mread-synerr "Missing `then'"))
          (case (peek-one-token)
-           (($else)   (list t (parse '$any (rbp (scan-one-token)))))
+           (($else) (list t (parse '$any (rbp (scan-one-token)))))
            (($elseif) (parse-condition (scan-one-token)))
-           (t
-            (list t '$false)))))
-@end group
+           (t (list t nil)))))
 
-@group
 (def-nud-equiv $then delim-err)
 (def-lbp $then 5)
 (def-rbp $then 25)
-@end group
 
-@group
 (def-nud-equiv $else delim-err)
 (def-lbp $else 5)
 (def-rbp $else 25)
-@end group
 
-@group
 (def-nud-equiv $elseif delim-err)
 (def-lbp  $elseif 5)
 (def-rbp  $elseif 45)
 (def-pos  $elseif $any)
 (def-rpos $elseif $clause)
-@end group
 @end lisp
+
+@emph{Bemerkung:}
+
+Im Unterschied zum Original Maxima wird ein fehlende @code{$else}-Anweisung
+nicht mit @code{(t '$false)} sondern mit @code{(t nil)} abgeschlossen.
+
 @end defvr
 
 @c --- 06.10.2011 --------------------------------------------------------------
