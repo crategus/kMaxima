@@ -410,7 +410,9 @@
 ;;; 	the nesting level of the current invocation of the main loop
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gtk-main-level :uint)
+(defcfun main-level :uint)
+
+(export 'main-level)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_main_quit ()
@@ -421,7 +423,9 @@
 ;;; control.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gtk-main-quit :void)
+(defcfun (main-quit "gtk_main_quit") :void)
+
+(export 'main-quit)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_main_iteration ()

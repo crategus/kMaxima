@@ -283,7 +283,8 @@
 
 (define-g-enum "GtkWindowType"
     window-type
-    (:export t :type-initializer "gtk_window_type_get_type")
+    (:export t
+     :type-initializer "gtk_window_type_get_type")
   (:toplevel 0)
   (:popup 1))
 
@@ -1617,22 +1618,6 @@
                         (yalign alignment-yalign "yalign" "gfloat" t t)
                         (yscale alignment-yscale "yscale" "gfloat" t t)))
 
-(define-g-object-class "GtkButton" button
-                       (:superclass bin :export t :interfaces
-                        ("AtkImplementorIface" "GtkActivatable" "GtkBuildable")
-                        :type-initializer "gtk_button_get_type")
-                       ((focus-on-click button-focus-on-click "focus-on-click"
-                         "gboolean" t t)
-                        (image button-image "image" "GtkWidget" t t)
-                        (image-position button-image-position "image-position"
-                         "GtkPositionType" t t)
-                        (label button-label "label" "gchararray" t t)
-                        (relief button-relief "relief" "GtkReliefStyle" t t)
-                        (use-stock button-use-stock "use-stock" "gboolean" t t)
-                        (use-underline button-use-underline "use-underline"
-                         "gboolean" t t)
-                        (xalign button-xalign "xalign" "gfloat" t t)
-                        (yalign button-yalign "yalign" "gfloat" t t)))
 
 (define-g-object-class "GtkColorButton" color-button
                        (:superclass button :export t :interfaces
@@ -1985,92 +1970,7 @@
                         (vadjustment viewport-vadjustment "vadjustment"
                          "GtkAdjustment" t t)))
 
-(define-g-object-class "GtkWindow" gtk-window
-                       (:superclass bin :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_window_get_type")
-                       ((accept-focus gtk-window-accept-focus "accept-focus"
-                         "gboolean" t t)
-                        (allow-grow gtk-window-allow-grow "allow-grow"
-                         "gboolean" t t)
-                        (allow-shrink gtk-window-allow-shrink "allow-shrink"
-                         "gboolean" t t)
-                        (decorated gtk-window-decorated "decorated" "gboolean"
-                         t t)
-                        (default-height gtk-window-default-height
-                         "default-height" "gint" t t)
-                        (default-width gtk-window-default-width "default-width"
-                         "gint" t t)
-                        (deletable gtk-window-deletable "deletable" "gboolean"
-                         t t)
-                        (destroy-with-parent gtk-window-destroy-with-parent
-                         "destroy-with-parent" "gboolean" t t)
-                        (focus-on-map gtk-window-focus-on-map "focus-on-map"
-                         "gboolean" t t)
-                        (gravity gtk-window-gravity "gravity" "GdkGravity" t t)
-                        (has-toplevel-focus gtk-window-has-toplevel-focus
-                         "has-toplevel-focus" "gboolean" t nil)
-                        (icon gtk-window-icon "icon" "GdkPixbuf" t t)
-                        (icon-name gtk-window-icon-name "icon-name"
-                         "gchararray" t t)
-                        (is-active gtk-window-is-active "is-active" "gboolean"
-                         t nil)
-                        (modal gtk-window-modal "modal" "gboolean" t t)
-                        (opacity gtk-window-opacity "opacity" "gdouble" t t)
-                        (resizable gtk-window-resizable "resizable" "gboolean"
-                         t t)
-                        (role gtk-window-role "role" "gchararray" t t)
-                        (screen gtk-window-screen "screen" "GdkScreen" t t)
-                        (skip-pager-hint gtk-window-skip-pager-hint
-                         "skip-pager-hint" "gboolean" t t)
-                        (skip-taskbar-hint gtk-window-skip-taskbar-hint
-                         "skip-taskbar-hint" "gboolean" t t)
-                        (startup-id gtk-window-startup-id "startup-id"
-                         "gchararray" nil t)
-                        (title gtk-window-title "title" "gchararray" t t)
-                        (transient-for gtk-window-transient-for "transient-for"
-                         "GtkWindow" t t)
-                        (type gtk-window-type "type" "GtkWindowType" t nil)
-                        (type-hint gtk-window-type-hint "type-hint"
-                         "GdkWindowTypeHint" t t)
-                        (urgency-hint gtk-window-urgency-hint "urgency-hint"
-                         "gboolean" t t)
-                        (window-position gtk-window-window-position
-                         "window-position" "GtkWindowPosition" t t)
-                        (:cffi focus gtk-window-focus (g-object widget)
-                         "gtk_window_get_focus" "gtk_window_set_focus")
-                        (:cffi default-widget gtk-window-default-widget
-                         (g-object widget) "gtk_window_get_default_widget"
-                         "gtk_window_set_default")
-                        (:cffi has-frame gtk-window-has-frame :boolean
-                         "gtk_window_get_has_frame" "gtk_window_set_has_frame")
-                        (:cffi mnemonic-modifier gtk-window-mnemonic-modifier
-                         (g-object modifier-type)
-                         "gtk_window_get_mnemonic_modifier"
-                         "gtk_window_set_mnemonic_modifier")
-                        (:cffi icon-list gtk-window-icon-list
-                         (glist pixbuf :free-from-foreign t :free-to-foreign t)
-                         "gtk_window_get_icon_list" "gtk_window_set_icon_list")
-                        (:cffi group gtk-window-group (g-object window-group)
-                         "gtk_window_get_group" nil)
-                        (:cffi keep-above gtk-window-keep-above :boolean nil
-                         "gtk_window_set_keep_above")
-                        (:cffi keep-below gtk-window-keep-below :boolean nil
-                         "gtk_window_set_keep_below")))
 
-
-;(define-g-object-class "GtkDialog" dialog
-;                       (:superclass gtk-window :export t :interfaces
-;                        ("AtkImplementorIface" "GtkBuildable")
-;                        :type-initializer "gtk_dialog_get_type")
-;                       ((has-separator dialog-has-separator "has-separator"
-;                         "gboolean" t t)
-;                        (:cffi content-area dialog-content-area
-;                         (g-object v-box) "gtk_dialog_get_content_area" nil)
-;                        (:cffi action-area dialog-action-area (g-object widget)
-;                         "gtk_dialog_get_action_area" nil)
-;                        (:cffi default-response dialog-default-response
-;                         response-type nil "gtk_dialog_set_default_response")))
 
 
 (define-g-object-class "GtkColorSelectionDialog" color-selection-dialog
@@ -2191,11 +2091,7 @@
                         :type-initializer "gtk_vbutton_box_get_type")
                        nil)
 
-(define-g-object-class "GtkHBox" h-box
-                       (:superclass box :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable" "GtkOrientable")
-                        :type-initializer "gtk_hbox_get_type")
-                       nil)
+
 
 (define-g-object-class "GtkFileChooserButton" file-chooser-button
                        (:superclass h-box :export t :interfaces
@@ -2218,11 +2114,7 @@
                        ((has-resize-grip statusbar-has-resize-grip
                          "has-resize-grip" "gboolean" t t)))
 
-(define-g-object-class "GtkVBox" v-box
-                       (:superclass box :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable" "GtkOrientable")
-                        :type-initializer "gtk_vbox_get_type")
-                       nil)
+
 
 (define-g-object-class "GtkColorSelection" color-selection
                        (:superclass v-box :export t :interfaces
@@ -2427,18 +2319,7 @@
                         :type-initializer "gtk_socket_get_type")
                        nil)
 
-(define-g-object-class "GtkTable" table
-                       (:superclass container :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_table_get_type")
-                       ((column-spacing table-column-spacing "column-spacing"
-                         "guint" t t)
-                        (homogeneous table-homogeneous "homogeneous" "gboolean"
-                         t t)
-                        (n-columns table-n-columns "n-columns" "guint" t t)
-                        (n-rows table-n-rows "n-rows" "guint" t t)
-                        (row-spacing table-row-spacing "row-spacing" "guint" t
-                         t)))
+
 
 (define-g-object-class "GtkTextView" text-view
                        (:superclass container :export t :interfaces
@@ -2725,14 +2606,7 @@
 
 
 
-(define-g-object-class "GtkAccelLabel" accel-label
-                       (:superclass label :export t :interfaces
-                        ("AtkImplementorIface" "GtkBuildable")
-                        :type-initializer "gtk_accel_label_get_type")
-                       ((accel-closure accel-label-accel-closure
-                         "accel-closure" "GClosure" t t)
-                        (accel-widget accel-label-accel-widget "accel-widget"
-                         "GtkWidget" t t)))
+
 
 (define-g-object-class "GtkProgress" progress
                        (:superclass widget :export t :interfaces

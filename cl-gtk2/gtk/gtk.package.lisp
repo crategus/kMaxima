@@ -14,7 +14,6 @@
            #:check-version
            
            #:gtk-main
-           #:gtk-main-quit
            #:dialog-run
            #:object-destroy
            #:text-buffer-insert

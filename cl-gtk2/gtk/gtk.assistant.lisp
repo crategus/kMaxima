@@ -808,7 +808,8 @@
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (assistant-update-buttons-state "gtk_assistant_update_buttons_state") :void
+(defcfun (assistant-update-buttons-state "gtk_assistant_update_buttons_state")
+    :void
   (assistant (g-object assistant)))
 
 (export 'assistant-update-buttons-state)
@@ -835,13 +836,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_assistant_next_page ()
 ;;; 
-;;; void                gtk_assistant_next_page             (GtkAssistant *assistant);
+;;; void gtk_assistant_next_page (GtkAssistant *assistant)
 ;;; 
 ;;; Navigate to the next page.
 ;;; 
 ;;; It is a programming error to call this function when there is no next page.
 ;;; 
-;;; This function is for use when creating pages of the GTK_ASSISTANT_PAGE_CUSTOM type.
+;;; This function is for use when creating pages of the
+;;; GTK_ASSISTANT_PAGE_CUSTOM type.
 ;;; 
 ;;; assistant :
 ;;; 	a GtkAssistant
@@ -852,13 +854,15 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_assistant_previous_page ()
 ;;; 
-;;; void                gtk_assistant_previous_page         (GtkAssistant *assistant);
+;;; void gtk_assistant_previous_page (GtkAssistant *assistant)
 ;;; 
 ;;; Navigate to the previous visited page.
 ;;; 
-;;; It is a programming error to call this function when no previous page is available.
+;;; It is a programming error to call this function when no previous page is
+;;; available.
 ;;; 
-;;; This function is for use when creating pages of the GTK_ASSISTANT_PAGE_CUSTOM type.
+;;; This function is for use when creating pages of the
+;;; GTK_ASSISTANT_PAGE_CUSTOM type.
 ;;; 
 ;;; assistant :
 ;;; 	a GtkAssistant
@@ -867,30 +871,38 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
+;;;
 ;;; Child Property Details
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "complete" child property
 ;;; 
 ;;;   "complete"                 gboolean              : Read / Write
 ;;; 
-;;; Setting the "complete" child property to TRUE marks a page as complete (i.e.: all the required fields are filled out). GTK+ uses this information to control the sensitivity of the navigation buttons.
+;;; Setting the "complete" child property to TRUE marks a page as complete
+;;; (i.e.: all the required fields are filled out). GTK+ uses this information
+;;; to control the sensitivity of the navigation buttons.
 ;;; 
 ;;; Default value: FALSE
 ;;; 
 ;;; Since 2.10
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "header-image" child property
 ;;; 
 ;;;   "header-image"             GdkPixbuf*            : Read / Write
 ;;; 
 ;;; Warning
 ;;; 
-;;; GtkAssistant:header-image has been deprecated since version 3.2 and should not be used in newly-written code. Since GTK+ 3.2, a header is no longer shown; add your header decoration to the page content instead.
+;;; GtkAssistant:header-image has been deprecated since version 3.2 and should
+;;; not be used in newly-written code. Since GTK+ 3.2, a header is no longer
+;;; shown; add your header decoration to the page content instead.
 ;;; 
 ;;; This image used to be displayed in the page header.
 ;;; 
 ;;; Since 2.10
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "page-type" child property
 ;;; 
 ;;;   "page-type"                GtkAssistantPageType  : Read / Write
@@ -901,18 +913,22 @@
 ;;; 
 ;;; Since 2.10
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "sidebar-image" child property
 ;;; 
 ;;;   "sidebar-image"            GdkPixbuf*            : Read / Write
 ;;; 
 ;;; Warning
 ;;; 
-;;; GtkAssistant:sidebar-image has been deprecated since version 3.2 and should not be used in newly-written code. Since GTK+ 3.2, the sidebar image is no longer shown.
+;;; GtkAssistant:sidebar-image has been deprecated since version 3.2 and should
+;;; not be used in newly-written code. Since GTK+ 3.2, the sidebar image is no
+;;; longer shown.
 ;;; 
 ;;; This image used to be displayed in the 'sidebar'.
 ;;; 
 ;;; Since 2.10
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "title" child property
 ;;; 
 ;;;   "title"                    gchar*                : Read / Write
@@ -923,8 +939,11 @@
 ;;; 
 ;;; Since 2.10
 ;;;
+;;; ----------------------------------------------------------------------------
+;;;
 ;;; Style Property Details
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "content-padding" style property
 ;;; 
 ;;;   "content-padding"          gint                  : Read
@@ -935,6 +954,7 @@
 ;;; 
 ;;; Default value: 1
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "header-padding" style property
 ;;; 
 ;;;   "header-padding"           gint                  : Read
@@ -944,21 +964,26 @@
 ;;; Allowed values: >= 0
 ;;; 
 ;;; Default value: 6
+;;;
 ;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
+;;;
 ;;; Signal Details
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "apply" signal
 ;;; 
-;;; void                user_function                      (GtkAssistant *assistant,
-;;;                                                         gpointer      user_data)      : Run Last
+;;; void user_function (GtkAssistant *assistant, gpointer user_data) : Run Last
 ;;; 
 ;;; The ::apply signal is emitted when the apply button is clicked.
 ;;; 
-;;; The default behavior of the GtkAssistant is to switch to the page after the current page, unless the current page is the last one.
+;;; The default behavior of the GtkAssistant is to switch to the page after the
+;;; current page, unless the current page is the last one.
 ;;; 
-;;; A handler for the ::apply signal should carry out the actions for which the wizard has collected data. If the action takes a long time to complete, you might consider putting a page of type GTK_ASSISTANT_PAGE_PROGRESS after the confirmation page and handle this operation within the "prepare" signal of the progress page.
+;;; A handler for the ::apply signal should carry out the actions for which the
+;;; wizard has collected data. If the action takes a long time to complete, you
+;;; might consider putting a page of type GTK_ASSISTANT_PAGE_PROGRESS after the
+;;; confirmation page and handle this operation within the "prepare" signal of
+;;; the progress page.
 ;;; 
 ;;; assistant :
 ;;; 	the GtkAssistant
@@ -967,13 +992,11 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 2.10
-;;; ----------------------------------------------------------------------------
-
+;;; 
 ;;; ----------------------------------------------------------------------------
 ;;; The "cancel" signal
 ;;; 
-;;; void                user_function                      (GtkAssistant *assistant,
-;;;                                                         gpointer      user_data)      : Run Last
+;;; void user_function (GtkAssistant *assistant, gpointer user_data) : Run Last
 ;;; 
 ;;; The ::cancel signal is emitted when then the cancel button is clicked.
 ;;; 
@@ -984,15 +1007,15 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 2.10
-;;; ----------------------------------------------------------------------------
-
+;;; 
 ;;; ----------------------------------------------------------------------------
 ;;; The "close" signal
 ;;; 
-;;; void                user_function                      (GtkAssistant *assistant,
-;;;                                                         gpointer      user_data)      : Run Last
+;;; void user_function (GtkAssistant *assistant, gpointer user_data) : Run Last
 ;;; 
-;;; The ::close signal is emitted either when the close button of a summary page is clicked, or when the apply button in the last page in the flow (of type GTK_ASSISTANT_PAGE_CONFIRM) is clicked.
+;;; The ::close signal is emitted either when the close button of a summary
+;;; page is clicked, or when the apply button in the last page in the flow (of
+;;; type GTK_ASSISTANT_PAGE_CONFIRM) is clicked.
 ;;; 
 ;;; assistant :
 ;;; 	the GtkAssistant
@@ -1001,18 +1024,19 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 2.10
-;;; ----------------------------------------------------------------------------
-
+;;; 
 ;;; ----------------------------------------------------------------------------
 ;;; The "prepare" signal
 ;;; 
-;;; void                user_function                      (GtkAssistant *assistant,
-;;;                                                         GtkWidget    *page,
-;;;                                                         gpointer      user_data)      : Run Last
+;;; void user_function (GtkAssistant *assistant,
+;;;                     GtkWidget *page,
+;;;                     gpointer user_data)        : Run Last
 ;;; 
-;;; The ::prepare signal is emitted when a new page is set as the assistant's current page, before making the new page visible.
+;;; The ::prepare signal is emitted when a new page is set as the assistant's
+;;; current page, before making the new page visible.
 ;;; 
-;;; A handler for this signal can do any preparations which are necessary before showing page.
+;;; A handler for this signal can do any preparations which are necessary
+;;; before showing page.
 ;;; 
 ;;; assistant :
 ;;; 	the GtkAssistant
@@ -1025,3 +1049,5 @@
 ;;; 
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
+
+;;; --- End of file gtk.assistant.lisp -----------------------------------------

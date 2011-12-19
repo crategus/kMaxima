@@ -57,7 +57,7 @@
     (bt:with-lock-held (*main-thread-lock*)
       (decf *main-thread-level*)
       (when (zerop *main-thread-level*)
-        (gtk-main-quit)))))
+        (main-quit)))))
 
 #-thread-support
 (progn
@@ -66,7 +66,7 @@
     (values))
 
   (defun leave-gtk-main ()
-    (gtk-main-quit))
+    (main-quit))
   
   (defun join-gtk-main ()))
 

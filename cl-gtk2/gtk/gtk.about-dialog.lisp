@@ -966,8 +966,10 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
+;;;
 ;;; Property Details
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "artists" property
 ;;; 
 ;;;   "artists"                  GStrv                 : Read / Write
@@ -978,6 +980,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "authors" property
 ;;; 
 ;;;   "authors"                  GStrv                 : Read / Write
@@ -988,6 +991,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "comments" property
 ;;; 
 ;;;   "comments"                 gchar*                : Read / Write
@@ -1000,6 +1004,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "copyright" property
 ;;; 
 ;;;   "copyright"                gchar*                : Read / Write
@@ -1009,6 +1014,8 @@
 ;;; Default value: NULL
 ;;; 
 ;;; Since 2.6
+;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "documenters" property
 ;;; 
 ;;;   "documenters"              GStrv                 : Read / Write
@@ -1019,6 +1026,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "license" property
 ;;; 
 ;;;   "license"                  gchar*                : Read / Write
@@ -1034,6 +1042,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "license-type" property
 ;;; 
 ;;;   "license-type"             GtkLicense            : Read / Write
@@ -1056,6 +1065,7 @@
 ;;; 
 ;;; Since 3.0
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "logo" property
 ;;; 
 ;;;   "logo"                     GdkPixbuf*            : Read / Write
@@ -1065,6 +1075,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "logo-icon-name" property
 ;;; 
 ;;;   "logo-icon-name"           gchar*                : Read / Write
@@ -1076,6 +1087,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "program-name" property
 ;;; 
 ;;;   "program-name"             gchar*                : Read / Write
@@ -1087,6 +1099,7 @@
 ;;; 
 ;;; Since 2.12
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "translator-credits" property
 ;;; 
 ;;;   "translator-credits"       gchar*                : Read / Write
@@ -1099,6 +1112,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "version" property
 ;;; 
 ;;;   "version"                  gchar*                : Read / Write
@@ -1109,6 +1123,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "website" property
 ;;; 
 ;;;   "website"                  gchar*                : Read / Write
@@ -1120,6 +1135,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "website-label" property
 ;;; 
 ;;;   "website-label"            gchar*                : Read / Write
@@ -1130,6 +1146,7 @@
 ;;; 
 ;;; Since 2.6
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "wrap-license" property
 ;;; 
 ;;;   "wrap-license"             gboolean              : Read / Write
@@ -1142,8 +1159,10 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
+;;;
 ;;; Signal Details
 ;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "activate-link" signal
 ;;; 
 ;;; gboolean user_function (GtkAboutDialog *label,
@@ -1206,7 +1225,9 @@
 (defvar *about-dialog-email-func* nil)
 
 (defcallback about-dialog-email-func-cb :void
-  ((dialog (g-object about-dialog)) (link (:string :free-from-foreign nil)) (user-data :pointer))
+  ((dialog (g-object about-dialog))
+   (link (:string :free-from-foreign nil))
+   (user-data :pointer))
   (declare (ignore user-data))
   (funcall *about-dialog-email-func* dialog link))
 
@@ -1232,4 +1253,4 @@
 
 (export 'about-dialog-global-email-hook)
 
-;;; ----------------------------------------------------------------------------
+;;; --- End of file gtk.about-dialog.lisp --------------------------------------

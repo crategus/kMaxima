@@ -1,4 +1,5 @@
 (defpackage :gobject
+  (:nicknames :g)
   (:use :c2cl :glib :cffi :tg :bordeaux-threads :iter :closer-mop)
   (:export #:g-type
            #:gtype
@@ -36,6 +37,7 @@
            #:flags-item-value
            #:flags-item-nick
            #:get-flags-items
+           #:signal-connect
            #:signal-info
            #:signal-info-id
            #:signal-info-name
@@ -195,55 +197,7 @@
            #:with-foreign-boxed-array
            #:get-g-type-definition)
   (:documentation
-   "CL-GTK2-GOBJECT is a binding to GObject type system.
-For information on GObject, see its @a[http://library.gnome.org/devel/gobject/stable/]{documentation}.
-
-CL-GTK2-GOBJECT is structured as follows:
-@itemize{
-@item{Binding to GObject API, providing low-level means to use functionality of GObject. This includes introspection facilities and means to invoke functionality of GObject.}
-@item{GObject wrapper that bridges Lisp language with GObject API.}
-}
-
-@begin[GObject instrospection API]{section}
-The base of GObject type system is GType. GType is a numerical value that is the unique identifier of a registered type.
-Each GType has a name that is retrieved with @fun{g-type-name}. Conversely, GType can be retrieved from its name via @fun{g-type-from-name}.
-
-There are several predefined GType values that correspond to fundamental or base types.
-@begin{itemize}
-@item{@variable{+g-type-invalid+}}
-@item{@variable{+g-type-void+}}
-@item{@variable{+g-type-interface+}}
-@item{@variable{+g-type-char+}}
-@item{@variable{+g-type-uchar+}}
-@item{@variable{+g-type-boolean+}}
-@item{@variable{+g-type-int+}}
-@item{@variable{+g-type-uint+}}
-@item{@variable{+g-type-long+}}
-@item{@variable{+g-type-ulong+}}
-@item{@variable{+g-type-int64+}}
-@item{@variable{+g-type-uint64+}}
-@item{@variable{+g-type-enum+}}
-@item{@variable{+g-type-flags+}}
-@item{@variable{+g-type-float+}}
-@item{@variable{+g-type-double+}}
-@item{@variable{+g-type-string+}}
-@item{@variable{+g-type-pointer+}}
-@item{@variable{+g-type-boxed+}}
-@item{@variable{+g-type-param+}}
-@item{@variable{+g-type-object+}}
-@end{itemize}
-
-GType values form type hierarchies via signle inheritance. Functions @fun{g-type-parent} and @fun{g-type-children} enable to traverse through the type hierarchy.
-
-For some types, additional information is available. Functions @fun{class-properties} and @fun{interface-properties} return properties of classes and interfaces. Functions @fun{get-enum-items} and @fun{get-flags-items} return members of enum and flags types.
-
-//TODO: document and refactor signals
-
-@end{section}
-
-@begin[GValue]{section}
-GObject uses GValues as a generic way to pass values. It is used when calling closures, emitting signals, setting and getting properties' values, passing values to object constructors. @class{g-value} foreign structure is used for holding GValue. It used like all foreign structures: either with @code{cffi:foreign-alloc} or with @code{cffi:with-foreign-object}. Before first use, @class{g-value} should be zeroed with @fun{g-value-zero}. Zeroed @class{g-value} may be configured to hold a GValue of a given type with @fun{g-value-init}. @fun{parse-g-value} retrieves the Lisp object corresponding to the value stored in GValue. @fun{set-g-value} sets the GValue from Lisp object.
-@end{section}"))
+   "CL-GTK2-GOBJECT is a binding to GObject type system."))
 
 (in-package :gobject)
 

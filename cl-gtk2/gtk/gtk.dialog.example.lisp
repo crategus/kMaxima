@@ -21,7 +21,7 @@
                             (dialog-add-button dialog "Yes" :yes)
                             (dialog-add-button dialog "Cancel" :cancel)
                             (setf (dialog-default-response dialog) :cancel)
-                            (set-dialog-alternative-button-order
+                            (dialog-set-alternative-button-order
                               dialog 
                               (list :yes :cancel :ok))
                             (format t "Response was: ~S~%" (dialog-run dialog))

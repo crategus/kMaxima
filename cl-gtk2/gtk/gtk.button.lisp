@@ -133,18 +133,49 @@
 ;;; struct GtkButton
 ;;; 
 ;;; struct GtkButton;
-;;; 
+;;; ----------------------------------------------------------------------------
+
+(define-g-object-class "GtkButton" button
+                       (:superclass bin
+                        :export t
+                        :interfaces ("AtkImplementorIface"
+                                     "GtkActivatable"
+                                     "GtkBuildable")
+                        :type-initializer "gtk_button_get_type")
+                       ((focus-on-click button-focus-on-click "focus-on-click"
+                         "gboolean" t t)
+                        (image button-image "image" "GtkWidget" t t)
+                        (image-position button-image-position "image-position"
+                         "GtkPositionType" t t)
+                        (label button-label "label" "gchararray" t t)
+                        (relief button-relief "relief" "GtkReliefStyle" t t)
+                        (use-stock button-use-stock "use-stock" "gboolean" t t)
+                        (use-underline button-use-underline "use-underline"
+                         "gboolean" t t)
+                        (xalign button-xalign "xalign" "gfloat" t t)
+                        (yalign button-yalign "yalign" "gfloat" t t)))
+
+;;; ---------------------------------------------------------------------------- 
 ;;; gtk_button_new ()
 ;;; 
-;;; GtkWidget *         gtk_button_new                      (void);
+;;; GtkWidget * gtk_button_new (void)
 ;;; 
-;;; Creates a new GtkButton widget. To add a child widget to the button, use gtk_container_add().
+;;; Creates a new GtkButton widget. To add a child widget to the button, use
+;;; gtk_container_add().
 ;;; 
 ;;; Returns :
 ;;; 	The newly created GtkButton widget.
+;;; ----------------------------------------------------------------------------
+
+(defun button-new ()
+  (make-instance 'button))
+
+(export 'button-new)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_new_with_label ()
 ;;; 
-;;; GtkWidget *         gtk_button_new_with_label           (const gchar *label);
+;;; GtkWidget * gtk_button_new_with_label (const gchar *label)
 ;;; 
 ;;; Creates a GtkButton widget with a GtkLabel child containing the given text.
 ;;; 
@@ -153,101 +184,146 @@
 ;;; 
 ;;; Returns :
 ;;; 	The newly created GtkButton widget.
+;;; ----------------------------------------------------------------------------
+
+(defun button-new-with-label (label)
+  (make-instance 'button :label label))
+
+(export 'button-new-with-label)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_new_with_mnemonic ()
 ;;; 
-;;; GtkWidget *         gtk_button_new_with_mnemonic        (const gchar *label);
+;;; GtkWidget * gtk_button_new_with_mnemonic (const gchar *label)
 ;;; 
-;;; Creates a new GtkButton containing a label. If characters in label are preceded by an underscore, they are underlined. If you need a literal underscore character in a label, use '__' (two underscores). The first underlined character represents a keyboard accelerator called a mnemonic. Pressing Alt and that key activates the button.
+;;; Creates a new GtkButton containing a label. If characters in label are
+;;; preceded by an underscore, they are underlined. If you need a literal
+;;; underscore character in a label, use '__' (two underscores). The first
+;;; underlined character represents a keyboard accelerator called a mnemonic.
+;;; Pressing Alt and that key activates the button.
 ;;; 
 ;;; label :
-;;; 	The text of the button, with an underscore in front of the mnemonic character
+;;; 	The text of the button, with an underscore in front of the mnemonic
+;;;     character
 ;;; 
 ;;; Returns :
 ;;; 	a new GtkButton
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_new_from_stock ()
 ;;; 
-;;; GtkWidget *         gtk_button_new_from_stock           (const gchar *stock_id);
+;;; GtkWidget * gtk_button_new_from_stock (const gchar *stock_id)
 ;;; 
-;;; Creates a new GtkButton containing the image and text from a stock item. Some stock ids have preprocessor macros like GTK_STOCK_OK and GTK_STOCK_APPLY.
+;;; Creates a new GtkButton containing the image and text from a stock item.
+;;; Some stock ids have preprocessor macros like GTK_STOCK_OK and
+;;; GTK_STOCK_APPLY.
 ;;; 
-;;; If stock_id is unknown, then it will be treated as a mnemonic label (as for gtk_button_new_with_mnemonic()).
+;;; If stock_id is unknown, then it will be treated as a mnemonic label (as for
+;;; gtk_button_new_with_mnemonic()).
 ;;; 
 ;;; stock_id :
 ;;; 	the name of the stock item
 ;;; 
 ;;; Returns :
 ;;; 	a new GtkButton
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_pressed ()
 ;;; 
-;;; void                gtk_button_pressed                  (GtkButton *button);
+;;; void gtk_button_pressed (GtkButton *button)
 ;;; 
 ;;; Warning
 ;;; 
-;;; gtk_button_pressed has been deprecated since version 2.20 and should not be used in newly-written code. Use the "button-press-event" signal.
+;;; gtk_button_pressed has been deprecated since version 2.20 and should not
+;;; be used in newly-written code. Use the "button-press-event" signal.
 ;;; 
 ;;; Emits a "pressed" signal to the given GtkButton.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to send the signal to.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_released ()
 ;;; 
-;;; void                gtk_button_released                 (GtkButton *button);
+;;; void gtk_button_released (GtkButton *button)
 ;;; 
 ;;; Warning
 ;;; 
-;;; gtk_button_released has been deprecated since version 2.20 and should not be used in newly-written code. Use the "button-release-event" signal.
+;;; gtk_button_released has been deprecated since version 2.20 and should not
+;;; be used in newly-written code. Use the "button-release-event" signal.
 ;;; 
 ;;; Emits a "released" signal to the given GtkButton.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to send the signal to.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_clicked ()
 ;;; 
-;;; void                gtk_button_clicked                  (GtkButton *button);
+;;; void gtk_button_clicked (GtkButton *button)
 ;;; 
 ;;; Emits a "clicked" signal to the given GtkButton.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to send the signal to.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_enter ()
 ;;; 
-;;; void                gtk_button_enter                    (GtkButton *button);
+;;; void gtk_button_enter (GtkButton *button)
 ;;; 
 ;;; Warning
 ;;; 
-;;; gtk_button_enter has been deprecated since version 2.20 and should not be used in newly-written code. Use the "enter-notify-event" signal.
+;;; gtk_button_enter has been deprecated since version 2.20 and should not be
+;;; used in newly-written code. Use the "enter-notify-event" signal.
 ;;; 
 ;;; Emits a "enter" signal to the given GtkButton.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to send the signal to.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_leave ()
 ;;; 
-;;; void                gtk_button_leave                    (GtkButton *button);
+;;; void gtk_button_leave (GtkButton *button)
 ;;; 
 ;;; Warning
 ;;; 
-;;; gtk_button_leave has been deprecated since version 2.20 and should not be used in newly-written code. Use the "leave-notify-event" signal.
+;;; gtk_button_leave has been deprecated since version 2.20 and should not be
+;;; used in newly-written code. Use the "leave-notify-event" signal.
 ;;; 
 ;;; Emits a "leave" signal to the given GtkButton.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to send the signal to.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_relief ()
 ;;; 
-;;; void                gtk_button_set_relief               (GtkButton *button,
-;;;                                                          GtkReliefStyle newstyle);
+;;; void gtk_button_set_relief (GtkButton *button, GtkReliefStyle newstyle)
 ;;; 
-;;; Sets the relief style of the edges of the given GtkButton widget. Three styles exist, GTK_RELIEF_NORMAL, GTK_RELIEF_HALF, GTK_RELIEF_NONE. The default style is, as one can guess, GTK_RELIEF_NORMAL.
+;;; Sets the relief style of the edges of the given GtkButton widget. Three
+;;; styles exist, GTK_RELIEF_NORMAL, GTK_RELIEF_HALF, GTK_RELIEF_NONE. The
+;;; default style is, as one can guess, GTK_RELIEF_NORMAL.
 ;;; 
 ;;; button :
 ;;; 	The GtkButton you want to set relief styles of.
 ;;; 
 ;;; newstyle :
 ;;; 	The GtkReliefStyle as described above.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_relief ()
 ;;; 
-;;; GtkReliefStyle      gtk_button_get_relief               (GtkButton *button);
+;;; GtkReliefStyle gtk_button_get_relief (GtkButton *button)
 ;;; 
 ;;; Returns the current relief style of the given GtkButton.
 ;;; 
@@ -256,23 +332,38 @@
 ;;; 
 ;;; Returns :
 ;;; 	The current GtkReliefStyle
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_label ()
 ;;; 
-;;; const gchar *       gtk_button_get_label                (GtkButton *button);
+;;; const gchar * gtk_button_get_label (GtkButton *button)
 ;;; 
-;;; Fetches the text from the label of the button, as set by gtk_button_set_label(). If the label text has not been set the return value will be NULL. This will be the case if you create an empty button with gtk_button_new() to use as a container.
+;;; Fetches the text from the label of the button, as set by
+;;; gtk_button_set_label(). If the label text has not been set the return value
+;;; will be NULL. This will be the case if you create an empty button with
+;;; gtk_button_new() to use as a container.
 ;;; 
 ;;; button :
 ;;; 	a GtkButton
 ;;; 
 ;;; Returns :
-;;; 	The text of the label widget. This string is owned by the widget and must not be modified or freed.
+;;; 	The text of the label widget. This string is owned by the widget and
+;;;     must not be modified or freed.
+;;; ----------------------------------------------------------------------------
+
+(defun button-get-label (button)
+  (button-label button))
+
+(export 'button-get-label)
+  
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_label ()
 ;;; 
-;;; void                gtk_button_set_label                (GtkButton *button,
-;;;                                                          const gchar *label);
+;;; void gtk_button_set_label (GtkButton *button, const gchar *label)
 ;;; 
-;;; Sets the text of the label of the button to str. This text is also used to select the stock item if gtk_button_set_use_stock() is used.
+;;; Sets the text of the label of the button to str. This text is also used to
+;;; select the stock item if gtk_button_set_use_stock() is used.
 ;;; 
 ;;; This will also clear any previously set labels.
 ;;; 
@@ -281,9 +372,17 @@
 ;;; 
 ;;; label :
 ;;; 	a string
+;;; ----------------------------------------------------------------------------
+
+(defun button-set-label (button label)
+  (setf (button-label button) label))
+
+(export 'button-set-label)
+  
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_use_stock ()
 ;;; 
-;;; gboolean            gtk_button_get_use_stock            (GtkButton *button);
+;;; gboolean gtk_button_get_use_stock (GtkButton *button)
 ;;; 
 ;;; Returns whether the button label is a stock item.
 ;;; 
@@ -291,30 +390,42 @@
 ;;; 	a GtkButton
 ;;; 
 ;;; Returns :
-;;; 	TRUE if the button label is used to select a stock item instead of being used directly as the label text.
+;;; 	TRUE if the button label is used to select a stock item instead of
+;;;     being used directly as the label text.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_use_stock ()
 ;;; 
-;;; void                gtk_button_set_use_stock            (GtkButton *button,
-;;;                                                          gboolean use_stock);
+;;; void gtk_button_set_use_stock (GtkButton *button, gboolean use_stock)
 ;;; 
-;;; If TRUE, the label set on the button is used as a stock id to select the stock item for the button.
+;;; If TRUE, the label set on the button is used as a stock id to select the
+;;; stock item for the button.
 ;;; 
 ;;; button :
 ;;; 	a GtkButton
 ;;; 
 ;;; use_stock :
 ;;; 	TRUE if the button should use a stock item
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_use_underline ()
 ;;; 
-;;; gboolean            gtk_button_get_use_underline        (GtkButton *button);
+;;; gboolean gtk_button_get_use_underline (GtkButton *button)
 ;;; 
-;;; Returns whether an embedded underline in the button label indicates a mnemonic. See gtk_button_set_use_underline().
+;;; Returns whether an embedded underline in the button label indicates a
+;;; mnemonic. See gtk_button_set_use_underline().
 ;;; 
 ;;; button :
 ;;; 	a GtkButton
 ;;; 
 ;;; Returns :
-;;; 	TRUE if an embedded underline in the button label indicates the mnemonic accelerator keys.
+;;; 	TRUE if an embedded underline in the button label indicates the
+;;;     mnemonic accelerator keys.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_use_underline ()
 ;;; 
 ;;; void                gtk_button_set_use_underline        (GtkButton *button,
@@ -327,6 +438,9 @@
 ;;; 
 ;;; use_underline :
 ;;; 	TRUE if underlines in the text indicate mnemonics
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_focus_on_click ()
 ;;; 
 ;;; void                gtk_button_set_focus_on_click       (GtkButton *button,
@@ -341,6 +455,9 @@
 ;;; 	whether the button grabs focus when clicked with the mouse
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_focus_on_click ()
 ;;; 
 ;;; gboolean            gtk_button_get_focus_on_click       (GtkButton *button);
@@ -354,6 +471,9 @@
 ;;; 	TRUE if the button grabs focus when it is clicked with the mouse.
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_alignment ()
 ;;; 
 ;;; void                gtk_button_set_alignment            (GtkButton *button,
@@ -372,6 +492,9 @@
 ;;; 	the vertical position of the child, 0.0 is top aligned, 1.0 is bottom aligned
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_alignment ()
 ;;; 
 ;;; void                gtk_button_get_alignment            (GtkButton *button,
@@ -390,6 +513,9 @@
 ;;; 	return location for vertical alignment. [out]
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_image ()
 ;;; 
 ;;; void                gtk_button_set_image                (GtkButton *button,
@@ -404,6 +530,9 @@
 ;;; 	a widget to set as the image for the button
 ;;; 
 ;;; Since 2.6
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_image ()
 ;;; 
 ;;; GtkWidget *         gtk_button_get_image                (GtkButton *button);
@@ -417,6 +546,9 @@
 ;;; 	a GtkWidget or NULL in case there is no image. [transfer none]
 ;;; 
 ;;; Since 2.6
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_set_image_position ()
 ;;; 
 ;;; void                gtk_button_set_image_position       (GtkButton *button,
@@ -431,6 +563,9 @@
 ;;; 	the position
 ;;; 
 ;;; Since 2.10
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_image_position ()
 ;;; 
 ;;; GtkPositionType     gtk_button_get_image_position       (GtkButton *button);
@@ -444,6 +579,9 @@
 ;;; 	the position
 ;;; 
 ;;; Since 2.10
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_button_get_event_window ()
 ;;; 
 ;;; GdkWindow *         gtk_button_get_event_window         (GtkButton *button);
@@ -457,6 +595,9 @@
 ;;; 	button's event window. [transfer none]
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; Property Details
 ;;; The "focus-on-click" property
 ;;; 
@@ -670,4 +811,6 @@
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
-;;; 
+;;; ----------------------------------------------------------------------------
+
+;;; --- End of file gtk.button.lisp --------------------------------------------

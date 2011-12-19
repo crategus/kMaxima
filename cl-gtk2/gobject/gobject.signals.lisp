@@ -26,7 +26,8 @@
 ;;;
 ;;; Signals
 ;;; 
-;;; A means for customization of object behaviour and a general purpose notification mechanism
+;;; A means for customization of object behaviour and a general purpose
+;;; notification mechanism
 ;;; 	
 ;;; Synopsis
 ;;; 
@@ -237,31 +238,47 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; The basic concept of the signal system is that of the emission of a signal. Signals are introduced per-type and are identified through strings. Signals introduced for a parent type are available in derived types as well, so basically they are a per-type facility that is inherited. A signal emission mainly involves invocation of a certain set of callbacks in precisely defined manner. There are two main categories of such callbacks, per-object [10] ones and user provided ones. The per-object callbacks are most often referred to as "object method handler" or "default (signal) handler", while user provided callbacks are usually just called "signal handler". The object method handler is provided at signal creation time (this most frequently happens at the end of an object class' creation), while user provided handlers are frequently connected and disconnected to/from a certain signal on certain object instances.
+;;; The basic concept of the signal system is that of the emission of a signal.
+;;; Signals are introduced per-type and are identified through strings. Signals
+;;; introduced for a parent type are available in derived types as well, so
+;;; basically they are a per-type facility that is inherited. A signal emission
+;;; mainly involves invocation of a certain set of callbacks in precisely
+;;; defined manner. There are two main categories of such callbacks, per-object
+;;; [10] ones and user provided ones. The per-object callbacks are most often
+;;; referred to as "object method handler" or "default (signal) handler", while
+;;; user provided callbacks are usually just called "signal handler". The object
+;;; method handler is provided at signal creation time (this most frequently
+;;; happens at the end of an object class' creation), while user provided
+;;; handlers are frequently connected and disconnected to/from a certain signal
+;;; on certain object instances.
 ;;; 
 ;;; A signal emission consists of five stages, unless prematurely stopped:
 ;;; 
-;;; 	
-;;; 
 ;;; 1 - Invocation of the object method handler for G_SIGNAL_RUN_FIRST signals
-;;; 
-;;; 	
-;;; 
+;;;  
 ;;; 2 - Invocation of normal user-provided signal handlers (after flag FALSE)
-;;; 
-;;; 	
 ;;; 
 ;;; 3 - Invocation of the object method handler for G_SIGNAL_RUN_LAST signals
 ;;; 
-;;; 	
-;;; 
-;;; 4 - Invocation of user provided signal handlers, connected with an after flag of TRUE
-;;; 
-;;; 	
+;;; 4 - Invocation of user provided signal handlers, connected with an after
+;;;     flag of TRUE
 ;;; 
 ;;; 5 - Invocation of the object method handler for G_SIGNAL_RUN_CLEANUP signals
 ;;; 
-;;; The user-provided signal handlers are called in the order they were connected in. All handlers may prematurely stop a signal emission, and any number of handlers may be connected, disconnected, blocked or unblocked during a signal emission. There are certain criteria for skipping user handlers in stages 2 and 4 of a signal emission. First, user handlers may be blocked, blocked handlers are omitted during callback invocation, to return from the "blocked" state, a handler has to get unblocked exactly the same amount of times it has been blocked before. Second, upon emission of a G_SIGNAL_DETAILED signal, an additional "detail" argument passed in to g_signal_emit() has to match the detail argument of the signal handler currently subject to invocation. Specification of no detail argument for signal handlers (omission of the detail part of the signal specification upon connection) serves as a wildcard and matches any detail argument passed in to emission.
+;;; The user-provided signal handlers are called in the order they were
+;;; connected in. All handlers may prematurely stop a signal emission, and any
+;;; number of handlers may be connected, disconnected, blocked or unblocked
+;;; during a signal emission. There are certain criteria for skipping user
+;;; handlers in stages 2 and 4 of a signal emission. First, user handlers may
+;;; be blocked, blocked handlers are omitted during callback invocation, to
+;;; return from the "blocked" state, a handler has to get unblocked exactly the
+;;; same amount of times it has been blocked before. Second, upon emission of a
+;;; G_SIGNAL_DETAILED signal, an additional "detail" argument passed in to
+;;; g_signal_emit() has to match the detail argument of the signal handler
+;;; currently subject to invocation. Specification of no detail argument for
+;;; signal handlers (omission of the detail part of the signal specification
+;;; upon connection) serves as a wildcard and matches any detail argument
+;;; passed in to emission.
 ;;; ----------------------------------------------------------------------------
 
 (in-package :gobject)
@@ -503,10 +520,12 @@
 ;;;   const GType  *param_types; /* mangled with G_SIGNAL_TYPE_STATIC_SCOPE flag */
 ;;; };
 ;;; 
-;;; A structure holding in-depth information for a specific signal. It is filled in by the g_signal_query() function.
+;;; A structure holding in-depth information for a specific signal. It is
+;;; filled in by the g_signal_query() function.
 ;;; 
 ;;; guint signal_id;
-;;; 	The signal id of the signal being queried, or 0 if the signal to be queried was unknown.
+;;; 	The signal id of the signal being queried, or 0 if the signal to be
+;;;     queried was unknown.
 ;;; 
 ;;; const gchar *signal_name;
 ;;; 	The signal name.
@@ -524,11 +543,11 @@
 ;;; 	The number of parameters that user callbacks take.
 ;;; 
 ;;; const GType *param_types;
-;;; 	The individual parameter types for user callbacks, note that the effective callback signature is:
-;;; 
-;;; @return_type callback (gpointer     data1,
-;;; [param_types param_names,]
-;;; gpointer     data2);
+;;; 	The individual parameter types for user callbacks, note that the
+;;;     effective callback signature is:
+;;;     
+;;;     @return_type callback (gpointer data1,
+;;;                            [param_types param_names,] gpointer data2);
 ;;; ----------------------------------------------------------------------------
 
 (defcstruct g-signal-query
@@ -995,7 +1014,9 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun g-signal-connect (object signal handler &key after)
-  "Deprecated alias for @fun{connect-signal}"
+  (connect-signal object signal handler :after after))
+
+(defun signal-connect (object signal handler &key after)
   (connect-signal object signal handler :after after))
 
 (defun connect-signal (object signal handler &key after)
@@ -1027,13 +1048,17 @@
 ;;; 
 ;;; Returns :
 ;;; 	the handler id
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_connect_swapped()
 ;;; 
-;;; #define             g_signal_connect_swapped(instance, detailed_signal, c_handler, data)
+;;; #define g_signal_connect_swapped(instance, detailed_signal, c_handler, data)
 ;;; 
 ;;; Connects a GCallback function to a signal for a particular object.
 ;;; 
-;;; The instance on which the signal is emitted and data will be swapped when calling the handler.
+;;; The instance on which the signal is emitted and data will be swapped when
+;;; calling the handler.
 ;;; 
 ;;; instance :
 ;;; 	the instance to connect to.
@@ -1049,6 +1074,9 @@
 ;;; 
 ;;; Returns :
 ;;; 	the handler id
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_connect_object ()
 ;;; 
 ;;; gulong              g_signal_connect_object             (gpointer instance,

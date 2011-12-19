@@ -909,7 +909,8 @@
 (export 'widget-default-colormap)
 
 
-(defcfun (widget-default-visual "gtk_widget_get_default_visual") (g-object visual))
+(defcfun (widget-default-visual "gtk_widget_get_default_visual")
+  (g-object visual))
 
 (export 'widget-default-visual)
 
@@ -1626,26 +1627,42 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new GtkWidget of type widget_type
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_destroy ()
 ;;; 
-;;; void                gtk_widget_destroy                  (GtkWidget *widget);
+;;; void gtk_widget_destroy (GtkWidget *widget)
 ;;; 
 ;;; Destroys a widget.
 ;;; 
-;;; When a widget is destroyed, it will break any references it holds to other objects. If the widget is inside a container, the widget will be removed from the container. If the widget is a toplevel (derived from GtkWindow), it will be removed from the list of toplevels, and the reference GTK+ holds to it will be removed. Removing a widget from its container or the list of toplevels results in the widget being finalized, unless you've added additional references to the widget with g_object_ref().
+;;; When a widget is destroyed, it will break any references it holds to other
+;;; objects. If the widget is inside a container, the widget will be removed
+;;; from the container. If the widget is a toplevel (derived from GtkWindow),
+;;; it will be removed from the list of toplevels, and the reference GTK+ holds
+;;; to it will be removed. Removing a widget from its container or the list of
+;;; toplevels results in the widget being finalized, unless you've added
+;;; additional references to the widget with g_object_ref().
 ;;; 
-;;; In most cases, only toplevel widgets (windows) require explicit destruction, because when you destroy a toplevel its children will be destroyed as well.
+;;; In most cases, only toplevel widgets (windows) require explicit destruction,
+;;; because when you destroy a toplevel its children will be destroyed as well.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (widget-destroy "gtk_widget_destroy") :void
+  (widget g-object))
+
+(export 'widget-destroy)
+
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_in_destruction ()
 ;;; 
-;;; gboolean            gtk_widget_in_destruction           (GtkWidget *widget);
+;;; gboolean gtk_widget_in_destruction (GtkWidget *widget)
 ;;; 
-;;; Returns whether the widget is currently being destroyed. This information can sometimes be used to avoid doing unnecessary work.
+;;; Returns whether the widget is currently being destroyed. This information
+;;; can sometimes be used to avoid doing unnecessary work.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget

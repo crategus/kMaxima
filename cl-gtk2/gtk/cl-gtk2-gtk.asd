@@ -106,6 +106,9 @@
                
                
                (:file "gtk.hsv")              ; GtkHSV
+               (:file "gtk.h-box")            ; GtkHBox
+               (:file "gtk.v-box")            ; GtkVBox
+               (:file "gtk.table")            ; GtkTable
                
                (:file "gtk.icon-factory")
                

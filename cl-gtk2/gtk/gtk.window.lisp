@@ -30,196 +30,204 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;;                     GtkWindow;
-;;; GtkWidget *         gtk_window_new                      (GtkWindowType type);
-;;; void                gtk_window_set_title                (GtkWindow *window,
-;;;                                                          const gchar *title);
-;;; void                gtk_window_set_wmclass              (GtkWindow *window,
-;;;                                                          const gchar *wmclass_name,
-;;;                                                          const gchar *wmclass_class);
-;;; void                gtk_window_set_resizable            (GtkWindow *window,
-;;;                                                          gboolean resizable);
-;;; gboolean            gtk_window_get_resizable            (GtkWindow *window);
-;;; void                gtk_window_add_accel_group          (GtkWindow *window,
-;;;                                                          GtkAccelGroup *accel_group);
-;;; void                gtk_window_remove_accel_group       (GtkWindow *window,
-;;;                                                          GtkAccelGroup *accel_group);
-;;; gboolean            gtk_window_activate_focus           (GtkWindow *window);
-;;; gboolean            gtk_window_activate_default         (GtkWindow *window);
-;;; void                gtk_window_set_modal                (GtkWindow *window,
-;;;                                                          gboolean modal);
-;;; void                gtk_window_set_default_size         (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
-;;; void                gtk_window_set_default_geometry     (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
-;;; void                gtk_window_set_geometry_hints       (GtkWindow *window,
-;;;                                                          GtkWidget *geometry_widget,
-;;;                                                          GdkGeometry *geometry,
-;;;                                                          GdkWindowHints geom_mask);
-;;; void                gtk_window_set_gravity              (GtkWindow *window,
-;;;                                                          GdkGravity gravity);
-;;; GdkGravity          gtk_window_get_gravity              (GtkWindow *window);
-;;; void                gtk_window_set_position             (GtkWindow *window,
-;;;                                                          GtkWindowPosition position);
-;;; void                gtk_window_set_transient_for        (GtkWindow *window,
-;;;                                                          GtkWindow *parent);
-;;; void                gtk_window_set_destroy_with_parent  (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_screen               (GtkWindow *window,
-;;;                                                          GdkScreen *screen);
-;;; GdkScreen *         gtk_window_get_screen               (GtkWindow *window);
-;;; gboolean            gtk_window_is_active                (GtkWindow *window);
-;;; gboolean            gtk_window_has_toplevel_focus       (GtkWindow *window);
-;;; GList *             gtk_window_list_toplevels           (void);
-;;; void                gtk_window_add_mnemonic             (GtkWindow *window,
-;;;                                                          guint keyval,
-;;;                                                          GtkWidget *target);
-;;; void                gtk_window_remove_mnemonic          (GtkWindow *window,
-;;;                                                          guint keyval,
-;;;                                                          GtkWidget *target);
-;;; gboolean            gtk_window_mnemonic_activate        (GtkWindow *window,
-;;;                                                          guint keyval,
-;;;                                                          GdkModifierType modifier);
-;;; gboolean            gtk_window_activate_key             (GtkWindow *window,
-;;;                                                          GdkEventKey *event);
-;;; gboolean            gtk_window_propagate_key_event      (GtkWindow *window,
-;;;                                                          GdkEventKey *event);
-;;; GtkWidget *         gtk_window_get_focus                (GtkWindow *window);
-;;; void                gtk_window_set_focus                (GtkWindow *window,
-;;;                                                          GtkWidget *focus);
-;;; GtkWidget *         gtk_window_get_default_widget       (GtkWindow *window);
-;;; void                gtk_window_set_default              (GtkWindow *window,
-;;;                                                          GtkWidget *default_widget);
-;;; void                gtk_window_present                  (GtkWindow *window);
-;;; void                gtk_window_present_with_time        (GtkWindow *window,
-;;;                                                          guint32 timestamp);
-;;; void                gtk_window_iconify                  (GtkWindow *window);
-;;; void                gtk_window_deiconify                (GtkWindow *window);
-;;; void                gtk_window_stick                    (GtkWindow *window);
-;;; void                gtk_window_unstick                  (GtkWindow *window);
-;;; void                gtk_window_maximize                 (GtkWindow *window);
-;;; void                gtk_window_unmaximize               (GtkWindow *window);
-;;; void                gtk_window_fullscreen               (GtkWindow *window);
-;;; void                gtk_window_unfullscreen             (GtkWindow *window);
-;;; void                gtk_window_set_keep_above           (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_keep_below           (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_begin_resize_drag        (GtkWindow *window,
-;;;                                                          GdkWindowEdge edge,
-;;;                                                          gint button,
-;;;                                                          gint root_x,
-;;;                                                          gint root_y,
-;;;                                                          guint32 timestamp);
-;;; void                gtk_window_begin_move_drag          (GtkWindow *window,
-;;;                                                          gint button,
-;;;                                                          gint root_x,
-;;;                                                          gint root_y,
-;;;                                                          guint32 timestamp);
-;;; void                gtk_window_set_decorated            (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_deletable            (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_mnemonic_modifier    (GtkWindow *window,
-;;;                                                          GdkModifierType modifier);
-;;; void                gtk_window_set_type_hint            (GtkWindow *window,
-;;;                                                          GdkWindowTypeHint hint);
-;;; void                gtk_window_set_skip_taskbar_hint    (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_skip_pager_hint      (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_urgency_hint         (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_accept_focus         (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_focus_on_map         (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_startup_id           (GtkWindow *window,
-;;;                                                          const gchar *startup_id);
-;;; void                gtk_window_set_role                 (GtkWindow *window,
-;;;                                                          const gchar *role);
-;;; gboolean            gtk_window_get_decorated            (GtkWindow *window);
-;;; gboolean            gtk_window_get_deletable            (GtkWindow *window);
-;;; GList *             gtk_window_get_default_icon_list    (void);
-;;; const gchar *       gtk_window_get_default_icon_name    (void);
-;;; void                gtk_window_get_default_size         (GtkWindow *window,
-;;;                                                          gint *width,
-;;;                                                          gint *height);
-;;; gboolean            gtk_window_get_destroy_with_parent  (GtkWindow *window);
-;;; GdkPixbuf *         gtk_window_get_icon                 (GtkWindow *window);
-;;; GList *             gtk_window_get_icon_list            (GtkWindow *window);
-;;; const gchar *       gtk_window_get_icon_name            (GtkWindow *window);
-;;; GdkModifierType     gtk_window_get_mnemonic_modifier    (GtkWindow *window);
-;;; gboolean            gtk_window_get_modal                (GtkWindow *window);
-;;; void                gtk_window_get_position             (GtkWindow *window,
-;;;                                                          gint *root_x,
-;;;                                                          gint *root_y);
-;;; const gchar *       gtk_window_get_role                 (GtkWindow *window);
-;;; void                gtk_window_get_size                 (GtkWindow *window,
-;;;                                                          gint *width,
-;;;                                                          gint *height);
-;;; const gchar *       gtk_window_get_title                (GtkWindow *window);
-;;; GtkWindow *         gtk_window_get_transient_for        (GtkWindow *window);
-;;; GdkWindowTypeHint   gtk_window_get_type_hint            (GtkWindow *window);
-;;; gboolean            gtk_window_get_skip_taskbar_hint    (GtkWindow *window);
-;;; gboolean            gtk_window_get_skip_pager_hint      (GtkWindow *window);
-;;; gboolean            gtk_window_get_urgency_hint         (GtkWindow *window);
-;;; gboolean            gtk_window_get_accept_focus         (GtkWindow *window);
-;;; gboolean            gtk_window_get_focus_on_map         (GtkWindow *window);
-;;; GtkWindowGroup *    gtk_window_get_group                (GtkWindow *window);
-;;; gboolean            gtk_window_has_group                (GtkWindow *window);
-;;; GtkWindowType       gtk_window_get_window_type          (GtkWindow *window);
-;;; void                gtk_window_move                     (GtkWindow *window,
-;;;                                                          gint x,
-;;;                                                          gint y);
-;;; gboolean            gtk_window_parse_geometry           (GtkWindow *window,
-;;;                                                          const gchar *geometry);
-;;; void                gtk_window_reshow_with_initial_size (GtkWindow *window);
-;;; void                gtk_window_resize                   (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
-;;; void                gtk_window_resize_to_geometry       (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
-;;; void                gtk_window_set_default_icon_list    (GList *list);
-;;; void                gtk_window_set_default_icon         (GdkPixbuf *icon);
-;;; gboolean            gtk_window_set_default_icon_from_file
-;;;                                                         (const gchar *filename,
-;;;                                                          GError **err);
-;;; void                gtk_window_set_default_icon_name    (const gchar *name);
-;;; void                gtk_window_set_icon                 (GtkWindow *window,
-;;;                                                          GdkPixbuf *icon);
-;;; void                gtk_window_set_icon_list            (GtkWindow *window,
-;;;                                                          GList *list);
-;;; gboolean            gtk_window_set_icon_from_file       (GtkWindow *window,
-;;;                                                          const gchar *filename,
-;;;                                                          GError **err);
-;;; void                gtk_window_set_icon_name            (GtkWindow *window,
-;;;                                                          const gchar *name);
-;;; void                gtk_window_set_auto_startup_notification
-;;;                                                         (gboolean setting);
-;;; gdouble             gtk_window_get_opacity              (GtkWindow *window);
-;;; void                gtk_window_set_opacity              (GtkWindow *window,
-;;;                                                          gdouble opacity);
-;;; gboolean            gtk_window_get_mnemonics_visible    (GtkWindow *window);
-;;; void                gtk_window_set_mnemonics_visible    (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; gboolean            gtk_window_get_focus_visible        (GtkWindow *window);
-;;; void                gtk_window_set_focus_visible        (GtkWindow *window,
-;;;                                                          gboolean setting);
-;;; void                gtk_window_set_has_resize_grip      (GtkWindow *window,
-;;;                                                          gboolean value);
-;;; gboolean            gtk_window_get_has_resize_grip      (GtkWindow *window);
-;;; gboolean            gtk_window_resize_grip_is_visible   (GtkWindow *window);
-;;; gboolean            gtk_window_get_resize_grip_area     (GtkWindow *window,
-;;;                                                          GdkRectangle *rect);
-;;; GtkApplication *    gtk_window_get_application          (GtkWindow *window);
-;;; void                gtk_window_set_application          (GtkWindow *window,
-;;;                                                          GtkApplication *application);
-;;; void                gtk_window_set_has_user_ref_count   (GtkWindow *window,
-;;;                                                          gboolean setting);
+;;;                   GtkWindow;
+;;;                   
+;;; GtkWidget *       gtk_window_new                (GtkWindowType type);
+;;; void              gtk_window_set_title          (GtkWindow *window,
+;;;                                                  const gchar *title)
+;;; void              gtk_window_set_wmclass        (GtkWindow *window,
+;;;                                                  const gchar *wmclass_name,
+;;;                                                  nst gchar *wmclass_class)
+;;; void              gtk_window_set_resizable      (GtkWindow *window,
+;;;                                                  gboolean resizable);
+;;; gboolean          gtk_window_get_resizable      (GtkWindow *window);
+;;; void              gtk_window_add_accel_group    (GtkWindow *window,
+;;;                                                  GtkAccelGroup *accel_group)
+;;; void              gtk_window_remove_accel_group (GtkWindow *window,
+;;;                                                  GtkAccelGroup *accel_group)
+;;; gboolean          gtk_window_activate_focus     (GtkWindow *window);
+;;; gboolean          gtk_window_activate_default   (GtkWindow *window);
+;;; void              gtk_window_set_modal          (GtkWindow *window,
+;;;                                                  gboolean modal);
+;;; void              gtk_window_set_default_size   (GtkWindow *window,
+;;;                                                  gint width,
+;;;                                                  gint height);
+;;; void              gtk_window_set_default_geometry
+;;;                                                 (GtkWindow *window,
+;;;                                                  gint width,
+;;;                                                  gint height)
+;;; void              gtk_window_set_geometry_hints (GtkWindow *window,
+;;;                                                  GtkWidget *geometry_widget,
+;;;                                                  GdkGeometry *geometry,
+;;;                                                  GdkWindowHints geom_mask);
+;;; void              gtk_window_set_gravity        (GtkWindow *window,
+;;;                                                  GdkGravity gravity);
+;;; GdkGravity        gtk_window_get_gravity        (GtkWindow *window);
+;;; void              gtk_window_set_position       (GtkWindow *window,
+;;;                                                  GtkWindowPosition position)
+;;; void              gtk_window_set_transient_for  (GtkWindow *window,
+;;;                                                  GtkWindow *parent);
+;;; void              gtk_window_set_destroy_with_parent
+;;;                                                 (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_screen         (GtkWindow *window,
+;;;                                                  GdkScreen *screen);
+;;; GdkScreen *       gtk_window_get_screen         (GtkWindow *window);
+;;; gboolean          gtk_window_is_active          (GtkWindow *window);
+;;; gboolean          gtk_window_has_toplevel_focus (GtkWindow *window);
+;;; GList *           gtk_window_list_toplevels     (void);
+;;; void              gtk_window_add_mnemonic       (GtkWindow *window,
+;;;                                                  guint keyval,
+;;;                                                  GtkWidget *target);
+;;; void              gtk_window_remove_mnemonic    (GtkWindow *window,
+;;;                                                  guint keyval,
+;;;                                                  GtkWidget *target);
+;;; gboolean          gtk_window_mnemonic_activate  (GtkWindow *window,
+;;;                                                  guint keyval,
+;;;                                                  GdkModifierType modifier)
+;;; gboolean          gtk_window_activate_key       (GtkWindow *window,
+;;;                                                  GdkEventKey *event);
+;;; gboolean          gtk_window_propagate_key_event
+;;;                                                 (GtkWindow *window,
+;;;                                                  GdkEventKey *event);
+;;; GtkWidget *       gtk_window_get_focus          (GtkWindow *window);
+;;; void              gtk_window_set_focus          (GtkWindow *window,
+;;;                                                  GtkWidget *focus);
+;;; GtkWidget *       gtk_window_get_default_widget (GtkWindow *window);
+;;; void              gtk_window_set_default        (GtkWindow *window,
+;;;                                                  GtkWidget *default_widget);
+;;; void              gtk_window_present            (GtkWindow *window);
+;;; void              gtk_window_present_with_time  (GtkWindow *window,
+;;;                                                  guint32 timestamp);
+;;; void              gtk_window_iconify            (GtkWindow *window);
+;;; void              gtk_window_deiconify          (GtkWindow *window);
+;;; void              gtk_window_stick              (GtkWindow *window);
+;;; void              gtk_window_unstick            (GtkWindow *window);
+;;; void              gtk_window_maximize           (GtkWindow *window);
+;;; void              gtk_window_unmaximize         (GtkWindow *window);
+;;; void              gtk_window_fullscreen         (GtkWindow *window);
+;;; void              gtk_window_unfullscreen       (GtkWindow *window);
+;;; void              gtk_window_set_keep_above     (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_keep_below     (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_begin_resize_drag  (GtkWindow *window,
+;;;                                                  GdkWindowEdge edge,
+;;;                                                  gint button,
+;;;                                                  gint root_x,
+;;;                                                  gint root_y,
+;;;                                                  guint32 timestamp);
+;;; void              gtk_window_begin_move_drag    (GtkWindow *window,
+;;;                                                  gint button,
+;;;                                                  gint root_x,
+;;;                                                  gint root_y,
+;;;                                                  guint32 timestamp);
+;;; void              gtk_window_set_decorated      (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_deletable      (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_mnemonic_modifier
+;;;                                                 (GtkWindow *window,
+;;;                                                  GdkModifierType modifier);
+;;; void              gtk_window_set_type_hint      (GtkWindow *window,
+;;;                                                  GdkWindowTypeHint hint);
+;;; void              gtk_window_set_skip_taskbar_hint
+;;;                                                 (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_skip_pager_hint
+;;;                                                 (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_urgency_hint   (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_accept_focus   (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_focus_on_map   (GtkWindow *window,
+;;;                                                  gboolean setting);
+;;; void              gtk_window_set_startup_id     (GtkWindow *window,
+;;;                                                  const gchar *startup_id);
+;;; void              gtk_window_set_role           (GtkWindow *window,
+;;;                                                  const gchar *role);
+;;; gboolean          gtk_window_get_decorated      (GtkWindow *window);
+;;; gboolean          gtk_window_get_deletable      (GtkWindow *window);
+;;; GList *           gtk_window_get_default_icon_list (void);
+;;; const gchar *     gtk_window_get_default_icon_name (void);
+;;; void              gtk_window_get_default_size   (GtkWindow *window,
+;;;                                                  gint *width,
+;;;                                                  gint *height);
+;;;
+;;; gboolean          gtk_window_get_destroy_with_parent  (GtkWindow *window);
+;;; GdkPixbuf *       gtk_window_get_icon                 (GtkWindow *window);
+;;; GList *           gtk_window_get_icon_list            (GtkWindow *window);
+;;; const gchar *     gtk_window_get_icon_name            (GtkWindow *window);
+;;; GdkModifierType   gtk_window_get_mnemonic_modifier    (GtkWindow *window);
+;;; gboolean          gtk_window_get_modal                (GtkWindow *window);
+;;; void              gtk_window_get_position             (GtkWindow *window,
+;;;                                                        gint *root_x,
+;;;                                                        gint *root_y);
+;;; const gchar *     gtk_window_get_role                 (GtkWindow *window);
+;;; void              gtk_window_get_size                 (GtkWindow *window,
+;;;                                                        gint *width,
+;;;                                                        gint *height);
+;;; const gchar *     gtk_window_get_title                (GtkWindow *window);
+;;; GtkWindow *       gtk_window_get_transient_for        (GtkWindow *window);
+;;; GdkWindowTypeHint gtk_window_get_type_hint            (GtkWindow *window);
+;;; gboolean          gtk_window_get_skip_taskbar_hint    (GtkWindow *window);
+;;; gboolean          gtk_window_get_skip_pager_hint      (GtkWindow *window);
+;;; gboolean          gtk_window_get_urgency_hint         (GtkWindow *window);
+;;; gboolean          gtk_window_get_accept_focus         (GtkWindow *window);
+;;; gboolean          gtk_window_get_focus_on_map         (GtkWindow *window);
+;;; GtkWindowGroup *  gtk_window_get_group                (GtkWindow *window);
+;;; gboolean          gtk_window_has_group                (GtkWindow *window);
+;;; GtkWindowType     gtk_window_get_window_type          (GtkWindow *window);
+;;; void              gtk_window_move                     (GtkWindow *window,
+;;;                                                        gint x,
+;;;                                                        gint y);
+;;; gboolean          gtk_window_parse_geometry           (GtkWindow *window,
+;;;                                                        const gchar *geometry);
+;;; void              gtk_window_reshow_with_initial_size (GtkWindow *window);
+;;; void              gtk_window_resize                   (GtkWindow *window,
+;;;                                                        gint width,
+;;;                                                        gint height);
+;;; void              gtk_window_resize_to_geometry       (GtkWindow *window,
+;;;                                                        gint width,
+;;;                                                        gint height);
+;;; void              gtk_window_set_default_icon_list    (GList *list);
+;;; void              gtk_window_set_default_icon         (GdkPixbuf *icon);
+;;; gboolean          gtk_window_set_default_icon_from_file
+;;;                                                       (const gchar *filename,
+;;;                                                        GError **err);
+;;; void              gtk_window_set_default_icon_name    (const gchar *name);
+;;; void              gtk_window_set_icon                 (GtkWindow *window,
+;;;                                                        GdkPixbuf *icon);
+;;; void              gtk_window_set_icon_list            (GtkWindow *window,
+;;;                                                        GList *list);
+;;; gboolean          gtk_window_set_icon_from_file       (GtkWindow *window,
+;;;                                                        const gchar *filename,
+;;;                                                        GError **err);
+;;; void              gtk_window_set_icon_name            (GtkWindow *window,
+;;;                                                        const gchar *name);
+;;; void              gtk_window_set_auto_startup_notification
+;;;                                                       (gboolean setting);
+;;; gdouble           gtk_window_get_opacity              (GtkWindow *window);
+;;; void              gtk_window_set_opacity              (GtkWindow *window,
+;;;                                                        gdouble opacity);
+;;; gboolean          gtk_window_get_mnemonics_visible    (GtkWindow *window);
+;;; void              gtk_window_set_mnemonics_visible    (GtkWindow *window,
+;;;                                                        gboolean setting);
+;;; gboolean          gtk_window_get_focus_visible        (GtkWindow *window);
+;;; void              gtk_window_set_focus_visible        (GtkWindow *window,
+;;;                                                        gboolean setting);
+;;; void              gtk_window_set_has_resize_grip      (GtkWindow *window,
+;;;                                                        gboolean value);
+;;; gboolean          gtk_window_get_has_resize_grip      (GtkWindow *window);
+;;; gboolean          gtk_window_resize_grip_is_visible   (GtkWindow *window);
+;;; gboolean          gtk_window_get_resize_grip_area     (GtkWindow *window,
+;;;                                                        GdkRectangle *rect);
+;;; GtkApplication *  gtk_window_get_application          (GtkWindow *window);
+;;; void              gtk_window_set_application          (GtkWindow *window,
+;;;                                                        GtkApplication *application);
+;;; void              gtk_window_set_has_user_ref_count   (GtkWindow *window,
+;;;                                                        gboolean setting);
 ;;; 
 ;;; Object Hierarchy
 ;;; 
@@ -240,49 +248,49 @@
 ;;;
 ;;; Properties
 ;;; 
-;;;   "accept-focus"             gboolean              : Read / Write
-;;;   "application"              GtkApplication*       : Read / Write
-;;;   "decorated"                gboolean              : Read / Write
-;;;   "default-height"           gint                  : Read / Write
-;;;   "default-width"            gint                  : Read / Write
-;;;   "deletable"                gboolean              : Read / Write
-;;;   "destroy-with-parent"      gboolean              : Read / Write
-;;;   "focus-on-map"             gboolean              : Read / Write
-;;;   "focus-visible"            gboolean              : Read / Write
-;;;   "gravity"                  GdkGravity            : Read / Write
-;;;   "has-resize-grip"          gboolean              : Read / Write
-;;;   "has-toplevel-focus"       gboolean              : Read
-;;;   "icon"                     GdkPixbuf*            : Read / Write
-;;;   "icon-name"                gchar*                : Read / Write
-;;;   "is-active"                gboolean              : Read
-;;;   "mnemonics-visible"        gboolean              : Read / Write
-;;;   "modal"                    gboolean              : Read / Write
-;;;   "opacity"                  gdouble               : Read / Write
-;;;   "resizable"                gboolean              : Read / Write
-;;;   "resize-grip-visible"      gboolean              : Read
-;;;   "role"                     gchar*                : Read / Write
-;;;   "screen"                   GdkScreen*            : Read / Write
-;;;   "skip-pager-hint"          gboolean              : Read / Write
-;;;   "skip-taskbar-hint"        gboolean              : Read / Write
-;;;   "startup-id"               gchar*                : Write
-;;;   "title"                    gchar*                : Read / Write
-;;;   "transient-for"            GtkWindow*            : Read / Write / Construct
-;;;   "type"                     GtkWindowType         : Read / Write / Construct Only
-;;;   "type-hint"                GdkWindowTypeHint     : Read / Write
-;;;   "urgency-hint"             gboolean              : Read / Write
-;;;   "window-position"          GtkWindowPosition     : Read / Write
+;;;   "accept-focus"          gboolean           : Read / Write
+;;;   "application"           GtkApplication*    : Read / Write
+;;;   "decorated"             gboolean           : Read / Write
+;;;   "default-height"        gint               : Read / Write
+;;;   "default-width"         gint               : Read / Write
+;;;   "deletable"             gboolean           : Read / Write
+;;;   "destroy-with-parent"   gboolean           : Read / Write
+;;;   "focus-on-map"          gboolean           : Read / Write
+;;;   "focus-visible"         gboolean           : Read / Write
+;;;   "gravity"               GdkGravity         : Read / Write
+;;;   "has-resize-grip"       gboolean           : Read / Write
+;;;   "has-toplevel-focus"    gboolean           : Read
+;;;   "icon"                  GdkPixbuf*         : Read / Write
+;;;   "icon-name"             gchar*             : Read / Write
+;;;   "is-active"             gboolean           : Read
+;;;   "mnemonics-visible"     gboolean           : Read / Write
+;;;   "modal"                 gboolean           : Read / Write
+;;;   "opacity"               gdouble            : Read / Write
+;;;   "resizable"             gboolean           : Read / Write
+;;;   "resize-grip-visible"   gboolean           : Read
+;;;   "role"                  gchar*             : Read / Write
+;;;   "screen"                GdkScreen*         : Read / Write
+;;;   "skip-pager-hint"       gboolean           : Read / Write
+;;;   "skip-taskbar-hint"     gboolean           : Read / Write
+;;;   "startup-id"            gchar*             : Write
+;;;   "title"                 gchar*             : Read / Write
+;;;   "transient-for"         GtkWindow*         : Read / Write / Construct
+;;;   "type"                  GtkWindowType      : Read / Write / Construct Only
+;;;   "type-hint"             GdkWindowTypeHint  : Read / Write
+;;;   "urgency-hint"          gboolean           : Read / Write
+;;;   "window-position"       GtkWindowPosition  : Read / Write
 ;;; 
 ;;; Style Properties
 ;;; 
-;;;   "resize-grip-height"       gint                  : Read / Write
-;;;   "resize-grip-width"        gint                  : Read / Write
+;;;   "resize-grip-height"    gint               : Read / Write
+;;;   "resize-grip-width"     gint               : Read / Write
 ;;; 
 ;;; Signals
 ;;; 
-;;;   "activate-default"                               : Action
-;;;   "activate-focus"                                 : Action
-;;;   "keys-changed"                                   : Run First
-;;;   "set-focus"                                      : Run Last
+;;;   "activate-default"                         : Action
+;;;   "activate-focus"                           : Action
+;;;   "keys-changed"                             : Run First
+;;;   "set-focus"                                : Run Last
 ;;; 
 ;;; Description
 ;;; 
@@ -304,27 +312,15 @@
 ;;; 
 ;;; Example 48. A UI definition fragment with accel groups
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 
-;;; 	
-;;; 
-;;; <object class="GtkWindow">
-;;;   <accel-groups>
-;;;     <group name="accelgroup1"/>
-;;;   </accel-groups>
-;;; </object>
-;;; <!-- -->
-;;; ...
-;;; <!-- -->
-;;; <object class="GtkAccelGroup" id="accelgroup1"/>
+;;;  1 <object class="GtkWindow">
+;;;  2   <accel-groups>
+;;;  3     <group name="accelgroup1"/>
+;;;  4   </accel-groups>
+;;;  5 </object>
+;;;  6 <!-- -->
+;;;  7 ...
+;;;  8 <!-- -->
+;;;  9 <object class="GtkAccelGroup" id="accelgroup1"/>
 ;;; ----------------------------------------------------------------------------
 
 (in-package :gtk)
@@ -334,6 +330,85 @@
 ;;; 
 ;;; typedef struct _GtkWindow GtkWindow;
 ;;; ----------------------------------------------------------------------------
+
+(define-g-object-class "GtkWindow" gtk-window
+                       (:superclass bin
+                        :export t
+                        :interfaces ("AtkImplementorIface" "GtkBuildable")
+                        :type-initializer "gtk_window_get_type")
+                       ((accept-focus gtk-window-accept-focus "accept-focus"
+                         "gboolean" t t)
+                        (allow-grow gtk-window-allow-grow "allow-grow"
+                         "gboolean" t t)
+                        (allow-shrink gtk-window-allow-shrink "allow-shrink"
+                         "gboolean" t t)
+                        (decorated gtk-window-decorated "decorated" "gboolean"
+                         t t)
+                        (default-height gtk-window-default-height
+                         "default-height" "gint" t t)
+                        (default-width gtk-window-default-width "default-width"
+                         "gint" t t)
+                        (deletable gtk-window-deletable "deletable" "gboolean"
+                         t t)
+                        (destroy-with-parent gtk-window-destroy-with-parent
+                         "destroy-with-parent" "gboolean" t t)
+                        (focus-on-map gtk-window-focus-on-map "focus-on-map"
+                         "gboolean" t t)
+                        (gravity gtk-window-gravity "gravity" "GdkGravity" t t)
+                        (has-toplevel-focus gtk-window-has-toplevel-focus
+                         "has-toplevel-focus" "gboolean" t nil)
+                        (icon gtk-window-icon "icon" "GdkPixbuf" t t)
+                        (icon-name gtk-window-icon-name "icon-name"
+                         "gchararray" t t)
+                        (is-active gtk-window-is-active "is-active" "gboolean"
+                         t nil)
+;                        (modal gtk-window-modal "modal" "gboolean" t t)
+                        (:cffi modal gtk-window-modal
+                               :boolean
+                               nil
+                               "gtk_window_set_modal"
+                          )
+                        (opacity gtk-window-opacity "opacity" "gdouble" t t)
+                        (resizable gtk-window-resizable "resizable" "gboolean"
+                         t t)
+                        (role gtk-window-role "role" "gchararray" t t)
+                        (screen gtk-window-screen "screen" "GdkScreen" t t)
+                        (skip-pager-hint gtk-window-skip-pager-hint
+                         "skip-pager-hint" "gboolean" t t)
+                        (skip-taskbar-hint gtk-window-skip-taskbar-hint
+                         "skip-taskbar-hint" "gboolean" t t)
+                        (startup-id gtk-window-startup-id "startup-id"
+                         "gchararray" nil t)
+                        (title gtk-window-title "title" "gchararray" t t)
+                        (transient-for gtk-window-transient-for "transient-for"
+                         "GtkWindow" t t)
+                        (type gtk-window-type "type" "GtkWindowType" t nil)
+                        (type-hint gtk-window-type-hint "type-hint"
+                         "GdkWindowTypeHint" t t)
+                        (urgency-hint gtk-window-urgency-hint "urgency-hint"
+                         "gboolean" t t)
+                        (window-position gtk-window-window-position
+                         "window-position" "GtkWindowPosition" t t)
+                        (:cffi focus gtk-window-focus (g-object widget)
+                         "gtk_window_get_focus" "gtk_window_set_focus")
+                        (:cffi default-widget gtk-window-default-widget
+                         (g-object widget) "gtk_window_get_default_widget"
+                         "gtk_window_set_default")
+                        (:cffi has-frame gtk-window-has-frame :boolean
+                         "gtk_window_get_has_frame" "gtk_window_set_has_frame")
+                        (:cffi mnemonic-modifier gtk-window-mnemonic-modifier
+                         (g-object modifier-type)
+                         "gtk_window_get_mnemonic_modifier"
+                         "gtk_window_set_mnemonic_modifier")
+                        (:cffi icon-list gtk-window-icon-list
+                         (glist pixbuf :free-from-foreign t :free-to-foreign t)
+                         "gtk_window_get_icon_list" "gtk_window_set_icon_list")
+                        (:cffi group gtk-window-group (g-object window-group)
+                         "gtk_window_get_group" nil)
+                        (:cffi keep-above gtk-window-keep-above :boolean nil
+                         "gtk_window_set_keep_above")
+                        (:cffi keep-below gtk-window-keep-below :boolean nil
+                         "gtk_window_set_keep_below")))
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_window_new ()
@@ -359,6 +434,11 @@
 ;;; 	a new GtkWindow.
 ;;; ----------------------------------------------------------------------------
 
+(defun window-new (type)
+  (make-instance 'gtk-window :type type))
+
+(export 'window-new)
+
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_title ()
 ;;; 
@@ -378,14 +458,25 @@
 ;;; 	title of the window
 ;;; ----------------------------------------------------------------------------
 
+(defun window-set-title (window title)
+  (setf (gtk-window-title window) title))
+
+(export 'window-set-title)
+
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_wmclass ()
 ;;; 
-;;; void                gtk_window_set_wmclass              (GtkWindow *window,
-;;;                                                          const gchar *wmclass_name,
-;;;                                                          const gchar *wmclass_class);
+;;; void gtk_window_set_wmclass (GtkWindow *window,
+;;;                              const gchar *wmclass_name,
+;;;                              const gchar *wmclass_class)
 ;;; 
-;;; Don't use this function. It sets the X Window System "class" and "name" hints for a window. According to the ICCCM, you should always set these to the same value for all windows in an application, and GTK+ sets them to that value by default, so calling this function is sort of pointless. However, you may want to call gtk_window_set_role() on each window in your application, for the benefit of the session manager. Setting the role allows the window manager to restore window positions when loading a saved session.
+;;; Don't use this function. It sets the X Window System "class" and "name"
+;;; hints for a window. According to the ICCCM, you should always set these to
+;;; the same value for all windows in an application, and GTK+ sets them to that
+;;; value by default, so calling this function is sort of pointless. However,
+;;; you may want to call gtk_window_set_role() on each window in your
+;;; application, for the benefit of the session manager. Setting the role allows
+;;; the window manager to restore window positions when loading a saved session.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
@@ -395,21 +486,34 @@
 ;;; 
 ;;; wmclass_class :
 ;;; 	window class hint
+;;; ----------------------------------------------------------------------------
+
+;;; *** NOT IMPLEMENTED ***
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_resizable ()
 ;;; 
-;;; void                gtk_window_set_resizable            (GtkWindow *window,
-;;;                                                          gboolean resizable);
+;;; void gtk_window_set_resizable (GtkWindow *window, gboolean resizable)
 ;;; 
-;;; Sets whether the user can resize a window. Windows are user resizable by default.
+;;; Sets whether the user can resize a window. Windows are user resizable by
+;;; default.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
 ;;; 
 ;;; resizable :
 ;;; 	TRUE if the user can resize this window
+;;; ----------------------------------------------------------------------------
+
+(defun window-set-resizable (window resizable)
+  (setf (gtk-window-resizable window) resizable))
+
+(export 'window-set-resizable)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_get_resizable ()
 ;;; 
-;;; gboolean            gtk_window_get_resizable            (GtkWindow *window);
+;;; gboolean gtk_window_get_resizable (GtkWindow *window)
 ;;; 
 ;;; Gets the value set by gtk_window_set_resizable().
 ;;; 
@@ -418,22 +522,35 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if the user can resize the window
+;;; ----------------------------------------------------------------------------
+
+(defun window-get-resizable (window)
+  (gtk-window-resizable window))
+
+(export 'window-get-resizable)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_add_accel_group ()
 ;;; 
-;;; void                gtk_window_add_accel_group          (GtkWindow *window,
-;;;                                                          GtkAccelGroup *accel_group);
+;;; void gtk_window_add_accel_group (GtkWindow *window,
+;;;                                  GtkAccelGroup *accel_group)
 ;;; 
-;;; Associate accel_group with window, such that calling gtk_accel_groups_activate() on window will activate accelerators in accel_group.
+;;; Associate accel_group with window, such that calling
+;;; gtk_accel_groups_activate() on window will activate accelerators in
+;;; accel_group.
 ;;; 
 ;;; window :
 ;;; 	window to attach accelerator group to
 ;;; 
 ;;; accel_group :
 ;;; 	a GtkAccelGroup
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_remove_accel_group ()
 ;;; 
-;;; void                gtk_window_remove_accel_group       (GtkWindow *window,
-;;;                                                          GtkAccelGroup *accel_group);
+;;; void gtk_window_remove_accel_group (GtkWindow *window,
+;;;                                     GtkAccelGroup *accel_group)
 ;;; 
 ;;; Reverses the effects of gtk_window_add_accel_group().
 ;;; 
@@ -442,9 +559,12 @@
 ;;; 
 ;;; accel_group :
 ;;; 	a GtkAccelGroup
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_activate_focus ()
 ;;; 
-;;; gboolean            gtk_window_activate_focus           (GtkWindow *window);
+;;; gboolean gtk_window_activate_focus (GtkWindow *window)
 ;;; 
 ;;; Activates the current focused widget within the window.
 ;;; 
@@ -453,46 +573,81 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if a widget got activated.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_activate_default ()
 ;;; 
-;;; gboolean            gtk_window_activate_default         (GtkWindow *window);
+;;; gboolean gtk_window_activate_default (GtkWindow *window)
 ;;; 
-;;; Activates the default widget for the window, unless the current focused widget has been configured to receive the default action (see gtk_widget_set_receives_default()), in which case the focused widget is activated.
+;;; Activates the default widget for the window, unless the current focused
+;;; widget has been configured to receive the default action (see
+;;; gtk_widget_set_receives_default()), in which case the focused widget is
+;;; activated.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if a widget got activated.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_modal ()
 ;;; 
-;;; void                gtk_window_set_modal                (GtkWindow *window,
-;;;                                                          gboolean modal);
+;;; void gtk_window_set_modal (GtkWindow *window, gboolean modal)
 ;;; 
-;;; Sets a window modal or non-modal. Modal windows prevent interaction with other windows in the same application. To keep modal dialogs on top of main application windows, use gtk_window_set_transient_for() to make the dialog transient for the parent; most window managers will then disallow lowering the dialog below the parent.
+;;; Sets a window modal or non-modal. Modal windows prevent interaction with
+;;; other windows in the same application. To keep modal dialogs on top of main
+;;; application windows, use gtk_window_set_transient_for() to make the dialog
+;;; transient for the parent; most window managers will then disallow lowering
+;;; the dialog below the parent.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
 ;;; 
 ;;; modal :
 ;;; 	whether the window is modal
+;;; ----------------------------------------------------------------------------
+
+(defun window-set-modal (window modal)
+  (setf (gtk-window-modal window) modal))
+
+(export 'window-set-modal)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_default_size ()
 ;;; 
-;;; void                gtk_window_set_default_size         (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
+;;; void gtk_window_set_default_size (GtkWindow *window,
+;;;                                   gint width, gint height)
 ;;; 
-;;; Sets the default size of a window. If the window's "natural" size (its size request) is larger than the default, the default will be ignored. More generally, if the default size does not obey the geometry hints for the window (gtk_window_set_geometry_hints() can be used to set these explicitly), the default size will be clamped to the nearest permitted size.
+;;; Sets the default size of a window. If the window's "natural" size (its size
+;;; request) is larger than the default, the default will be ignored. More
+;;; generally, if the default size does not obey the geometry hints for the
+;;; window (gtk_window_set_geometry_hints() can be used to set these
+;;; explicitly), the default size will be clamped to the nearest permitted size.
 ;;; 
-;;; Unlike gtk_widget_set_size_request(), which sets a size request for a widget and thus would keep users from shrinking the window, this function only sets the initial size, just as if the user had resized the window themselves. Users can still shrink the window again as they normally would. Setting a default size of -1 means to use the "natural" default size (the size request of the window).
+;;; Unlike gtk_widget_set_size_request(), which sets a size request for a widget
+;;; and thus would keep users from shrinking the window, this function only sets
+;;; the initial size, just as if the user had resized the window themselves.
+;;; Users can still shrink the window again as they normally would. Setting a
+;;; default size of -1 means to use the "natural" default size (the size request
+;;; of the window).
 ;;; 
-;;; For more control over a window's initial size and how resizing works, investigate gtk_window_set_geometry_hints().
+;;; For more control over a window's initial size and how resizing works,
+;;; investigate gtk_window_set_geometry_hints().
 ;;; 
-;;; For some uses, gtk_window_resize() is a more appropriate function. gtk_window_resize() changes the current size of the window, rather than the size to be used on initial display. gtk_window_resize() always affects the window itself, not the geometry widget.
+;;; For some uses, gtk_window_resize() is a more appropriate function.
+;;; gtk_window_resize() changes the current size of the window, rather than the
+;;; size to be used on initial display. gtk_window_resize() always affects the
+;;; window itself, not the geometry widget.
 ;;; 
-;;; The default size of a window only affects the first time a window is shown; if a window is hidden and re-shown, it will remember the size it had prior to hiding, rather than using the default size.
+;;; The default size of a window only affects the first time a window is shown;
+;;; if a window is hidden and re-shown, it will remember the size it had prior
+;;; to hiding, rather than using the default size.
 ;;; 
-;;; Windows can't actually be 0x0 in size, they must be at least 1x1, but passing 0 for width and height is OK, resulting in a 1x1 default size.
+;;; Windows can't actually be 0x0 in size, they must be at least 1x1, but
+;;; passing 0 for width and height is OK, resulting in a 1x1 default size.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
@@ -502,13 +657,22 @@
 ;;; 
 ;;; height :
 ;;; 	height in pixels, or -1 to unset the default height
+;;; ----------------------------------------------------------------------------
+
+(defun window-set-default-size (window width height)
+  (setf (gtk-window-default-width window) width)
+  (setf (gtk-window-default-height window) height))
+
+(export 'window-set-default-size)
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_default_geometry ()
 ;;; 
-;;; void                gtk_window_set_default_geometry     (GtkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
+;;; void gtk_window_set_default_geometry (GtkWindow *window,
+;;;                                       gint width, gint height)
 ;;; 
-;;; Like gtk_window_set_default_size(), but width and height are interpreted in terms of the base size and increment set with gtk_window_set_geometry_hints.
+;;; Like gtk_window_set_default_size(), but width and height are interpreted in
+;;; terms of the base size and increment set with gtk_window_set_geometry_hints.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
@@ -520,43 +684,56 @@
 ;;; 	height in resize increments, or -1 to unset the default height
 ;;; 
 ;;; Since 3.0
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_geometry_hints ()
 ;;; 
-;;; void                gtk_window_set_geometry_hints       (GtkWindow *window,
-;;;                                                          GtkWidget *geometry_widget,
-;;;                                                          GdkGeometry *geometry,
-;;;                                                          GdkWindowHints geom_mask);
+;;; void gtk_window_set_geometry_hints (GtkWindow *window,
+;;;                                     GtkWidget *geometry_widget,
+;;;                                     GdkGeometry *geometry,
+;;;                                     GdkWindowHints geom_mask)
 ;;; 
-;;; This function sets up hints about how a window can be resized by the user. You can set a minimum and maximum size; allowed resize increments (e.g. for xterm, you can only resize by the size of a character); aspect ratios; and more. See the GdkGeometry struct.
+;;; This function sets up hints about how a window can be resized by the user.
+;;; You can set a minimum and maximum size; allowed resize increments (e.g. for
+;;; xterm, you can only resize by the size of a character); aspect ratios; and
+;;; more. See the GdkGeometry struct.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
 ;;; 
 ;;; geometry_widget :
-;;; 	widget the geometry hints will be applied to or NULL. [allow-none]
+;;; 	widget the geometry hints will be applied to or NULL.
 ;;; 
 ;;; geometry :
-;;; 	struct containing geometry information or NULL. [allow-none]
+;;; 	struct containing geometry information or NULL.
 ;;; 
 ;;; geom_mask :
 ;;; 	mask indicating which struct fields should be paid attention to
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_gravity ()
 ;;; 
-;;; void                gtk_window_set_gravity              (GtkWindow *window,
-;;;                                                          GdkGravity gravity);
+;;; void gtk_window_set_gravity (GtkWindow *window, GdkGravity gravity)
 ;;; 
-;;; Window gravity defines the meaning of coordinates passed to gtk_window_move(). See gtk_window_move() and GdkGravity for more details.
+;;; Window gravity defines the meaning of coordinates passed to
+;;; gtk_window_move(). See gtk_window_move() and GdkGravity for more details.
 ;;; 
-;;; The default window gravity is GDK_GRAVITY_NORTH_WEST which will typically "do what you mean."
+;;; The default window gravity is GDK_GRAVITY_NORTH_WEST which will typically
+;;; "do what you mean."
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow
 ;;; 
 ;;; gravity :
 ;;; 	window gravity
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_get_gravity ()
 ;;; 
-;;; GdkGravity          gtk_window_get_gravity              (GtkWindow *window);
+;;; GdkGravity gtk_window_get_gravity (GtkWindow *window)
 ;;; 
 ;;; Gets the value set by gtk_window_set_gravity().
 ;;; 
@@ -564,19 +741,26 @@
 ;;; 	a GtkWindow
 ;;; 
 ;;; Returns :
-;;; 	window gravity. [transfer none]
+;;; 	window gravity.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_position ()
 ;;; 
-;;; void                gtk_window_set_position             (GtkWindow *window,
-;;;                                                          GtkWindowPosition position);
+;;; void gtk_window_set_position (GtkWindow *window, GtkWindowPosition position)
 ;;; 
-;;; Sets a position constraint for this window. If the old or new constraint is GTK_WIN_POS_CENTER_ALWAYS, this will also cause the window to be repositioned to satisfy the new constraint.
+;;; Sets a position constraint for this window. If the old or new constraint is
+;;; GTK_WIN_POS_CENTER_ALWAYS, this will also cause the window to be
+;;; repositioned to satisfy the new constraint.
 ;;; 
 ;;; window :
 ;;; 	a GtkWindow.
 ;;; 
 ;;; position :
 ;;; 	a position constraint.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_window_set_transient_for ()
 ;;; 
 ;;; void                gtk_window_set_transient_for        (GtkWindow *window,
