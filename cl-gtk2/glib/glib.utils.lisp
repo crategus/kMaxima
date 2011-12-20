@@ -171,9 +171,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_set_prgname ()
 ;;; 
-;;; void                g_set_prgname                       (const gchar *prgname);
+;;; void g_set_prgname (const gchar *prgname);
 ;;; 
-;;; Sets the name of the program. This name should not be localized, contrast with g_set_application_name(). Note that for thread-safety reasons this function can only be called once.
+;;; Sets the name of the program. This name should not be localized, contrast
+;;; with g_set_application_name(). Note that for thread-safety reasons this
+;;; function can only be called once.
 ;;; 
 ;;; prgname :
 ;;; 	the name of the program.
@@ -182,16 +184,19 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_environ ()
 ;;; 
-;;; gchar **            g_get_environ                       (void);
+;;; gchar ** g_get_environ (void);
 ;;; 
-;;; Gets the list of environment variables for the current process. The list is NULL terminated and each item in the list is of the form 'NAME=VALUE'.
+;;; Gets the list of environment variables for the current process. The list is
+;;; NULL terminated and each item in the list is of the form 'NAME=VALUE'.
 ;;; 
-;;; This is equivalent to direct access to the 'environ' global variable, except portable.
+;;; This is equivalent to direct access to the 'environ' global variable,
+;;; except portable.
 ;;; 
-;;; The return value is freshly allocated and it should be freed with g_strfreev() when it is no longer needed.
+;;; The return value is freshly allocated and it should be freed with
+;;; g_strfreev() when it is no longer needed.
 ;;; 
 ;;; Returns :
-;;; 	the list of environment variables. [array zero-terminated=1][transfer full]
+;;; 	the list of environment variables.
 ;;; 
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
@@ -199,27 +204,36 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_getenv ()
 ;;; 
-;;; const gchar *       g_getenv                            (const gchar *variable);
+;;; const gchar * g_getenv (const gchar *variable);
 ;;; 
-;;; Returns the value of an environment variable. The name and value are in the GLib file name encoding. On UNIX, this means the actual bytes which might or might not be in some consistent character set and encoding. On Windows, it is in UTF-8. On Windows, in case the environment variable's value contains references to other environment variables, they are expanded.
+;;; Returns the value of an environment variable. The name and value are in the
+;;; GLib file name encoding. On UNIX, this means the actual bytes which might or
+;;; might not be in some consistent character set and encoding. On Windows, it
+;;; is in UTF-8. On Windows, in case the environment variable's value contains
+;;; references to other environment variables, they are expanded.
 ;;; 
 ;;; variable :
 ;;; 	the environment variable to get, in the GLib file name encoding.
 ;;; 
 ;;; Returns :
-;;; 	the value of the environment variable, or NULL if the environment variable is not found. The returned string may be overwritten by the next call to g_getenv(), g_setenv() or g_unsetenv().
+;;; 	the value of the environment variable, or NULL if the environment
+;;;     variable is not found. The returned string may be overwritten by the
+;;;     next call to g_getenv(), g_setenv() or g_unsetenv().
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_setenv ()
 ;;; 
-;;; gboolean            g_setenv                            (const gchar *variable,
-;;;                                                          const gchar *value,
-;;;                                                          gboolean overwrite);
+;;; gboolean g_setenv (const gchar *variable,
+;;;                    const gchar *value,
+;;;                    gboolean overwrite);
 ;;; 
-;;; Sets an environment variable. Both the variable's name and value should be in the GLib file name encoding. On UNIX, this means that they can be any sequence of bytes. On Windows, they should be in UTF-8.
+;;; Sets an environment variable. Both the variable's name and value should be
+;;; in the GLib file name encoding. On UNIX, this means that they can be any
+;;; sequence of bytes. On Windows, they should be in UTF-8.
 ;;; 
-;;; Note that on some systems, when variables are overwritten, the memory used for the previous variables and its value isn't reclaimed.
+;;; Note that on some systems, when variables are overwritten, the memory used
+;;; for the previous variables and its value isn't reclaimed.
 ;;; 
 ;;; variable :
 ;;; 	the environment variable to set, must not contain '='.
@@ -239,11 +253,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_unsetenv ()
 ;;; 
-;;; void                g_unsetenv                          (const gchar *variable);
+;;; void g_unsetenv (const gchar *variable);
 ;;; 
 ;;; Removes an environment variable from the environment.
 ;;; 
-;;; Note that on some systems, when variables are overwritten, the memory used for the previous variables and its value isn't reclaimed. Furthermore, this function can't be guaranteed to operate in a threadsafe way.
+;;; Note that on some systems, when variables are overwritten, the memory used
+;;; for the previous variables and its value isn't reclaimed. Furthermore, this
+;;; function can't be guaranteed to operate in a threadsafe way.
 ;;; 
 ;;; variable :
 ;;; 	the environment variable to remove, must not contain '='.
@@ -254,12 +270,18 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_listenv ()
 ;;; 
-;;; gchar **            g_listenv                           (void);
+;;; gchar ** g_listenv (void);
 ;;; 
 ;;; Gets the names of all variables set in the environment.
 ;;; 
 ;;; Returns :
-;;; 	a NULL-terminated list of strings which must be freed with g_strfreev(). Programs that want to be portable to Windows should typically use this function and g_getenv() instead of using the environ array from the C library directly. On Windows, the strings in the environ array are in system codepage encoding, while in most of the typical use cases for environment variables in GLib-using programs you want the UTF-8 encoding that this function and g_getenv() provide. [array zero-terminated=1][transfer full]
+;;; 	a NULL-terminated list of strings which must be freed with g_strfreev().
+;;;     Programs that want to be portable to Windows should typically use this
+;;;     function and g_getenv() instead of using the environ array from the C
+;;;     library directly. On Windows, the strings in the environ array are in
+;;;     system codepage encoding, while in most of the typical use cases for
+;;;     environment variables in GLib-using programs you want the UTF-8 encoding
+;;;     that this function and g_getenv() provide.
 ;;; 
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
@@ -267,9 +289,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_name ()
 ;;; 
-;;; const gchar *       g_get_user_name                     (void);
+;;; const gchar * g_get_user_name (void);
 ;;; 
-;;; Gets the user name of the current user. The encoding of the returned string is system-defined. On UNIX, it might be the preferred file name encoding, or something else, and there is no guarantee that it is even consistent on a machine. On Windows, it is always UTF-8.
+;;; Gets the user name of the current user. The encoding of the returned string
+;;; is system-defined. On UNIX, it might be the preferred file name encoding, or
+;;; something else, and there is no guarantee that it is even consistent on a
+;;; machine. On Windows, it is always UTF-8.
 ;;; 
 ;;; Returns :
 ;;; 	the user name of the current user.
@@ -278,9 +303,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_real_name ()
 ;;; 
-;;; const gchar *       g_get_real_name                     (void);
+;;; const gchar * g_get_real_name (void);
 ;;; 
-;;; Gets the real name of the user. This usually comes from the user's entry in the passwd file. The encoding of the returned string is system-defined. (On Windows, it is, however, always UTF-8.) If the real user name cannot be determined, the string "Unknown" is returned.
+;;; Gets the real name of the user. This usually comes from the user's entry
+;;; in the passwd file. The encoding of the returned string is system-defined.
+;;; (On Windows, it is, however, always UTF-8.) If the real user name cannot be
+;;; determined, the string "Unknown" is returned.
 ;;; 
 ;;; Returns :
 ;;; 	the user's real name.
@@ -317,7 +345,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_data_dir ()
 ;;; 
-;;; const gchar *       g_get_user_data_dir                 (void);
+;;; const gchar * g_get_user_data_dir (void);
 ;;; 
 ;;; Returns a base directory in which to access application data such as icons
 ;;; that is customized for a particular user.
@@ -371,18 +399,27 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_runtime_dir ()
 ;;; 
-;;; const gchar *       g_get_user_runtime_dir              (void);
+;;; const gchar * g_get_user_runtime_dir (void);
 ;;; 
 ;;; Returns a directory that is unique to the current user on the local system.
 ;;; 
-;;; On UNIX platforms this is determined using the mechanisms described in the XDG Base Directory Specification. This is the directory specified in the XDG_RUNTIME_DIR environment variable. In the case that this variable is not set, GLib will issue a warning message to stderr and return the value of g_get_user_cache_dir().
+;;; On UNIX platforms this is determined using the mechanisms described in the
+;;; XDG Base Directory Specification. This is the directory specified in the
+;;; XDG_RUNTIME_DIR environment variable. In the case that this variable is not
+;;; set, GLib will issue a warning message to stderr and return the value of
+;;; g_get_user_cache_dir().
 ;;; 
-;;; On Windows this is the folder to use for local (as opposed to roaming) application data. See documentation for CSIDL_LOCAL_APPDATA. Note that on Windows it thus is the same as what g_get_user_config_dir() returns.
+;;; On Windows this is the folder to use for local (as opposed to roaming)
+;;; application data. See documentation for CSIDL_LOCAL_APPDATA. Note that on
+;;; Windows it thus is the same as what g_get_user_config_dir() returns.
 ;;; 
 ;;; Returns :
 ;;; 	a string owned by GLib that must not be modified or freed.
 ;;; 
 ;;; Since 2.28
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GUserDirectory
 ;;; 
 ;;; typedef enum {
@@ -398,9 +435,12 @@
 ;;;   G_USER_N_DIRECTORIES
 ;;; } GUserDirectory;
 ;;; 
-;;; These are logical ids for special directories which are defined depending on the platform used. You should use g_get_user_special_dir() to retrieve the full path associated to the logical id.
+;;; These are logical ids for special directories which are defined depending
+;;; on the platform used. You should use g_get_user_special_dir() to retrieve
+;;; the full path associated to the logical id.
 ;;; 
-;;; The GUserDirectory enumeration can be extended at later date. Not every platform has a directory for every logical id in this enumeration.
+;;; The GUserDirectory enumeration can be extended at later date. Not every
+;;; platform has a directory for every logical id in this enumeration.
 ;;; 
 ;;; G_USER_DIRECTORY_DESKTOP
 ;;; 	the user's Desktop directory
@@ -435,19 +475,25 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_special_dir ()
 ;;; 
-;;; const gchar *       g_get_user_special_dir              (GUserDirectory directory);
+;;; const gchar * g_get_user_special_dir (GUserDirectory directory);
 ;;; 
 ;;; Returns the full path of a special directory using its logical id.
 ;;; 
-;;; On Unix this is done using the XDG special user directories. For compatibility with existing practise, G_USER_DIRECTORY_DESKTOP falls back to $HOME/Desktop when XDG special user directories have not been set up.
+;;; On Unix this is done using the XDG special user directories. For
+;;; compatibility with existing practise, G_USER_DIRECTORY_DESKTOP falls back
+;;; to $HOME/Desktop when XDG special user directories have not been set up.
 ;;; 
-;;; Depending on the platform, the user might be able to change the path of the special directory without requiring the session to restart; GLib will not reflect any change once the special directories are loaded.
+;;; Depending on the platform, the user might be able to change the path of the
+;;; special directory without requiring the session to restart; GLib will not
+;;; reflect any change once the special directories are loaded.
 ;;; 
 ;;; directory :
 ;;; 	the logical id of special directory
 ;;; 
 ;;; Returns :
-;;; 	the path to the specified special directory, or NULL if the logical id was not found. The returned string is owned by GLib and should not be modified or freed.
+;;; 	the path to the specified special directory, or NULL if the logical id
+;;;     was not found. The returned string is owned by GLib and should not be
+;;;     modified or freed.
 ;;; 
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
@@ -455,24 +501,38 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_system_data_dirs ()
 ;;; 
-;;; const gchar * const * g_get_system_data_dirs            (void);
+;;; const gchar * const * g_get_system_data_dirs (void);
 ;;; 
-;;; Returns an ordered list of base directories in which to access system-wide application data.
+;;; Returns an ordered list of base directories in which to access system-wide
+;;; application data.
 ;;; 
-;;; On UNIX platforms this is determined using the mechanisms described in the XDG Base Directory Specification In this case the list of directories retrieved will be XDG_DATA_DIRS.
+;;; On UNIX platforms this is determined using the mechanisms described in the
+;;; XDG Base Directory Specification In this case the list of directories
+;;; retrieved will be XDG_DATA_DIRS.
 ;;; 
-;;; On Windows the first elements in the list are the Application Data and Documents folders for All Users. (These can be determined only on Windows 2000 or later and are not present in the list on other Windows versions.) See documentation for CSIDL_COMMON_APPDATA and CSIDL_COMMON_DOCUMENTS.
+;;; On Windows the first elements in the list are the Application Data and
+;;; Documents folders for All Users. (These can be determined only on Windows
+;;; 2000 or later and are not present in the list on other Windows versions.)
+;;; See documentation for CSIDL_COMMON_APPDATA and CSIDL_COMMON_DOCUMENTS.
 ;;; 
-;;; Then follows the "share" subfolder in the installation folder for the package containing the DLL that calls this function, if it can be determined.
+;;; Then follows the "share" subfolder in the installation folder for the
+;;; package containing the DLL that calls this function, if it can be
+;;; determined.
 ;;; 
-;;; Finally the list contains the "share" subfolder in the installation folder for GLib, and in the installation folder for the package the application's .exe file belongs to.
+;;; Finally the list contains the "share" subfolder in the installation folder
+;;; for GLib, and in the installation folder for the package the application's
+;;; .exe file belongs to.
 ;;; 
-;;; The installation folders above are determined by looking up the folder where the module (DLL or EXE) in question is located. If the folder's name is "bin", its parent is used, otherwise the folder itself.
+;;; The installation folders above are determined by looking up the folder where
+;;; the module (DLL or EXE) in question is located. If the folder's name is
+;;; "bin", its parent is used, otherwise the folder itself.
 ;;; 
-;;; Note that on Windows the returned list can vary depending on where this function is called.
+;;; Note that on Windows the returned list can vary depending on where this
+;;; function is called.
 ;;; 
 ;;; Returns :
-;;; 	a NULL-terminated array of strings owned by GLib that must not be modified or freed. [array zero-terminated=1][transfer none]
+;;; 	a NULL-terminated array of strings owned by GLib that must not be
+;;;     modified or freed. [array zero-terminated=1][transfer none]
 ;;; 
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
@@ -480,16 +540,25 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_system_config_dirs ()
 ;;; 
-;;; const gchar * const * g_get_system_config_dirs          (void);
+;;; const gchar * const * g_get_system_config_dirs (void);
 ;;; 
-;;; Returns an ordered list of base directories in which to access system-wide configuration information.
+;;; Returns an ordered list of base directories in which to access system-wide
+;;; configuration information.
 ;;; 
-;;; On UNIX platforms this is determined using the mechanisms described in the XDG Base Directory Specification. In this case the list of directories retrieved will be XDG_CONFIG_DIRS.
+;;; On UNIX platforms this is determined using the mechanisms described in the
+;;; XDG Base Directory Specification. In this case the list of directories
+;;; retrieved will be XDG_CONFIG_DIRS.
 ;;; 
-;;; On Windows is the directory that contains application data for all users. A typical path is C:\Documents and Settings\All Users\Application Data. This folder is used for application data that is not user specific. For example, an application can store a spell-check dictionary, a database of clip art, or a log file in the CSIDL_COMMON_APPDATA folder. This information will not roam and is available to anyone using the computer.
+;;; On Windows is the directory that contains application data for all users. A
+;;; typical path is C:\Documents and Settings\All Users\Application Data. This
+;;; folder is used for application data that is not user specific. For example,
+;;; an application can store a spell-check dictionary, a database of clip art,
+;;; or a log file in the CSIDL_COMMON_APPDATA folder. This information will not
+;;; roam and is available to anyone using the computer.
 ;;; 
 ;;; Returns :
-;;; 	a NULL-terminated array of strings owned by GLib that must not be modified or freed. [array zero-terminated=1][transfer none]
+;;; 	a NULL-terminated array of strings owned by GLib that must not be
+;;;     modified or freed.
 ;;; 
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
@@ -497,11 +566,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_reload_user_special_dirs_cache ()
 ;;; 
-;;; void                g_reload_user_special_dirs_cache    (void);
+;;; void g_reload_user_special_dirs_cache (void);
 ;;; 
-;;; Resets the cache used for g_get_user_special_dir(), so that the latest on-disk version is used. Call this only if you just changed the data on disk yourself.
+;;; Resets the cache used for g_get_user_special_dir(), so that the latest
+;;; on-disk version is used. Call this only if you just changed the data on disk
+;;; yourself.
 ;;; 
-;;; Due to threadsafety issues this may cause leaking of strings that were previously returned from g_get_user_special_dir() that can't be freed. We ensure to only leak the data for the directories that actually changed value though.
+;;; Due to threadsafety issues this may cause leaking of strings that were
+;;; previously returned from g_get_user_special_dir() that can't be freed. We
+;;; ensure to only leak the data for the directories that actually changed value
+;;; though.
 ;;; 
 ;;; Since 2.22
 ;;; ----------------------------------------------------------------------------
@@ -509,11 +583,18 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_host_name ()
 ;;; 
-;;; const gchar *       g_get_host_name                     (void);
+;;; const gchar * g_get_host_name (void);
 ;;; 
 ;;; Return a name for the machine.
 ;;; 
-;;; The returned name is not necessarily a fully-qualified domain name, or even present in DNS or some other name service at all. It need not even be unique on your local network or site, but usually it is. Callers should not rely on the return value having any specific properties like uniqueness for security purposes. Even if the name of the machine is changed while an application is running, the return value from this function does not change. The returned string is owned by GLib and should not be modified or freed. If no name can be determined, a default fixed string "localhost" is returned.
+;;; The returned name is not necessarily a fully-qualified domain name, or even
+;;; present in DNS or some other name service at all. It need not even be unique
+;;; on your local network or site, but usually it is. Callers should not rely on
+;;; the return value having any specific properties like uniqueness for security
+;;; purposes. Even if the name of the machine is changed while an application is
+;;; running, the return value from this function does not change. The returned
+;;; string is owned by GLib and should not be modified or freed. If no name
+;;; can be determined, a default fixed string "localhost" is returned.
 ;;; 
 ;;; Returns :
 ;;; 	the host name of the machine.
@@ -524,28 +605,28 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_home_dir ()
 ;;; 
-;;; const gchar *       g_get_home_dir                      (void);
+;;; const gchar * g_get_home_dir (void);
 ;;; 
 ;;; Gets the current user's home directory as defined in the password database.
 ;;; 
-;;; Note that in contrast to traditional UNIX tools, this function prefers passwd entries over the HOME environment variable.
+;;; Note that in contrast to traditional UNIX tools, this function prefers
+;;; passwd entries over the HOME environment variable.
 ;;; 
-;;; One of the reasons for this decision is that applications in many cases need special handling to deal with the case where HOME is
+;;; One of the reasons for this decision is that applications in many cases
+;;; need special handling to deal with the case where HOME is
+;;;
 ;;; Not owned by the user
 ;;; Not writeable
 ;;; Not even readable
 ;;; 
-;;; Since applications are in general not written to deal with these situations it was considered better to make g_get_home_dir() not pay attention to HOME and to return the real home directory for the user. If applications want to pay attention to HOME, they can do:
+;;; Since applications are in general not written to deal with these situations
+;;; it was considered better to make g_get_home_dir() not pay attention to HOME
+;;; and to return the real home directory for the user. If applications want to
+;;; pay attention to HOME, they can do:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 
-;;; 	
-;;; 
-;;; const char *homedir = g_getenv ("HOME");
-;;;  if (!homedir)
-;;;     homedir = g_get_home_dir ();
+;;;  1 const char *homedir = g_getenv ("HOME");
+;;;  2 if (!homedir)
+;;;  3     homedir = g_get_home_dir ();
 ;;; 
 ;;; Returns :
 ;;; 	the current user's home directory
@@ -554,9 +635,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_tmp_dir ()
 ;;; 
-;;; const gchar *       g_get_tmp_dir                       (void);
+;;; const gchar * g_get_tmp_dir (void);
 ;;; 
-;;; Gets the directory to use for temporary files. This is found from inspecting the environment variables TMPDIR, TMP, and TEMP in that order. If none of those are defined "/tmp" is returned on UNIX and "C:\" on Windows. The encoding of the returned string is system-defined. On Windows, it is always UTF-8. The return value is never NULL or the empty string.
+;;; Gets the directory to use for temporary files. This is found from inspecting
+;;; the environment variables TMPDIR, TMP, and TEMP in that order. If none of
+;;; those are defined "/tmp" is returned on UNIX and "C:\" on Windows. The
+;;; encoding of the returned string is system-defined. On Windows, it is always
+;;; UTF-8. The return value is never NULL or the empty string.
 ;;; 
 ;;; Returns :
 ;;; 	the directory to use for temporary files.
@@ -565,9 +650,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_current_dir ()
 ;;; 
-;;; gchar *             g_get_current_dir                   (void);
+;;; gchar * g_get_current_dir (void);
 ;;; 
-;;; Gets the current directory. The returned string should be freed when no longer needed. The encoding of the returned string is system defined. On Windows, it is always UTF-8.
+;;; Gets the current directory. The returned string should be freed when no
+;;; longer needed. The encoding of the returned string is system defined. On
+;;; Windows, it is always UTF-8.
 ;;; 
 ;;; Returns :
 ;;; 	the current directory.
@@ -576,13 +663,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_basename ()
 ;;; 
-;;; const gchar *       g_basename                          (const gchar *file_name);
+;;; const gchar * g_basename (const gchar *file_name);
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_basename has been deprecated since version 2.2 and should not be used in newly-written code. Use g_path_get_basename() instead, but notice that g_path_get_basename() allocates new memory for the returned string, unlike this function which returns a pointer into the argument.
+;;; g_basename has been deprecated since version 2.2 and should not be used
+;;; in newly-written code. Use g_path_get_basename() instead, but notice that
+;;; g_path_get_basename() allocates new memory for the returned string, unlike
+;;; this function which returns a pointer into the argument.
 ;;; 
-;;; Gets the name of the file without any leading directory components. It returns a pointer into the given file name string.
+;;; Gets the name of the file without any leading directory components. It
+;;; returns a pointer into the given file name string.
 ;;; 
 ;;; file_name :
 ;;; 	the name of the file.
@@ -594,13 +685,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_dirname
 ;;; 
-;;; #define             g_dirname
+;;; #define g_dirname
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_dirname is deprecated and should not be used in newly-written code. use g_path_get_dirname() instead
+;;; g_dirname is deprecated and should not be used in newly-written code. use
+;;; g_path_get_dirname() instead
 ;;; 
-;;; Gets the directory components of a file name. If the file name has no directory components "." is returned. The returned string should be freed when no longer needed.
+;;; Gets the directory components of a file name. If the file name has no
+;;; directory components "." is returned. The returned string should be freed
+;;; when no longer needed.
 ;;; 
 ;;; file_name :
 ;;; 	the name of the file
@@ -612,17 +706,30 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_path_is_absolute ()
 ;;; 
-;;; gboolean            g_path_is_absolute                  (const gchar *file_name);
+;;; gboolean g_path_is_absolute (const gchar *file_name);
 ;;; 
-;;; Returns TRUE if the given file_name is an absolute file name. Note that this is a somewhat vague concept on Windows.
+;;; Returns TRUE if the given file_name is an absolute file name. Note that
+;;; this is a somewhat vague concept on Windows.
 ;;; 
-;;; On POSIX systems, an absolute file name is well-defined. It always starts from the single root directory. For example "/usr/local".
+;;; On POSIX systems, an absolute file name is well-defined. It always starts
+;;; from the single root directory. For example "/usr/local".
 ;;; 
-;;; On Windows, the concepts of current drive and drive-specific current directory introduce vagueness. This function interprets as an absolute file name one that either begins with a directory separator such as "\Users\tml" or begins with the root on a drive, for example "C:\Windows". The first case also includes UNC paths such as "\\myserver\docs\foo". In all cases, either slashes or backslashes are accepted.
+;;; On Windows, the concepts of current drive and drive-specific current
+;;; directory introduce vagueness. This function interprets as an absolute file
+;;; name one that either begins with a directory separator such as "\Users\tml"
+;;; or begins with the root on a drive, for example "C:\Windows". The first case
+;;; also includes UNC paths such as "\\myserver\docs\foo". In all cases, either
+;;; slashes or backslashes are accepted.
 ;;; 
-;;; Note that a file name relative to the current drive root does not truly specify a file uniquely over time and across processes, as the current drive is a per-process value and can be changed.
+;;; Note that a file name relative to the current drive root does not truly
+;;; specify a file uniquely over time and across processes, as the current drive
+;;; is a per-process value and can be changed.
 ;;; 
-;;; File names relative the current directory on some specific drive, such as "D:foo/bar", are not interpreted as absolute by this function, but they obviously are not relative to the normal current directory as returned by getcwd() or g_get_current_dir() either. Such paths should be avoided, or need to be handled using Windows-specific code.
+;;; File names relative the current directory on some specific drive, such as
+;;; "D:foo/bar", are not interpreted as absolute by this function, but they
+;;; obviously are not relative to the normal current directory as returned by
+;;; getcwd() or g_get_current_dir() either. Such paths should be avoided, or
+;;; need to be handled using Windows-specific code.
 ;;; 
 ;;; file_name :
 ;;; 	a file name.
@@ -634,9 +741,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_path_skip_root ()
 ;;; 
-;;; const gchar *       g_path_skip_root                    (const gchar *file_name);
+;;; const gchar * g_path_skip_root (const gchar *file_name);
 ;;; 
-;;; Returns a pointer into file_name after the root component, i.e. after the "/" in UNIX or "C:\" under Windows. If file_name is not an absolute path it returns NULL.
+;;; Returns a pointer into file_name after the root component, i.e. after the
+;;; "/" in UNIX or "C:\" under Windows. If file_name is not an absolute path
+;;; it returns NULL.
 ;;; 
 ;;; file_name :
 ;;; 	a file name.
@@ -648,9 +757,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_path_get_basename ()
 ;;; 
-;;; gchar *             g_path_get_basename                 (const gchar *file_name);
+;;; gchar * g_path_get_basename (const gchar *file_name);
 ;;; 
-;;; Gets the last component of the filename. If file_name ends with a directory separator it gets the component before the last slash. If file_name consists only of directory separators (and on Windows, possibly a drive letter), a single separator is returned. If file_name is empty, it gets ".".
+;;; Gets the last component of the filename. If file_name ends with a directory
+;;; separator it gets the component before the last slash. If file_name consists
+;;; only of directory separators (and on Windows, possibly a drive letter), a
+;;; single separator is returned. If file_name is empty, it gets ".".
 ;;; 
 ;;; file_name :
 ;;; 	the name of the file.
@@ -662,9 +774,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_path_get_dirname ()
 ;;; 
-;;; gchar *             g_path_get_dirname                  (const gchar *file_name);
+;;; gchar * g_path_get_dirname (const gchar *file_name);
 ;;; 
-;;; Gets the directory components of a file name. If the file name has no directory components "." is returned. The returned string should be freed when no longer needed.
+;;; Gets the directory components of a file name. If the file name has no
+;;; directory components "." is returned. The returned string should be freed
+;;; when no longer needed.
 ;;; 
 ;;; file_name :
 ;;; 	the name of the file.
@@ -726,8 +840,8 @@
 ;;; gchar * g_build_filenamev (gchar **args)
 ;;; 
 ;;; Behaves exactly like g_build_filename(), but takes the path elements as a
-;;; string array, instead of varargs. This function is mainly meant for language
-;;; bindings.
+;;; string array, instead of varargs. This function is mainly meant for
+;;; language bindings.
 ;;; 
 ;;; args :
 ;;; 	NULL-terminated array of strings containing the path elements.
@@ -744,21 +858,35 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_build_path ()
 ;;; 
-;;; gchar *             g_build_path                        (const gchar *separator,
-;;;                                                          const gchar *first_element,
-;;;                                                          ...);
+;;; gchar * g_build_path (const gchar *separator,
+;;;                       const gchar *first_element,
+;;;                       ...);
 ;;; 
-;;; Creates a path from a series of elements using separator as the separator between elements. At the boundary between two elements, any trailing occurrences of separator in the first element, or leading occurrences of separator in the second element are removed and exactly one copy of the separator is inserted.
+;;; Creates a path from a series of elements using separator as the separator
+;;; between elements. At the boundary between two elements, any trailing
+;;; occurrences of separator in the first element, or leading occurrences of
+;;; separator in the second element are removed and exactly one copy of the
+;;; separator is inserted.
 ;;; 
 ;;; Empty elements are ignored.
 ;;; 
-;;; The number of leading copies of the separator on the result is the same as the number of leading copies of the separator on the first non-empty element.
+;;; The number of leading copies of the separator on the result is the same as
+;;; the number of leading copies of the separator on the first non-empty
+;;; element.
 ;;; 
-;;; The number of trailing copies of the separator on the result is the same as the number of trailing copies of the separator on the last non-empty element. (Determination of the number of trailing copies is done without stripping leading copies, so if the separator is ABA, ABABA has 1 trailing copy.)
+;;; The number of trailing copies of the separator on the result is the same as
+;;; the number of trailing copies of the separator on the last non-empty
+;;; element. (Determination of the number of trailing copies is done without
+;;; stripping leading copies, so if the separator is ABA, ABABA has 1 trailing
+;;; copy.)
 ;;; 
-;;; However, if there is only a single non-empty element, and there are no characters in that element not part of the leading or trailing separators, then the result is exactly the original value of that element.
+;;; However, if there is only a single non-empty element, and there are no
+;;; characters in that element not part of the leading or trailing separators,
+;;; then the result is exactly the original value of that element.
 ;;; 
-;;; Other than for determination of the number of leading and trailing copies of the separator, elements consisting only of copies of the separator are ignored.
+;;; Other than for determination of the number of leading and trailing copies
+;;; of the separator, elements consisting only of copies of the separator are
+;;; ignored.
 ;;; 
 ;;; separator :
 ;;; 	a string used to separator the elements of the path.
@@ -776,16 +904,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_build_pathv ()
 ;;; 
-;;; gchar *             g_build_pathv                       (const gchar *separator,
-;;;                                                          gchar **args);
+;;; gchar * g_build_pathv (const gchar *separator, gchar **args)
 ;;; 
-;;; Behaves exactly like g_build_path(), but takes the path elements as a string array, instead of varargs. This function is mainly meant for language bindings.
+;;; Behaves exactly like g_build_path(), but takes the path elements as a
+;;; string array, instead of varargs. This function is mainly meant for language
+;;; bindings.
 ;;; 
 ;;; separator :
 ;;; 	a string used to separator the elements of the path.
 ;;; 
 ;;; args :
-;;; 	NULL-terminated array of strings containing the path elements. [array zero-terminated=1]
+;;; 	NULL-terminated array of strings containing the path elements.
 ;;; 
 ;;; Returns :
 ;;; 	a newly-allocated string that must be freed with g_free().
@@ -796,21 +925,26 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_format_size ()
 ;;; 
-;;; gchar *             g_format_size                       (guint64 size);
+;;; gchar * g_format_size (guint64 size);
 ;;; 
-;;; Formats a size (for example the size of a file) into a human readable string. Sizes are rounded to the nearest size prefix (kB, MB, GB) and are displayed rounded to the nearest tenth. E.g. the file size 3292528 bytes will be converted into the string "3.2 MB".
+;;; Formats a size (for example the size of a file) into a human readable
+;;; string. Sizes are rounded to the nearest size prefix (kB, MB, GB) and are
+;;; displayed rounded to the nearest tenth. E.g. the file size 3292528 bytes
+;;; will be converted into the string "3.2 MB".
 ;;; 
 ;;; The prefix units base is 1000 (i.e. 1 kB is 1000 bytes).
 ;;; 
 ;;; This string should be freed with g_free() when not needed any longer.
 ;;; 
-;;; See g_format_size_full() for more options about how the size might be formatted.
+;;; See g_format_size_full() for more options about how the size might be
+;;; formatted.
 ;;; 
 ;;; size :
 ;;; 	a size in bytes
 ;;; 
 ;;; Returns :
-;;; 	a newly-allocated formatted string containing a human readable file size.
+;;; 	a newly-allocated formatted string containing a human readable file
+;;;     size.
 ;;; 
 ;;; Since 2.30
 ;;; ----------------------------------------------------------------------------

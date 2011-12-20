@@ -375,6 +375,8 @@
   (:code :int)
   (:message (:string :free-from-foreign nil)))
 
+(export 'g-error)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_new ()
 ;;; 
@@ -426,6 +428,8 @@
   (code :int)
   (message :string))
 
+(export 'g-error-new-literal)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_new_valist ()
 ;;; 
@@ -469,6 +473,8 @@
 (defcfun g-error-free :void
   (error :pointer))
 
+(export 'g-error-free)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_copy ()
 ;;; 
@@ -485,6 +491,8 @@
 
 (defcfun g-error-copy :pointer
   (error :pointer))
+
+(export 'g-error-copy)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_matches ()
@@ -511,6 +519,8 @@
   (error :pointer)
   (domain g-quark)
   (code :int))
+
+(export 'g-error-matches)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_set_error ()
@@ -575,6 +585,8 @@
   (code :int)
   (message :string))
 
+(export 'g-set-error-literal)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_propagate_error ()
 ;;; 
@@ -593,6 +605,8 @@
 (defcfun g-propagate-error :void
   (dest-ptr :pointer)
   (src-ptr :pointer))
+
+(export 'g-propagate-error)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_clear_error ()
@@ -632,6 +646,8 @@
 
 (defcfun g-clear-error :void
   (err-ptr :pointer))
+
+(export 'g-clear-error)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_propagate_prefixed_error ()

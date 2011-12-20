@@ -31,27 +31,22 @@
   :license "LLGPL"
   :serial t
   :components ((:file "glib.package")
-               (:file "glib.init")
+               (:file "glib.init")        ; Lisp Initialization
+
+               (:file "glib.misc")        ; Different Glib Types and Functions
+               (:file "glib.version")     ; Glib Version information
+               (:file "glib.threads")     ; Thread abstraction
+               (:file "glib.main-loop")   ; The Main Event Loop
+               (:file "glib.quark")       ; Association between string and id
+               (:file "glib.error")       ; Error Reporting
+               (:file "glib.utils")       ; Miscellaneous Utility Functions
                
-               (:file "glib.version")
-               (:file "glib.basic-types")
-               (:file "glib.mem")
-               (:file "glib.date")
-               (:file "glib.threads")
-               (:file "glib.main-loop")
-               (:file "glib.spawn")
-               (:file "glib.glist")
-               (:file "glib.gslist")
-               (:file "glib.string")
-               (:file "glib.quark")
-               (:file "glib.error")
-               (:file "glib.utils")
-               (:file "glib.rand")
-               
-               (:file "glib.lisp"))
+               (:file "glib.lisp"))       ; More Lisp support
   :depends-on (:cffi
                :trivial-garbage
                :iterate
                :bordeaux-threads
                :iterate
                :closer-mop))
+
+;;; --- End of file cl-gtk2-glib.asd -------------------------------------------

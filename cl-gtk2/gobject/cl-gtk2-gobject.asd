@@ -7,14 +7,15 @@
   :components ((:file "gobject.package")
                (:file "gobject.init")
                
+               
+               (:file "gobject.foreign")
+               
                (:file "gobject.type")      ; Type Information
                (:file "gobject.gvalue")    ; Generic Values
                (:file "gobject.paramspec") ; GParamSpec
                                            
                (:file "gobject.base")      ; The Base Object Type
-               
                (:file "gobject.ffi")
-               (:file "gobject.foreign")
                
                (:file "gobject.meta")
                

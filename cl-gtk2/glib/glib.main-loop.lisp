@@ -697,6 +697,8 @@
 
 (defconstant +g-priority-high+ -100)
 
+(export '+g-priority-high+)
+
 ;;; ----------------------------------------------------------------------------
 ;;; G_PRIORITY_DEFAULT
 ;;; 
@@ -709,6 +711,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defconstant +g-priority-default+ 0)
+
+(export '+g-priority-default+)
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_PRIORITY_HIGH_IDLE
@@ -725,6 +729,8 @@
 
 (defconstant +g-priority-high-idle+ 100)
 
+(export '+g-priority-high-idle+)
+
 ;;; ----------------------------------------------------------------------------
 ;;; G_PRIORITY_DEFAULT_IDLE
 ;;; 
@@ -736,6 +742,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defconstant +g-priority-default-idle+ 200)
+
+(export '+g-priority-default-idle+)
   
 ;;; ----------------------------------------------------------------------------
 ;;; G_PRIORITY_LOW
@@ -748,6 +756,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defconstant +g-priority-low+ 300)
+
+(export '+g-priority-low+)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_new ()
@@ -1647,6 +1657,8 @@
          (:pointer g-source)
   (interval-milliseconds :int))
 
+(export 'g-timeout-source-new)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_source_new_seconds ()
 ;;; 
@@ -1676,6 +1688,8 @@
                                        :library glib)
          (:pointer g-source)
   (interval-seconds :int))
+
+(export 'g-timeout-source-new-seconds)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_add ()
@@ -1724,6 +1738,8 @@
   (interval-milliseconds :uint)
   (function :pointer)
   (data :pointer))
+
+(export 'g-timeout-add)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_add_full ()
@@ -1781,6 +1797,8 @@
   (data :pointer)
   (destroy-notify :pointer))
 
+(export 'g-timeout-add-full)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_add_seconds ()
 ;;; 
@@ -1824,6 +1842,8 @@
   (interval-seconds :uint)
   (function :pointer)
   (data :pointer))
+
+(export 'g-timeout-add-seconds)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_timeout_add_seconds_full ()
@@ -1899,6 +1919,8 @@
   (data :pointer)
   (destroy-notify :pointer))
 
+(export 'g-timeout-add-seconds-full)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_idle_source_new ()
 ;;; 
@@ -1948,6 +1970,8 @@
   (function :pointer)
   (data :pointer))
 
+(export 'g-idle-add)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_idle_add_full ()
 ;;; 
@@ -1986,6 +2010,8 @@
   (function :pointer)
   (data :pointer)
   (notify :pointer))
+
+(export 'g-idle-add-full)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_idle_remove_by_data ()
@@ -2722,6 +2748,8 @@
   (source (:pointer g-source))
   (fd (:pointer g-poll-fd)))
 
+(export 'g-source-remove-poll)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_add_child_source ()
 ;;; 
@@ -2819,7 +2847,9 @@
 (defcfun (g-source-get-current-time "g_source_get_current_time" :library glib)
          :void
   (source (:pointer g-source))
-  (timeval-ret (:pointer g-time-val)))
+  (timeval-ret (:pointer gtimeval)))
+
+(export 'g-source-get-current-time)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_remove ()
@@ -2844,6 +2874,8 @@
 
 (defcfun (g-source-remove "g_source_remove" :library glib) :boolean
   (id :uint))
+
+(export 'g-source-remove)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_remove_by_funcs_user_data ()
@@ -2871,6 +2903,8 @@
   (funcs (:pointer g-source-funcs))
   (data :pointer))
 
+(export 'g-source-remove-by-funcs-user-data)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_remove_by_user_data ()
 ;;; 
@@ -2891,5 +2925,7 @@
                                        :library glib)
          :boolean
   (data :pointer))
+
+(export 'g-source-remove-by-user-data)
 
 ;;; --- End of file glib.main-loop.lisp ----------------------------------------

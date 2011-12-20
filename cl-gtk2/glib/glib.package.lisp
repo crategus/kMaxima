@@ -27,42 +27,9 @@
 (defpackage :glib
   (:use :cl :cffi :iter)
   (:export #:at-init
-           #:g-free
-           #:glist
-           #:gstrv
-           #:g-malloc
-           #:g-strdup
-           #:g-string
-           #:gslist
-           #:g-quark
-           #:+g-priority-high+
-           #:+g-priority-default+
-           #:+g-priority-high-idle+
-           #:+g-priority-default-idle+
-           #:+g-priority-low+
-           #:g-idle-add-full
-           #:g-idle-add
-           #:g-timeout-add-full
-           #:g-source-remove
            #:at-finalize
-           #:with-g-error
-           #:with-catching-to-g-error
-           #:g-error-condition
-           #:g-error-condition-domain
-           #:g-error-condition-code
-           #:g-error-condition-message
-           #:g-spawn-flags
            #:push-library-version-features
-           #:foreign-library-minimum-version-mismatch
            #:require-library-version
-           #:get-user-cache-dir
-           #:get-user-cache-dir
-           #:get-user-config-dir
-           #:build-filename
-           #:random-double-range
-           #:random-double
-           #:random-int-range
-           #:random-int
-           #:random-boolean
-           #:random-set-seed
+           #:with-catching-to-g-error
+           #:with-g-error
     ))

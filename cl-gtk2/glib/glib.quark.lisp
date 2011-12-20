@@ -74,6 +74,8 @@
 (defmethod translate-from-foreign (value (type quark-type))
   (g-quark-to-string value))
 
+(export 'g-quark)
+
 ;;; ----------------------------------------------------------------------------
 ;;; GQuark
 ;;; 

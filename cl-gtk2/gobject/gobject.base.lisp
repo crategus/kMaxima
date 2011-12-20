@@ -30,8 +30,6 @@
 ;;; 
 ;;; Synopsis
 ;;; 
-;;; #include <glib-object.h>
-;;; 
 ;;; struct              GObject;
 ;;; struct              GObjectClass;
 ;;; struct              GObjectConstructParam;
@@ -266,6 +264,32 @@
     :reader g-object-signal-handlers))
   (:documentation
    "Base class for GObject classes hierarchy."))
+
+;;; ----------------------------------------------------------------------------
+;;; struct GParameter
+;;; 
+;;; struct GParameter {
+;;;   const gchar *name;
+;;;   GValue       value;
+;;; };
+;;; 
+;;; The GParameter struct is an auxiliary structure used to hand parameter
+;;; name/value pairs to g_object_newv().
+;;; 
+;;; const gchar *name;
+;;; 	the parameter name
+;;; 
+;;; GValue value;
+;;; 	the parameter value
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-parameter
+  (:name (:string :free-from-foreign nil :free-to-foreign nil))
+  (:value g-value))
+
+
+
+
 
 (defvar *foreign-gobjects-weak* (make-weak-hash-table :test 'equal 
                                                       :weakness
@@ -1035,27 +1059,6 @@
 ;;; 	the value to set the parameter to
 ;;; ----------------------------------------------------------------------------
 
-;;; ----------------------------------------------------------------------------
-;;; struct GParameter
-;;; 
-;;; struct GParameter {
-;;;   const gchar *name;
-;;;   GValue       value;
-;;; };
-;;; 
-;;; The GParameter struct is an auxiliary structure used to hand parameter
-;;; name/value pairs to g_object_newv().
-;;; 
-;;; const gchar *name;
-;;; 	the parameter name
-;;; 
-;;; GValue value;
-;;; 	the parameter value
-;;; ----------------------------------------------------------------------------
-
-(defcstruct g-parameter
-  (:name (:string :free-from-foreign nil :free-to-foreign nil))
-  (:value g-value))
 
 ;;; ----------------------------------------------------------------------------
 ;;; GObjectGetPropertyFunc ()
