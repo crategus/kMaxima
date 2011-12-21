@@ -30,9 +30,9 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; struct              GMainLoop;
-;;; struct              GMainContext;
-;;; struct              GPollFD;
+;;; struct        gmainloop
+;;; struct        gmaincontext
+;;; struct        gpollfd
 ;;;
 ;;; GMainLoop *         g_main_loop_new                     (GMainContext *context,
 ;;;                                                          gboolean is_running);
@@ -218,10 +218,10 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; The main event loop manages all the available sources of events for GLib and
-;;; GTK+ applications. These events can come from any number of different types
-;;; of sources such as file descriptors (plain files, pipes or sockets) and
-;;; timeouts. New types of event sources can also be added using
+;;; The main event loop manages all the available sources of events for GLib
+;;; and GTK+ applications. These events can come from any number of different
+;;; types of sources such as file descriptors (plain files, pipes or sockets)
+;;; and timeouts. New types of event sources can also be added using
 ;;; g_source_attach().
 ;;; 
 ;;; To allow multiple independent sets of sources to be handled in different
@@ -234,15 +234,15 @@
 ;;; Values greater than 0 denote lower priorities. Events from high priority
 ;;; sources are always processed before events from lower priority sources.
 ;;; 
-;;; Idle functions can also be added, and assigned a priority. These will be run
-;;; whenever no events with a higher priority are ready to be processed.
+;;; Idle functions can also be added, and assigned a priority. These will be
+;;; run whenever no events with a higher priority are ready to be processed.
 ;;; 
-;;; The GMainLoop data type represents a main event loop. A GMainLoop is created
-;;; with g_main_loop_new(). After adding the initial event sources,
+;;; The GMainLoop data type represents a main event loop. A GMainLoop is
+;;; created with g_main_loop_new(). After adding the initial event sources,
 ;;; g_main_loop_run() is called. This continuously checks for new events from
-;;; each of the event sources and dispatches them. Finally, the processing of an
-;;; event from one of the sources leads to a call to g_main_loop_quit() to exit
-;;; the main loop, and g_main_loop_run() returns.
+;;; each of the event sources and dispatches them. Finally, the processing of
+;;; an event from one of the sources leads to a call to g_main_loop_quit() to
+;;; exit the main loop, and g_main_loop_run() returns.
 ;;; 
 ;;; It is possible to create new instances of GMainLoop recursively. This is
 ;;; often used in GTK+ applications when showing modal dialog boxes. Note that
@@ -298,7 +298,9 @@
 ;;; loop of a GLib or GTK+ application.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-main-loop)
+(defcstruct gmainloop)
+
+(export 'gmainloop)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GMainContext
@@ -309,7 +311,9 @@
 ;;; sources to be handled in a main loop.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-main-context)
+(defcstruct gmaincontext)
+
+(export 'gmaincontext)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GPollFD
@@ -339,10 +343,12 @@
 ;;;     poll() function to indicate which events occurred.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-poll-fd
+(defcstruct gpollfd
   (fd :int) ;; TODO: #if defined (G_OS_WIN32) && GLIB_SIZEOF_VOID_P == 8
   (events :ushort)
   (revent :ushort))
+
+(export 'gpollfd)
 
 ;;; ---------------------------------------------------------------------------- 
 ;;; struct GSource
@@ -353,7 +359,9 @@
 ;;; The GSource struct is an opaque data type representing an event source.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-source)
+(defcstruct gsource)
+
+(export 'gsource)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GSourceFuncs
@@ -421,13 +429,15 @@
 ;;; 	Called when the source is finalized.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-source-funcs
+(defcstruct gsourcefuncs
   (prepare :pointer)
   (check :pointer)
   (dispatch :pointer)
   (finalize :pointer)
   (closure-callback :pointer)
   (closure-marshal :pointer))
+
+(export 'gsourcefuncs)
 
 ;;; ---------------------------------------------------------------------------- 	
 ;;; struct GSourceCallbackFuncs
@@ -455,10 +465,12 @@
 ;;;     object.
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-source-callback-funcs
+(defcstruct gsourcecallbackfuncs
   (ref :pointer)
   (unref :pointer)
   (get :pointer))
+
+(export 'gsourcecallbacksfuncs)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_new ()
@@ -478,10 +490,11 @@
 ;;; 	a new GMainLoop.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-new "g_main_loop_new" :library glib)
-         (:pointer g-main-loop)
-  (context (:pointer g-main-context))
+(defcfun (g-main-loop-new "g_main_loop_new") (:pointer gmainloop)
+  (context (:pointer gmaincontext))
   (is-running :boolean))
+
+(export 'g-main-loop-new)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_ref ()
@@ -497,9 +510,10 @@
 ;;; 	loop
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-ref "g_main_loop_ref" :library glib)
-         (:pointer g-main-loop)
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-ref "g_main_loop_ref") (:pointer gmainloop)
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-ref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_unref ()
@@ -513,9 +527,10 @@
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-unref "g_main_loop_unref" :library glib)
-         (:pointer g-main-loop)
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-unref "g_main_loop_unref") (:pointer gmainloop)
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-unref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_run ()
@@ -530,8 +545,10 @@
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-run "g_main_loop_run" :library glib) :void
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-run "g_main_loop_run") :void
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-run)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_quit ()
@@ -548,8 +565,10 @@
 ;;; 	a GMainLoop
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-quit "g_main_loop_quit" :library glib) :void
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-quit "g_main_loop_quit") :void
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-quit)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_is_running ()
@@ -565,9 +584,10 @@
 ;;; 	TRUE if the mainloop is currently being run.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-is-running "g_main_loop_is_running" :library glib)
-         :boolean
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-is-running "g_main_loop_is_running") :boolean
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-is-running)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_loop_get_context ()
@@ -583,9 +603,11 @@
 ;;; 	the GMainContext of loop.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-loop-get-context "g_main_loop_get_context" :library glib)
-         (:pointer g-main-context)
-  (loop (:pointer g-main-loop)))
+(defcfun (g-main-loop-get-context "g_main_loop_get_context")
+    (:pointer gmaincontext)
+  (loop (:pointer gmainloop)))
+
+(export 'g-main-loop-get-context)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_new()
@@ -770,8 +792,9 @@
 ;;; 	the new GMainContext
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-new "g_main_context_new" :library glib)
-         (:pointer g-main-context))
+(defcfun (g-main-context-new "g_main_context_new") (:pointer gmaincontext))
+
+(export 'g-main-context-new)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_ref ()
@@ -787,9 +810,10 @@
 ;;; 	the context that was passed in (since 2.6)
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-ref "g_main_context_ref" :library glib)
-         (:pointer g-main-context)
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-ref "g_main_context_ref") (:pointer gmaincontext)
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-ref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_unref ()
@@ -803,9 +827,10 @@
 ;;; 	a GMainContext
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-unref "g_main_context_unref" :library glib)
-         (:pointer g-main-context)
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-unref "g_main_context_unref") (:pointer gmaincontext)
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-unref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_default ()
@@ -821,8 +846,10 @@
 ;;; 	the global default main context.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-default "g_main_context_default" :library glib)
-         (:pointer g-main-context))
+(defcfun (g-main-context-default "g_main_context_default")
+    (:pointer gmaincontext))
+
+(export 'g-main-context-default)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_iteration ()
@@ -852,10 +879,11 @@
 ;;; 	TRUE if events were dispatched.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-iteration "g_main_context_iteration" :library glib)
-         :boolean
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-iteration "g_main_context_iteration") :boolean
+  (context (:pointer gmaincontext))
   (may-block :boolean))
+
+(export 'g-main-context-iteration)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_iteration()
@@ -895,9 +923,10 @@
 ;;; 	TRUE if events are pending.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-pending "g_main_context_pending" :library glib)
-         :boolean
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-pending "g_main_context_pending") :boolean
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-pending)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_pending
@@ -936,11 +965,12 @@
 ;;; 	the GSource if found, otherwise, NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-find-source-by-id "g_main_context_find_source_by_id"
-                                           :library glib)
-         (:pointer g-source)
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-find-source-by-id "g_main_context_find_source_by_id")
+    (:pointer gsource)
+  (context (:pointer gmaincontext))
   (source-id :uint))
+
+(export 'g-main-context-find-source-by-id)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_find_source_by_user_data ()
@@ -961,11 +991,12 @@
 ;;; 	the source, if one was found, otherwise NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-find-source-by-user-data "g_main_context_find_source_by_user_data"
-                                                  :library glib)
-         (:pointer g-source)
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-find-source-by-user-data
+          "g_main_context_find_source_by_user_data") (:pointer gsource)
+  (context (:pointer gmaincontext))
   (user-data :pointer))
+
+(export 'g-main-context-find-source-by-user-data)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_find_source_by_funcs_user_data ()
@@ -992,12 +1023,13 @@
 ;;; 	the source, if one was found, otherwise NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-find-source-by-funcs-user-data "g_main_context_find_source_by_funcs_user_data"
-                                                        :library glib)
-         (:pointer g-source)
-  (context (:pointer g-main-context))
-  (funcs (:pointer g-source-funcs))
+(defcfun (g-main-context-find-source-by-funcs-user-data
+          "g_main_context_find_source_by_funcs_user_data") (:pointer gsource)
+  (context (:pointer gmaincontext))
+  (funcs (:pointer gsourcefuncs))
   (user-data :pointer))
+
+(export 'g-main-context-find-source-by-funcs-user-data)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_wakeup ()
@@ -1011,8 +1043,10 @@
 ;;; 	a GMainContext
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-wakeup "g_main_context_wakeup" :library glib) :void
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-wakeup "g_main_context_wakeup") :void
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-wakeup)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_acquire ()
@@ -1037,9 +1071,10 @@
 ;;;     context.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-acquire "g_main_context_acquire" :library glib)
-         :boolean
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-acquire "g_main_context_acquire") :boolean
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-acquire)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_release ()
@@ -1055,8 +1090,10 @@
 ;;; 	a GMainContext
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-release "g_main_context_release" :library glib) :void
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-release "g_main_context_release") :void
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-release)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_is_owner ()
@@ -1076,9 +1113,10 @@
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-is-owner "g_main_context_is_owner" :library glib)
-         :boolean
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-is-owner "g_main_context_is_owner") :boolean
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-is-owner)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_wait ()
@@ -1106,10 +1144,12 @@
 ;;;     context.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-wait "g_main_context_wait" :library glib) :boolean
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-wait "g_main_context_wait") :boolean
+  (context (:pointer gmaincontext))
   (cond (:pointer g-cond))
   (mutex (:pointer g-mutex)))
+
+(export 'g-main-context-wait)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_prepare ()
@@ -1130,10 +1170,11 @@
 ;;; 	TRUE if some source is ready to be dispatched prior to polling.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g_main_context_prepare "g_main_context_prepare" :library glib)
-         :boolean
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-prepare "g_main_context_prepare") :boolean
+  (context (:pointer gmaincontext))
   (priority-ret (:pointer :int)))
+
+(export 'g-main-context-prepare)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_query ()
@@ -1166,12 +1207,14 @@
 ;;;     records need to be stored, the number of records that need to be stored.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g_main_context_query "g_main_context_query" :library glib) :int
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-query "g_main_context_query") :int
+  (context (:pointer gmaincontext))
   (max-priority :int)
   (timeout-ret (:pointer :int))
-  (fds-ret (:pointer g-poll-fd))
+  (fds-ret (:pointer gpollfd))
   (n-dfs :int))
+
+(export 'g-main-context-query)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_check ()
@@ -1200,11 +1243,13 @@
 ;;; 	TRUE if some sources are ready to be dispatched.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-check "g_main_context_check" :library glib) :int
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-check "g_main_context_check") :int
+  (context (:pointer gmaincontext))
   (max-priority :int)
-  (fds (:pointer g-poll-fd))
+  (fds (:pointer gpollfd))
   (n-fds :int))
+
+(export 'g-main-context-check)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_dispatch ()
@@ -1217,8 +1262,10 @@
 ;;; 	a GMainContext
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-dispatch "g_main_context_dispatch" :library glib) :void
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-dispatch "g_main_context_dispatch") :void
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-dispatch)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_set_poll_func ()
@@ -1240,11 +1287,11 @@
 ;;; 	the function to call to poll all file descriptors
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-set-poll-func "g_main_context_set_poll_func"
-                                       :library glib)
-         :void
-  (context (:pointer g-main-context))
+(defcfun (g-main-context-set-poll-func "g_main_context_set_poll_func") :void
+  (context (:pointer gmaincontext))
   (func :pointer))
+
+(export 'g-main-context-set-poll-func)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_get_poll_func ()
@@ -1260,10 +1307,10 @@
 ;;; 	the poll function
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-get-poll-func "g_main_context_get_poll_func"
-                                       :library glib)
-         :pointer
-  (context (:pointer g-main-context)))
+(defcfun (g-main-context-get-poll-func "g_main_context_get_poll_func") :pointer
+  (context (:pointer gmaincontext)))
+
+(export 'g-main-context-get-poll-func)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GPollFunc ()
@@ -1314,10 +1361,12 @@
 ;;;     is polled whenever the results may be needed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-add-poll "g_main_context_add_poll" :library glib) :void
-  (context (:pointer g-main-context))
-  (fd (:pointer g-poll-fd))
+(defcfun (g-main-context-add-poll "g_main_context_add_poll") :void
+  (context (:pointer gmaincontext))
+  (fd (:pointer gpollfd))
   (priority :int))
+
+(export 'g-main-context-add-poll)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_context_remove_poll ()
@@ -1334,10 +1383,11 @@
 ;;; 	a GPollFD descriptor previously added with g_main_context_add_poll()
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-context-remove-poll "g_main_context_remove_poll" :library glib)
-         :void
-  (context (:pointer g-main-context))
-  (fd (:pointer g-poll-fd)))
+(defcfun (g-main-context-remove-poll "g_main_context_remove_poll") :void
+  (context (:pointer gmaincontext))
+  (fd (:pointer gpollfd)))
+
+(export 'g-main-context-remove-poll)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_depth ()
@@ -1441,7 +1491,9 @@
 ;;; 	The main loop recursion level in the current thread
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-depth "g_main_depth" :library glib) :int)
+(defcfun (g-main-depth "g_main_depth") :int)
+
+(export 'g-main-depth)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_current_source ()
@@ -1456,8 +1508,9 @@
 ;;; Since 2.12
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-main-current-source "g_main_current_source" :library glib)
-         (:pointer g-source))
+(defcfun (g-main-current-source "g_main_current_source") (:pointer gsource))
+
+(export 'g-main-current-source)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_main_set_poll_func()
@@ -1653,8 +1706,7 @@
 ;;; 	the newly-created timeout source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-source-new "g_timeout_source_new" :library glib)
-         (:pointer g-source)
+(defcfun (g-timeout-source-new "g_timeout_source_new") (:pointer gsource)
   (interval-milliseconds :int))
 
 (export 'g-timeout-source-new)
@@ -1684,9 +1736,8 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-source-new-seconds "g_timeout_source_new_seconds"
-                                       :library glib)
-         (:pointer g-source)
+(defcfun (g-timeout-source-new-seconds "g_timeout_source_new_seconds")
+    (:pointer gsource)
   (interval-seconds :int))
 
 (export 'g-timeout-source-new-seconds)
@@ -1734,7 +1785,7 @@
 ;;; 	the ID (greater than 0) of the event source.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-add "g_timeout_add" :library glib) :uint
+(defcfun (g-timeout-add "g_timeout_add") :uint
   (interval-milliseconds :uint)
   (function :pointer)
   (data :pointer))
@@ -1790,7 +1841,7 @@
 ;;; 	the ID (greater than 0) of the event source. Rename to: g_timeout_add
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-add-full "g_timeout_add_full" :library glib) :uint
+(defcfun (g-timeout-add-full "g_timeout_add_full") :uint
   (priority :int)
   (interval-milliseconds :uint)
   (function :pointer)
@@ -1838,7 +1889,7 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-add-seconds "g_timeout_add_seconds" :library glib) :uint
+(defcfun (g-timeout-add-seconds "g_timeout_add_seconds") :uint
   (interval-seconds :uint)
   (function :pointer)
   (data :pointer))
@@ -1911,8 +1962,7 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-timeout-add-seconds-full "g_timeout_add_seconds_full" :library glib)
-         :uint
+(defcfun (g-timeout-add-seconds-full "g_timeout_add_seconds_full") :uint
   (priority :int)
   (interval-seconds :uint)
   (function :pointer)
@@ -1938,8 +1988,7 @@
 ;;; 	the newly-created idle source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-idle-source-new "g_idle_source_new" :library glib)
-         (:pointer g-source))
+(defcfun (g-idle-source-new "g_idle_source_new") (:pointer gsource))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_idle_add ()
@@ -1966,7 +2015,7 @@
 ;;; 	the ID (greater than 0) of the event source.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-idle-add "g_idle_add" :library glib) :uint
+(defcfun (g-idle-add "g_idle_add") :uint
   (function :pointer)
   (data :pointer))
 
@@ -2005,7 +2054,7 @@
 ;;; 	the ID (greater than 0) of the event source. Rename to: g_idle_add
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-idle-add-full "g_idle_add_full" :library glib) :uint
+(defcfun (g-idle-add-full "g_idle_add_full") :uint
   (priority :uint)
   (function :pointer)
   (data :pointer)
@@ -2027,8 +2076,10 @@
 ;;; 	TRUE if an idle source was found and removed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-idle-remove-by-data "g_idle_remove_by_data" :library glib) :boolean
+(defcfun (g-idle-remove-by-data "g_idle_remove_by_data") :boolean
   (data :pointer))
+
+(export 'g-idle-remove-by-data)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GPid
@@ -2274,9 +2325,11 @@
 ;;; 	the newly-created GSource.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-new "g_source_new" :library glib) (:pointer g-source)
-  (source-funcs (:pointer g-source-funcs))
+(defcfun (g-source-new "g_source_new") (:pointer gsource)
+  (source-funcs (:pointer gsourcefuncs))
   (struct-size :uint))
+
+(export 'g-source-new)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_ref ()
@@ -2292,8 +2345,10 @@
 ;;; 	source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-ref "g_source_ref" :library glib) (:pointer g-source)
-  (source (:pointer g-source)))
+(defcfun (g-source-ref "g_source_ref") (:pointer gsource)
+  (source (:pointer gsource)))
+
+(export 'g-source-ref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_unref ()
@@ -2307,8 +2362,10 @@
 ;;; 	a GSource
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-unref "g_source_unref" :library glib) :void
-  (source (:pointer g-source)))
+(defcfun (g-source-unref "g_source_unref") :void
+  (source (:pointer gsource)))
+
+(export 'g-source-unref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_funcs ()
@@ -2327,9 +2384,11 @@
 ;;; Since 2.12
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-set-funcs "g_source_set_funcs" :library glib) :void
-  (source (:pointer g-source))
-  (funcs (:pointer g-source-funcs)))
+(defcfun (g-source-set-funcs "g_source_set_funcs") :void
+  (source (:pointer gsource))
+  (funcs (:pointer gsourcefuncs)))
+
+(export 'g-source-set-funcs)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_attach ()
@@ -2349,9 +2408,11 @@
 ;;; 	the ID (greater than 0) for the source within the GMainContext.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-attach "g_source_attach" :library glib) :uint
-  (source (:pointer g-source))
-  (context (:pointer g-main-context)))
+(defcfun (g-source-attach "g_source_attach") :uint
+  (source (:pointer gsource))
+  (context (:pointer gmaincontext)))
+
+(export 'g-source-attach)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_destroy ()
@@ -2365,8 +2426,10 @@
 ;;; 	a GSource
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-destroy "g_source_destroy" :library glib) :void
-  (source (:pointer g-source)))
+(defcfun (g-source-destroy "g_source_destroy") :void
+  (source (:pointer gsource)))
+
+(export 'g-source-destroy)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_is_destroyed ()
@@ -2438,8 +2501,10 @@
 ;;; Since 2.12
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-is-destroyed "g_source_is_destroyed" :library glib) :boolean
-  (source (:pointer g-source)))
+(defcfun (g-source-is-destroyed "g_source_is_destroyed") :boolean
+  (source (:pointer gsource)))
+
+(export 'g-source-is-destroyed)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_priority ()
@@ -2457,9 +2522,11 @@
 ;;; 	the new priority.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-set-priority "g_source_set_priority" :library glib) :void
-  (source (:pointer g-source))
+(defcfun (g-source-set-priority "g_source_set_priority") :void
+  (source (:pointer gsource))
   (priority :int))
+
+(export 'g-source-set-priority)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_priority ()
@@ -2475,8 +2542,10 @@
 ;;; 	the priority of the source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-priority "g_source_get_priority" :library glib) :int
-  (source (:pointer g-source)))
+(defcfun (g-source-get-priority "g_source_get_priority") :int
+  (source (:pointer gsource)))
+
+(export 'g-source-get-priority)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_can_recurse ()
@@ -2495,10 +2564,11 @@
 ;;; 	whether recursion is allowed for this source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-set-can-recurse "g_source_set_can_recurse" :library glib)
-         :void
-  (source (:pointer g-source))
+(defcfun (g-source-set-can-recurse "g_source_set_can_recurse") :void
+  (source (:pointer gsource))
   (can-recurse :boolean))
+
+(export 'g-source-set-can-recurse)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_can_recurse ()
@@ -2515,9 +2585,10 @@
 ;;; 	whether recursion is allowed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-can-recurse "g_source_get_can_recurse" :library glib)
-         :boolean
-  (source (:pointer g-source)))
+(defcfun (g-source-get-can-recurse "g_source_get_can_recurse") :boolean
+  (source (:pointer gsource)))
+
+(export 'g-source-get-can-recurse)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_id ()
@@ -2536,8 +2607,10 @@
 ;;; 	the ID (greater than 0) for the source
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-id "g_source_get_id" :library glib) :uint
-  (source (:pointer g-source)))
+(defcfun (g-source-get-id "g_source_get_id") :uint
+  (source (:pointer gsource)))
+
+(export 'g-source-get-id)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_get_name ()
@@ -2623,9 +2696,10 @@
 ;;;     context has not yet been added to a source. [transfer none]
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-context "g_source_get_context" :library glib)
-         (:pointer g-main-context)
-  (source (:pointer g-source)))
+(defcfun (g-source-get-context "g_source_get_context") (:pointer gmaincontext)
+  (source (:pointer gsource)))
+
+(export 'g-source-get-context)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_set_callback ()
@@ -2657,11 +2731,13 @@
 ;;; 	a function to call when data is no longer in use, or NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-set-callback "g_source_set_callback" :library glib) :void
-  (source (:pointer g-source))
+(defcfun (g-source-set-callback "g_source_set_callback") :void
+  (source (:pointer gsource))
   (func :pointer)
   (data :pointer)
   (notify :pointer))
+
+(export 'g-source-set-callback)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GSourceFunc ()
@@ -2725,9 +2801,11 @@
 ;;;    watch.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-add-poll "g_source_add_poll" :library glib) :void
-  (source (:pointer g-source))
-  (fd (:pointer g-poll-fd)))
+(defcfun (g-source-add-poll "g_source_add_poll") :void
+  (source (:pointer gsource))
+  (fd (:pointer gpollfd)))
+
+(export 'g-source-add-poll)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_source_remove_poll ()
@@ -2744,9 +2822,9 @@
 ;;; 	a GPollFD structure previously passed to g_source_add_poll().
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-remove-poll "g_source_remove_poll" :library glib) :void
-  (source (:pointer g-source))
-  (fd (:pointer g-poll-fd)))
+(defcfun (g-source-remove-poll "g_source_remove_poll") :void
+  (source (:pointer gsource))
+  (fd (:pointer gpollfd)))
 
 (export 'g-source-remove-poll)
 
@@ -2844,9 +2922,8 @@
 ;;; 	GTimeVal structure in which to store current time.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-get-current-time "g_source_get_current_time" :library glib)
-         :void
-  (source (:pointer g-source))
+(defcfun (g-source-get-current-time "g_source_get_current_time") :void
+  (source (:pointer gsource))
   (timeval-ret (:pointer gtimeval)))
 
 (export 'g-source-get-current-time)
@@ -2872,7 +2949,7 @@
 ;;; 	TRUE if the source was found and removed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-remove "g_source_remove" :library glib) :boolean
+(defcfun (g-source-remove "g_source_remove") :boolean
   (id :uint))
 
 (export 'g-source-remove)
@@ -2897,10 +2974,9 @@
 ;;; 	TRUE if a source was found and removed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-remove-by-funcs-user-data "g_source_remove_by_funcs_user_data"
-                                             :library glib)
-         :boolean
-  (funcs (:pointer g-source-funcs))
+(defcfun (g-source-remove-by-funcs-user-data
+          "g_source_remove_by_funcs_user_data") :boolean
+  (funcs (:pointer gsourcefuncs))
   (data :pointer))
 
 (export 'g-source-remove-by-funcs-user-data)
@@ -2921,9 +2997,7 @@
 ;;; 	TRUE if a source was found and removed.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-source-remove-by-user-data "g_source_remove_by_user_data" 
-                                       :library glib)
-         :boolean
+(defcfun (g-source-remove-by-user-data "g_source_remove_by_user_data") :boolean
   (data :pointer))
 
 (export 'g-source-remove-by-user-data)

@@ -70,11 +70,11 @@
 ;;; loaded. (Works only on SBCL for now).
 ;;;
 ;;; At-init form may be called multiple times. The same code from should not be
-;;; run multiple times at initialization time (in best case, this will only slow
-;;; down initialization, in worst case, the code may crash). To ensure this,
-;;; every at-init expression is added to hash-table with the body and keys as a
-;;; composite key. This ensures that the same code is only executed once (once
-;;; on the same set of parameters).
+;;; run multiple times at initialization time (in best case, this will only
+;;; slow down initialization, in worst case, the code may crash). To ensure
+;;; this, every at-init expression is added to hash-table with the body and
+;;; keys as a composite key. This ensures that the same code is only executed
+;;; once (once on the same set of parameters).
 ;;;
 ;;; Example:
 ;;; 

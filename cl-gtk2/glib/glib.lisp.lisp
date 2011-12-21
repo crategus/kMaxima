@@ -51,23 +51,29 @@
    (minimum-version :initarg :minimum-version :reader .minimum-version)
    (actual-version :initarg :actual-version :reader .actual-version))
   (:report (lambda (c s)
-             (format s "Library ~A has too old version: it is ~A but required to be at least ~A"
+             (format s "Library ~A has too old version: it is ~A but required ~
+                       to be at least ~A"
                      (.library c)
                      (.actual-version c)
                      (.minimum-version c)))))
 
-(defun require-library-version (library min-major-version min-minor-version major-version minor-version)
+(defun require-library-version (library min-major-version
+                                        min-minor-version
+                                        major-version 
+                                        minor-version)
   (unless (or (> major-version min-major-version)
               (and (= major-version min-major-version)
                    (>= minor-version min-minor-version)))
     (restart-case
         (error 'foreign-library-minimum-version-mismatch
                :library library
-               :minimum-version (format nil "~A.~A" min-major-version min-minor-version)
-               :actual-version (format nil "~A.~A" major-version minor-version))
+               :minimum-version (format nil "~A.~A"
+                                        min-major-version min-minor-version)
+               :actual-version (format nil "~A.~A"
+                                       major-version minor-version))
       (ignore () :report "Ignore version requirement" nil))))
 
-(push-library-version-features glib *major-version* *micro-version*
+(push-library-version-features glib *glib-major-version* *glib-micro-version*
   2 2
   2 4
   2 6
@@ -80,7 +86,7 @@
   2 20
   2 22)
 
-(require-library-version "Glib" 2 20 *major-version* *minor-version*)
+(require-library-version "Glib" 2 20 *glib-major-version* *glib-minor-version*)
 
 ;;; ----------------------------------------------------------------------------
 
@@ -91,7 +97,8 @@
    (code :initarg :code :initform nil :reader g-error-condition-code)
    (message :initarg :message :initform nil :reader g-error-condition-message))
   (:report (lambda (e stream)
-             (format stream "GError was raised. Domain: ~S, code: ~S, message: ~A"
+             (format stream "GError was raised. Domain: ~S, code: ~S, ~
+                             message: ~A"
                      (g-error-condition-domain e)
                      (g-error-condition-code e)
                      (g-error-condition-message e)))))
@@ -99,9 +106,9 @@
 (defun mayber-raise-g-error-condition (err)
   (unless (null-pointer-p err)
     (error 'g-error-condition
-           :domain (foreign-slot-value err 'g-error :domain)
-           :code (foreign-slot-value err 'g-error :code)
-           :message (foreign-slot-value err 'g-error :message))))
+           :domain (foreign-slot-value err 'gerror :domain)
+           :code (foreign-slot-value err 'gerror :code)
+           :message (foreign-slot-value err 'gerror :message))))
 
 (defmacro with-g-error ((err) &body body)
   `(with-foreign-object (,err :pointer)

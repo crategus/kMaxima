@@ -30,7 +30,8 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; struct   GError;
+;;; struct   gerror
+;;;
 ;;; GError * g_error_new                (GQuark domain,
 ;;;                                      gint code,
 ;;;                                      const gchar *format,
@@ -105,7 +106,8 @@
 ;;;  1 gchar *contents;
 ;;;  2 GError *err = NULL;
 ;;;  3 g_file_get_contents ("foo.txt", &contents, NULL, &err);
-;;;  4 g_assert ((contents == NULL && err != NULL) || (contents != NULL && err == NULL));
+;;;  4 g_assert ((contents == NULL && err != NULL) ||
+;;;              (contents != NULL && err == NULL));
 ;;;  5 if (err != NULL)
 ;;;  6   {
 ;;;  7     /* Report error to user, and free error */
@@ -120,14 +122,14 @@
 ;;; 16   }
 ;;; 
 ;;; Note that err != NULL in this example is a reliable indicator of whether
-;;; g_file_get_contents() failed. Additionally, g_file_get_contents() returns a
-;;; boolean which indicates whether it was successful.
+;;; g_file_get_contents() failed. Additionally, g_file_get_contents() returns
+;;; a boolean which indicates whether it was successful.
 ;;; 
 ;;; Because g_file_get_contents() returns FALSE on failure, if you are only
 ;;; interested in whether it failed and don't need to display an error message,
 ;;; you can pass NULL for the error argument:
 ;;; 
-;;;  1 if (g_file_get_contents ("foo.txt", &contents, NULL, NULL)) /* ignore errors */
+;;;  1 if (g_file_get_contents ("foo.txt", &contents, NULL, NULL))
 ;;;  2   /* no error occurred */ ;
 ;;;  3 else
 ;;;  4   /* error */ ;
@@ -136,9 +138,9 @@
 ;;; error-reporting function is located in, code indicates the specific error
 ;;; that occurred, and message is a user-readable error message with as many
 ;;; details as possible. Several functions are provided to deal with an error
-;;; received from a called function: g_error_matches() returns TRUE if the error
-;;; matches a given domain and code, g_propagate_error() copies an error into an
-;;; error location (so the calling function will receive it), and
+;;; received from a called function: g_error_matches() returns TRUE if the
+;;; error matches a given domain and code, g_propagate_error() copies an error
+;;;  into an error location (so the calling function will receive it), and
 ;;; g_clear_error() clears an error location by freeing the error and resetting
 ;;; the location to NULL. To display an error to the user, simply display
 ;;; error->message, perhaps along with additional context known only to the
@@ -162,7 +164,7 @@
 ;;; 10       g_set_error (error,
 ;;; 11                    FOO_ERROR,                 /* error domain */
 ;;; 12                    FOO_ERROR_BLAH,            /* error code */
-;;; 13                    "Failed to open file: %s", /* error message format string */
+;;; 13                    "Failed to open file: %s", /* error message string */
 ;;; 14                    g_strerror (errno));
 ;;; 15       return -1;
 ;;; 16     }
@@ -171,9 +173,9 @@
 ;;; 19 }
 ;;; 
 ;;; Things are somewhat more complicated if you yourself call another function
-;;; that can report a GError. If the sub-function indicates fatal errors in some
-;;; way other than reporting a GError, such as by returning TRUE on success, you
-;;; can simply do the following:
+;;; that can report a GError. If the sub-function indicates fatal errors in
+;;; some way other than reporting a GError, such as by returning TRUE on
+;;; success, you can simply do the following:
 ;;; 
 ;;;  1 gboolean
 ;;;  2 my_function_that_can_fail (GError **err)
@@ -266,8 +268,8 @@
 ;;; 
 ;;; Note that passing NULL for the error location ignores errors; it's
 ;;; equivalent to try { sub_function_that_can_fail(); } catch (...) {} in C++.
-;;; It does not mean to leave errors unhandled; it means to handle them by doing
-;;; nothing.
+;;; It does not mean to leave errors unhandled; it means to handle them by
+;;; doing nothing.
 ;;; 
 ;;; Error domains and codes are conventionally named as follows:
 ;;; 
@@ -303,9 +305,9 @@
 ;;;     Do not report programming errors via GError.
 ;;; 
 ;;;     The last argument of a function that returns an error should be a
-;;;     location where a GError can be placed (i.e. "GError** error"). If GError
-;;;     is used with varargs, the GError** should be the last argument before
-;;;     the "...".
+;;;     location where a GError can be placed (i.e. "GError** error"). If
+;;;     GError is used with varargs, the GError** should be the last argument
+;;;     before the "...".
 ;;; 
 ;;;     The caller may pass NULL for the GError** if they are not interested in
 ;;;     details of the exact error that occurred.
@@ -341,9 +343,9 @@
 ;;;     users must check whether an error was returned to see if the function
 ;;;     succeeded.
 ;;; 
-;;;     When implementing a function that can report errors, you may want to add
-;;;     a check at the top of your function that the error return location is
-;;;     either NULL or contains a NULL error (e.g. g_return_if_fail
+;;;     When implementing a function that can report errors, you may want to
+;;;     add a check at the top of your function that the error return location
+;;;     is either NULL or contains a NULL error (e.g. g_return_if_fail
 ;;;     (error == NULL || *error == NULL);).
 ;;; ----------------------------------------------------------------------------
 
@@ -370,20 +372,20 @@
 ;;; 	human-readable informative error message
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct g-error
+(defcstruct gerror
   (:domain g-quark)
   (:code :int)
   (:message (:string :free-from-foreign nil)))
 
-(export 'g-error)
+(export 'gerror)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_new ()
 ;;; 
 ;;; GError * g_error_new (GQuark domain, gint code, const gchar *format, ...)
 ;;; 
-;;; Creates a new GError with the given domain and code, and a message formatted
-;;; with format.
+;;; Creates a new GError with the given domain and code, and a message
+;;; formatted with format.
 ;;; 
 ;;; domain :
 ;;; 	error domain
@@ -560,9 +562,9 @@
 ;;; 
 ;;; Does nothing if err is NULL; if err is non-NULL, then *err must be NULL.
 ;;; A new GError is created and assigned to *err. Unlike g_set_error(), message
-;;; is not a printf()-style format string. Use this function if message contains
-;;; text you don't have control over, that could include printf() escape
-;;; sequences.
+;;; is not a printf()-style format string. Use this function if message
+;;; contains text you don't have control over, that could include printf()
+;;; escape sequences.
 ;;; 
 ;;; err :
 ;;; 	a return location for a GError, or NULL
@@ -674,3 +676,5 @@
 ;;; 
 ;;; Since 2.16
 ;;; ----------------------------------------------------------------------------
+
+;;; --- End of file glib.error.lisp --------------------------------------------

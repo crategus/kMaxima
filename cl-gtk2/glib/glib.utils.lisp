@@ -30,8 +30,8 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; const gchar *       g_get_application_name              (void);
-;;; void                g_set_application_name              (const gchar *application_name);
+;;;    g-get-application_name ()
+;;;    g-set-application_name (application_name)
 ;;; gchar *             g_get_prgname                       (void);
 ;;; void                g_set_prgname                       (const gchar *prgname);
 ;;; gchar **            g_get_environ                       (void);
@@ -131,6 +131,10 @@
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-application-name "g_get_application_name") :string)
+
+(export 'g-get-application-name)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_set_application_name ()
 ;;; 
@@ -153,6 +157,11 @@
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-set-application-name "g_set_application_name") :void
+    (application_name :string))
+
+(export 'g-set-application-name)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_prgname ()
 ;;; 
@@ -168,6 +177,10 @@
 ;;;     not be modified or freed.
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-prgname "g_get_prgname") :string)
+
+(export 'g-get-prgname)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_set_prgname ()
 ;;; 
@@ -180,6 +193,11 @@
 ;;; prgname :
 ;;; 	the name of the program.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-set-prgname "g_set_prgname") :void
+    (prgname :string))
+
+(export 'g-set-prgname)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_environ ()
@@ -201,6 +219,10 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-environ "g_get_environ") gstrv)
+
+(export 'g-get-environ)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_getenv ()
 ;;; 
@@ -220,6 +242,11 @@
 ;;;     variable is not found. The returned string may be overwritten by the
 ;;;     next call to g_getenv(), g_setenv() or g_unsetenv().
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-getenv "g_getenv") :string
+  (variable :string))
+
+(export 'g-getenv)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_setenv ()
@@ -249,6 +276,13 @@
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-setenv "g_setenv") :boolean
+  (variable :string)
+  (value :string)
+  (overwrite :boolean))
+
+(export 'g-setenv)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_unsetenv ()
@@ -286,6 +320,10 @@
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-listenv "g_listenv") gstrv)
+
+(export 'g-listenv)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_name ()
 ;;; 
@@ -300,6 +338,10 @@
 ;;; 	the user name of the current user.
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-user-name "g_get_user_name") :string)
+
+(export 'g-get-user-name)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_real_name ()
 ;;; 
@@ -313,6 +355,10 @@
 ;;; Returns :
 ;;; 	the user's real name.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-get-real-name "g_get_real_name") :string)
+
+(export 'g-get-real-name)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_cache_dir ()
@@ -337,10 +383,9 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-get-user-cache-dir :string)
+(defcfun (g-get-user-cache-dir "g_get_user_cache_dir") :string)
 
-(defun get-user-cache-dir ()
-  (g-get-user-cache-dir))
+(export 'g-get-user-cache-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_data_dir ()
@@ -364,10 +409,9 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-get-user-data-dir :string)
+(defcfun (g-get-user-data-dir "g_get_user_data_dir") :string)
 
-(defun get-user-data-dir ()
-  (g-get-user-data-dir))
+(export 'g-get-user-data-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_config_dir ()
@@ -391,10 +435,9 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-get-user-config-dir :string)
+(defcfun (g-get-user-config-dir "g_get_user_config_dir") :string)
 
-(defun get-user-config-dir ()
-  (g-get-user-config-dir))
+(export 'g-get-user-config-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_runtime_dir ()
@@ -418,6 +461,10 @@
 ;;; 
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-get-user-runtime-dir "g_get_user_runtime_dir") :string)
+
+(export 'g-get-user-runtime-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; enum GUserDirectory
@@ -472,6 +519,19 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
+(defcenum guserdirectory
+  :g-user-directory-desktop
+  :g-user-directory-documents
+  :g-user-directory-download
+  :g-user-directory-music
+  :g-user-directory-pictures
+  :g-user-directory-public-share
+  :g-user-directory-templates
+  :g-user-directory-videos
+  :g-user-directory-n-directories)
+
+(export 'guserdirectory)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_user_special_dir ()
 ;;; 
@@ -498,6 +558,11 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-user-special-dir "g_get_user_special_dir") :string
+  (directory guserdirectory))
+
+(export 'g-get-user-special-dir)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_system_data_dirs ()
 ;;; 
@@ -523,19 +588,23 @@
 ;;; for GLib, and in the installation folder for the package the application's
 ;;; .exe file belongs to.
 ;;; 
-;;; The installation folders above are determined by looking up the folder where
-;;; the module (DLL or EXE) in question is located. If the folder's name is
-;;; "bin", its parent is used, otherwise the folder itself.
+;;; The installation folders above are determined by looking up the folder
+;;; where the module (DLL or EXE) in question is located. If the folder's name
+;;; is "bin", its parent is used, otherwise the folder itself.
 ;;; 
 ;;; Note that on Windows the returned list can vary depending on where this
 ;;; function is called.
 ;;; 
 ;;; Returns :
 ;;; 	a NULL-terminated array of strings owned by GLib that must not be
-;;;     modified or freed. [array zero-terminated=1][transfer none]
+;;;     modified or freed.
 ;;; 
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-get-system-data-dirs "g_get_system_data_dirs") gstrv)
+
+(export 'g-get-system-data-dirs)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_system_config_dirs ()
@@ -563,6 +632,10 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-system-config-dirs "g_get_system_config_dirs") gstrv)
+
+(export 'g-get-system-config-dirs)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_reload_user_special_dirs_cache ()
 ;;; 
@@ -574,8 +647,8 @@
 ;;; 
 ;;; Due to threadsafety issues this may cause leaking of strings that were
 ;;; previously returned from g_get_user_special_dir() that can't be freed. We
-;;; ensure to only leak the data for the directories that actually changed value
-;;; though.
+;;; ensure to only leak the data for the directories that actually changed
+;;; value though.
 ;;; 
 ;;; Since 2.22
 ;;; ----------------------------------------------------------------------------
@@ -601,6 +674,10 @@
 ;;; 
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-get-host-name "g_get_host_name") :string)
+
+(export 'g-get-host-name)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_home_dir ()
@@ -632,6 +709,10 @@
 ;;; 	the current user's home directory
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-home-dir "g_get_home_dir") :string)
+
+(export 'g-get-home-dir)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_tmp_dir ()
 ;;; 
@@ -647,6 +728,10 @@
 ;;; 	the directory to use for temporary files.
 ;;; ----------------------------------------------------------------------------
 
+(defcfun (g-get-tmp-dir "g_get_tmp_dir") :string)
+
+(export 'g-get-tmp-dir)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_get_current_dir ()
 ;;; 
@@ -659,6 +744,10 @@
 ;;; Returns :
 ;;; 	the current directory.
 ;;; ----------------------------------------------------------------------------
+
+(defcfun (g-get-current-dir "g_get_current_dir") :string)
+
+(export 'g-get-current-dir)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_basename ()

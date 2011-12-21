@@ -299,7 +299,9 @@
   (:actual-type :pointer))
 
 (define-parse-method gstrv (&key (free-from-foreign t) (free-to-foreign t))
-  (make-instance 'gstrv-type :free-from-foreign free-from-foreign :free-to-foreign free-to-foreign))
+  (make-instance 'gstrv-type
+                 :free-from-foreign free-from-foreign
+                 :free-to-foreign free-to-foreign))
 
 (defmethod translate-from-foreign (value (type gstrv-type))
   (unless (null-pointer-p value)
@@ -307,7 +309,8 @@
         (iter (for i from 0)
               (for str-ptr = (mem-aref value :pointer i))
               (until (null-pointer-p str-ptr))
-              (collect (convert-from-foreign str-ptr '(:string :free-from-foreign nil)))
+              (collect (convert-from-foreign str-ptr
+                                             '(:string :free-from-foreign nil)))
               (when (gstrv-type-fff type)
                 (g-free str-ptr)))
       (when (gstrv-type-fff type)
