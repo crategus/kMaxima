@@ -338,23 +338,42 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GCallback ()
 ;;; 
-;;; void                (*GCallback)                        (void);
+;;; void (*GCallback) (void);
 ;;; 
-;;; The type used for callback functions in structure definitions and function signatures. This doesn't mean that all callback functions must take no parameters and return void. The required signature of a callback function is determined by the context in which is used (e.g. the signal to which it is connected). Use G_CALLBACK() to cast the callback function to a GCallback.
+;;; The type used for callback functions in structure definitions and function
+;;; signatures. This doesn't mean that all callback functions must take no
+;;; parameters and return void. The required signature of a callback function
+;;; is determined by the context in which is used (e.g. the signal to which it
+;;; is connected). Use G_CALLBACK() to cast the callback function to a
+;;; GCallback.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GClosure
 ;;; 
 ;;; struct GClosure {
-;;;   volatile       	guint	 in_marshal : 1;
-;;;   volatile       	guint	 is_invalid : 1;
+;;;   volatile guint in_marshal : 1;
+;;;   volatile guint is_invalid : 1;
 ;;; };
 ;;; 
 ;;; A GClosure represents a callback supplied by the programmer.
 ;;; 
-;;; volatile        guint in_marshal : 1;
-;;; 	Indicates whether the closure is currently being invoked with g_closure_invoke()
+;;; volatile guint in_marshal : 1;
+;;; 	Indicates whether the closure is currently being invoked with
+;;;     g_closure_invoke()
 ;;; 
-;;; volatile        guint is_invalid : 1;
-;;; 	Indicates whether the closure has been invalidated by g_closure_invalidate()
+;;; volatile guint is_invalid : 1;
+;;; 	Indicates whether the closure has been invalidated by
+;;;     g_closure_invalidate()
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-closure
+  (:private-data :uint32)
+  (:marshal :pointer)
+  (:data :pointer)
+  (:notifiers :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_CLOSURE
 ;;; 
 ;;; #define G_TYPE_CLOSURE (g_closure_get_type ())
@@ -374,6 +393,9 @@
 ;;; 
 ;;; gpointer callback;
 ;;; 	the callback function
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GClosureMarshal ()
 ;;; 
 ;;; void                (*GClosureMarshal)                  (GClosure *closure,
@@ -402,6 +424,9 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller, see g_closure_set_marshal() and g_closure_set_meta_marshal(). [allow-none]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GClosureNotify ()
 ;;; 
 ;;; void                (*GClosureNotify)                   (gpointer data,

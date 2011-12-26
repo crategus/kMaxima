@@ -8,7 +8,6 @@
            #:g-type-children
            #:g-type-parent
            #:g-type-designator
-           #:g-type-fundamental
            #:g-type-depth
            #:g-type-next-base
            #:g-type-is-a
@@ -119,7 +118,6 @@
            #:connect-signal
            #:boxed-c-structure-name
            #:g-type-designator
-           #:g-type-fundamental
            #:g-type-depth
            #:g-type-next-base
            #:g-type-is-a
@@ -130,7 +128,6 @@
            #:g-type-children
            #:g-type-parent
            #:g-type-designator
-           #:g-type-fundamental
            #:g-type-depth
            #:g-type-next-base
            #:g-type-is-a

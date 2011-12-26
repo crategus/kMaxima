@@ -286,6 +286,17 @@
 ;;; 
 ;;; values_cmp ()
 ;;; 	Compares value1 with value2 according to this type (recommended, the default is memcmp()), see g_param_values_cmp().
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-class
+  (:type-class g-type-class)
+  (:value-type g-type-designator)
+  (:finalize :pointer)
+  (:value-set-default :pointer)
+  (:value-validate :pointer)
+  (:values-cmp :pointer))
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GParamFlags
 ;;; 
 ;;; typedef enum {

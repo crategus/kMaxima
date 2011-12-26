@@ -36,7 +36,9 @@
 ;;; #define             G_PARAM_SPEC_BOOLEAN                (pspec)
 ;;; #define             G_VALUE_HOLDS_BOOLEAN               (value)
 ;;; #define             G_TYPE_PARAM_BOOLEAN
-;;; struct              GParamSpecBoolean;
+;;;
+;;; struct              g-param-spec-boolean
+;;;
 ;;; GParamSpec *        g_param_spec_boolean                (const gchar *name,
 ;;;                                                          const gchar *nick,
 ;;;                                                          const gchar *blurb,
@@ -50,7 +52,9 @@
 ;;; #define             G_PARAM_SPEC_CHAR                   (pspec)
 ;;; #define             G_VALUE_HOLDS_CHAR                  (value)
 ;;; #define             G_TYPE_PARAM_CHAR
+;;;
 ;;; struct              GParamSpecChar;
+;;;
 ;;; GParamSpec *        g_param_spec_char                   (const gchar *name,
 ;;;                                                          const gchar *nick,
 ;;;                                                          const gchar *blurb,
@@ -58,15 +62,17 @@
 ;;;                                                          gint8 maximum,
 ;;;                                                          gint8 default_value,
 ;;;                                                          GParamFlags flags);
-;;; void                g_value_set_char                    (GValue *value,
-;;;                                                          gchar v_char);
+;;;     g_value_set_char (value, v_char)
+;;;
 ;;; gchar               g_value_get_char                    (const GValue *value);
 ;;; 
 ;;; #define             G_IS_PARAM_SPEC_UCHAR               (pspec)
 ;;; #define             G_PARAM_SPEC_UCHAR                  (pspec)
 ;;; #define             G_VALUE_HOLDS_UCHAR                 (value)
 ;;; #define             G_TYPE_PARAM_UCHAR
+;;;
 ;;; struct              GParamSpecUChar;
+;;;
 ;;; GParamSpec *        g_param_spec_uchar                  (const gchar *name,
 ;;;                                                          const gchar *nick,
 ;;;                                                          const gchar *blurb,
@@ -401,7 +407,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_BOOLEAN()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_BOOLEAN(pspec)     (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_BOOLEAN))
+;;; #define G_IS_PARAM_SPEC_BOOLEAN(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                         G_TYPE_PARAM_BOOLEAN))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_BOOLEAN.
 ;;; 
@@ -415,7 +422,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_BOOLEAN()
 ;;; 
-;;; #define G_PARAM_SPEC_BOOLEAN(pspec)        (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_BOOLEAN, GParamSpecBoolean))
+;;; #define G_PARAM_SPEC_BOOLEAN(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                      G_TYPE_PARAM_BOOLEAN,
+;;;                                      GParamSpecBoolean))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecBoolean.
 ;;; 
@@ -426,7 +435,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_BOOLEAN()
 ;;; 
-;;; #define G_VALUE_HOLDS_BOOLEAN(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_BOOLEAN))
+;;; #define G_VALUE_HOLDS_BOOLEAN(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                       G_TYPE_BOOLEAN))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_BOOLEAN.
 ;;; 
@@ -440,9 +450,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_BOOLEAN
 ;;; 
-;;; #define G_TYPE_PARAM_BOOLEAN		   (g_param_spec_types[2])
+;;; #define G_TYPE_PARAM_BOOLEAN (g_param_spec_types[2])
 ;;; 
 ;;; The GType of GParamSpecBoolean.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecBoolean
 ;;; 
 ;;; struct GParamSpecBoolean {
@@ -451,7 +464,8 @@
 ;;;   gboolean      default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for boolean properties.
+;;; A GParamSpec derived structure that contains the meta data for boolean
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -460,16 +474,21 @@
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-param-spec-boolean
+  (:parent-instance g-param-spec)
+  (:default-value :boolean))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_boolean ()
 ;;; 
-;;; GParamSpec *        g_param_spec_boolean                (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gboolean default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_boolean (const gchar *name,
+;;;                                    const gchar *nick,
+;;;                                    const gchar *blurb,
+;;;                                    gboolean default_value,
+;;;                                    GParamFlags flags);
 ;;; 
-;;; Creates a new GParamSpecBoolean instance specifying a G_TYPE_BOOLEAN property.
+;;; Creates a new GParamSpecBoolean instance specifying a G_TYPE_BOOLEAN
+;;; property.
 ;;; 
 ;;; See g_param_spec_internal() for details on property names.
 ;;; 
@@ -582,6 +601,9 @@
 ;;; #define G_TYPE_PARAM_CHAR		   (g_param_spec_types[0])
 ;;; 
 ;;; The GType of GParamSpecChar.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecChar
 ;;; 
 ;;; struct GParamSpecChar {
@@ -592,7 +614,8 @@
 ;;;   gint8         default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for character properties.
+;;; A GParamSpec derived structure that contains the meta data for character
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -607,16 +630,22 @@
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-param-spec-char
+  (:parent-instance g-param-spec)
+  (:minimum :int8)
+  (:maximum :int8)
+  (:default-value :int8))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_char ()
 ;;; 
-;;; GParamSpec *        g_param_spec_char                   (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gint8 minimum,
-;;;                                                          gint8 maximum,
-;;;                                                          gint8 default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_char (const gchar *name,
+;;;                                 const gchar *nick,
+;;;                                 const gchar *blurb,
+;;;                                 gint8 minimum,
+;;;                                 gint8 maximum,
+;;;                                 gint8 default_value,
+;;;                                 GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecChar instance specifying a G_TYPE_CHAR property.
 ;;; 
@@ -657,8 +686,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_char ()
 ;;; 
-;;; void                g_value_set_char                    (GValue *value,
-;;;                                                          gchar v_char);
+;;; void g_value_set_char (GValue *value, gchar v_char);
 ;;; 
 ;;; Set the contents of a G_TYPE_CHAR GValue to v_char.
 ;;; 
@@ -669,14 +697,14 @@
 ;;; 	character value to be set
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-value-set-char :void
+(defcfun ("g_value_set_char" g-value-set-char) :void
   (g-value (:pointer g-value))
   (new-value :char))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_char ()
 ;;; 
-;;; gchar               g_value_get_char                    (const GValue *value);
+;;; gchar g_value_get_char (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_CHAR GValue.
 ;;; 
@@ -735,6 +763,9 @@
 ;;; #define G_TYPE_PARAM_UCHAR		   (g_param_spec_types[1])
 ;;; 
 ;;; The GType of GParamSpecUChar.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecUChar
 ;;; 
 ;;; struct GParamSpecUChar {
@@ -745,7 +776,8 @@
 ;;;   guint8        default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for unsigned character properties.
+;;; A GParamSpec derived structure that contains the meta data for unsigned
+;;; character properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -759,6 +791,12 @@
 ;;; guint8 default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-uchar
+  (:parent-instance g-param-spec)
+  (:minimum :uint8)
+  (:maximum :uint8)
+  (:default-value :uint8))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uchar ()
@@ -888,6 +926,9 @@
 ;;; #define G_TYPE_PARAM_INT		   (g_param_spec_types[3])
 ;;; 
 ;;; The GType of GParamSpecInt.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecInt
 ;;; 
 ;;; struct GParamSpecInt {
@@ -898,7 +939,8 @@
 ;;;   gint          default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for integer properties.
+;;; A GParamSpec derived structure that contains the meta data for integer
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -912,6 +954,12 @@
 ;;; gint default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-int
+  (:parent-instance g-param-spec)
+  (:minimum :int)
+  (:maximum :int)
+  (:default-value :int))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_int ()
@@ -1043,6 +1091,9 @@
 ;;; #define G_TYPE_PARAM_UINT		   (g_param_spec_types[4])
 ;;; 
 ;;; The GType of GParamSpecUInt.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecUInt
 ;;; 
 ;;; struct GParamSpecUInt {
@@ -1067,6 +1118,12 @@
 ;;; guint default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-uint
+  (:parent-instance g-param-spec)
+  (:minimum :uint)
+  (:maximum :uint)
+  (:default-value :uint))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uint ()
@@ -1198,6 +1255,9 @@
 ;;; #define G_TYPE_PARAM_LONG		   (g_param_spec_types[5])
 ;;; 
 ;;; The GType of GParamSpecLong.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecLong
 ;;; 
 ;;; struct GParamSpecLong {
@@ -1208,7 +1268,8 @@
 ;;;   glong         default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for long integer properties.
+;;; A GParamSpec derived structure that contains the meta data for long integer
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1222,6 +1283,12 @@
 ;;; glong default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-long
+  (:parent-instance g-param-spec)
+  (:minimum :long)
+  (:maximum :long)
+  (:default-value :ulong))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_long ()
@@ -1353,6 +1420,9 @@
 ;;; #define G_TYPE_PARAM_ULONG		   (g_param_spec_types[6])
 ;;; 
 ;;; The GType of GParamSpecULong.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecULong
 ;;; 
 ;;; struct GParamSpecULong {
@@ -1363,7 +1433,8 @@
 ;;;   gulong        default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for unsigned long integer properties.
+;;; A GParamSpec derived structure that contains the meta data for unsigned
+;;; long integer properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1377,6 +1448,12 @@
 ;;; gulong default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-ulong
+  (:parent-instance g-param-spec)
+  (:minimum :ulong)
+  (:maximum :ulong)
+  (:default-value :ulong))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_ulong ()
@@ -1508,6 +1585,9 @@
 ;;; #define G_TYPE_PARAM_INT64		   (g_param_spec_types[7])
 ;;; 
 ;;; The GType of GParamSpecInt64.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecInt64
 ;;; 
 ;;; struct GParamSpecInt64 {
@@ -1532,6 +1612,12 @@
 ;;; gint64 default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-int64
+  (:parent-instance g-param-spec)
+  (:minimum :uint64)
+  (:maximum :uint64)
+  (:default-value :uint64))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_int64 ()
@@ -1663,6 +1749,9 @@
 ;;; #define G_TYPE_PARAM_UINT64		   (g_param_spec_types[8])
 ;;; 
 ;;; The GType of GParamSpecUInt64.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecUInt64
 ;;; 
 ;;; struct GParamSpecUInt64 {
@@ -1673,7 +1762,8 @@
 ;;;   guint64       default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for unsigned 64bit integer properties.
+;;; A GParamSpec derived structure that contains the meta data for unsigned
+;;; 64bit integer properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1687,6 +1777,12 @@
 ;;; guint64 default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-uint64
+  (:parent-instance g-param-spec)
+  (:minimum :uint64)
+  (:maximum :uint64)
+  (:default-value :uint64))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uint64 ()
@@ -1776,7 +1872,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_FLOAT()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_FLOAT(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_FLOAT))
+;;; #define G_IS_PARAM_SPEC_FLOAT(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_FLOAT))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_FLOAT.
 ;;; 
@@ -1790,7 +1887,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_FLOAT()
 ;;; 
-;;; #define G_PARAM_SPEC_FLOAT(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_FLOAT, GParamSpecFloat))
+;;; #define G_PARAM_SPEC_FLOAT(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_FLOAT, GParamSpecFloat))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecFloat.
 ;;; 
@@ -1801,7 +1899,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_FLOAT()
 ;;; 
-;;; #define G_VALUE_HOLDS_FLOAT(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_FLOAT))
+;;; #define G_VALUE_HOLDS_FLOAT(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_FLOAT))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_FLOAT.
 ;;; 
@@ -1815,9 +1914,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_FLOAT
 ;;; 
-;;; #define G_TYPE_PARAM_FLOAT		   (g_param_spec_types[12])
+;;; #define G_TYPE_PARAM_FLOAT  (g_param_spec_types[12])
 ;;; 
 ;;; The GType of GParamSpecFloat.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecFloat
 ;;; 
 ;;; struct GParamSpecFloat {
@@ -1829,7 +1931,8 @@
 ;;;   gfloat        epsilon;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for float properties.
+;;; A GParamSpec derived structure that contains the meta data for float
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1844,8 +1947,16 @@
 ;;; 	default value for the property specified
 ;;; 
 ;;; gfloat epsilon;
-;;; 	values closer than epsilon will be considered identical by g_param_values_cmp(); the default value is 1e-30.
+;;; 	values closer than epsilon will be considered identical by
+;;;     g_param_values_cmp(); the default value is 1e-30.
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-float
+  (:parent-instance g-param-spec)
+  (:minimum :float)
+  (:maximum :float)
+  (:default-value :float)
+  (:epsilon :float))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_float ()
@@ -1977,6 +2088,9 @@
 ;;; #define G_TYPE_PARAM_DOUBLE		   (g_param_spec_types[13])
 ;;; 
 ;;; The GType of GParamSpecDouble.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecDouble
 ;;; 
 ;;; struct GParamSpecDouble {
@@ -1988,7 +2102,8 @@
 ;;;   gdouble       epsilon;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for double properties.
+;;; A GParamSpec derived structure that contains the meta data for double
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -2003,8 +2118,16 @@
 ;;; 	default value for the property specified
 ;;; 
 ;;; gdouble epsilon;
-;;; 	values closer than epsilon will be considered identical by g_param_values_cmp(); the default value is 1e-90.
+;;; 	values closer than epsilon will be considered identical by
+;;;     g_param_values_cmp(); the default value is 1e-90.
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-double
+  (:parent-instance g-param-spec)
+  (:minimum :double)
+  (:maximum :double)
+  (:default-value :double)
+  (:epsilon :double))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_double ()
@@ -2136,6 +2259,9 @@
 ;;; #define G_TYPE_PARAM_ENUM		   (g_param_spec_types[10])
 ;;; 
 ;;; The GType of GParamSpecEnum.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecEnum
 ;;; 
 ;;; struct GParamSpecEnum {
@@ -2145,7 +2271,8 @@
 ;;;   gint          default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for enum properties.
+;;; A GParamSpec derived structure that contains the meta data for enum
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -2156,6 +2283,11 @@
 ;;; gint default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-enum
+  (:parent-instance g-param-spec)
+  (:enum-class (:pointer g-enum-class))
+  (:default-value :int))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_enum ()
@@ -2284,6 +2416,9 @@
 ;;; #define G_TYPE_PARAM_FLAGS		   (g_param_spec_types[11])
 ;;; 
 ;;; The GType of GParamSpecFlags.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecFlags
 ;;; 
 ;;; struct GParamSpecFlags {
@@ -2293,7 +2428,8 @@
 ;;;   guint         default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for flags properties.
+;;; A GParamSpec derived structure that contains the meta data for flags
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -2304,6 +2440,11 @@
 ;;; guint default_value;
 ;;; 	default value for the property specified
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-flags
+  (:parent-instance g-param-spec)
+  (:flags-class (:pointer g-flags-class))
+  (:default-value :uint))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_flags ()
@@ -2430,6 +2571,9 @@
 ;;; #define G_TYPE_PARAM_STRING		   (g_param_spec_types[14])
 ;;; 
 ;;; The GType of GParamSpecString.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecString
 ;;; 
 ;;; struct GParamSpecString {
@@ -2443,7 +2587,8 @@
 ;;;   guint         ensure_non_null : 1;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for string properties.
+;;; A GParamSpec derived structure that contains the meta data for string
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -2471,6 +2616,14 @@
 ;;; 
 ;;; A C representable type name for G_TYPE_STRING.
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-string
+  (:parent-instance g-param-spec)
+  (:default-value (:string :free-to-foreign nil :free-from-foreign nil))
+  (:cset-first (:string :free-to-foreign nil :free-from-foreign nil))
+  (:cset-nth (:string :free-to-foreign nil :free-from-foreign nil))
+  (:substitutor :char)
+  (:flags-for-null :uint))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_string ()
@@ -2654,29 +2807,36 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_PARAM
 ;;; 
-;;; #define G_TYPE_PARAM_PARAM		   (g_param_spec_types[15])
+;;; #define G_TYPE_PARAM_PARAM (g_param_spec_types[15])
 ;;; 
 ;;; The GType of GParamSpecParam.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecParam
 ;;; 
 ;;; struct GParamSpecParam {
-;;;   GParamSpec    parent_instance;
+;;;   GParamSpec parent_instance;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for G_TYPE_PARAM properties.
+;;; A GParamSpec derived structure that contains the meta data for G_TYPE_PARAM
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-param-spec-param
+  (:parent-instance g-param-spec))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_param ()
 ;;; 
-;;; GParamSpec *        g_param_spec_param                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GType param_type,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_param (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  GType param_type,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecParam instance specifying a G_TYPE_PARAM property.
 ;;; 
@@ -2711,8 +2871,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_param ()
 ;;; 
-;;; void                g_value_set_param                   (GValue *value,
-;;;                                                          GParamSpec *param);
+;;; void g_value_set_param (GValue *value, GParamSpec *param);
 ;;; 
 ;;; Set the contents of a G_TYPE_PARAM GValue to param.
 ;;; 
@@ -2730,10 +2889,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_take_param ()
 ;;; 
-;;; void                g_value_take_param                  (GValue *value,
-;;;                                                          GParamSpec *param);
+;;; void g_value_take_param (GValue *value, GParamSpec *param);
 ;;; 
-;;; Sets the contents of a G_TYPE_PARAM GValue to param and takes over the ownership of the callers reference to param; the caller doesn't have to unref it any more.
+;;; Sets the contents of a G_TYPE_PARAM GValue to param and takes over the
+;;; ownership of the callers reference to param; the caller doesn't have to
+;;; unref it any more.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of type G_TYPE_PARAM
@@ -2836,31 +2996,39 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_BOXED
 ;;; 
-;;; #define G_TYPE_PARAM_BOXED		   (g_param_spec_types[16])
+;;; #define G_TYPE_PARAM_BOXED (g_param_spec_types[16])
 ;;; 
 ;;; The GType of GParamSpecBoxed.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecBoxed
 ;;; 
 ;;; struct GParamSpecBoxed {
-;;;   GParamSpec    parent_instance;
+;;;   GParamSpec parent_instance;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for boxed properties.
+;;; A GParamSpec derived structure that contains the meta data for boxed
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-param-spec-boxed
+  (:parent-instance g-param-spec))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_boxed ()
 ;;; 
-;;; GParamSpec *        g_param_spec_boxed                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GType boxed_type,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_boxed (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  GType boxed_type,
+;;;                                  GParamFlags flags);
 ;;; 
-;;; Creates a new GParamSpecBoxed instance specifying a G_TYPE_BOXED derived property.
+;;; Creates a new GParamSpecBoxed instance specifying a G_TYPE_BOXED derived
+;;; property.
 ;;; 
 ;;; See g_param_spec_internal() for details on property names.
 ;;; 
@@ -2893,8 +3061,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_boxed ()
 ;;; 
-;;; void                g_value_set_boxed                   (GValue *value,
-;;;                                                          gconstpointer v_boxed);
+;;; void g_value_set_boxed (GValue *value, gconstpointer v_boxed);
 ;;; 
 ;;; Set the contents of a G_TYPE_BOXED derived GValue to v_boxed.
 ;;; 
@@ -2912,10 +3079,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_static_boxed ()
 ;;; 
-;;; void                g_value_set_static_boxed            (GValue *value,
-;;;                                                          gconstpointer v_boxed);
+;;; void g_value_set_static_boxed (GValue *value, gconstpointer v_boxed);
 ;;; 
-;;; Set the contents of a G_TYPE_BOXED derived GValue to v_boxed. The boxed value is assumed to be static, and is thus not duplicated when setting the GValue.
+;;; Set the contents of a G_TYPE_BOXED derived GValue to v_boxed. The boxed
+;;; value is assumed to be static, and is thus not duplicated when setting the
+;;; GValue.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of G_TYPE_BOXED derived type
@@ -3037,20 +3205,27 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_POINTER
 ;;; 
-;;; #define G_TYPE_PARAM_POINTER		   (g_param_spec_types[17])
+;;; #define G_TYPE_PARAM_POINTER (g_param_spec_types[17])
 ;;; 
 ;;; The GType of GParamSpecPointer.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecPointer
 ;;; 
 ;;; struct GParamSpecPointer {
-;;;   GParamSpec    parent_instance;
+;;;   GParamSpec parent_instance;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for pointer properties.
+;;; A GParamSpec derived structure that contains the meta data for pointer
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-pointer
+  (:parent-instance g-param-spec))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_pointer ()
@@ -3164,31 +3339,39 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_OBJECT
 ;;; 
-;;; #define G_TYPE_PARAM_OBJECT		   (g_param_spec_types[19])
+;;; #define G_TYPE_PARAM_OBJECT (g_param_spec_types[19])
 ;;; 
 ;;; The GType of GParamSpecObject.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecObject
 ;;; 
 ;;; struct GParamSpecObject {
 ;;;   GParamSpec    parent_instance;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for object properties.
+;;; A GParamSpec derived structure that contains the meta data for object
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
 ;;; ----------------------------------------------------------------------------
 
+(defcstruct g-param-spec-object
+  (:parent-instance g-param-spec))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_object ()
 ;;; 
-;;; GParamSpec *        g_param_spec_object                 (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GType object_type,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_object (const gchar *name,
+;;;                                   const gchar *nick,
+;;;                                   const gchar *blurb,
+;;;                                   GType object_type,
+;;;                                   GParamFlags flags);
 ;;; 
-;;; Creates a new GParamSpecBoxed instance specifying a G_TYPE_OBJECT derived property.
+;;; Creates a new GParamSpecBoxed instance specifying a G_TYPE_OBJECT derived
+;;; property.
 ;;; 
 ;;; See g_param_spec_internal() for details on property names.
 ;;; 
@@ -3418,6 +3601,9 @@
 ;;; #define G_TYPE_PARAM_VALUE_ARRAY	   (g_param_spec_types[18])
 ;;; 
 ;;; The GType of GParamSpecValueArray.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecValueArray
 ;;; 
 ;;; struct GParamSpecValueArray {
@@ -3426,17 +3612,25 @@
 ;;;   guint		fixed_n_elements;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for GValueArray properties.
+;;; A GParamSpec derived structure that contains the meta data for GValueArray
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
 ;;; 
 ;;; GParamSpec *element_spec;
-;;; 	a GParamSpec describing the elements contained in arrays of this property, may be NULL
+;;; 	a GParamSpec describing the elements contained in arrays of this
+;;;     property, may be NULL
 ;;; 
 ;;; guint fixed_n_elements;
-;;; 	if greater than 0, arrays of this property will always have this many elements
+;;; 	if greater than 0, arrays of this property will always have this many
+;;;     elements
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-value-array
+  (:parent-instance g-param-spec)
+  (:element-spec (:pointer g-param-spec))
+  (:fixed-n-elements :uint))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_value_array ()
@@ -3610,7 +3804,8 @@
 ;;;   GType         is_a_type;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for GType properties.
+;;; A GParamSpec derived structure that contains the meta data for GType
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -3620,6 +3815,10 @@
 ;;; 
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
+
+(defcstruct g-param-spec-g-type
+  (:parent-instance g-param-spec)
+  (:types-root g-type-designator))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_gtype ()

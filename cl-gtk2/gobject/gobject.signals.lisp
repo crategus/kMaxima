@@ -333,12 +333,18 @@
 
 (defun create-signal-handler-closure (object fn)
   (let ((function-id (save-handler-to-object object fn))
-        (closure (g-closure-new-simple (foreign-type-size 'lisp-signal-handler-closure) (null-pointer))))
-    (setf (foreign-slot-value closure 'lisp-signal-handler-closure :function-id) function-id
-          (foreign-slot-value closure 'lisp-signal-handler-closure :object) (pointer object))
-    (g-closure-add-finalize-notifier closure (null-pointer)
+        (closure (g-closure-new-simple
+                   (foreign-type-size 'lisp-signal-handler-closure)
+                   (null-pointer))))
+    (setf (foreign-slot-value closure 'lisp-signal-handler-closure :function-id)
+          function-id
+          (foreign-slot-value closure 'lisp-signal-handler-closure :object)
+          (pointer object))
+    (g-closure-add-finalize-notifier closure
+                                     (null-pointer)
                                      (callback lisp-signal-handler-closure-finalize))
-    (g-closure-set-marshal closure (callback lisp-signal-handler-closure-marshal))
+    (g-closure-set-marshal closure
+                           (callback lisp-signal-handler-closure-marshal))
     closure))
 
 (defun find-free-signal-handler-id (object)
@@ -436,7 +442,11 @@
 ;;; 	user data associated with the hook.
 ;;; 
 ;;; Returns :
-;;; 	whether it wants to stay connected. If it returns FALSE, the signal hook is disconnected (and destroyed).
+;;; 	whether it wants to stay connected. If it returns FALSE, the signal
+;;;  hook is disconnected (and destroyed).
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GSignalFlags
 ;;; 
 ;;; typedef enum {
@@ -450,7 +460,9 @@
 ;;;   G_SIGNAL_MUST_COLLECT = 1 << 7
 ;;; } GSignalFlags;
 ;;; 
-;;; The signal flags are used to specify a signal's behaviour, the overall signal description outlines how especially the RUN flags control the stages of a signal emission.
+;;; The signal flags are used to specify a signal's behaviour, the overall
+;;; signal description outlines how especially the RUN flags control the stages
+;;; of a signal emission.
 ;;; 
 ;;; G_SIGNAL_RUN_FIRST
 ;;; 	Invoke the object method handler in the first emission stage.
@@ -462,19 +474,41 @@
 ;;; 	Invoke the object method handler in the last emission stage.
 ;;; 
 ;;; G_SIGNAL_NO_RECURSE
-;;; 	Signals being emitted for an object while currently being in emission for this very object will not be emitted recursively, but instead cause the first emission to be restarted.
+;;; 	Signals being emitted for an object while currently being in emission
+;;;     for this very object will not be emitted recursively, but instead cause
+;;;     the first emission to be restarted.
 ;;; 
 ;;; G_SIGNAL_DETAILED
-;;; 	This signal supports "::detail" appendices to the signal name upon handler connections and emissions.
+;;; 	This signal supports "::detail" appendices to the signal name upon
+;;;     handler connections and emissions.
 ;;; 
 ;;; G_SIGNAL_ACTION
-;;; 	Action signals are signals that may freely be emitted on alive objects from user code via g_signal_emit() and friends, without the need of being embedded into extra code that performs pre or post emission adjustments on the object. They can also be thought of as object methods which can be called generically by third-party code.
+;;; 	Action signals are signals that may freely be emitted on alive objects
+;;;     from user code via g_signal_emit() and friends, without the need of
+;;;     being embedded into extra code that performs pre or post emission
+;;;     adjustments on the object. They can also be thought of as object methods
+;;;     which can be called generically by third-party code.
 ;;; 
 ;;; G_SIGNAL_NO_HOOKS
 ;;; 	No emissions hooks are supported for this signal.
 ;;; 
 ;;; G_SIGNAL_MUST_COLLECT
-;;; 	Varargs signal emission will always collect the arguments, even if there are no signal handlers connected. Since 2.30.
+;;; 	Varargs signal emission will always collect the arguments, even if there
+;;;     are no signal handlers connected.
+;;;
+;;; Since 2.30.
+;;; ----------------------------------------------------------------------------
+
+(defbitfield g-signal-flags
+  :run-first
+  :run-last
+  :run-cleanup
+  :no-recurse
+  :detailed
+  :action
+  :no-hooks)
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GSignalMatchType
 ;;; 
 ;;; typedef enum {
@@ -1079,25 +1113,31 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_signal_connect_object ()
 ;;; 
-;;; gulong              g_signal_connect_object             (gpointer instance,
-;;;                                                          const gchar *detailed_signal,
-;;;                                                          GCallback c_handler,
-;;;                                                          gpointer gobject,
-;;;                                                          GConnectFlags connect_flags);
+;;; gulong g_signal_connect_object (gpointer instance,
+;;;                                 const gchar *detailed_signal,
+;;;                                 GCallback c_handler,
+;;;                                 gpointer gobject,
+;;;                                 GConnectFlags connect_flags);
 ;;; 
-;;; This is similar to g_signal_connect_data(), but uses a closure which ensures that the gobject stays alive during the call to c_handler by temporarily adding a reference count to gobject.
+;;; This is similar to g_signal_connect_data(), but uses a closure which
+;;; ensures that the gobject stays alive during the call to c_handler by
+;;; temporarily adding a reference count to gobject.
 ;;; 
-;;; Note that there is a bug in GObject that makes this function much less useful than it might seem otherwise. Once gobject is disposed, the callback will no longer be called, but, the signal handler is not currently disconnected. If the instance is itself being freed at the same time than this doesn't matter, since the signal will automatically be removed, but if instance persists, then the signal handler will leak. You should not remove the signal yourself because in a future versions of GObject, the handler will automatically be disconnected.
+;;; Note that there is a bug in GObject that makes this function much less
+;;; useful than it might seem otherwise. Once gobject is disposed, the callback
+;;; will no longer be called, but, the signal handler is not currently
+;;; disconnected. If the instance is itself being freed at the same time than
+;;; this doesn't matter, since the signal will automatically be removed, but if
+;;; instance persists, then the signal handler will leak. You should not remove
+;;; the signal yourself because in a future versions of GObject, the handler
+;;; will automatically be disconnected.
 ;;; 
-;;; It's possible to work around this problem in a way that will continue to work with future versions of GObject by checking that the signal handler is still connected before disconnected it:
+;;; It's possible to work around this problem in a way that will continue to
+;;; work with future versions of GObject by checking that the signal handler is
+;;; still connected before disconnected it:
 ;;; 
-;;; 1
-;;; 2
-;;; 
-;;; 	
-;;; 
-;;; if (g_signal_handler_is_connected (instance, id))
-;;;   g_signal_handler_disconnect (instance, id);
+;;;  1 if (g_signal_handler_is_connected (instance, id))
+;;;  2   g_signal_handler_disconnect (instance, id);
 ;;; 
 ;;; instance :
 ;;; 	the instance to connect to.
@@ -1130,6 +1170,9 @@
 ;;; 
 ;;; G_CONNECT_SWAPPED
 ;;; 	whether the instance and data should be swapped when calling the handler.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_signal_connect_data ()
 ;;; 
 ;;; gulong              g_signal_connect_data               (gpointer instance,
