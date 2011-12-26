@@ -53,9 +53,11 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; The GtkInvisible widget is used internally in GTK+, and is probably not very useful for application developers.
+;;; The GtkInvisible widget is used internally in GTK+, and is probably not
+;;; very useful for application developers.
 ;;; 
-;;; It is used for reliable pointer grabs and selection handling in the code for drag-and-drop.
+;;; It is used for reliable pointer grabs and selection handling in the code
+;;; for drag-and-drop.
 ;;; ----------------------------------------------------------------------------
 
 (in-package :gtk)
@@ -75,7 +77,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_invisible_new ()
 ;;; 
-;;; GtkWidget *         gtk_invisible_new                   (void);
+;;; GtkWidget * gtk_invisible_new (void);
 ;;; 
 ;;; Creates a new GtkInvisible.
 ;;; 
@@ -86,12 +88,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_invisible_new_for_screen ()
 ;;; 
-;;; GtkWidget *         gtk_invisible_new_for_screen        (GdkScreen *screen);
+;;; GtkWidget * gtk_invisible_new_for_screen (GdkScreen *screen);
 ;;; 
 ;;; Creates a new GtkInvisible object for a specified screen
 ;;; 
 ;;; screen :
-;;; 	a GdkScreen which identifies on which the new GtkInvisible will be created.
+;;; 	a GdkScreen which identifies on which the new GtkInvisible will be
+;;;     created.
 ;;; 
 ;;; Returns :
 ;;; 	a newly created GtkInvisible object
@@ -102,8 +105,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_invisible_set_screen ()
 ;;; 
-;;; void                gtk_invisible_set_screen            (GtkInvisible *invisible,
-;;;                                                          GdkScreen *screen);
+;;; void gtk_invisible_set_screen (GtkInvisible *invisible, GdkScreen *screen);
 ;;; 
 ;;; Sets the GdkScreen where the GtkInvisible object will be displayed.
 ;;; 
@@ -119,7 +121,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_invisible_get_screen ()
 ;;; 
-;;; GdkScreen *         gtk_invisible_get_screen            (GtkInvisible *invisible);
+;;; GdkScreen * gtk_invisible_get_screen (GtkInvisible *invisible);
 ;;; 
 ;;; Returns the GdkScreen object associated with invisible
 ;;; 
@@ -127,7 +129,7 @@
 ;;; 	a GtkInvisible.
 ;;; 
 ;;; Returns :
-;;; 	the associated GdkScreen. [transfer none]
+;;; 	the associated GdkScreen.
 ;;; 
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
@@ -136,7 +138,7 @@
 ;;; Property Details
 ;;; The "screen" property
 ;;; 
-;;;   "screen"                   GdkScreen*            : Read / Write
+;;;   "screen" GdkScreen* : Read / Write
 ;;; 
 ;;; The screen where this window will be displayed.
 ;;; ----------------------------------------------------------------------------
