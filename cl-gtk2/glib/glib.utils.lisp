@@ -827,6 +827,11 @@
 ;;; 	TRUE if file_name is absolute.
 ;;; ----------------------------------------------------------------------------
 
+(defcfun ("g_path_is_absolute" g-path-is-absolute) :boolean
+  (file-name :string))
+
+(export 'g-path-is-absolute)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_path_skip_root ()
 ;;; 
@@ -905,23 +910,22 @@
 ;;; 	a newly-allocated string that must be freed with g_free().
 ;;; ----------------------------------------------------------------------------
 
-(defun build-filename (&rest args)
+(defun g-build-filename (&rest args)
   (let* ((n (length args))
          (arr (g-malloc (* (1+ n) (foreign-type-size :pointer)))))
-
     (iter (for i from 0)
           (for arg in args)
           (setf (mem-aref arr :pointer i) (g-strdup arg)))
     (setf (mem-aref arr :pointer n) (null-pointer))
-
     (prog1
       (g-build-filenamev arr)
-
       (iter (for i from 0)
             (for str-ptr = (mem-aref arr :pointer i))
             (until (null-pointer-p str-ptr))
             (g-free str-ptr))
       (g-free arr))))
+
+(export 'g-build-filename)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_build_filenamev ()
@@ -941,8 +945,10 @@
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-build-filenamev (:string :free-from-foreign t)
+(defcfun ("g_build_filenamev" g-build-filenamev) (:string :free-from-foreign t)
   (args :pointer))
+
+(export 'g-build-filenamev)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_build_path ()
@@ -1070,8 +1076,8 @@
 ;;; 
 ;;; Formats a size.
 ;;; 
-;;; This function is similar to g_format_size() but allows for flags that modify
-;;; the output. See GFormatSizeFlags.
+;;; This function is similar to g_format_size() but allows for flags that
+;;; modify the output. See GFormatSizeFlags.
 ;;; 
 ;;; size :
 ;;; 	a size in bytes
@@ -1264,8 +1270,8 @@
 ;;;                             guint nkeys)
 ;;; 
 ;;; Parses a string containing debugging options into a guint containing bit
-;;; flags. This is used within GDK and GTK+ to parse the debug options passed on
-;;; the command line or through environment variables.
+;;; flags. This is used within GDK and GTK+ to parse the debug options passed
+;;; on the command line or through environment variables.
 ;;; 
 ;;; If string is equal to "all", all flags are set. If string is equal to
 ;;; "help", all the available keys in keys are printed out to standard error.

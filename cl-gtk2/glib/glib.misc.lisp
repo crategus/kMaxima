@@ -175,8 +175,8 @@
 ;;; struct timeval returned by the gettimeofday() UNIX call.
 ;;; 
 ;;; GLib is attempting to unify around the use of 64bit integers to represent
-;;; microsecond-precision time. As such, this type will be removed from a future
-;;; version of GLib.
+;;; microsecond-precision time. As such, this type will be removed from a
+;;; future version of GLib.
 ;;; 
 ;;; glong tv_sec;
 ;;; 	seconds
