@@ -96,8 +96,10 @@
 (defvar *g-type-name->g-boxed-foreign-info* (make-hash-table :test 'equal))
 
 (defun get-g-boxed-foreign-info-for-gtype (g-type-designator)
-  (or (gethash (gtype-name (gtype g-type-designator)) *g-type-name->g-boxed-foreign-info*)
-      (error "Unknown GBoxed type '~A'" (gtype-name (gtype g-type-designator)))))
+  (or (gethash (gtype-name (gtype g-type-designator))
+               *g-type-name->g-boxed-foreign-info*)
+      (error "Unknown GBoxed type '~A'"
+             (gtype-name (gtype g-type-designator)))))
 
 (defgeneric make-foreign-type (info &key return-p))
 
@@ -121,7 +123,10 @@
   (format t "(boxed-free-fn ~A ~A)~%" (g-boxed-info-name type-info) native))
 
 (defgeneric has-callback-cleanup (foreign-type))
-(defgeneric cleanup-translated-object-for-callback (foreign-type converted-object native-object))
+
+(defgeneric cleanup-translated-object-for-callback (foreign-type
+                                                    converted-object
+                                                    native-object))
 
 (defmethod has-callback-cleanup ((type g-boxed-foreign-type))
   t)
@@ -142,10 +147,12 @@
 (defstruct (cstruct-inline-slot-description (:include cstruct-slot-description))
   boxed-type-name)
 
-(defmethod make-load-form ((object cstruct-slot-description) &optional environment)
+(defmethod make-load-form ((object cstruct-slot-description)
+                           &optional environment)
   (make-load-form-saving-slots object :environment environment))
 
-(defmethod make-load-form ((object cstruct-inline-slot-description) &optional environment)
+(defmethod make-load-form ((object cstruct-inline-slot-description)
+                           &optional environment)
   (make-load-form-saving-slots object :environment environment))
 
 (defstruct cstruct-description
@@ -158,11 +165,17 @@
 (defun parse-cstruct-slot (slot)
   (destructuring-bind (name type &key count initform inline) slot
     (if inline
-        (make-cstruct-inline-slot-description :name name :type (generated-cunion-name type)
-                                       :count count :initform initform :inline-p inline
-                                       :boxed-type-name type)
-        (make-cstruct-inline-slot-description :name name :type type
-                                              :count count :initform initform :inline-p inline))))
+        (make-cstruct-inline-slot-description :name name
+                                              :type (generated-cunion-name type)
+                                              :count count
+                                              :initform initform
+                                              :inline-p inline
+                                              :boxed-type-name type)
+        (make-cstruct-inline-slot-description :name name
+                                              :type type
+                                              :count count
+                                              :initform initform
+                                              :inline-p inline))))
 
 (defun parse-cstruct-definition (name slots)
   (make-cstruct-description :name name
@@ -192,7 +205,8 @@
                (gethash ,g-type-name *g-type-name->g-boxed-foreign-info*)
                (get ',name 'g-boxed-foreign-info)
                (get ',name 'structure-constructor)
-               ',(intern (format nil "MAKE-~A" (symbol-name name)) (symbol-package name)))))))
+               ',(intern (format nil "MAKE-~A" (symbol-name name))
+                         (symbol-package name)))))))
 
 (defmethod make-foreign-type ((info g-boxed-cstruct-wrapper-info) &key return-p)
   (make-instance 'boxed-cstruct-foreign-type :info info :return-p return-p))
@@ -476,19 +490,22 @@
   (let ((name (var-structure-name str)))
     `(progn
        (defstruct ,(if (var-structure-parent str)
-                       `(,(var-structure-name str) (:include ,(var-structure-name (var-structure-parent str))
-                                                             (,(var-structure-discriminator-slot (var-structure-parent str))
-                                                               ,(first (var-structure-variant-discriminating-values
-                                                                        (find str
-                                                                              (var-structure-variants
-                                                                               (var-structure-parent str))
-                                                                              :key #'var-structure-variant-structure))))))
+                       `(,(var-structure-name str)
+                          (:include
+                            ,(var-structure-name (var-structure-parent str))
+                            (,(var-structure-discriminator-slot (var-structure-parent str))
+                              ,(first (var-structure-variant-discriminating-values
+                                        (find str
+                                              (var-structure-variants
+                                                (var-structure-parent str))
+                                              :key #'var-structure-variant-structure))))))
                        `,(var-structure-name str))
          ,@(iter (for slot in (var-structure-slots str))
                  (collect `(,(cstruct-slot-description-name slot)
                              ,(cstruct-slot-description-initform slot)))))
        (setf (get ',name 'structure-constructor)
-             ',(intern (format nil "MAKE-~A" (symbol-name name)) (symbol-package name))))))
+             ',(intern (format nil "MAKE-~A" (symbol-name name))
+                       (symbol-package name))))))
 
 (defun generate-structures (str)
   (iter (for variant in (reverse (all-structures str)))
