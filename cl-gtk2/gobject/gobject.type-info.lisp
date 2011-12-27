@@ -35,13 +35,13 @@
 ;;; #define        G_TYPE_FUNDAMENTAL       (type)
 ;;; #define        G_TYPE_FUNDAMENTAL_MAX
 ;;;
-;;;    g-type-make-fundamental (x)
+;;;         g-type-make-fundamental (x)
 ;;;
 ;;; #define        G_TYPE_IS_ABSTRACT       (type)
 ;;; #define        G_TYPE_IS_DERIVED        (type)
 ;;; #define        G_TYPE_IS_FUNDAMENTAL    (type)
 ;;;
-;;;    g-type-is-value-type (type)
+;;;         g-type-is-value-type (type)
 ;;;
 ;;; #define        G_TYPE_HAS_VALUE_TABLE   (type)
 ;;; #define        G_TYPE_IS_CLASSED        (type)
@@ -50,16 +50,16 @@
 ;;; #define        G_TYPE_IS_DEEP_DERIVABLE (type)
 ;;; #define        G_TYPE_IS_INTERFACE      (type)
 ;;;
-;;; enum           GTypeFlags;
-;;; enum           GTypeFundamentalFlags;
+;;; enum    g-type-flags
+;;; enum    g-type-fundamental-flags
 ;;;
-;;; struct         GTypeInterface;
-;;; struct         GTypeClass;
-;;; struct         GTypeInstance;
-;;; struct         GTypeInfo;
-;;; struct         GTypeFundamentalInfo;
-;;; struct         GInterfaceInfo;
-;;; struct         GTypeValueTable;
+;;; struct  g-type-interface
+;;; struct  g-type-class
+;;; struct  g-type-instance
+;;; struct  g-type-info
+;;; struct  g-type-fundamental-info
+;;; struct  g-type-interface-info
+;;; struct  g-type-value-table
 ;;;                
 ;;; #define        G_TYPE_FROM_INSTANCE               (instance)
 ;;; #define        G_TYPE_FROM_CLASS                  (g_class)
@@ -77,40 +77,49 @@
 ;;; #define        G_TYPE_CHECK_VALUE_TYPE            (value, g_type)
 ;;; #define        G_TYPE_FLAG_RESERVED_ID_BIT
 ;;;
-;;; void                g_type_init                         (void);
+;;;         %g-type-init ()
 ;;;
 ;;; enum                GTypeDebugFlags;
+;;;
 ;;; void                g_type_init_with_debug_flags        (GTypeDebugFlags debug_flags);
-;;; const gchar *       g_type_name                         (GType type);
+;;;
+;;;         %g-type-name (type)
+;;;         gtype-id
+;;;
 ;;; GQuark              g_type_qname                        (GType type);
-;;; GType               g_type_from_name                    (const gchar *name);
-;;; GType               g_type_parent                       (GType type);
-;;; guint               g_type_depth                        (GType type);
-;;; GType               g_type_next_base                    (GType leaf_type,
-;;;                                                          GType root_type);
-;;; gboolean            g_type_is_a                         (GType type,
-;;;                                                          GType is_a_type);
-;;; gpointer            g_type_class_ref                    (GType type);
+;;;
+;;;         g-type-from-name (name)
+;;;         g-type-from-id (id)
+;;;         g-type-parent (type)
+;;;         g-type-depth (type)
+;;;         g-type-next-base (leaf-type, root-type)
+;;;         g-type-is-a (type, is-a-type)
+;;;         g-type-class-ref (type)
+;;;
 ;;; gpointer            g_type_class_peek                   (GType type);
 ;;; gpointer            g_type_class_peek_static            (GType type);
-;;; void                g_type_class_unref                  (gpointer g_class);
+;;;
+;;;         g-type-class-unref (g-class)
+;;;
 ;;; gpointer            g_type_class_peek_parent            (gpointer g_class);
-;;; void                g_type_class_add_private            (gpointer g_class,
-;;;                                                          gsize private_size);
+;;;
+;;;         g-type-class-add-private (g-class, private-size)
+;;;
 ;;; void                g_type_add_class_private            (GType class_type,
 ;;;                                                          gsize private_size);
 ;;; gpointer            g_type_interface_peek               (gpointer instance_class,
 ;;;                                                          GType iface_type);
 ;;; gpointer            g_type_interface_peek_parent        (gpointer g_iface);
-;;; gpointer            g_type_default_interface_ref        (GType g_type);
+;;;
+;;;        g-type-default-interface-ref (g-type)
+;;;
 ;;; gpointer            g_type_default_interface_peek       (GType g_type);
-;;; void                g_type_default_interface_unref      (gpointer g_iface);
-;;; GType *             g_type_children                     (GType type,
-;;;                                                          guint *n_children);
-;;; GType *             g_type_interfaces                   (GType type,
-;;;                                                          guint *n_interfaces);
-;;; GType *             g_type_interface_prerequisites      (GType interface_type,
-;;;                                                          guint *n_prerequisites);
+;;;
+;;;        g-type-default-interface-unref (g-iface)
+;;;        g-type-children (type, n_children)
+;;;        g-type-interfaces (type, n-interfaces)
+;;;        g-type-interface_prerequisites (interface-type, n-prerequisites)
+;;;
 ;;; void                g_type_set_qdata                    (GType type,
 ;;;                                                          GQuark quark,
 ;;;                                                          gpointer data);
@@ -118,7 +127,8 @@
 ;;;                                                          GQuark quark);
 ;;; void                g_type_query                        (GType type,
 ;;;                                                          GTypeQuery *query);
-;;; struct              GTypeQuery;
+;;; struct g-type-query
+;;;
 ;;; void                (*GBaseInitFunc)                    (gpointer g_class);
 ;;; void                (*GBaseFinalizeFunc)                (gpointer g_class);
 ;;; void                (*GClassInitFunc)                   (gpointer g_class,
@@ -167,7 +177,7 @@
 ;;;                                                          GType interface_type);
 ;;; GType               g_type_fundamental_next             (void);
 ;;;
-;;;    g-type-fundamental (type-id)
+;;;    g-type-make-fundamental (type-id)
 ;;;
 ;;; GTypeInstance *     g_type_create_instance              (GType type);
 ;;; void                g_type_free_instance                (GTypeInstance *instance);
@@ -183,35 +193,16 @@
 ;;; void                (*GTypeInterfaceCheckFunc)          (gpointer check_data,
 ;;;                                                          gpointer g_iface);
 ;;; GTypeValueTable *   g_type_value_table_peek             (GType type);
-;;; #define             G_DEFINE_TYPE                       (TN,
-;;;                                                          t_n,
-;;;                                                          T_P)
-;;; #define             G_DEFINE_TYPE_WITH_CODE             (TN,
-;;;                                                          t_n,
-;;;                                                          T_P,
-;;;                                                          _C_)
-;;; #define             G_DEFINE_ABSTRACT_TYPE              (TN,
-;;;                                                          t_n,
-;;;                                                          T_P)
-;;; #define             G_DEFINE_ABSTRACT_TYPE_WITH_CODE    (TN,
-;;;                                                          t_n,
-;;;                                                          T_P,
-;;;                                                          _C_)
-;;; #define             G_DEFINE_INTERFACE                  (TN,
-;;;                                                          t_n,
-;;;                                                          T_P)
-;;; #define             G_DEFINE_INTERFACE_WITH_CODE        (TN,
-;;;                                                          t_n,
-;;;                                                          T_P,
-;;;                                                          _C_)
-;;; #define             G_IMPLEMENT_INTERFACE               (TYPE_IFACE,
-;;;                                                          iface_init)
-;;; #define             G_DEFINE_TYPE_EXTENDED              (TN,
-;;;                                                          t_n,
-;;;                                                          T_P,
-;;;                                                          _f_,
-;;;                                                          _C_)
-;;; #define             G_DEFINE_BOXED_TYPE                 (TypeName,
+;;;
+;;; #define       G_DEFINE_TYPE                       (TN, t_n, T_P)
+;;; #define       G_DEFINE_TYPE_WITH_CODE             (TN, t_n, T_P, _C_)
+;;; #define       G_DEFINE_ABSTRACT_TYPE              (TN, t_n, T_P)
+;;; #define       G_DEFINE_ABSTRACT_TYPE_WITH_CODE    (TN, t_n, T_P, _C_)
+;;; #define       G_DEFINE_INTERFACE                  (TN, t_n, T_P)
+;;; #define       G_DEFINE_INTERFACE_WITH_CODE        (TN, t_n, T_P, _C_)
+;;; #define       G_IMPLEMENT_INTERFACE               (TYPE_IFACE, iface_init)
+;;; #define       G_DEFINE_TYPE_EXTENDED              (TN, t_n, T_P, _f_, _C_)
+;;; #define       G_DEFINE_BOXED_TYPE                 (TypeName,
 ;;;                                                          type_name,
 ;;;                                                          copy_func,
 ;;;                                                          free_func)
@@ -611,6 +602,8 @@
   :derivable
   :deep-derivable)
 
+(export 'g-type-fundamental-flags)
+
 ;;; ----------------------------------------------------------------------------
 ;;; struct GTypeInterface
 ;;;
@@ -820,9 +813,9 @@
 ;;;     in value. No resources may remain allocated through the GValue contents
 ;;;     after this function returns. E.g. for our above string type:
 ;;; 
-;;; 1 // only free strings without a specific flag for static storage
-;;; 2 if (!(value->data[1].v_uint & G_VALUE_NOCOPY_CONTENTS))
-;;; 3 g_free (value->data[0].v_pointer);
+;;;  1 // only free strings without a specific flag for static storage
+;;;  2 if (!(value->data[1].v_uint & G_VALUE_NOCOPY_CONTENTS))
+;;;  3 g_free (value->data[0].v_pointer);
 ;;; 
 ;;; value_copy ()
 ;;;     dest_value is a GValue with zero-filled data section and src_value is a
@@ -831,14 +824,14 @@
 ;;;     that even after src_value has been freed, the contents of dest_value
 ;;;     remain valid. String type example:
 ;;; 
-;;; 1 dest_value->data[0].v_pointer = g_strdup (src_value->data[0].v_pointer);
+;;;  1 dest_value->data[0].v_pointer = g_strdup (src_value->data[0].v_pointer);
 ;;; 
 ;;; value_peek_pointer ()
 ;;;     If the value contents fit into a pointer, such as objects or strings,
 ;;;     return this pointer, so the caller can peek at the current contents. To
 ;;;     extend on our above string example:
 ;;; 
-;;; 1 return value->data[0].v_pointer;
+;;;  1 return value->data[0].v_pointer;
 ;;;
 ;;; gchar *collect_format;
 ;;;     A string format describing how to collect the contents of this value
@@ -1320,7 +1313,7 @@
 ;;;     Corresponding type ID or 0.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (%g-type-from-name "g_type_from_name") g-type
+(defcfun ("g_type_from_name" %g-type-from-name ) g-type
   (name :string))
 
 (defun gtype-from-name (name)
@@ -1374,14 +1367,17 @@
 ;;; Return the direct parent type of the passed in type. If the passed in type
 ;;; has no parent, i.e. is a fundamental type, 0 is returned.
 ;;;
-;;; type    : The derived type.
-;;; Returns : The parent type.
+;;; type :
+;;;     The derived type.
+;;;
+;;; Returns :
+;;;     The parent type.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun ("g_type_parent" g-type-parent) g-type-designator
   (type g-type-designator))
 
-(export 'g-type-designator)
+(export 'g-type-parent)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_depth ()
@@ -1391,12 +1387,17 @@
 ;;; Returns the length of the ancestry of the passed in type. This includes the
 ;;; type itself, so that e.g. a fundamental type has depth 1.
 ;;;
-;;; type    : A GType value.
-;;; Returns : The depth of type.
+;;; type :
+;;;     A GType value.
+;;;
+;;; Returns :
+;;;     The depth of type.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-depth :uint
+(defcfun ("g_type_depth" g-type-depth) :uint
   (type g-type-designator))
+
+(export 'g-type-depth)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_next_base ()
@@ -1410,14 +1411,21 @@
 ;;; this function can be used to determine the types and order in which the leaf
 ;;; type is descended from the root type.
 ;;;
-;;; leaf_type : Descendant of root_type and the type to be returned.
-;;; root_type : Immediate parent of the returned type.
-;;; Returns   : Immediate child of root_type and anchestor of leaf_type.
+;;; leaf_type :
+;;;     Descendant of root_type and the type to be returned.
+;;;
+;;; root_type :
+;;;     Immediate parent of the returned type.
+;;;
+;;; Returns :
+;;;     Immediate child of root_type and anchestor of leaf_type.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-next-base g-type-designator
+(defcfun ("g_type_next_base" g-type-next-base) g-type-designator
   (leaf-type g-type-designator)
   (root-type g-type-designator))
+
+(export 'g-type-next-base)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_is_a ()
@@ -1427,14 +1435,21 @@
 ;;; If is_a_type is a derivable type, check whether type is a descendant of
 ;;; is_a_type. If is_a_type is an interface, check whether type conforms to it.
 ;;;
-;;; type      : Type to check anchestry for.
-;;; is_a_type : Possible anchestor of type or interface type could conform to.
-;;; Returns   : TRUE if type is_a is_a_type holds true.
+;;; type :
+;;;     Type to check anchestry for.
+;;;
+;;; is_a_type :
+;;;     Possible anchestor of type or interface type could conform to.
+;;;
+;;; Returns :
+;;;     TRUE if type is_a is_a_type holds true.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-is-a :boolean
+(defcfun ("g_type_is_a" g-type-is-a) :boolean
   (type g-type-designator)
   (is-a-type g-type-designator))
+
+(export 'g-type-is-a)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_class_ref ()
@@ -1449,8 +1464,10 @@
 ;;;           [type GObject.TypeClass][transfer none]
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-class-ref (:pointer g-type-class)
+(defcfun ("g_type_class_ref" g-type-class-ref) (:pointer g-type-class)
   (type g-type-designator))
+
+(export 'g-type-class-ref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_class_peek ()
@@ -1492,11 +1509,14 @@
 ;;; finalized by the type system, so further dereferencing of a class pointer
 ;;; after g_type_class_unref() are invalid.
 ;;;
-;;; g_class : The GTypeClass structure to unreference.
+;;; g_class :
+;;;     The GTypeClass structure to unreference.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-class-unref :void
+(defcfun ("g_type_class_unref" g-type-class-unref) :void
   (class (:pointer g-type-class)))
+
+(export 'g-type-class-unref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_class_peek_parent ()
@@ -1578,9 +1598,11 @@
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-class-add-private :void
+(defcfun ("g_type_class_add_private" g-type-class-add-private) :void
   (class (:pointer g-type-class))
   (private-size gsize))
+    
+(export 'g-type-class-add-private)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_add_class_private ()
@@ -1655,8 +1677,10 @@
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-default-interface-ref :pointer
+(defcfun ("g_type_default_interface_ref" g-type-default-interface-ref) :pointer
   (type g-type-designator))
+
+(export 'g-type-default-interface-ref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_default_interface_peek ()
@@ -1691,8 +1715,10 @@
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-type-default-interface-unref :void
+(defcfun ("g_type_default_interface_unref" g-type-default-interface-unref) :void
   (interface :pointer))
+
+(export 'g-type-default-interface-unref)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_children ()
@@ -1709,7 +1735,7 @@
 ;;;              [array length=n_children][transfer full]
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (%g-type-children "g_type_children") (:pointer g-type)
+(defcfun ("g_type_children" %g-type-children) (:pointer g-type)
   (type g-type-designator)
   (n-children (:pointer :uint)))
 
@@ -1721,6 +1747,8 @@
              for i from 0 below (mem-ref n-children :uint)
              collect (mem-aref g-types-ptr 'g-type-designator i))
         (g-free g-types-ptr)))))
+
+(export 'g-type-children)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_interfaces ()
@@ -1737,7 +1765,7 @@
 ;;; Returns      : Newly allocated and 0-terminated array of interface types.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (%g-type-interfaces "g_type_interfaces") (:pointer g-type)
+(defcfun ("g_type_interfaces" %g-type-interfaces) (:pointer g-type)
   (type g-type-designator)
   (n-interfaces (:pointer :uint)))
 
@@ -1749,6 +1777,8 @@
              for i from 0 below (mem-ref n-interfaces :uint)
              collect (mem-aref g-types-ptr 'g-type-designator i))
         (g-free g-types-ptr)))))
+
+(export 'g-type-interfaces)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_type_interface_prerequisites ()
@@ -1766,8 +1796,8 @@
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (%g-type-interface-prerequisites "g_type_interface_prerequisites")
-         (:pointer g-type)
+(defcfun ("g_type_interface_prerequisites" %g-type-interface-prerequisites)
+    (:pointer g-type)
   (type g-type-designator)
   (n-interface-prerequisites (:pointer :uint)))
 
