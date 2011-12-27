@@ -5,13 +5,7 @@
            #:gtype
            #:gtype-name
            #:gtype-id
-           #:g-type-children
-           #:g-type-parent
            #:g-type-designator
-           #:g-type-depth
-           #:g-type-next-base
-           #:g-type-is-a
-           #:g-type-interfaces
            #:g-type-interface-prerequisites
            #:g-strv-get-type
            #:g-closure-get-type
@@ -36,7 +30,6 @@
            #:flags-item-value
            #:flags-item-nick
            #:get-flags-items
-           #:signal-connect
            #:signal-info
            #:signal-info-id
            #:signal-info-name
@@ -73,7 +66,6 @@
            #:g-object
            #:pointer
            #:g-type-from-object
-           #:g-signal-connect
            #:define-g-object-class
            #:g-initially-unowned
            #:define-g-enum
@@ -105,33 +97,18 @@
            #:g-value-unset
            #:g-value-zero
            #:g-value-init
-           #:g-type-class-ref
            #:g-object-class
            #:gobject-class
            #:g-param-spec
            #:type-instance
-           #:g-type-class-unref
            #:registered-object-type-by-name
-           #:g-type-children
-           #:g-signal-lookup
-           #:g-type-parent
            #:connect-signal
            #:boxed-c-structure-name
            #:g-type-designator
-           #:g-type-depth
-           #:g-type-next-base
-           #:g-type-is-a
-           #:g-type-interfaces
            #:g-type-interface-prerequisites
            #:g-type-name
            #:g-type
-           #:g-type-children
-           #:g-type-parent
            #:g-type-designator
-           #:g-type-depth
-           #:g-type-next-base
-           #:g-type-is-a
-           #:g-type-interfaces
            #:g-type-interface-prerequisites
            #:g-strv-get-type
            #:g-closure-get-type
@@ -187,7 +164,6 @@
            #:save-handler-to-object
            #:retrieve-handler-from-object
            #:delete-handler-from-object
-           #:disconnect-signal
            #:define-cb-methods
            #:create-fn-ref
            #:copy-boxed-slots-to-foreign
