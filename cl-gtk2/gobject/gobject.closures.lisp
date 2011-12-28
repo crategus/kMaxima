@@ -22,15 +22,13 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-;;; ----------------------------------------------------------------------------;;; Closures
+;;; ----------------------------------------------------------------------------
 ;;; 
 ;;; Closures
 ;;;
 ;;; Functions as first-class objects
 ;;; 
 ;;; Synopsis
-;;; 
-;;; #include <glib-object.h>
 ;;; 
 ;;; #define             G_CLOSURE_NEEDS_MARSHAL             (closure)
 ;;; #define             G_CLOSURE_N_NOTIFIERS               (cl)
@@ -244,9 +242,18 @@
 ;;; 
 ;;; Description
 ;;; 
-;;; A GClosure represents a callback supplied by the programmer. It will generally comprise a function of some kind and a marshaller used to call it. It is the reponsibility of the marshaller to convert the arguments for the invocation from GValues into a suitable form, perform the callback on the converted arguments, and transform the return value back into a GValue.
+;;; A GClosure represents a callback supplied by the programmer. It will
+;;; generally comprise a function of some kind and a marshaller used to call it.
+;;; It is the reponsibility of the marshaller to convert the arguments for the
+;;; invocation from GValues into a suitable form, perform the callback on the
+;;; converted arguments, and transform the return value back into a GValue.
 ;;; 
-;;; In the case of C programs, a closure usually just holds a pointer to a function and maybe a data argument, and the marshaller converts between GValue and native C types. The GObject library provides the GCClosure type for this purpose. Bindings for other languages need marshallers which convert between GValues and suitable representations in the runtime of the language in order to use functions written in that languages as callbacks.
+;;; In the case of C programs, a closure usually just holds a pointer to a
+;;; function and maybe a data argument, and the marshaller converts between
+;;; GValue and native C types. The GObject library provides the GCClosure type
+;;; for this purpose. Bindings for other languages need marshallers which
+;;; convert between GValues and suitable representations in the runtime of the
+;;; language in order to use functions written in that languages as callbacks.
 ;;; 
 ;;; Within GObject, closures play an important role in the implementation of
 ;;; signals. When a signal is registered, the c_marshaller argument to
@@ -262,15 +269,14 @@
 ;;; Using closures has a number of important advantages over a simple callback
 ;;; function/data pointer combination:
 ;;; 
-;;;     * Closures allow the callee to get the types of the callback parameters,
-;;;       which means that language bindings don't have to write individual
-;;;       glue for each callback type.
-;;;     * The reference counting of GClosure makes it easy to handle reentrancy
-;;;       right; if a callback is removed while it is being invoked, the
-;;;       closure and its parameters won't be freed until the invocation
-;;;       finishes.
-;;;     * g_closure_invalidate() and invalidation notifiers allow callbacks to
-;;;       be automatically removed when the objects they point to go away.
+;;; * Closures allow the callee to get the types of the callback parameters,
+;;;   which means that language bindings don't have to write individual
+;;;   glue for each callback type.
+;;; * The reference counting of GClosure makes it easy to handle reentrancy
+;;;   right; if a callback is removed while it is being invoked, the closure
+;;;   and its parameters won't be freed until the invocation finishes.
+;;; * g_closure_invalidate() and invalidation notifiers allow callbacks to
+;;;   be automatically removed when the objects they point to go away.
 ;;; ----------------------------------------------------------------------------
 
 (in-package :gobject)
@@ -398,12 +404,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GClosureMarshal ()
 ;;; 
-;;; void                (*GClosureMarshal)                  (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void (*GClosureMarshal) (GClosure *closure,
+;;;                          GValue *return_value,
+;;;                          guint n_param_values,
+;;;                          const GValue *param_values,
+;;;                          gpointer invocation_hint,
+;;;                          gpointer marshal_data);
 ;;; 
 ;;; The type used for marshaller functions.
 ;;; 
@@ -411,41 +417,48 @@
 ;;; 	the GClosure to which the marshaller belongs
 ;;; 
 ;;; return_value :
-;;; 	a GValue to store the return value. May be NULL if the callback of closure doesn't return a value. [allow-none]
+;;; 	a GValue to store the return value. May be NULL if the callback of
+;;;     closure doesn't return a value.
 ;;; 
 ;;; n_param_values :
 ;;; 	the length of the param_values array
 ;;; 
 ;;; param_values :
-;;; 	an array of GValues holding the arguments on which to invoke the callback of closure. [array length=n_param_values]
+;;; 	an array of GValues holding the arguments on which to invoke the
+;;;     callback of closure.
 ;;; 
 ;;; invocation_hint :
-;;; 	the invocation hint given as the last argument to g_closure_invoke(). [allow-none]
+;;; 	the invocation hint given as the last argument to g_closure_invoke().
 ;;; 
 ;;; marshal_data :
-;;; 	additional data specified when registering the marshaller, see g_closure_set_marshal() and g_closure_set_meta_marshal(). [allow-none]
+;;; 	additional data specified when registering the marshaller, see
+;;;     g_closure_set_marshal() and g_closure_set_meta_marshal().
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; GClosureNotify ()
 ;;; 
-;;; void                (*GClosureNotify)                   (gpointer data,
-;;;                                                          GClosure *closure);
+;;; void (*GClosureNotify) (gpointer data, GClosure *closure);
 ;;; 
-;;; The type used for the various notification callbacks which can be registered on closures.
+;;; The type used for the various notification callbacks which can be
+;;; registered on closures.
 ;;; 
 ;;; data :
 ;;; 	data specified when registering the notification callback
 ;;; 
 ;;; closure :
 ;;; 	the GClosure on which the notification is emitted
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_new ()
 ;;; 
-;;; GClosure *          g_cclosure_new                      (GCallback callback_func,
-;;;                                                          gpointer user_data,
-;;;                                                          GClosureNotify destroy_data);
+;;; GClosure * g_cclosure_new (GCallback callback_func,
+;;;                            gpointer user_data,
+;;;                            GClosureNotify destroy_data);
 ;;; 
-;;; Creates a new closure which invokes callback_func with user_data as the last parameter.
+;;; Creates a new closure which invokes callback_func with user_data as the
+;;; last parameter.
 ;;; 
 ;;; callback_func :
 ;;; 	the function to invoke
@@ -458,13 +471,17 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new GCClosure
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_new_swap ()
 ;;; 
-;;; GClosure *          g_cclosure_new_swap                 (GCallback callback_func,
-;;;                                                          gpointer user_data,
-;;;                                                          GClosureNotify destroy_data);
+;;; GClosure * g_cclosure_new_swap (GCallback callback_func,
+;;;                                 gpointer user_data,
+;;;                                 GClosureNotify destroy_data);
 ;;; 
-;;; Creates a new closure which invokes callback_func with user_data as the first parameter.
+;;; Creates a new closure which invokes callback_func with user_data as the
+;;; first parameter.
 ;;; 
 ;;; callback_func :
 ;;; 	the function to invoke
@@ -476,13 +493,18 @@
 ;;; 	destroy notify to be called when user_data is no longer used
 ;;; 
 ;;; Returns :
-;;; 	a new GCClosure. [transfer full]
+;;; 	a new GCClosure.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_new_object ()
 ;;; 
-;;; GClosure *          g_cclosure_new_object               (GCallback callback_func,
-;;;                                                          GObject *object);
+;;; GClosure * g_cclosure_new_object (GCallback callback_func, GObject *object)
 ;;; 
-;;; A variant of g_cclosure_new() which uses object as user_data and calls g_object_watch_closure() on object and the created closure. This function is useful when you have a callback closely associated with a GObject, and want the callback to no longer run after the object is is freed.
+;;; A variant of g_cclosure_new() which uses object as user_data and calls
+;;; g_object_watch_closure() on object and the created closure. This function
+;;; is useful when you have a callback closely associated with a GObject, and
+;;; want the callback to no longer run after the object is is freed.
 ;;; 
 ;;; callback_func :
 ;;; 	the function to invoke
@@ -492,12 +514,18 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new GCClosure
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_new_object_swap ()
 ;;; 
-;;; GClosure *          g_cclosure_new_object_swap          (GCallback callback_func,
-;;;                                                          GObject *object);
+;;; GClosure * g_cclosure_new_object_swap (GCallback callback_func,
+;;;                                        GObject *object);
 ;;; 
-;;; A variant of g_cclosure_new_swap() which uses object as user_data and calls g_object_watch_closure() on object and the created closure. This function is useful when you have a callback closely associated with a GObject, and want the callback to no longer run after the object is is freed.
+;;; A variant of g_cclosure_new_swap() which uses object as user_data and calls
+;;; g_object_watch_closure() on object and the created closure. This function
+;;; is useful when you have a callback closely associated with a GObject, and
+;;; want the callback to no longer run after the object is is freed.
 ;;; 
 ;;; callback_func :
 ;;; 	the function to invoke
@@ -507,14 +535,17 @@
 ;;; 
 ;;; Returns :
 ;;; 	a new GCClosure
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_generic ()
 ;;; 
-;;; void                g_cclosure_marshal_generic          (GClosure *closure,
-;;;                                                          GValue *return_gvalue,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_generic (GClosure *closure,
+;;;                                  GValue *return_gvalue,
+;;;                                  guint n_param_values,
+;;;                                  const GValue *param_values,
+;;;                                  gpointer invocation_hint,
+;;;                                  gpointer marshal_data);
 ;;; 
 ;;; A generic marshaller function implemented via libffi.
 ;;; 
@@ -522,36 +553,46 @@
 ;;; 	A GClosure.
 ;;; 
 ;;; return_gvalue :
-;;; 	A GValue to store the return value. May be NULL if the callback of closure doesn't return a value.
+;;; 	A GValue to store the return value. May be NULL if the callback of
+;;;     closure doesn't return a value.
 ;;; 
 ;;; n_param_values :
 ;;; 	The length of the param_values array.
 ;;; 
 ;;; param_values :
-;;; 	An array of GValues holding the arguments on which to invoke the callback of closure.
+;;; 	An array of GValues holding the arguments on which to invoke the
+;;;     callback of closure.
 ;;; 
 ;;; invocation_hint :
 ;;; 	The invocation hint given as the last argument to g_closure_invoke().
 ;;; 
 ;;; marshal_data :
-;;; 	Additional data specified when registering the marshaller, see g_closure_set_marshal() and g_closure_set_meta_marshal()
+;;; 	Additional data specified when registering the marshaller, see
+;;;     g_closure_set_marshal() and g_closure_set_meta_marshal()
 ;;; 
 ;;; Since 2.30
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_closure_new_object ()
 ;;; 
-;;; GClosure *          g_closure_new_object                (guint sizeof_closure,
-;;;                                                          GObject *object);
+;;; GClosure * g_closure_new_object (guint sizeof_closure, GObject *object);
 ;;; 
-;;; A variant of g_closure_new_simple() which stores object in the data field of the closure and calls g_object_watch_closure() on object and the created closure. This function is mainly useful when implementing new types of closures.
+;;; A variant of g_closure_new_simple() which stores object in the data field
+;;; of the closure and calls g_object_watch_closure() on object and the created
+;;; closure. This function is mainly useful when implementing new types of
+;;; closures.
 ;;; 
 ;;; sizeof_closure :
-;;; 	the size of the structure to allocate, must be at least sizeof (GClosure)
+;;; 	the size of the structure to allocate, must be at least sizeof
+;;;     (GClosure)
 ;;; 
 ;;; object :
-;;; 	a GObject pointer to store in the data field of the newly allocated GClosure
+;;; 	a GObject pointer to store in the data field of the newly allocated
+;;;     GClosure
 ;;; 
 ;;; Returns :
-;;; 	a newly allocated GClosure. [transfer full]
+;;; 	a newly allocated GClosure.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -642,11 +683,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_closure_invoke ()
 ;;; 
-;;; void                g_closure_invoke                    (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint);
+;;; void g_closure_invoke (GClosure *closure,
+;;;                        GValue *return_value,
+;;;                        guint n_param_values,
+;;;                        const GValue *param_values,
+;;;                        gpointer invocation_hint);
 ;;; 
 ;;; Invokes the closure, i.e. executes the callback represented by the closure.
 ;;; 
@@ -654,16 +695,18 @@
 ;;; 	a GClosure
 ;;; 
 ;;; return_value :
-;;; 	a GValue to store the return value. May be NULL if the callback of closure doesn't return a value. [allow-none]
+;;; 	a GValue to store the return value. May be NULL if the callback of
+;;;     closure doesn't return a value.
 ;;; 
 ;;; n_param_values :
 ;;; 	the length of the param_values array
 ;;; 
 ;;; param_values :
-;;; 	an array of GValues holding the arguments on which to invoke the callback of closure. [array length=n_param_values]
+;;; 	an array of GValues holding the arguments on which to invoke the
+;;;     callback of closure.
 ;;; 
 ;;; invocation_hint :
-;;; 	a context-dependent invocation hint. [allow-none]
+;;; 	a context-dependent invocation hint.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -749,9 +792,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_closure_remove_finalize_notifier ()
 ;;; 
-;;; void                g_closure_remove_finalize_notifier  (GClosure *closure,
-;;;                                                          gpointer notify_data,
-;;;                                                          GClosureNotify notify_func);
+;;; voidg_closure_remove_finalize_notifier (GClosure *closure,
+;;;                                         gpointer notify_data,
+;;;                                         GClosureNotify notify_func);
 ;;; 
 ;;; Removes a finalization notifier.
 ;;; 
@@ -761,16 +804,19 @@
 ;;; 	a GClosure
 ;;; 
 ;;; notify_data :
-;;; 	data which was passed to g_closure_add_finalize_notifier() when registering notify_func
+;;; 	data which was passed to g_closure_add_finalize_notifier() when
+;;;     registering notify_func
 ;;; 
 ;;; notify_func :
 ;;; 	the callback function to remove
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_closure_remove_invalidate_notifier ()
 ;;; 
-;;; void                g_closure_remove_invalidate_notifier
-;;;                                                         (GClosure *closure,
-;;;                                                          gpointer notify_data,
-;;;                                                          GClosureNotify notify_func);
+;;; void g_closure_remove_invalidate_notifier (GClosure *closure,
+;;;                                            gpointer notify_data,
+;;;                                            GClosureNotify notify_func);
 ;;; 
 ;;; Removes an invalidation notifier.
 ;;; 
@@ -780,7 +826,8 @@
 ;;; 	a GClosure
 ;;; 
 ;;; notify_data :
-;;; 	data which was passed to g_closure_add_invalidate_notifier() when registering notify_func
+;;; 	data which was passed to g_closure_add_invalidate_notifier() when
+;;;     registering notify_func
 ;;; 
 ;;; notify_func :
 ;;; 	the callback function to remove
@@ -866,13 +913,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_closure_add_marshal_guards ()
 ;;; 
-;;; void                g_closure_add_marshal_guards        (GClosure *closure,
-;;;                                                          gpointer pre_marshal_data,
-;;;                                                          GClosureNotify pre_marshal_notify,
-;;;                                                          gpointer post_marshal_data,
-;;;                                                          GClosureNotify post_marshal_notify);
+;;; void g_closure_add_marshal_guards (GClosure *closure,
+;;;                                    gpointer pre_marshal_data,
+;;;                                    GClosureNotify pre_marshal_notify,
+;;;                                    gpointer post_marshal_data,
+;;;                                    GClosureNotify post_marshal_notify);
 ;;; 
-;;; Adds a pair of notifiers which get invoked before and after the closure callback, respectively. This is typically used to protect the extra arguments for the duration of the callback. See g_object_watch_closure() for an example of marshal guards.
+;;; Adds a pair of notifiers which get invoked before and after the closure
+;;; callback, respectively. This is typically used to protect the extra
+;;; arguments for the duration of the callback. See g_object_watch_closure()
+;;; for an example of marshal guards.
 ;;; 
 ;;; closure :
 ;;; 	a GClosure
@@ -888,15 +938,27 @@
 ;;; 
 ;;; post_marshal_notify :
 ;;; 	a function to call after the closure callback
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_closure_set_meta_marshal ()
 ;;; 
-;;; void                g_closure_set_meta_marshal          (GClosure *closure,
-;;;                                                          gpointer marshal_data,
-;;;                                                          GClosureMarshal meta_marshal);
+;;; void g_closure_set_meta_marshal (GClosure *closure,
+;;;                                  gpointer marshal_data,
+;;;                                  GClosureMarshal meta_marshal);
 ;;; 
-;;; Sets the meta marshaller of closure. A meta marshaller wraps closure->marshal and modifies the way it is called in some fashion. The most common use of this facility is for C callbacks. The same marshallers (generated by glib-genmarshal) are used everywhere, but the way that we get the callback function differs. In most cases we want to use closure->callback, but in other cases we want to use some different technique to retrieve the callback function.
+;;; Sets the meta marshaller of closure. A meta marshaller wraps
+;;; closure->marshal and modifies the way it is called in some fashion. The
+;;; most common use of this facility is for C callbacks. The same marshallers
+;;; (generated by glib-genmarshal) are used everywhere, but the way that we get
+;;; the callback function differs. In most cases we want to use
+;;; closure->callback, but in other cases we want to use some different
+;;; technique to retrieve the callback function.
 ;;; 
-;;; For example, class closures for signals (see g_signal_type_cclosure_new()) retrieve the callback function from a fixed offset in the class structure. The meta marshaller retrieves the right callback and passes it to the marshaller as the marshal_data argument.
+;;; For example, class closures for signals (see g_signal_type_cclosure_new())
+;;; retrieve the callback function from a fixed offset in the class structure.
+;;; The meta marshaller retrieves the right callback and passes it to the
+;;; marshaller as the marshal_data argument.
 ;;; 
 ;;; closure :
 ;;; 	a GClosure
@@ -906,14 +968,18 @@
 ;;; 
 ;;; meta_marshal :
 ;;; 	a GClosureMarshal function
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_source_set_closure ()
 ;;; 
-;;; void                g_source_set_closure                (GSource *source,
-;;;                                                          GClosure *closure);
+;;; void g_source_set_closure (GSource *source, GClosure *closure);
 ;;; 
 ;;; Set the callback for a source as a GClosure.
 ;;; 
-;;; If the source is not one of the standard GLib types, the closure_callback and closure_marshal fields of the GSourceFuncs structure must have been filled in with pointers to appropriate functions.
+;;; If the source is not one of the standard GLib types, the closure_callback
+;;; and closure_marshal fields of the GSourceFuncs structure must have been
+;;; filled in with pointers to appropriate functions.
 ;;; 
 ;;; source :
 ;;; 	the source
@@ -943,14 +1009,15 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__VOID ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__VOID       (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__VOID (GClosure *closure,
+;;;                                     GValue *return_value,
+;;;                                     guint n_param_values,
+;;;                                     const GValue *param_values,
+;;;                                     gpointer invocation_hint,
+;;;                                     gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type void (*callback)
+;;; (gpointer instance, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -969,16 +1036,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__BOOLEAN ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__BOOLEAN    (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__BOOLEAN (GClosure *closure,
+;;;                                        GValue *return_value,
+;;;                                        guint n_param_values,
+;;;                                        const GValue *param_values,
+;;;                                        gpointer invocation_hint,
+;;;                                        gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gboolean arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type void (*callback)
+;;; (gpointer instance, gboolean arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -997,16 +1068,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__CHAR ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__CHAR       (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__CHAR (GClosure *closure,
+;;;                                     GValue *return_value,
+;;;                                     guint n_param_values,
+;;;                                     const GValue *param_values,
+;;;                                     gpointer invocation_hint,
+;;;                                     gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gchar arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type void (*callback)
+;;; (gpointer instance, gchar arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1025,16 +1100,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__UCHAR ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__UCHAR      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__UCHAR (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, guchar arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, guchar arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1053,16 +1132,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__INT ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__INT        (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__INT (GClosure *closure,
+;;;                                    GValue *return_value,
+;;;                                    guint n_param_values,
+;;;                                    const GValue *param_values,
+;;;                                    gpointer invocation_hint,
+;;;                                    gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gint arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gint arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1081,16 +1164,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__UINT ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__UINT       (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__UINT (GClosure *closure,
+;;;                                     GValue *return_value,
+;;;                                     guint n_param_values,
+;;;                                     const GValue *param_values,
+;;;                                     gpointer invocation_hint,
+;;;                                     gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, guint arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, guint arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1109,16 +1196,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__LONG ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__LONG       (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__LONG (GClosure *closure,
+;;;                                     GValue *return_value,
+;;;                                     guint n_param_values,
+;;;                                     const GValue *param_values,
+;;;                                     gpointer invocation_hint,
+;;;                                     gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, glong arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, glong arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1137,16 +1228,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__ULONG ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__ULONG      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__ULONG (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gulong arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gulong arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1165,16 +1260,21 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__ENUM ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__ENUM       (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__ENUM (GClosure *closure,
+;;;                                     GValue *return_value,
+;;;                                     guint n_param_values,
+;;;                                     const GValue *param_values,
+;;;                                     gpointer invocation_hint,
+;;;                                     gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gint arg1, gpointer user_data) where the gint parameter denotes an enumeration type..
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gint arg1, gpointer user_data) where
+;;; the gint parameter denotes an enumeration type..
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1193,16 +1293,21 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__FLAGS ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__FLAGS      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__FLAGS (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gint arg1, gpointer user_data) where the gint parameter denotes a flags type.
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gint arg1, gpointer user_data)
+;;; where the gint parameter denotes a flags type.
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1221,16 +1326,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__FLOAT ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__FLOAT      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__FLOAT (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gfloat arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gfloat arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1249,16 +1358,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__DOUBLE ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__DOUBLE     (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__DOUBLE (GClosure *closure,
+;;;                                       GValue *return_value,
+;;;                                       guint n_param_values,
+;;;                                       const GValue *param_values,
+;;;                                       gpointer invocation_hint,
+;;;                                       gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gdouble arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gdouble arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1277,16 +1390,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__STRING ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__STRING     (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__STRING (GClosure *closure,
+;;;                                       GValue *return_value,
+;;;                                       guint n_param_values,
+;;;                                       const GValue *param_values,
+;;;                                       gpointer invocation_hint,
+;;;                                       gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, const gchar *arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, const gchar *arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1305,16 +1422,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__PARAM ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__PARAM      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__PARAM (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, GParamSpec *arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, GParamSpec *arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1333,16 +1454,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__BOXED ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__BOXED      (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__BOXED (GClosure *closure,
+;;;                                      GValue *return_value,
+;;;                                      guint n_param_values,
+;;;                                      const GValue *param_values,
+;;;                                      gpointer invocation_hint,
+;;;                                      gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, GBoxed *arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, GBoxed *arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1361,16 +1486,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__POINTER ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__POINTER    (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__POINTER (GClosure *closure,
+;;;                                        GValue *return_value,
+;;;                                        guint n_param_values,
+;;;                                        const GValue *param_values,
+;;;                                        gpointer invocation_hint,
+;;;                                        gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, gpointer arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, gpointer arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1389,16 +1518,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__OBJECT ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__OBJECT     (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__OBJECT (GClosure *closure,
+;;;                                       GValue *return_value,
+;;;                                       guint n_param_values,
+;;;                                       const GValue *param_values,
+;;;                                       gpointer invocation_hint,
+;;;                                       gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, GObject *arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, GObject *arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1417,16 +1550,20 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__VARIANT ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__VARIANT    (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__VARIANT (GClosure *closure,
+;;;                                        GValue *return_value,
+;;;                                        guint n_param_values,
+;;;                                        const GValue *param_values,
+;;;                                        gpointer invocation_hint,
+;;;                                        gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, GVariant *arg1, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, GVariant *arg1, gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1447,17 +1584,21 @@
 ;;; 	additional data specified when registering the marshaller
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_STRING__OBJECT_POINTER ()
 ;;; 
-;;; void                g_cclosure_marshal_STRING__OBJECT_POINTER
-;;;                                                         (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_STRING__OBJECT_POINTER (GClosure *closure,
+;;;                                                 GValue *return_value,
+;;;                                                 guint n_param_values,
+;;;                                                 const GValue *param_values,
+;;;                                                 gpointer invocation_hint,
+;;;                                                 gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type gchar* (*callback) (gpointer instance, GObject *arg1, gpointer arg2, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; gchar* (*callback) (gpointer instance, GObject *arg1, gpointer arg2,
+;;;                     gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1476,17 +1617,21 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_VOID__UINT_POINTER ()
 ;;; 
-;;; void                g_cclosure_marshal_VOID__UINT_POINTER
-;;;                                                         (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_VOID__UINT_POINTER (GClosure *closure,
+;;;                                             GValue *return_value,
+;;;                                             guint n_param_values,
+;;;                                             const GValue *param_values,
+;;;                                             gpointer invocation_hint,
+;;;                                             gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type void (*callback) (gpointer instance, guint arg1, gpointer arg2, gpointer user_data).
+;;; A marshaller for a GCClosure with a callback of type
+;;; void (*callback) (gpointer instance, guint arg1, gpointer arg2,
+;;;                   gpointer user_data).
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1505,16 +1650,21 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_BOOLEAN__FLAGS ()
 ;;; 
-;;; void                g_cclosure_marshal_BOOLEAN__FLAGS   (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
+;;; void g_cclosure_marshal_BOOLEAN__FLAGS (GClosure *closure,
+;;;                                         GValue *return_value,
+;;;                                         guint n_param_values,
+;;;                                         const GValue *param_values,
+;;;                                         gpointer invocation_hint,
+;;;                                         gpointer marshal_data);
 ;;; 
-;;; A marshaller for a GCClosure with a callback of type gboolean (*callback) (gpointer instance, gint arg1, gpointer user_data) where the gint parameter denotes a flags type.
+;;; A marshaller for a GCClosure with a callback of type
+;;; gboolean (*callback) (gpointer instance, gint arg1, gpointer user_data)
+;;; where the gint parameter denotes a flags type.
 ;;; 
 ;;; closure :
 ;;; 	the GClosure to which the marshaller belongs
@@ -1533,23 +1683,29 @@
 ;;; 
 ;;; marshal_data :
 ;;; 	additional data specified when registering the marshaller
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_BOOL__FLAGS
 ;;; 
-;;; #define             g_cclosure_marshal_BOOL__FLAGS
+;;; #define g_cclosure_marshal_BOOL__FLAGS
 ;;; 
 ;;; Another name for g_cclosure_marshal_BOOLEAN__FLAGS().
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_BOOLEAN__BOXED_BOXED ()
 ;;; 
-;;; void                g_cclosure_marshal_BOOLEAN__BOXED_BOXED
-;;;                                                         (GClosure *closure,
-;;;                                                          GValue *return_value,
-;;;                                                          guint n_param_values,
-;;;                                                          const GValue *param_values,
-;;;                                                          gpointer invocation_hint,
-;;;                                                          gpointer marshal_data);
-;;; 
+;;; void g_cclosure_marshal_BOOLEAN__BOXED_BOXED (GClosure *closure,
+;;;                                               GValue *return_value,
+;;;                                               guint n_param_values,
+;;;                                               const GValue *param_values,
+;;;                                               gpointer invocation_hint,
+;;;                                               gpointer marshal_data);
+;;; ----------------------------------------------------------------------------
 ;;; g_cclosure_marshal_BOOL__BOXED_BOXED
 ;;; 
-;;; #define             g_cclosure_marshal_BOOL__BOXED_BOXED
-;;; 
-;;; 
+;;; #define g_cclosure_marshal_BOOL__BOXED_BOXED
+;;; ----------------------------------------------------------------------------
+
+;;; --- End of file gobject.closure.lisp ---------------------------------------

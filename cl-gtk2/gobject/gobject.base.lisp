@@ -26,8 +26,6 @@
 ;;;
 ;;; The Base Object Type
 ;;; 
-;;; The Base Object Type — The base object type
-;;; 
 ;;; Synopsis
 ;;; 
 ;;; struct              GObject;
@@ -1050,7 +1048,8 @@
 ;;;   GValue     *value;
 ;;; };
 ;;; 
-;;; The GObjectConstructParam struct is an auxiliary structure used to hand GParamSpec/GValue pairs to the constructor of a GObjectClass.
+;;; The GObjectConstructParam struct is an auxiliary structure used to hand
+;;; GParamSpec/GValue pairs to the constructor of a GObjectClass.
 ;;; 
 ;;; GParamSpec *pspec;
 ;;; 	the GParamSpec of the construct parameter
@@ -1058,7 +1057,6 @@
 ;;; GValue *value;
 ;;; 	the value to set the parameter to
 ;;; ----------------------------------------------------------------------------
-
 
 ;;; ----------------------------------------------------------------------------
 ;;; GObjectGetPropertyFunc ()
@@ -1087,10 +1085,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; GObjectSetPropertyFunc ()
 ;;; 
-;;; void                (*GObjectSetPropertyFunc)           (GObject *object,
-;;;                                                          guint property_id,
-;;;                                                          const GValue *value,
-;;;                                                          GParamSpec *pspec);
+;;; void (*GObjectSetPropertyFunc) (GObject *object,
+;;;                                 guint property_id,
+;;;                                 const GValue *value,
+;;;                                 GParamSpec *pspec);
 ;;; 
 ;;; The type of the set_property function of GObjectClass.
 ;;; 
@@ -1098,24 +1096,31 @@
 ;;; 	a GObject
 ;;; 
 ;;; property_id :
-;;; 	the numeric id under which the property was registered with g_object_class_install_property().
+;;; 	the numeric id under which the property was registered with
+;;;     g_object_class_install_property().
 ;;; 
 ;;; value :
 ;;; 	the new value for the property
 ;;; 
 ;;; pspec :
 ;;; 	the GParamSpec describing the property
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GObjectFinalizeFunc ()
 ;;; 
-;;; void                (*GObjectFinalizeFunc)              (GObject *object);
+;;; void (*GObjectFinalizeFunc) (GObject *object);
 ;;; 
 ;;; The type of the finalize function of GObjectClass.
 ;;; 
 ;;; object :
 ;;; 	the GObject being finalized
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_IS_OBJECT()
 ;;; 
-;;; #define G_TYPE_IS_OBJECT(type)      (G_TYPE_FUNDAMENTAL (type) == G_TYPE_OBJECT)
+;;; #define G_TYPE_IS_OBJECT(type) (G_TYPE_FUNDAMENTAL (type) == G_TYPE_OBJECT)
 ;;; 
 ;;; Check if the passed in type id is a G_TYPE_OBJECT or derived from it.
 ;;; 
@@ -1143,31 +1148,45 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_OBJECT()
 ;;; 
-;;; #define G_IS_OBJECT(object)         (G_TYPE_CHECK_INSTANCE_TYPE ((object), G_TYPE_OBJECT))
+;;; #define G_IS_OBJECT(object) (G_TYPE_CHECK_INSTANCE_TYPE ((object),
+;;;                              G_TYPE_OBJECT))
 ;;; 
 ;;; Checks whether a valid GTypeInstance pointer is of type G_TYPE_OBJECT.
 ;;; 
 ;;; object :
 ;;; 	Instance to check for being a G_TYPE_OBJECT.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_CLASS()
 ;;; 
-;;; #define G_OBJECT_CLASS(class)       (G_TYPE_CHECK_CLASS_CAST ((class), G_TYPE_OBJECT, GObjectClass))
+;;; #define G_OBJECT_CLASS(class) (G_TYPE_CHECK_CLASS_CAST ((class),
+;;;                                G_TYPE_OBJECT, GObjectClass))
 ;;; 
 ;;; Casts a derived GObjectClass structure into a GObjectClass structure.
 ;;; 
 ;;; class :
 ;;; 	a valid GObjectClass
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_IS_OBJECT_CLASS()
 ;;; 
-;;; #define G_IS_OBJECT_CLASS(class)    (G_TYPE_CHECK_CLASS_TYPE ((class), G_TYPE_OBJECT))
+;;; #define G_IS_OBJECT_CLASS(class) (G_TYPE_CHECK_CLASS_TYPE ((class),
+;;;                                   G_TYPE_OBJECT))
 ;;; 
-;;; Checks whether class "is a" valid GObjectClass structure of type G_TYPE_OBJECT or derived.
+;;; Checks whether class "is a" valid GObjectClass structure of type
+;;; G_TYPE_OBJECT or derived.
 ;;; 
 ;;; class :
 ;;; 	a GObjectClass
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_GET_CLASS()
 ;;; 
-;;; #define G_OBJECT_GET_CLASS(object)  (G_TYPE_INSTANCE_GET_CLASS ((object), G_TYPE_OBJECT, GObjectClass))
+;;; #define G_OBJECT_GET_CLASS(object) (G_TYPE_INSTANCE_GET_CLASS ((object),
+;;;                                     G_TYPE_OBJECT, GObjectClass))
 ;;; 
 ;;; Get the class structure associated to a GObject instance.
 ;;; 
@@ -1176,9 +1195,12 @@
 ;;; 
 ;;; Returns :
 ;;; 	pointer to object class structure.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_TYPE()
 ;;; 
-;;; #define G_OBJECT_TYPE(object)       (G_TYPE_FROM_INSTANCE (object))
+;;; #define G_OBJECT_TYPE(object) (G_TYPE_FROM_INSTANCE (object))
 ;;; 
 ;;; Get the type id of an object.
 ;;; 
@@ -1187,9 +1209,12 @@
 ;;; 
 ;;; Returns :
 ;;; 	Type id of object.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_TYPE_NAME()
 ;;; 
-;;; #define G_OBJECT_TYPE_NAME(object)  (g_type_name (G_OBJECT_TYPE (object)))
+;;; #define G_OBJECT_TYPE_NAME(object) (g_type_name (G_OBJECT_TYPE (object)))
 ;;; 
 ;;; Get the name of an object's type.
 ;;; 
@@ -1197,10 +1222,14 @@
 ;;; 	Object to return the type name for.
 ;;; 
 ;;; Returns :
-;;; 	Type name of object. The string is owned by the type system and should not be freed.
+;;; 	Type name of object. The string is owned by the type system and should
+;;;     not be freed.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_CLASS_TYPE()
 ;;; 
-;;; #define G_OBJECT_CLASS_TYPE(class)  (G_TYPE_FROM_CLASS (class))
+;;; #define G_OBJECT_CLASS_TYPE(class) (G_TYPE_FROM_CLASS (class))
 ;;; 
 ;;; Get the type id of a class structure.
 ;;; 
@@ -1209,9 +1238,13 @@
 ;;; 
 ;;; Returns :
 ;;; 	Type id of class.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_CLASS_NAME()
 ;;; 
-;;; #define G_OBJECT_CLASS_NAME(class)  (g_type_name (G_OBJECT_CLASS_TYPE (class)))
+;;; #define G_OBJECT_CLASS_NAME(class)
+;;;         (g_type_name (G_OBJECT_CLASS_TYPE (class)))
 ;;; 
 ;;; Return the name of a class structure's type.
 ;;; 
@@ -1219,8 +1252,9 @@
 ;;; 	a valid GObjectClass
 ;;; 
 ;;; Returns :
-;;; 	Type name of class. The string is owned by the type system and should not be freed.
-;;; |#
+;;; 	Type name of class. The string is owned by the type system and should
+;;;     not be freed.
+;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_class_install_property ()
@@ -1235,9 +1269,14 @@
 ;;; installing a property with the same name. This can be useful at times, e.g.
 ;;; to change the range of allowed values or the default value.
 ;;;
-;;; oclass      : a GObjectClass
-;;; property_id : the id for the new property
-;;; pspec       : the GParamSpec for the new property
+;;; oclass :
+;;;     a GObjectClass
+;;;
+;;; property_id 
+;;;     the id for the new property
+;;;
+;;; pspec :
+;;;     the GParamSpec for the new property
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-class-install-property :void
@@ -1245,104 +1284,66 @@
   (property-id :uint)
   (param-spec (:pointer g-param-spec)))
 
-;;; #|
+;;; ----------------------------------------------------------------------------
 ;;; g_object_class_install_properties ()
 ;;; 
-;;; void                g_object_class_install_properties   (GObjectClass *oclass,
-;;;                                                          guint n_pspecs,
-;;;                                                          GParamSpec **pspecs);
+;;; void g_object_class_install_properties (GObjectClass *oclass,
+;;;                                         guint n_pspecs,
+;;;                                         GParamSpec **pspecs);
 ;;; 
-;;; Installs new properties from an array of GParamSpecs. This is usually done in the class initializer.
+;;; Installs new properties from an array of GParamSpecs. This is usually done
+;;; in the class initializer.
 ;;; 
-;;; The property id of each property is the index of each GParamSpec in the pspecs array.
+;;; The property id of each property is the index of each GParamSpec in the
+;;; pspecs array.
 ;;; 
-;;; The property id of 0 is treated specially by GObject and it should not be used to store a GParamSpec.
+;;; The property id of 0 is treated specially by GObject and it should not be
+;;; used to store a GParamSpec.
 ;;; 
-;;; This function should be used if you plan to use a static array of GParamSpecs and g_object_notify_by_pspec(). For instance, this class initialization:
+;;; This function should be used if you plan to use a static array of
+;;; GParamSpecs and g_object_notify_by_pspec(). For instance, this class
+;;; initialization:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
-;;; 24
-;;; 25
-;;; 26
-;;; 27
-;;; 28
-;;; 
-;;; 	
-;;; 
-;;; enum {
-;;;   PROP_0, PROP_FOO, PROP_BAR, N_PROPERTIES
-;;; };
-;;; 
-;;; static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
-;;; 
-;;; static void
-;;; my_object_class_init (MyObjectClass *klass)
-;;; {
-;;;   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-;;; 
-;;;   obj_properties[PROP_FOO] =
-;;;     g_param_spec_int ("foo", "Foo", "Foo",
-;;;                       -1, G_MAXINT,
-;;;                       0,
-;;;                       G_PARAM_READWRITE);
-;;; 
-;;;   obj_properties[PROP_BAR] =
-;;;     g_param_spec_string ("bar", "Bar", "Bar",
-;;;                          NULL,
-;;;                          G_PARAM_READWRITE);
-;;; 
-;;;   gobject_class->set_property = my_object_set_property;
-;;;   gobject_class->get_property = my_object_get_property;
-;;;   g_object_class_install_properties (gobject_class,
-;;;                                      N_PROPERTIES,
-;;;                                      obj_properties);
-;;; }
+;;;  1 enum {
+;;;  2   PROP_0, PROP_FOO, PROP_BAR, N_PROPERTIES
+;;;  3 };
+;;;  4 
+;;;  5 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
+;;;  6 
+;;;  7 static void
+;;;  8 my_object_class_init (MyObjectClass *klass)
+;;;  9 {
+;;; 10   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+;;; 11 
+;;; 12   obj_properties[PROP_FOO] =
+;;; 13     g_param_spec_int ("foo", "Foo", "Foo",
+;;; 14                       -1, G_MAXINT,
+;;; 15                       0,
+;;; 16                       G_PARAM_READWRITE);
+;;; 17 
+;;; 18   obj_properties[PROP_BAR] =
+;;; 19     g_param_spec_string ("bar", "Bar", "Bar",
+;;; 20                          NULL,
+;;; 21                          G_PARAM_READWRITE);
+;;; 22 
+;;; 23   gobject_class->set_property = my_object_set_property;
+;;; 24   gobject_class->get_property = my_object_get_property;
+;;; 25   g_object_class_install_properties (gobject_class,
+;;; 26                                      N_PROPERTIES,
+;;; 27                                      obj_properties);
+;;; 28 }
 ;;; 
 ;;; allows calling g_object_notify_by_pspec() to notify of property changes:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 
-;;; 	
-;;; 
-;;; void
-;;; my_object_set_foo (MyObject *self, gint foo)
-;;; {
-;;;   if (self->foo != foo)
-;;;     {
-;;;       self->foo = foo;
-;;;       g_object_notify_by_pspec (G_OBJECT (self), obj_properties[PROP_FOO]);
-;;;     }
-;;;  }
+;;;  1 void
+;;;  2 my_object_set_foo (MyObject *self, gint foo)
+;;;  3 {
+;;;  4   if (self->foo != foo)
+;;;  5     {
+;;;  6       self->foo = foo;
+;;;  7       g_object_notify_by_pspec (G_OBJECT (self), obj_properties[PROP_FOO]);
+;;;  8     }
+;;;  9  }
 ;;; 
 ;;; oclass :
 ;;; 	a GObjectClass
@@ -1351,16 +1352,16 @@
 ;;; 	the length of the GParamSpecs array
 ;;; 
 ;;; pspecs :
-;;; 	the GParamSpecs array defining the new properties. [array length=n_pspecs]
+;;; 	the GParamSpecs array defining the new properties.
 ;;; 
 ;;; Since 2.26
-;;; |#
+;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_class_find_property ()
 ;;;
-;;; GParamSpec *        g_object_class_find_property        (GObjectClass *oclass,
-;;;                                                         const gchar *property_name);
+;;; GParamSpec * g_object_class_find_property (GObjectClass *oclass,
+;;;                                            const gchar *property_name);
 ;;;
 ;;; Looks up the GParamSpec for a property of a class.
 ;;;
@@ -1414,10 +1415,15 @@
 ;;; this makes no difference. If you need to get the overridden property, you
 ;;; can call g_param_spec_get_redirect_target().
 ;;;
-;;; oclass      : a GObjectClass
-;;; property_id : the new property ID
-;;; name        : the name of a property registered in a parent class or in an
-;;;               interface of this class.
+;;; oclass :
+;;;     a GObjectClass
+;;;
+;;; property_id :
+;;;     the new property ID
+;;;
+;;; name :
+;;;     the name of a property registered in a parent class or in an
+;;;     interface of this class.
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1447,9 +1453,12 @@
 ;;; called after after class_init has been called for any object types
 ;;; implementing this interface.
 ;;;
-;;; g_iface : any interface vtable for the interface, or the default vtable for
-;;;           the interface.
-;;; pspec   : the GParamSpec for the new property
+;;; g_iface :
+;;;     any interface vtable for the interface, or the default vtable for
+;;;     the interface.
+;;;
+;;; pspec :
+;;;     the GParamSpec for the new property
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1469,11 +1478,16 @@
 ;;; g_type_default_interface_ref(), or, if you know the interface has already
 ;;; been loaded, g_type_default_interface_peek().
 ;;;
-;;; g_iface       : any interface vtable for the interface, or the default
-;;;                 vtable for the interface
-;;; property_name : name of a property to lookup.
-;;; Returns       : the GParamSpec for the property of the interface with the
-;;;                 name property_name, or NULL if no such property exists.
+;;; g_iface :
+;;;     any interface vtable for the interface, or the default
+;;;     vtable for the interface
+;;;
+;;; property_name :
+;;;     name of a property to lookup.
+;;;
+;;; Returns :
+;;;     the GParamSpec for the property of the interface with the
+;;;     name property_name, or NULL if no such property exists.
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1493,12 +1507,17 @@
 ;;; g_type_default_interface_ref(), or, if you know the interface has already
 ;;; been loaded, g_type_default_interface_peek().
 ;;;
-;;; g_iface        : any interface vtable for the interface, or the default
-;;;                  vtable for the interface
-;;; n_properties_p : location to store number of properties returned.
-;;; Returns        : a pointer to an array of pointers to GParamSpec structures.
-;;;                  The paramspecs are owned by GLib, but the array should be
-;;;                  freed with g_free() when you are done with it.
+;;; g_iface :
+;;;     any interface vtable for the interface, or the default
+;;;     vtable for the interface
+;;;
+;;; n_properties_p :
+;;;     location to store number of properties returned.
+;;;
+;;; Returns :
+;;;     a pointer to an array of pointers to GParamSpec structures. The
+;;;     paramspecs are owned by GLib, but the array should be freed with
+;;;     g_free() when you are done with it.
 ;;;
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -1518,11 +1537,18 @@
 ;;; Construction parameters (see G_PARAM_CONSTRUCT, G_PARAM_CONSTRUCT_ONLY)
 ;;; which are not explicitly specified are set to their default values.
 ;;;
-;;; object_type         : the type id of the GObject subtype to instantiate
-;;; first_property_name : the name of the first property
-;;; ...                 : the value of the first property, followed optionally
-;;;                       by more name/value pairs, followed by NULL
-;;; Returns             : a new instance of object_type. [transfer full]
+;;; object_type :
+;;;     the type id of the GObject subtype to instantiate
+;;;
+;;; first_property_name :
+;;;     the name of the first property
+;;;
+;;; ... :
+;;;     the value of the first property, followed optionally by more name/value
+;;;     pairs, followed by NULL
+;;;
+;;; Returns :
+;;;     a new instance of object_type.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -1539,10 +1565,17 @@
 ;;;
 ;; Rename to: g_object_new
 ;;;
-;;; object_type  : the type id of the GObject subtype to instantiate
-;;; n_parameters : the length of the parameters array
-;;; parameters   : an array of GParameter.
-;;; Returns      : a new instance of object_type.
+;;; object_type  :
+;;;     the type id of the GObject subtype to instantiate
+;;;
+;;; n_parameters :
+;;;     the length of the parameters array
+;;;
+;;; parameters :
+;;;     an array of GParameter.
+;;;
+;;; Returns :
+;;;     a new instance of object_type.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-newv :pointer
@@ -1557,8 +1590,11 @@
 ;;;
 ;;; Increases the reference count of object.
 ;;;
-;;;     object  : a GObject.
-;;;     Returns : the same object.
+;;; object :
+;;;     a GObject.
+;;;
+;;; Returns :
+;;;     the same object.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-ref :pointer
@@ -1572,7 +1608,8 @@
 ;;; Decreases the reference count of object. When its reference count drops
 ;;; to 0, the object is finalized (i.e. its memory is freed).
 ;;;
-;;; object : a GObject.
+;;; object :
+;;;     a GObject.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-unref :void
@@ -1592,8 +1629,11 @@
 ;;; If the object is not floating, then this call adds a new normal reference
 ;;; increasing the reference count by one.
 ;;;
-;;;     object  : a GObject.
-;;;     Returns : object.
+;;; object :
+;;;     a GObject.
+;;;
+;;; Returns :
+;;;     object.
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -1619,7 +1659,8 @@
 ;;; A macro is also included that allows this function to be used without
 ;;; pointer casts.
 ;;;
-;;;     object_ptr : a pointer to a GObject reference
+;;; object_ptr :
+;;;     a pointer to a GObject reference
 ;;;
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
@@ -1653,7 +1694,7 @@
   (:metaclass gobject-class)
   (:g-type-name . "GInitiallyUnowned")
   (:g-type-initializer . "g_initially_unowned_get_type")
-  (:documentation "Base class that has initial \"floating\" reference."))
+  (:documentation "Base class that has initial 'floating' reference."))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_is_floating ()
@@ -1662,8 +1703,11 @@
 ;;;
 ;;; Checks whether object has a floating reference.
 ;;;
-;;;     object  : a GObject.
-;;;     Returns : TRUE if object has a floating reference
+;;; object :
+;;;     a GObject.
+;;;
+;;; Returns :
+;;;     TRUE if object has a floating reference
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -1681,7 +1725,8 @@
 ;;; GInitiallyUnowneds are created with a floating reference which usually just
 ;;; needs to be sunken by calling g_object_ref_sink().
 ;;;
-;;;     object : a GObject
+;;; object :
+;;;     a GObject
 ;;;
 ;;; Since 2.10
 ;;; ----------------------------------------------------------------------------
@@ -1717,9 +1762,14 @@
 ;;; g_object_ref() (g_object_ref() adds a strong reference, that is, forces the
 ;;; object to stay alive).
 ;;;
-;;; object : GObject to reference weakly
-;;; notify : callback to invoke before the object is freed
-;;; data   : extra data to pass to notify
+;;; object :
+;;;     GObject to reference weakly
+;;;
+;;; notify :
+;;;     callback to invoke before the object is freed
+;;;
+;;; data :
+;;;     extra data to pass to notify
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-weak-ref :void
@@ -1736,9 +1786,14 @@
 ;;;
 ;;; Removes a weak reference callback to an object.
 ;;;
-;;; object : GObject to remove a weak reference from
-;;; notify : callback to search for
-;;; data   : data to search for
+;;; object :
+;;;     GObject to remove a weak reference from
+;;;
+;;; notify :
+;;;     callback to search for
+;;;
+;;; data :
+;;;     data to search for
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-weak-unref :void
@@ -1746,38 +1801,47 @@
   (notify :pointer)
   (data :pointer))
 
-;;; #|
+;;; ----------------------------------------------------------------------------
 ;;; g_object_add_weak_pointer ()
 ;;; 
-;;; void                g_object_add_weak_pointer           (GObject *object,
-;;;                                                          gpointer *weak_pointer_location);
+;;; void g_object_add_weak_pointer (GObject *object,
+;;;                                 gpointer *weak_pointer_location);
 ;;; 
-;;; Adds a weak reference from weak_pointer to object to indicate that the pointer located at weak_pointer_location is only valid during the lifetime of object. When the object is finalized, weak_pointer will be set to NULL.
+;;; Adds a weak reference from weak_pointer to object to indicate that the
+;;; pointer located at weak_pointer_location is only valid during the lifetime
+;;; of object. When the object is finalized, weak_pointer will be set to NULL.
 ;;; 
 ;;; object :
 ;;; 	The object that should be weak referenced.
 ;;; 
 ;;; weak_pointer_location :
 ;;; 	The memory address of a pointer. [inout]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_remove_weak_pointer ()
 ;;; 
-;;; void                g_object_remove_weak_pointer        (GObject *object,
-;;;                                                          gpointer *weak_pointer_location);
+;;; void g_object_remove_weak_pointer (GObject *object,
+;;;                                    gpointer *weak_pointer_location);
 ;;; 
-;;; Removes a weak reference from object that was previously added using g_object_add_weak_pointer(). The weak_pointer_location has to match the one used with g_object_add_weak_pointer().
+;;; Removes a weak reference from object that was previously added using
+;;; g_object_add_weak_pointer(). The weak_pointer_location has to match the one
+;;; used with g_object_add_weak_pointer().
 ;;; 
 ;;; object :
 ;;; 	The object that is weak referenced.
 ;;; 
 ;;; weak_pointer_location :
 ;;; 	The memory address of a pointer. [inout]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GToggleNotify ()
 ;;; 
-;;; void                (*GToggleNotify)                    (gpointer data,
-;;;                                                          GObject *object,
-;;;                                                          gboolean is_last_ref);
+;;; void (*GToggleNotify) (gpointer data, GObject *object, gboolean is_last_ref)
 ;;; 
-;;; A callback function used for notification when the state of a toggle reference changes. See g_object_add_toggle_ref().
+;;; A callback function used for notification when the state of a toggle
+;;; reference changes. See g_object_add_toggle_ref().
 ;;; 
 ;;; data :
 ;;; 	Callback data passed to g_object_add_toggle_ref()
@@ -1786,7 +1850,9 @@
 ;;; 	The object on which g_object_add_toggle_ref() was called.
 ;;; 
 ;;; is_last_ref :
-;;; 	TRUE if the toggle reference is now the last reference to the object. FALSE if the toggle reference was the last reference and there are now other references.
+;;; 	TRUE if the toggle reference is now the last reference to the object.
+;;;     FALSE if the toggle reference was the last reference and there are now
+;;;     other references.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -1796,9 +1862,9 @@
 ;;;                               GToggleNotify notify,
 ;;;                               gpointer data)
 ;;; 
-;;; Increases the reference count of the object by one and sets a callback to be
-;;; called when all other references to the object are dropped, or when this is
-;;; already the last reference to the object and another reference is
+;;; Increases the reference count of the object by one and sets a callback to
+;;; be called when all other references to the object are dropped, or when this
+;;; is already the last reference to the object and another reference is
 ;;; established.
 ;;; 
 ;;; This functionality is intended for binding object to a proxy object managed
@@ -1818,8 +1884,8 @@
 ;;; strong.
 ;;; 
 ;;; Multiple toggle references may be added to the same gobject, however if
-;;; there are multiple toggle references to an object, none of them will ever be
-;;; notified until all but one are removed. For this reason, you should only
+;;; there are multiple toggle references to an object, none of them will ever
+;;; be notified until all but one are removed. For this reason, you should only
 ;;; ever use a toggle reference if there is important state in the proxy object.
 ;;; 
 ;;; object :
@@ -1871,73 +1937,55 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_connect ()
 ;;; 
-;;; gpointer            g_object_connect                    (gpointer object,
-;;;                                                          const gchar *signal_spec,
-;;;                                                          ...);
+;;; gpointer g_object_connect (gpointer object, const gchar *signal_spec, ...);
 ;;; 
 ;;; A convenience function to connect multiple signals at once.
 ;;; 
-;;; The signal specs expected by this function have the form "modifier::signal_name", where modifier can be one of the following:
+;;; The signal specs expected by this function have the form
+;;; "modifier::signal_name", where modifier can be one of the following:
 ;;; 
 ;;; signal
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_data (..., NULL, 0)
+;;;    equivalent to g_signal_connect_data (..., NULL, 0)
 ;;; 
 ;;; object_signal, object-signal
-;;; 	
-;;; 
-;;; equivalent to g_signal_connect_object (..., 0)
+;;; 	 
+;;;    equivalent to g_signal_connect_object (..., 0)
 ;;; 
 ;;; swapped_signal, swapped-signal
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_data (..., NULL, G_CONNECT_SWAPPED)
+;;;    equivalent to g_signal_connect_data (..., NULL, G_CONNECT_SWAPPED)
 ;;; 
 ;;; swapped_object_signal, swapped-object-signal
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_object (..., G_CONNECT_SWAPPED)
+;;;    equivalent to g_signal_connect_object (..., G_CONNECT_SWAPPED)
 ;;; 
 ;;; signal_after, signal-after
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_data (..., NULL, G_CONNECT_AFTER)
+;;;    equivalent to g_signal_connect_data (..., NULL, G_CONNECT_AFTER)
 ;;; 
 ;;; object_signal_after, object-signal-after
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_object (..., G_CONNECT_AFTER)
+;;;    equivalent to g_signal_connect_object (..., G_CONNECT_AFTER)
 ;;; 
 ;;; swapped_signal_after, swapped-signal-after
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_data (..., NULL, G_CONNECT_SWAPPED | G_CONNECT_AFTER)
+;;;    equivalent to g_signal_connect_data (..., NULL,
+;;;                                         G_CONNECT_SWAPPED | G_CONNECT_AFTER)
 ;;; 
 ;;; swapped_object_signal_after, swapped-object-signal-after
-;;; 	
 ;;; 
-;;; equivalent to g_signal_connect_object (..., G_CONNECT_SWAPPED | G_CONNECT_AFTER)
+;;;    equivalent to g_signal_connect_object (...,
+;;;                                         G_CONNECT_SWAPPED | G_CONNECT_AFTER)
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 
-;;; 	
-;;; 
-;;; menu->toplevel = g_object_connect (g_object_new (GTK_TYPE_WINDOW,
-;;;                            "type", GTK_WINDOW_POPUP,
-;;;                            "child", menu,
-;;;                            NULL),
-;;;                      "signal::event", gtk_menu_window_event, menu,
-;;;                      "signal::size_request", gtk_menu_window_size_request, menu,
-;;;                      "signal::destroy", gtk_widget_destroyed, &menu->toplevel,
-;;;                      NULL);
+;;;  1 menu->toplevel = g_object_connect (g_object_new (GTK_TYPE_WINDOW,
+;;;  2                            "type", GTK_WINDOW_POPUP,
+;;;  3                            "child", menu,
+;;;  4                            NULL),
+;;;  5                      "signal::event", gtk_menu_window_event, menu,
+;;;  6                      "signal::size_request", gtk_menu_window_size_request, menu,
+;;;  7                      "signal::destroy", gtk_widget_destroyed, &menu->toplevel,
+;;;  8                      NULL);
 ;;; 
 ;;; object :
 ;;; 	a GObject
@@ -1946,22 +1994,25 @@
 ;;; 	the spec for the first signal
 ;;; 
 ;;; ... :
-;;; 	GCallback for the first signal, followed by data for the first signal, followed optionally by more signal spec/callback/data triples, followed by NULL
+;;; 	GCallback for the first signal, followed by data for the first signal,
+;;;     followed optionally by more signal spec/callback/data triples, followed
+;;;     by NULL
 ;;; 
 ;;; Returns :
-;;; 	object. [transfer none]
+;;; 	object.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_disconnect ()
 ;;; 
-;;; void                g_object_disconnect                 (gpointer object,
-;;;                                                          const gchar *signal_spec,
-;;;                                                          ...);
+;;; void g_object_disconnect (gpointer object, const gchar *signal_spec, ...);
 ;;; 
 ;;; A convenience function to disconnect multiple signals at once.
 ;;; 
-;;; The signal specs expected by this function have the form "any_signal", which means to disconnect any signal with matching callback and data, or "any_signal::signal_name", which only disconnects the signal named "signal_name".
+;;; The signal specs expected by this function have the form "any_signal",
+;;; which means to disconnect any signal with matching callback and data, or
+;;; "any_signal::signal_name", which only disconnects the signal named
+;;; "signal_name".
 ;;; 
 ;;; object :
 ;;; 	a GObject
@@ -1970,15 +2021,15 @@
 ;;; 	the spec for the first signal
 ;;; 
 ;;; ... :
-;;; 	GCallback for the first signal, followed by data for the first signal, followed optionally by more signal spec/callback/data triples, followed by NULL
+;;; 	GCallback for the first signal, followed by data for the first signal,
+;;;     followed optionally by more signal spec/callback/data triples, followed
+;;;     by NULL
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_set ()
 ;;; 
-;;; void                g_object_set                        (gpointer object,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          ...);
+;;; void g_object_set (gpointer object, const gchar *first_property_name, ...);
 ;;; 
 ;;; Sets properties on an object.
 ;;; 
@@ -1989,22 +2040,26 @@
 ;;; 	name of the first property to set
 ;;; 
 ;;; ... :
-;;; 	value for the first property, followed optionally by more name/value pairs, followed by NULL
+;;; 	value for the first property, followed optionally by more name/value
+;;;     pairs, followed by NULL
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_get ()
 ;;; 
-;;; void                g_object_get                        (gpointer object,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          ...);
+;;; void g_object_get (gpointer object, const gchar *first_property_name, ...);
 ;;; 
 ;;; Gets properties of an object.
 ;;; 
-;;; In general, a copy is made of the property contents and the caller is responsible for freeing the memory in the appropriate manner for the type, for instance by calling g_free() or g_object_unref().
+;;; In general, a copy is made of the property contents and the caller is
+;;; responsible for freeing the memory in the appropriate manner for the type,
+;;; for instance by calling g_free() or g_object_unref().
 ;;; 
 ;;; Example 2. Using g_object_get()
-;;; An example of using g_object_get() to get the contents of three properties - one of type G_TYPE_INT, one of type G_TYPE_STRING, and one of type G_TYPE_OBJECT:
+;;;
+;;; An example of using g_object_get() to get the contents of three properties
+;;; - one of type G_TYPE_INT, one of type G_TYPE_STRING, and one of
+;;; type G_TYPE_OBJECT:
 ;;; 
 ;;;  gint intval;
 ;;;  gchar *strval;
@@ -2029,7 +2084,8 @@
 ;;; 	name of the first property to get
 ;;; 
 ;;; ... :
-;;; 	return location for the first property, followed optionally by more name/return location pairs, followed by NULL
+;;; 	return location for the first property, followed optionally by more
+;;;     name/return location pairs, followed by NULL
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -2057,58 +2113,38 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_notify_by_pspec ()
 ;;; 
-;;; void                g_object_notify_by_pspec            (GObject *object,
-;;;                                                          GParamSpec *pspec);
+;;; void g_object_notify_by_pspec (GObject *object, GParamSpec *pspec);
 ;;; 
 ;;; Emits a "notify" signal for the property specified by pspec on object.
 ;;; 
-;;; This function omits the property name lookup, hence it is faster than g_object_notify().
+;;; This function omits the property name lookup, hence it is faster than
+;;; g_object_notify().
 ;;; 
-;;; One way to avoid using g_object_notify() from within the class that registered the properties, and using g_object_notify_by_pspec() instead, is to store the GParamSpec used with g_object_class_install_property() inside a static array, e.g.:
-;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 
-;;; 	
-;;; 
-;;; enum
-;;; {
-;;;   PROP_0,
-;;;   PROP_FOO,
-;;;   PROP_LAST
-;;; };
-;;; 
-;;; static GParamSpec *properties[PROP_LAST];
-;;; 
-;;; static void
-;;; my_object_class_init (MyObjectClass *klass)
-;;; {
-;;;   properties[PROP_FOO] = g_param_spec_int ("foo", "Foo", "The foo",
-;;;                                            0, 100,
-;;;                                            50,
-;;;                                            G_PARAM_READWRITE);
-;;;   g_object_class_install_property (gobject_class,
-;;;                                    PROP_FOO,
-;;;                                    properties[PROP_FOO]);
-;;; }
+;;; One way to avoid using g_object_notify() from within the class that
+;;; registered the properties, and using g_object_notify_by_pspec() instead, is
+;;; to store the GParamSpec used with g_object_class_install_property() inside
+;;; a static array, e.g.:
+;;;  
+;;;  1 enum
+;;;  2 {
+;;;  3   PROP_0,
+;;;  4   PROP_FOO,
+;;;  5   PROP_LAST
+;;;  6 };
+;;;  7 
+;;;  8 static GParamSpec *properties[PROP_LAST];
+;;;  9 
+;;; 10 static void
+;;; 11 my_object_class_init (MyObjectClass *klass)
+;;; 12 {
+;;; 13   properties[PROP_FOO] = g_param_spec_int ("foo", "Foo", "The foo",
+;;; 14                                            0, 100,
+;;; 15                                            50,
+;;; 16                                            G_PARAM_READWRITE);
+;;; 17   g_object_class_install_property (gobject_class,
+;;; 18                                    PROP_FOO,
+;;; 19                                    properties[PROP_FOO]);
+;;; 20 }
 ;;; 
 ;;; and then notify a change on the "foo" property with:
 ;;; 
@@ -2175,7 +2211,7 @@
 ;;; 	name of the key for that association
 ;;; 
 ;;; Returns :
-;;; 	the data if found, or NULL if no such data exists. [transfer none]
+;;; 	the data if found, or NULL if no such data exists.
 ;;; ----------------------------------------------------------------------------
 
 (defcfun g-object-get-data :pointer
@@ -2268,8 +2304,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_get_qdata ()
 ;;; 
-;;; gpointer            g_object_get_qdata                  (GObject *object,
-;;;                                                          GQuark quark);
+;;; gpointer g_object_get_qdata (GObject *object, GQuark quark);
 ;;; 
 ;;; This function gets back user data pointers stored via g_object_set_qdata().
 ;;; 
@@ -2286,11 +2321,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_set_qdata ()
 ;;; 
-;;; void                g_object_set_qdata                  (GObject *object,
-;;;                                                          GQuark quark,
-;;;                                                          gpointer data);
+;;; void g_object_set_qdata (GObject *object, GQuark quark, gpointer data);
 ;;; 
-;;; This sets an opaque, named pointer on an object. The name is specified through a GQuark (retrived e.g. via g_quark_from_static_string()), and the pointer can be gotten back from the object with g_object_get_qdata() until the object is finalized. Setting a previously set user data pointer, overrides (frees) the old pointer set, using NULL as pointer essentially removes the data stored.
+;;; This sets an opaque, named pointer on an object. The name is specified
+;;; through a GQuark (retrived e.g. via g_quark_from_static_string()), and the
+;;; pointer can be gotten back from the object with g_object_get_qdata() until
+;;; the object is finalized. Setting a previously set user data pointer,
+;;; overrides (frees) the old pointer set, using NULL as pointer essentially
+;;; removes the data stored.
 ;;; 
 ;;; object :
 ;;; 	The GObject to set store a user data pointer
@@ -2374,7 +2412,7 @@
 ;;; 	A GQuark, naming the user data pointer
 ;;; 
 ;;; Returns :
-;;; 	The user data pointer set, or NULL. [transfer full]
+;;; 	The user data pointer set, or NULL.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -2436,13 +2474,14 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_new_valist ()
 ;;; 
-;;; GObject *           g_object_new_valist                 (GType object_type,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          va_list var_args);
+;;; GObject * g_object_new_valist (GType object_type,
+;;;                                const gchar *first_property_name,
+;;;                                va_list var_args);
 ;;; 
 ;;; Creates a new instance of a GObject subtype and sets its properties.
 ;;; 
-;;; Construction parameters (see G_PARAM_CONSTRUCT, G_PARAM_CONSTRUCT_ONLY) which are not explicitly specified are set to their default values.
+;;; Construction parameters (see G_PARAM_CONSTRUCT, G_PARAM_CONSTRUCT_ONLY)
+;;; which are not explicitly specified are set to their default values.
 ;;; 
 ;;; object_type :
 ;;; 	the type id of the GObject subtype to instantiate
@@ -2451,7 +2490,8 @@
 ;;; 	the name of the first property
 ;;; 
 ;;; var_args :
-;;; 	the value of the first property, followed optionally by more name/value pairs, followed by NULL
+;;; 	the value of the first property, followed optionally by more name/value
+;;;     pairs, followed by NULL
 ;;; 
 ;;; Returns :
 ;;; 	a new instance of object_type
@@ -2460,9 +2500,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_set_valist ()
 ;;; 
-;;; void                g_object_set_valist                 (GObject *object,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          va_list var_args);
+;;; void g_object_set_valist (GObject *object,
+;;;                           const gchar *first_property_name,
+;;;                           va_list var_args);
 ;;; 
 ;;; Sets properties on an object.
 ;;; 
@@ -2473,19 +2513,22 @@
 ;;; 	name of the first property to set
 ;;; 
 ;;; var_args :
-;;; 	value for the first property, followed optionally by more name/value pairs, followed by NULL
+;;; 	value for the first property, followed optionally by more name/value
+;;;     pairs, followed by NULL
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_object_get_valist ()
 ;;; 
-;;; void                g_object_get_valist                 (GObject *object,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          va_list var_args);
+;;; void g_object_get_valist (GObject *object,
+;;;                           const gchar *first_property_name,
+;;;                           va_list var_args);
 ;;; 
 ;;; Gets properties of an object.
 ;;; 
-;;; In general, a copy is made of the property contents and the caller is responsible for freeing the memory in the appropriate manner for the type, for instance by calling g_free() or g_object_unref().
+;;; In general, a copy is made of the property contents and the caller is
+;;; responsible for freeing the memory in the appropriate manner for the type,
+;;; for instance by calling g_free() or g_object_unref().
 ;;; 
 ;;; See g_object_get().
 ;;; 
@@ -2496,34 +2539,52 @@
 ;;; 	name of the first property to get
 ;;; 
 ;;; var_args :
-;;; 	return location for the first property, followed optionally by more name/return location pairs, followed by NULL
+;;; 	return location for the first property, followed optionally by more
+;;;     name/return location pairs, followed by NULL
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_watch_closure ()
 ;;; 
-;;; void                g_object_watch_closure              (GObject *object,
-;;;                                                          GClosure *closure);
+;;; void g_object_watch_closure (GObject *object, GClosure *closure);
 ;;; 
-;;; This function essentially limits the life time of the closure to the life time of the object. That is, when the object is finalized, the closure is invalidated by calling g_closure_invalidate() on it, in order to prevent invocations of the closure with a finalized (nonexisting) object. Also, g_object_ref() and g_object_unref() are added as marshal guards to the closure, to ensure that an extra reference count is held on object during invocation of the closure. Usually, this function will be called on closures that use this object as closure data.
+;;; This function essentially limits the life time of the closure to the life
+;;; time of the object. That is, when the object is finalized, the closure is
+;;; invalidated by calling g_closure_invalidate() on it, in order to prevent
+;;; invocations of the closure with a finalized (nonexisting) object. Also,
+;;; g_object_ref() and g_object_unref() are added as marshal guards to the
+;;; closure, to ensure that an extra reference count is held on object during
+;;; invocation of the closure. Usually, this function will be called on closures
+;;; that use this object as closure data.
 ;;; 
 ;;; object :
 ;;; 	GObject restricting lifetime of closure
 ;;; 
 ;;; closure :
 ;;; 	GClosure to watch
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_object_run_dispose ()
 ;;; 
-;;; void                g_object_run_dispose                (GObject *object);
+;;; void g_object_run_dispose (GObject *object);
 ;;; 
-;;; Releases all references to other objects. This can be used to break reference cycles.
+;;; Releases all references to other objects. This can be used to break
+;;; reference cycles.
 ;;; 
 ;;; This functions should only be called from object system implementations.
 ;;; 
 ;;; object :
 ;;; 	a GObject
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_OBJECT_WARN_INVALID_PROPERTY_ID()
 ;;; 
-;;; #define             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec)
+;;; #define G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec)
 ;;; 
-;;; This macro should be used to emit a standard warning about unexpected properties in set_property() and get_property() implementations.
+;;; This macro should be used to emit a standard warning about unexpected
+;;; properties in set_property() and get_property() implementations.
 ;;; 
 ;;; object :
 ;;; 	the GObject on which set_property() or get_property() was called
@@ -2533,28 +2594,32 @@
 ;;; 
 ;;; pspec :
 ;;; 	the GParamSpec of the property
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
+;;;
 ;;; Signal Details
+;;;
+;;; ----------------------------------------------------------------------------
 ;;; The "notify" signal
 ;;; 
-;;; void                user_function                      (GObject    *gobject,
-;;;                                                         GParamSpec *pspec,
-;;;                                                         gpointer    user_data)      : No Hooks
+;;; void user_function (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 ;;; 
-;;; The notify signal is emitted on an object when one of its properties has been changed. Note that getting this signal doesn't guarantee that the value of the property has actually changed, it may also be emitted when the setter for the property is called to reinstate the previous value.
+;;; The notify signal is emitted on an object when one of its properties has
+;;; been changed. Note that getting this signal doesn't guarantee that the
+;;; value of the property has actually changed, it may also be emitted when the
+;;; setter for the property is called to reinstate the previous value.
 ;;; 
-;;; This signal is typically used to obtain change notification for a single property, by specifying the property name as a detail in the g_signal_connect() call, like this:
+;;; This signal is typically used to obtain change notification for a single
+;;; property, by specifying the property name as a detail in the
+;;; g_signal_connect() call, like this:
 ;;; 
-;;; 1
-;;; 2
-;;; 3
+;;;  1 g_signal_connect (text_view->buffer, "notify::paste-target-list",
+;;;  2                   G_CALLBACK (gtk_text_view_target_list_notify),
+;;;  3                   text_view)
 ;;; 
-;;; 	
-;;; 
-;;; g_signal_connect (text_view->buffer, "notify::paste-target-list",
-;;;                   G_CALLBACK (gtk_text_view_target_list_notify),
-;;;                   text_view)
-;;; 
-;;; It is important to note that you must use canonical parameter names as detail strings for the notify signal.
+;;; It is important to note that you must use canonical parameter names as
+;;; detail strings for the notify signal.
 ;;; 
 ;;; gobject :
 ;;; 	the object which received the signal.
@@ -2564,14 +2629,13 @@
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
-;;; See Also
-;;; GParamSpecObject, g_param_spec_object()
-;;; |#
+;;; ----------------------------------------------------------------------------
 
 (defun should-ref-sink-at-creation (object)
 ;;If object was not created from lisp-side, we should ref it
 ;;If an object is regular g-object, we should not ref-sink it
-;;If an object is GInitiallyUnowned, then it is created with a floating reference, we should ref-sink it
+;;If an object is GInitiallyUnowned, then it is created with a floating
+;; reference, we should ref-sink it
 ;;A special case is GtkWindow: we should ref-sink it anyway
   (let ((r (cond
              ((equal *current-object-from-pointer* (pointer object))
@@ -2583,4 +2647,4 @@
     (log-for :gc "(should-ref-sink-at-creation ~A) => ~A~%" object r)
     r))
 
-;;; --- End of file gobject.base.lisp nil --------------------------------------
+;;; --- End of file gobject.base.lisp ------------------------------------------

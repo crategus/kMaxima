@@ -584,7 +584,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_CHAR()
 ;;; 
-;;; #define G_VALUE_HOLDS_CHAR(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_CHAR))
+;;; #define G_VALUE_HOLDS_CHAR(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                    G_TYPE_CHAR))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_CHAR.
 ;;; 
@@ -598,7 +599,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_CHAR
 ;;; 
-;;; #define G_TYPE_PARAM_CHAR		   (g_param_spec_types[0])
+;;; #define G_TYPE_PARAM_CHAR (g_param_spec_types[0])
 ;;; 
 ;;; The GType of GParamSpecChar.
 ;;; ----------------------------------------------------------------------------
@@ -721,7 +722,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_UCHAR()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_UCHAR(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_UCHAR))
+;;; #define G_IS_PARAM_SPEC_UCHAR(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_UCHAR))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_UCHAR.
 ;;; 
@@ -735,7 +737,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_UCHAR()
 ;;; 
-;;; #define G_PARAM_SPEC_UCHAR(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_UCHAR, GParamSpecUChar))
+;;; #define G_PARAM_SPEC_UCHAR(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_UCHAR, GParamSpecUChar))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecUChar.
 ;;; 
@@ -746,7 +749,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_UCHAR()
 ;;; 
-;;; #define G_VALUE_HOLDS_UCHAR(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_UCHAR))
+;;; #define G_VALUE_HOLDS_UCHAR(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_UCHAR))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_UCHAR.
 ;;; 
@@ -760,7 +764,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_UCHAR
 ;;; 
-;;; #define G_TYPE_PARAM_UCHAR		   (g_param_spec_types[1])
+;;; #define G_TYPE_PARAM_UCHAR (g_param_spec_types[1])
 ;;; 
 ;;; The GType of GParamSpecUChar.
 ;;; ----------------------------------------------------------------------------
@@ -801,13 +805,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uchar ()
 ;;; 
-;;; GParamSpec *        g_param_spec_uchar                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          guint8 minimum,
-;;;                                                          guint8 maximum,
-;;;                                                          guint8 default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_uchar (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  guint8 minimum,
+;;;                                  guint8 maximum,
+;;;                                  guint8 default_value,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecUChar instance specifying a G_TYPE_UCHAR property.
 ;;; 
@@ -848,8 +852,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_uchar ()
 ;;; 
-;;; void                g_value_set_uchar                   (GValue *value,
-;;;                                                          guchar v_uchar);
+;;; void g_value_set_uchar (GValue *value, guchar v_uchar);
 ;;; 
 ;;; Set the contents of a G_TYPE_UCHAR GValue to v_uchar.
 ;;; 
@@ -867,7 +870,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_uchar ()
 ;;; 
-;;; guchar              g_value_get_uchar                   (const GValue *value);
+;;; guchar g_value_get_uchar (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_UCHAR GValue.
 ;;; 
@@ -884,7 +887,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_INT()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_INT(pspec)         (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_INT))
+;;; #define G_IS_PARAM_SPEC_INT(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                     G_TYPE_PARAM_INT))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_INT.
 ;;; 
@@ -898,7 +902,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_INT()
 ;;; 
-;;; #define G_PARAM_SPEC_INT(pspec)            (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_INT, GParamSpecInt))
+;;; #define G_PARAM_SPEC_INT(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                  G_TYPE_PARAM_INT, GParamSpecInt))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecInt.
 ;;; 
@@ -909,7 +914,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_INT()
 ;;; 
-;;; #define G_VALUE_HOLDS_INT(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_INT))
+;;; #define G_VALUE_HOLDS_INT(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                   G_TYPE_INT))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_INT.
 ;;; 
@@ -923,7 +929,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_INT
 ;;; 
-;;; #define G_TYPE_PARAM_INT		   (g_param_spec_types[3])
+;;; #define G_TYPE_PARAM_INT (g_param_spec_types[3])
 ;;; 
 ;;; The GType of GParamSpecInt.
 ;;; ----------------------------------------------------------------------------
@@ -964,13 +970,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_int ()
 ;;; 
-;;; GParamSpec *        g_param_spec_int                    (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gint minimum,
-;;;                                                          gint maximum,
-;;;                                                          gint default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_int (const gchar *name,
+;;;                                const gchar *nick,
+;;;                                const gchar *blurb,
+;;;                                gint minimum,
+;;;                                gint maximum,
+;;;                                gint default_value,
+;;;                                GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecInt instance specifying a G_TYPE_INT property.
 ;;; 
@@ -1013,8 +1019,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_int ()
 ;;; 
-;;; void                g_value_set_int                     (GValue *value,
-;;;                                                          gint v_int);
+;;; void g_value_set_int (GValue *value, gint v_int);
 ;;; 
 ;;; Set the contents of a G_TYPE_INT GValue to v_int.
 ;;; 
@@ -1032,7 +1037,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_int ()
 ;;; 
-;;; gint                g_value_get_int                     (const GValue *value);
+;;; gint g_value_get_int (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_INT GValue.
 ;;; 
@@ -1049,7 +1054,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_UINT()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_UINT(pspec)        (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_UINT))
+;;; #define G_IS_PARAM_SPEC_UINT(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                      G_TYPE_PARAM_UINT))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_UINT.
 ;;; 
@@ -1063,7 +1069,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_UINT()
 ;;; 
-;;; #define G_PARAM_SPEC_UINT(pspec)           (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_UINT, GParamSpecUInt))
+;;; #define G_PARAM_SPEC_UINT(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                   G_TYPE_PARAM_UINT, GParamSpecUInt))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecUInt.
 ;;; 
@@ -1074,7 +1081,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_UINT()
 ;;; 
-;;; #define G_VALUE_HOLDS_UINT(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_UINT))
+;;; #define G_VALUE_HOLDS_UINT(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                    G_TYPE_UINT))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_UINT.
 ;;; 
@@ -1088,7 +1096,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_UINT
 ;;; 
-;;; #define G_TYPE_PARAM_UINT		   (g_param_spec_types[4])
+;;; #define G_TYPE_PARAM_UINT (g_param_spec_types[4])
 ;;; 
 ;;; The GType of GParamSpecUInt.
 ;;; ----------------------------------------------------------------------------
@@ -1104,7 +1112,8 @@
 ;;;   guint         default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for unsigned integer properties.
+;;; A GParamSpec derived structure that contains the meta data for unsigned
+;;; integer properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1128,13 +1137,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uint ()
 ;;; 
-;;; GParamSpec *        g_param_spec_uint                   (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          guint minimum,
-;;;                                                          guint maximum,
-;;;                                                          guint default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_uint (const gchar *name,
+;;;                                 const gchar *nick,
+;;;                                 const gchar *blurb,
+;;;                                 guint minimum,
+;;;                                 guint maximum,
+;;;                                 guint default_value,
+;;;                                 GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecUInt instance specifying a G_TYPE_UINT property.
 ;;; 
@@ -1177,8 +1186,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_uint ()
 ;;; 
-;;; void                g_value_set_uint                    (GValue *value,
-;;;                                                          guint v_uint);
+;;; void g_value_set_uint (GValue *value, guint v_uint);
 ;;; 
 ;;; Set the contents of a G_TYPE_UINT GValue to v_uint.
 ;;; 
@@ -1196,7 +1204,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_uint ()
 ;;; 
-;;; guint               g_value_get_uint                    (const GValue *value);
+;;; guint g_value_get_uint (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_UINT GValue.
 ;;; 
@@ -1213,7 +1221,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_LONG()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_LONG(pspec)        (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_LONG))
+;;; #define G_IS_PARAM_SPEC_LONG(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                      G_TYPE_PARAM_LONG))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_LONG.
 ;;; 
@@ -1227,7 +1236,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_LONG()
 ;;; 
-;;; #define G_PARAM_SPEC_LONG(pspec)           (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_LONG, GParamSpecLong))
+;;; #define G_PARAM_SPEC_LONG(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                   G_TYPE_PARAM_LONG, GParamSpecLong))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecLong.
 ;;; 
@@ -1238,7 +1248,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_LONG()
 ;;; 
-;;; #define G_VALUE_HOLDS_LONG(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_LONG))
+;;; #define G_VALUE_HOLDS_LONG(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                    G_TYPE_LONG))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_LONG.
 ;;; 
@@ -1252,7 +1263,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_LONG
 ;;; 
-;;; #define G_TYPE_PARAM_LONG		   (g_param_spec_types[5])
+;;; #define G_TYPE_PARAM_LONG (g_param_spec_types[5])
 ;;; 
 ;;; The GType of GParamSpecLong.
 ;;; ----------------------------------------------------------------------------
@@ -1293,13 +1304,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_long ()
 ;;; 
-;;; GParamSpec *        g_param_spec_long                   (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          glong minimum,
-;;;                                                          glong maximum,
-;;;                                                          glong default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_long (const gchar *name,
+;;;                                 const gchar *nick,
+;;;                                 const gchar *blurb,
+;;;                                 glong minimum,
+;;;                                 glong maximum,
+;;;                                 glong default_value,
+;;;                                 GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecLong instance specifying a G_TYPE_LONG property.
 ;;; 
@@ -1342,8 +1353,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_long ()
 ;;; 
-;;; void                g_value_set_long                    (GValue *value,
-;;;                                                          glong v_long);
+;;; void g_value_set_long (GValue *value, glong v_long);
 ;;; 
 ;;; Set the contents of a G_TYPE_LONG GValue to v_long.
 ;;; 
@@ -1361,7 +1371,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_long ()
 ;;; 
-;;; glong               g_value_get_long                    (const GValue *value);
+;;; glong g_value_get_long (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_LONG GValue.
 ;;; 
@@ -1378,7 +1388,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_ULONG()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_ULONG(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_ULONG))
+;;; #define G_IS_PARAM_SPEC_ULONG(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_ULONG))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_ULONG.
 ;;; 
@@ -1392,7 +1403,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_ULONG()
 ;;; 
-;;; #define G_PARAM_SPEC_ULONG(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_ULONG, GParamSpecULong))
+;;; #define G_PARAM_SPEC_ULONG(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_ULONG, GParamSpecULong))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecULong.
 ;;; 
@@ -1403,7 +1415,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_ULONG()
 ;;; 
-;;; #define G_VALUE_HOLDS_ULONG(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_ULONG))
+;;; #define G_VALUE_HOLDS_ULONG(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_ULONG))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_ULONG.
 ;;; 
@@ -1417,7 +1430,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_ULONG
 ;;; 
-;;; #define G_TYPE_PARAM_ULONG		   (g_param_spec_types[6])
+;;; #define G_TYPE_PARAM_ULONG (g_param_spec_types[6])
 ;;; 
 ;;; The GType of GParamSpecULong.
 ;;; ----------------------------------------------------------------------------
@@ -1458,13 +1471,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_ulong ()
 ;;; 
-;;; GParamSpec *        g_param_spec_ulong                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gulong minimum,
-;;;                                                          gulong maximum,
-;;;                                                          gulong default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_ulong (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  gulong minimum,
+;;;                                  gulong maximum,
+;;;                                  gulong default_value,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecULong instance specifying a G_TYPE_ULONG property.
 ;;; 
@@ -1507,8 +1520,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_ulong ()
 ;;; 
-;;; void                g_value_set_ulong                   (GValue *value,
-;;;                                                          gulong v_ulong);
+;;; void g_value_set_ulong (GValue *value, gulong v_ulong);
 ;;; 
 ;;; Set the contents of a G_TYPE_ULONG GValue to v_ulong.
 ;;; 
@@ -1526,7 +1538,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_ulong ()
 ;;; 
-;;; gulong              g_value_get_ulong                   (const GValue *value);
+;;; gulong g_value_get_ulong (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_ULONG GValue.
 ;;; 
@@ -1543,7 +1555,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_INT64()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_INT64(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_INT64))
+;;; #define G_IS_PARAM_SPEC_INT64(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_INT64))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_INT64.
 ;;; 
@@ -1557,7 +1570,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_INT64()
 ;;; 
-;;; #define G_PARAM_SPEC_INT64(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_INT64, GParamSpecInt64))
+;;; #define G_PARAM_SPEC_INT64(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_INT64, GParamSpecInt64))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecInt64.
 ;;; 
@@ -1568,7 +1582,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_INT64()
 ;;; 
-;;; #define G_VALUE_HOLDS_INT64(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_INT64))
+;;; #define G_VALUE_HOLDS_INT64(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_INT64))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_INT64.
 ;;; 
@@ -1582,7 +1597,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_INT64
 ;;; 
-;;; #define G_TYPE_PARAM_INT64		   (g_param_spec_types[7])
+;;; #define G_TYPE_PARAM_INT64 (g_param_spec_types[7])
 ;;; 
 ;;; The GType of GParamSpecInt64.
 ;;; ----------------------------------------------------------------------------
@@ -1598,7 +1613,8 @@
 ;;;   gint64        default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for 64bit integer properties.
+;;; A GParamSpec derived structure that contains the meta data for 64bit
+;;; integer properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -1622,13 +1638,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_int64 ()
 ;;; 
-;;; GParamSpec *        g_param_spec_int64                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gint64 minimum,
-;;;                                                          gint64 maximum,
-;;;                                                          gint64 default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_int64 (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  gint64 minimum,
+;;;                                  gint64 maximum,
+;;;                                  gint64 default_value,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecInt64 instance specifying a G_TYPE_INT64 property.
 ;;; 
@@ -1671,8 +1687,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_int64 ()
 ;;; 
-;;; void                g_value_set_int64                   (GValue *value,
-;;;                                                          gint64 v_int64);
+;;; void g_value_set_int64 (GValue *value, gint64 v_int64);
 ;;; 
 ;;; Set the contents of a G_TYPE_INT64 GValue to v_int64.
 ;;; 
@@ -1690,7 +1705,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_int64 ()
 ;;; 
-;;; gint64              g_value_get_int64                   (const GValue *value);
+;;; gint64 g_value_get_int64 (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_INT64 GValue.
 ;;; 
@@ -1707,7 +1722,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_UINT64()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_UINT64(pspec)      (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_UINT64))
+;;; #define G_IS_PARAM_SPEC_UINT64(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                        G_TYPE_PARAM_UINT64))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_UINT64.
 ;;; 
@@ -1721,7 +1737,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_UINT64()
 ;;; 
-;;; #define G_PARAM_SPEC_UINT64(pspec)         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_UINT64, GParamSpecUInt64))
+;;; #define G_PARAM_SPEC_UINT64(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                     G_TYPE_PARAM_UINT64, GParamSpecUInt64))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecUInt64.
 ;;; 
@@ -1732,7 +1749,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_UINT64()
 ;;; 
-;;; #define G_VALUE_HOLDS_UINT64(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_UINT64))
+;;; #define G_VALUE_HOLDS_UINT64(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                      G_TYPE_UINT64))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_UINT64.
 ;;; 
@@ -1746,7 +1764,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_UINT64
 ;;; 
-;;; #define G_TYPE_PARAM_UINT64		   (g_param_spec_types[8])
+;;; #define G_TYPE_PARAM_UINT64 (g_param_spec_types[8])
 ;;; 
 ;;; The GType of GParamSpecUInt64.
 ;;; ----------------------------------------------------------------------------
@@ -1787,13 +1805,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_uint64 ()
 ;;; 
-;;; GParamSpec *        g_param_spec_uint64                 (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          guint64 minimum,
-;;;                                                          guint64 maximum,
-;;;                                                          guint64 default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_uint64 (const gchar *name,
+;;;                                   const gchar *nick,
+;;;                                   const gchar *blurb,
+;;;                                   guint64 minimum,
+;;;                                   guint64 maximum,
+;;;                                   guint64 default_value,
+;;;                                   GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecUInt64 instance specifying a G_TYPE_UINT64 property.
 ;;; 
@@ -1836,8 +1854,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_uint64 ()
 ;;; 
-;;; void                g_value_set_uint64                  (GValue *value,
-;;;                                                          guint64 v_uint64);
+;;; void g_value_set_uint64 (GValue *value, guint64 v_uint64);
 ;;; 
 ;;; Set the contents of a G_TYPE_UINT64 GValue to v_uint64.
 ;;; 
@@ -1855,7 +1872,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_uint64 ()
 ;;; 
-;;; guint64             g_value_get_uint64                  (const GValue *value);
+;;; guint64 g_value_get_uint64 (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_UINT64 GValue.
 ;;; 
@@ -1961,13 +1978,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_float ()
 ;;; 
-;;; GParamSpec *        g_param_spec_float                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gfloat minimum,
-;;;                                                          gfloat maximum,
-;;;                                                          gfloat default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_float (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  gfloat minimum,
+;;;                                  gfloat maximum,
+;;;                                  gfloat default_value,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecFloat instance specifying a G_TYPE_FLOAT property.
 ;;; 
@@ -2010,8 +2027,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_float ()
 ;;; 
-;;; void                g_value_set_float                   (GValue *value,
-;;;                                                          gfloat v_float);
+;;; void g_value_set_float (GValue *value, gfloat v_float);
 ;;; 
 ;;; Set the contents of a G_TYPE_FLOAT GValue to v_float.
 ;;; 
@@ -2029,7 +2045,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_float ()
 ;;; 
-;;; gfloat              g_value_get_float                   (const GValue *value);
+;;; gfloat g_value_get_float (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_FLOAT GValue.
 ;;; 
@@ -2046,7 +2062,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_DOUBLE()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_DOUBLE(pspec)      (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_DOUBLE))
+;;; #define G_IS_PARAM_SPEC_DOUBLE(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                        G_TYPE_PARAM_DOUBLE))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_DOUBLE.
 ;;; 
@@ -2060,7 +2077,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_DOUBLE()
 ;;; 
-;;; #define G_PARAM_SPEC_DOUBLE(pspec)         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_DOUBLE, GParamSpecDouble))
+;;; #define G_PARAM_SPEC_DOUBLE(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                     G_TYPE_PARAM_DOUBLE, GParamSpecDouble))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecDouble.
 ;;; 
@@ -2071,7 +2089,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_DOUBLE()
 ;;; 
-;;; #define G_VALUE_HOLDS_DOUBLE(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_DOUBLE))
+;;; #define G_VALUE_HOLDS_DOUBLE(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                      G_TYPE_DOUBLE))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_DOUBLE.
 ;;; 
@@ -2085,7 +2104,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_DOUBLE
 ;;; 
-;;; #define G_TYPE_PARAM_DOUBLE		   (g_param_spec_types[13])
+;;; #define G_TYPE_PARAM_DOUBLE (g_param_spec_types[13])
 ;;; 
 ;;; The GType of GParamSpecDouble.
 ;;; ----------------------------------------------------------------------------
@@ -2132,13 +2151,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_double ()
 ;;; 
-;;; GParamSpec *        g_param_spec_double                 (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gdouble minimum,
-;;;                                                          gdouble maximum,
-;;;                                                          gdouble default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_double (const gchar *name,
+;;;                                   const gchar *nick,
+;;;                                   const gchar *blurb,
+;;;                                   gdouble minimum,
+;;;                                   gdouble maximum,
+;;;                                   gdouble default_value,
+;;;                                   GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecDouble instance specifying a G_TYPE_DOUBLE property.
 ;;; 
@@ -2181,8 +2200,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_double ()
 ;;; 
-;;; void                g_value_set_double                  (GValue *value,
-;;;                                                          gdouble v_double);
+;;; void g_value_set_double (GValue *value, gdouble v_double);
 ;;; 
 ;;; Set the contents of a G_TYPE_DOUBLE GValue to v_double.
 ;;; 
@@ -2200,7 +2218,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_double ()
 ;;; 
-;;; gdouble             g_value_get_double                  (const GValue *value);
+;;; gdouble g_value_get_double (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_DOUBLE GValue.
 ;;; 
@@ -2217,7 +2235,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_ENUM()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_ENUM(pspec)        (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_ENUM))
+;;; #define G_IS_PARAM_SPEC_ENUM(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                      G_TYPE_PARAM_ENUM))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_ENUM.
 ;;; 
@@ -2231,7 +2250,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_ENUM()
 ;;; 
-;;; #define G_PARAM_SPEC_ENUM(pspec)           (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_ENUM, GParamSpecEnum))
+;;; #define G_PARAM_SPEC_ENUM(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                   G_TYPE_PARAM_ENUM, GParamSpecEnum))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecEnum.
 ;;; 
@@ -2242,9 +2262,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_ENUM()
 ;;; 
-;;; #define G_VALUE_HOLDS_ENUM(value)      (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_ENUM))
+;;; #define G_VALUE_HOLDS_ENUM(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                    G_TYPE_ENUM))
 ;;; 
-;;; Checks whether the given GValue can hold values derived from type G_TYPE_ENUM.
+;;; Checks whether the given GValue can hold values derived from type
+;;; G_TYPE_ENUM.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue structure
@@ -2256,7 +2278,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_ENUM
 ;;; 
-;;; #define G_TYPE_PARAM_ENUM		   (g_param_spec_types[10])
+;;; #define G_TYPE_PARAM_ENUM (g_param_spec_types[10])
 ;;; 
 ;;; The GType of GParamSpecEnum.
 ;;; ----------------------------------------------------------------------------
@@ -2292,12 +2314,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_enum ()
 ;;; 
-;;; GParamSpec *        g_param_spec_enum                   (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GType enum_type,
-;;;                                                          gint default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_enum (const gchar *name,
+;;;                                 const gchar *nick,
+;;;                                 const gchar *blurb,
+;;;                                 GType enum_type,
+;;;                                 gint default_value,
+;;;                                 GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecEnum instance specifying a G_TYPE_ENUM property.
 ;;; 
@@ -2336,8 +2358,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_enum ()
 ;;; 
-;;; void                g_value_set_enum                    (GValue *value,
-;;;                                                          gint v_enum);
+;;; void g_value_set_enum (GValue *value, gint v_enum);
 ;;; 
 ;;; Set the contents of a G_TYPE_ENUM GValue to v_enum.
 ;;; 
@@ -2355,7 +2376,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_enum ()
 ;;; 
-;;; gint                g_value_get_enum                    (const GValue *value);
+;;; gint g_value_get_enum (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_ENUM GValue.
 ;;; 
@@ -2372,7 +2393,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_FLAGS()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_FLAGS(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_FLAGS))
+;;; #define G_IS_PARAM_SPEC_FLAGS(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_FLAGS))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_FLAGS.
 ;;; 
@@ -2386,7 +2408,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_FLAGS()
 ;;; 
-;;; #define G_PARAM_SPEC_FLAGS(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_FLAGS, GParamSpecFlags))
+;;; #define G_PARAM_SPEC_FLAGS(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_FLAGS, GParamSpecFlags))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecFlags.
 ;;; 
@@ -2413,7 +2436,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_FLAGS
 ;;; 
-;;; #define G_TYPE_PARAM_FLAGS		   (g_param_spec_types[11])
+;;; #define G_TYPE_PARAM_FLAGS (g_param_spec_types[11])
 ;;; 
 ;;; The GType of GParamSpecFlags.
 ;;; ----------------------------------------------------------------------------
@@ -2449,12 +2472,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_flags ()
 ;;; 
-;;; GParamSpec *        g_param_spec_flags                  (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GType flags_type,
-;;;                                                          guint default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_flags (const gchar *name,
+;;;                                  const gchar *nick,
+;;;                                  const gchar *blurb,
+;;;                                  GType flags_type,
+;;;                                  guint default_value,
+;;;                                  GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecFlags instance specifying a G_TYPE_FLAGS property.
 ;;; 
@@ -2493,8 +2516,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_flags ()
 ;;; 
-;;; void                g_value_set_flags                   (GValue *value,
-;;;                                                          guint v_flags);
+;;; void g_value_set_flags (GValue *value, guint v_flags);
 ;;; 
 ;;; Set the contents of a G_TYPE_FLAGS GValue to v_flags.
 ;;; 
@@ -2512,7 +2534,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_flags ()
 ;;; 
-;;; guint               g_value_get_flags                   (const GValue *value);
+;;; guint g_value_get_flags (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_FLAGS GValue.
 ;;; 
@@ -2529,7 +2551,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_STRING()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_STRING(pspec)      (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_STRING))
+;;; #define G_IS_PARAM_SPEC_STRING(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                        G_TYPE_PARAM_STRING))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_STRING.
 ;;; 
@@ -2543,7 +2566,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_STRING()
 ;;; 
-;;; #define G_PARAM_SPEC_STRING(pspec)         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_STRING, GParamSpecString))
+;;; #define G_PARAM_SPEC_STRING(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                     G_TYPE_PARAM_STRING, GParamSpecString))
 ;;; 
 ;;; Casts a GParamSpec instance into a GParamSpecString.
 ;;; 
@@ -2554,7 +2578,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_STRING()
 ;;; 
-;;; #define G_VALUE_HOLDS_STRING(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_STRING))
+;;; #define G_VALUE_HOLDS_STRING(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                      G_TYPE_STRING))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_STRING.
 ;;; 
@@ -2568,7 +2593,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_STRING
 ;;; 
-;;; #define G_TYPE_PARAM_STRING		   (g_param_spec_types[14])
+;;; #define G_TYPE_PARAM_STRING (g_param_spec_types[14])
 ;;; 
 ;;; The GType of GParamSpecString.
 ;;; ----------------------------------------------------------------------------
@@ -2610,11 +2635,6 @@
 ;;; 
 ;;; guint ensure_non_null : 1;
 ;;; 	replace NULL strings by an empty string
-;;; gchararray
-;;; 
-;;; typedef gchar* gchararray;
-;;; 
-;;; A C representable type name for G_TYPE_STRING.
 ;;; ----------------------------------------------------------------------------
 
 (defcstruct g-param-spec-string
@@ -2624,15 +2644,23 @@
   (:cset-nth (:string :free-to-foreign nil :free-from-foreign nil))
   (:substitutor :char)
   (:flags-for-null :uint))
+  
+;;; ----------------------------------------------------------------------------
+;;; gchararray
+;;; 
+;;; typedef gchar* gchararray;
+;;; 
+;;; A C representable type name for G_TYPE_STRING.
+;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_string ()
 ;;; 
-;;; GParamSpec *        g_param_spec_string                 (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          const gchar *default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_string (const gchar *name,
+;;;                                   const gchar *nick,
+;;;                                   const gchar *blurb,
+;;;                                   const gchar *default_value,
+;;;                                   GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecString instance.
 ;;; 
@@ -2667,8 +2695,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_string ()
 ;;; 
-;;; void                g_value_set_string                  (GValue *value,
-;;;                                                          const gchar *v_string);
+;;; void g_value_set_string (GValue *value, const gchar *v_string);
 ;;; 
 ;;; Set the contents of a G_TYPE_STRING GValue to v_string.
 ;;; 
@@ -2686,10 +2713,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_static_string ()
 ;;; 
-;;; void                g_value_set_static_string           (GValue *value,
-;;;                                                          const gchar *v_string);
+;;; void g_value_set_static_string (GValue *value, const gchar *v_string);
 ;;; 
-;;; Set the contents of a G_TYPE_STRING GValue to v_string. The string is assumed to be static, and is thus not duplicated when setting the GValue.
+;;; Set the contents of a G_TYPE_STRING GValue to v_string. The string is
+;;; assumed to be static, and is thus not duplicated when setting the GValue.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of type G_TYPE_STRING
@@ -2701,8 +2728,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_take_string ()
 ;;; 
-;;; void                g_value_take_string                 (GValue *value,
-;;;                                                          gchar *v_string);
+;;; void g_value_take_string (GValue *value, gchar *v_string);
 ;;; 
 ;;; Sets the contents of a G_TYPE_STRING GValue to v_string.
 ;;; 
@@ -2718,12 +2744,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_string_take_ownership ()
 ;;; 
-;;; void                g_value_set_string_take_ownership   (GValue *value,
-;;;                                                          gchar *v_string);
+;;; void g_value_set_string_take_ownership (GValue *value, gchar *v_string);
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_value_set_string_take_ownership has been deprecated since version 2.4 and should not be used in newly-written code. Use g_value_take_string() instead.
+;;; g_value_set_string_take_ownership has been deprecated since version 2.4 and
+;;; should not be used in newly-written code. Use g_value_take_string() instead.
 ;;; 
 ;;; This is an internal function introduced mainly for C marshallers.
 ;;; 
@@ -2737,7 +2763,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_string ()
 ;;; 
-;;; const gchar *       g_value_get_string                  (const GValue *value);
+;;; const gchar * g_value_get_string (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_STRING GValue.
 ;;; 
@@ -2754,7 +2780,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_string ()
 ;;; 
-;;; gchar *             g_value_dup_string                  (const GValue *value);
+;;; gchar * g_value_dup_string (const GValue *value);
 ;;; 
 ;;; Get a copy the contents of a G_TYPE_STRING GValue.
 ;;; 
@@ -2768,7 +2794,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_PARAM()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_PARAM(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_PARAM))
+;;; #define G_IS_PARAM_SPEC_PARAM(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_PARAM))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_PARAM.
 ;;; 
@@ -2782,7 +2809,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_PARAM()
 ;;; 
-;;; #define G_PARAM_SPEC_PARAM(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_PARAM, GParamSpecParam))
+;;; #define G_PARAM_SPEC_PARAM(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_PARAM, GParamSpecParam))
 ;;; 
 ;;; Casts a GParamSpec instance into a GParamSpecParam.
 ;;; 
@@ -2793,9 +2821,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_PARAM()
 ;;; 
-;;; #define G_VALUE_HOLDS_PARAM(value) (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_PARAM))
+;;; #define G_VALUE_HOLDS_PARAM(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_PARAM))
 ;;; 
-;;; Checks whether the given GValue can hold values derived from type G_TYPE_PARAM.
+;;; Checks whether the given GValue can hold values derived from type
+;;; G_TYPE_PARAM.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue structure
@@ -2907,12 +2937,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_param_take_ownership ()
 ;;; 
-;;; void                g_value_set_param_take_ownership    (GValue *value,
-;;;                                                          GParamSpec *param);
+;;; void g_value_set_param_take_ownership (GValue *value, GParamSpec *param);
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_value_set_param_take_ownership has been deprecated since version 2.4 and should not be used in newly-written code. Use g_value_take_param() instead.
+;;; g_value_set_param_take_ownership has been deprecated since version 2.4 and
+;;; should not be used in newly-written code. Use g_value_take_param() instead.
 ;;; 
 ;;; This is an internal function introduced mainly for C marshallers.
 ;;; 
@@ -2926,7 +2956,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_param ()
 ;;; 
-;;; GParamSpec *        g_value_get_param                   (const GValue *value);
+;;; GParamSpec * g_value_get_param (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_PARAM GValue.
 ;;; 
@@ -2943,7 +2973,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_param ()
 ;;; 
-;;; GParamSpec *        g_value_dup_param                   (const GValue *value);
+;;; GParamSpec * g_value_dup_param (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_PARAM GValue, increasing its reference count.
 ;;; 
@@ -2957,7 +2987,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_BOXED()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_BOXED(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_BOXED))
+;;; #define G_IS_PARAM_SPEC_BOXED(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_BOXED))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_BOXED.
 ;;; 
@@ -2971,7 +3002,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_BOXED()
 ;;; 
-;;; #define G_PARAM_SPEC_BOXED(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_BOXED, GParamSpecBoxed))
+;;; #define G_PARAM_SPEC_BOXED(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_BOXED, GParamSpecBoxed))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecBoxed.
 ;;; 
@@ -2982,9 +3014,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_BOXED()
 ;;; 
-;;; #define G_VALUE_HOLDS_BOXED(value) (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_BOXED))
+;;; #define G_VALUE_HOLDS_BOXED(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_BOXED))
 ;;; 
-;;; Checks whether the given GValue can hold values derived from type G_TYPE_BOXED.
+;;; Checks whether the given GValue can hold values derived from type
+;;; G_TYPE_BOXED.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue structure
@@ -3095,10 +3129,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_take_boxed ()
 ;;; 
-;;; void                g_value_take_boxed                  (GValue *value,
-;;;                                                          gconstpointer v_boxed);
+;;; void g_value_take_boxed (GValue *value, gconstpointer v_boxed);
 ;;; 
-;;; Sets the contents of a G_TYPE_BOXED derived GValue to v_boxed and takes over the ownership of the callers reference to v_boxed; the caller doesn't have to unref it any more.
+;;; Sets the contents of a G_TYPE_BOXED derived GValue to v_boxed and takes
+;;; over the ownership of the callers reference to v_boxed; the caller doesn't
+;;; have to unref it any more.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of G_TYPE_BOXED derived type
@@ -3116,12 +3151,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_boxed_take_ownership ()
 ;;; 
-;;; void                g_value_set_boxed_take_ownership    (GValue *value,
-;;;                                                          gconstpointer v_boxed);
+;;; void g_value_set_boxed_take_ownership (GValue *value, gconstpointer v_boxed)
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_value_set_boxed_take_ownership has been deprecated since version 2.4 and should not be used in newly-written code. Use g_value_take_boxed() instead.
+;;; g_value_set_boxed_take_ownership has been deprecated since version 2.4 and
+;;; should not be used in newly-written code. Use g_value_take_boxed() instead.
 ;;; 
 ;;; This is an internal function introduced mainly for C marshallers.
 ;;; 
@@ -3135,7 +3170,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_boxed ()
 ;;; 
-;;; gpointer            g_value_get_boxed                   (const GValue *value);
+;;; gpointer g_value_get_boxed (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_BOXED derived GValue.
 ;;; 
@@ -3152,9 +3187,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_boxed ()
 ;;; 
-;;; gpointer            g_value_dup_boxed                   (const GValue *value);
+;;; gpointer g_value_dup_boxed (const GValue *value);
 ;;; 
-;;; Get the contents of a G_TYPE_BOXED derived GValue. Upon getting, the boxed value is duplicated and needs to be later freed with g_boxed_free(), e.g. like: g_boxed_free (G_VALUE_TYPE (value), return_value);
+;;; Get the contents of a G_TYPE_BOXED derived GValue. Upon getting, the boxed
+;;; value is duplicated and needs to be later freed with g_boxed_free(), e.g.
+;;; like: g_boxed_free (G_VALUE_TYPE (value), return_value);
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of G_TYPE_BOXED derived type
@@ -3166,7 +3203,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_POINTER()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_POINTER(pspec)     (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_POINTER))
+;;; #define G_IS_PARAM_SPEC_POINTER(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                         G_TYPE_PARAM_POINTER))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_POINTER.
 ;;; 
@@ -3180,7 +3218,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_POINTER()
 ;;; 
-;;; #define G_PARAM_SPEC_POINTER(pspec)        (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_POINTER, GParamSpecPointer))
+;;; #define G_PARAM_SPEC_POINTER(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                      G_TYPE_PARAM_POINTER,
+;;;                                      GParamSpecPointer))
 ;;; 
 ;;; Casts a GParamSpec instance into a GParamSpecPointer.
 ;;; 
@@ -3191,7 +3231,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_POINTER()
 ;;; 
-;;; #define G_VALUE_HOLDS_POINTER(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_POINTER))
+;;; #define G_VALUE_HOLDS_POINTER(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                       G_TYPE_POINTER))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_POINTER.
 ;;; 
@@ -3230,10 +3271,10 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_pointer ()
 ;;; 
-;;; GParamSpec *        g_param_spec_pointer                (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_pointer (const gchar *name,
+;;;                                    const gchar *nick,
+;;;                                    const gchar *blurb,
+;;;                                    GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecPointer instance specifying a pointer property.
 ;;; 
@@ -3264,8 +3305,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_pointer ()
 ;;; 
-;;; void                g_value_set_pointer                 (GValue *value,
-;;;                                                          gpointer v_pointer);
+;;; void g_value_set_pointer (GValue *value, gpointer v_pointer);
 ;;; 
 ;;; Set the contents of a pointer GValue to v_pointer.
 ;;; 
@@ -3283,7 +3323,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_pointer ()
 ;;; 
-;;; gpointer            g_value_get_pointer                 (const GValue *value);
+;;; gpointer g_value_get_pointer (const GValue *value);
 ;;; 
 ;;; Get the contents of a pointer GValue.
 ;;; 
@@ -3300,7 +3340,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_OBJECT()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_OBJECT(pspec)      (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_OBJECT))
+;;; #define G_IS_PARAM_SPEC_OBJECT(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                        G_TYPE_PARAM_OBJECT))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_OBJECT.
 ;;; 
@@ -3314,7 +3355,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_OBJECT()
 ;;; 
-;;; #define G_PARAM_SPEC_OBJECT(pspec)         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_OBJECT, GParamSpecObject))
+;;; #define G_PARAM_SPEC_OBJECT(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                     G_TYPE_PARAM_OBJECT, GParamSpecObject))
 ;;; 
 ;;; Casts a GParamSpec instance into a GParamSpecObject.
 ;;; 
@@ -3325,9 +3367,11 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_OBJECT()
 ;;; 
-;;; #define G_VALUE_HOLDS_OBJECT(value) (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_OBJECT))
+;;; #define G_VALUE_HOLDS_OBJECT(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                      G_TYPE_OBJECT))
 ;;; 
-;;; Checks whether the given GValue can hold values derived from type G_TYPE_OBJECT.
+;;; Checks whether the given GValue can hold values derived from type
+;;; G_TYPE_OBJECT.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue structure
@@ -3404,14 +3448,18 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_object ()
 ;;; 
-;;; void                g_value_set_object                  (GValue *value,
-;;;                                                          gpointer v_object);
+;;; void g_value_set_object (GValue *value, gpointer v_object);
 ;;; 
 ;;; Set the contents of a G_TYPE_OBJECT derived GValue to v_object.
 ;;; 
-;;; g_value_set_object() increases the reference count of v_object (the GValue holds a reference to v_object). If you do not wish to increase the reference count of the object (i.e. you wish to pass your current reference to the GValue because you no longer need it), use g_value_take_object() instead.
+;;; g_value_set_object() increases the reference count of v_object (the GValue
+;;; holds a reference to v_object). If you do not wish to increase the reference
+;;; count of the object (i.e. you wish to pass your current reference to the
+;;; GValue because you no longer need it), use g_value_take_object() instead.
 ;;; 
-;;; It is important that your GValue holds a reference to v_object (either its own, or one it has taken) to ensure that the object won't be destroyed while the GValue still exists).
+;;; It is important that your GValue holds a reference to v_object (either its
+;;; own, or one it has taken) to ensure that the object won't be destroyed while
+;;; the GValue still exists).
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of G_TYPE_OBJECT derived type
@@ -3427,12 +3475,15 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_take_object ()
 ;;; 
-;;; void                g_value_take_object                 (GValue *value,
-;;;                                                          gpointer v_object);
+;;; void g_value_take_object (GValue *value, gpointer v_object);
 ;;; 
-;;; Sets the contents of a G_TYPE_OBJECT derived GValue to v_object and takes over the ownership of the callers reference to v_object; the caller doesn't have to unref it any more (i.e. the reference count of the object is not increased).
+;;; Sets the contents of a G_TYPE_OBJECT derived GValue to v_object and takes
+;;; over the ownership of the callers reference to v_object; the caller doesn't
+;;; have to unref it any more (i.e. the reference count of the object is not
+;;; increased).
 ;;; 
-;;; If you want the GValue to hold its own reference to v_object, use g_value_set_object() instead.
+;;; If you want the GValue to hold its own reference to v_object, use
+;;; g_value_set_object() instead.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of G_TYPE_OBJECT derived type
@@ -3446,12 +3497,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_object_take_ownership ()
 ;;; 
-;;; void                g_value_set_object_take_ownership   (GValue *value,
-;;;                                                          gpointer v_object);
+;;; void g_value_set_object_take_ownership (GValue *value, gpointer v_object);
 ;;; 
 ;;; Warning
 ;;; 
-;;; g_value_set_object_take_ownership has been deprecated since version 2.4 and should not be used in newly-written code. Use g_value_take_object() instead.
+;;; g_value_set_object_take_ownership has been deprecated since version 2.4 and
+;;; should not be used in newly-written code. Use g_value_take_object() instead.
 ;;; 
 ;;; This is an internal function introduced mainly for C marshallers.
 ;;; 
@@ -3465,7 +3516,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_object ()
 ;;; 
-;;; gpointer            g_value_get_object                  (const GValue *value);
+;;; gpointer g_value_get_object (const GValue *value);
 ;;; 
 ;;; Get the contents of a G_TYPE_OBJECT derived GValue.
 ;;; 
@@ -3482,21 +3533,23 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_object ()
 ;;; 
-;;; gpointer            g_value_dup_object                  (const GValue *value);
+;;; gpointer g_value_dup_object (const GValue *value);
 ;;; 
-;;; Get the contents of a G_TYPE_OBJECT derived GValue, increasing its reference count. If the contents of the GValue are NULL, then NULL will be returned.
+;;; Get the contents of a G_TYPE_OBJECT derived GValue, increasing its reference
+;;; count. If the contents of the GValue are NULL, then NULL will be returned.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue whose type is derived from G_TYPE_OBJECT
 ;;; 
 ;;; Returns :
-;;; 	object content of value, should be unreferenced when no longer needed. [type GObject.Object][transfer full]
+;;; 	object content of value, should be unreferenced when no longer needed.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_UNICHAR()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_UNICHAR(pspec)     (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_UNICHAR))
+;;; #define G_IS_PARAM_SPEC_UNICHAR(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                         G_TYPE_PARAM_UNICHAR))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_UNICHAR.
 ;;; 
@@ -3510,7 +3563,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_UNICHAR()
 ;;; 
-;;; #define G_PARAM_SPEC_UNICHAR(pspec)        (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_UNICHAR, GParamSpecUnichar))
+;;; #define G_PARAM_SPEC_UNICHAR(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                      G_TYPE_PARAM_UNICHAR, GParamSpecUnichar))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecUnichar.
 ;;; 
@@ -3521,7 +3575,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_UNICHAR
 ;;; 
-;;; #define G_TYPE_PARAM_UNICHAR		   (g_param_spec_types[9])
+;;; #define G_TYPE_PARAM_UNICHAR (g_param_spec_types[9])
 ;;; 
 ;;; The GType of GParamSpecUnichar.
 ;;; struct GParamSpecUnichar
@@ -3532,7 +3586,8 @@
 ;;;   gunichar      default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for unichar (unsigned integer) properties.
+;;; A GParamSpec derived structure that contains the meta data for unichar
+;;; (unsigned integer) properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -3544,13 +3599,15 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_unichar ()
 ;;; 
-;;; GParamSpec *        g_param_spec_unichar                (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          gunichar default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_unichar (const gchar *name,
+;;;                                    const gchar *nick,
+;;;                                    const gchar *blurb,
+;;;                                    gunichar default_value,
+;;;                                    GParamFlags flags);
 ;;; 
-;;; Creates a new GParamSpecUnichar instance specifying a G_TYPE_UINT property. GValue structures for this property can be accessed with g_value_set_uint() and g_value_get_uint().
+;;; Creates a new GParamSpecUnichar instance specifying a G_TYPE_UINT property.
+;;; GValue structures for this property can be accessed with g_value_set_uint()
+;;; and g_value_get_uint().
 ;;; 
 ;;; See g_param_spec_internal() for details on property names.
 ;;; 
@@ -3571,9 +3628,13 @@
 ;;; 
 ;;; Returns :
 ;;; 	a newly created parameter specification
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_VALUE_ARRAY()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_VALUE_ARRAY(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_VALUE_ARRAY))
+;;; #define G_IS_PARAM_SPEC_VALUE_ARRAY(pspec)
+;;;         (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_VALUE_ARRAY))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_VALUE_ARRAY.
 ;;; 
@@ -3587,7 +3648,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_VALUE_ARRAY()
 ;;; 
-;;; #define G_PARAM_SPEC_VALUE_ARRAY(pspec)    (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_VALUE_ARRAY, GParamSpecValueArray))
+;;; #define G_PARAM_SPEC_VALUE_ARRAY(pspec
+;;;         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_VALUE_ARRAY,
+;;;          GParamSpecValueArray))
 ;;; 
 ;;; Cast a GParamSpec instance into a GParamSpecValueArray.
 ;;; 
@@ -3598,7 +3661,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_VALUE_ARRAY
 ;;; 
-;;; #define G_TYPE_PARAM_VALUE_ARRAY	   (g_param_spec_types[18])
+;;; #define G_TYPE_PARAM_VALUE_ARRAY (g_param_spec_types[18])
 ;;; 
 ;;; The GType of GParamSpecValueArray.
 ;;; ----------------------------------------------------------------------------
@@ -3635,13 +3698,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_value_array ()
 ;;; 
-;;; GParamSpec *        g_param_spec_value_array            (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          GParamSpec *element_spec,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_value_array (const gchar *name,
+;;;                                        const gchar *nick,
+;;;                                        const gchar *blurb,
+;;;                                        GParamSpec *element_spec,
+;;;                                        GParamFlags flags);
 ;;; 
-;;; Creates a new GParamSpecValueArray instance specifying a G_TYPE_VALUE_ARRAY property. G_TYPE_VALUE_ARRAY is a G_TYPE_BOXED type, as such, GValue structures for this property can be accessed with g_value_set_boxed() and g_value_get_boxed().
+;;; Creates a new GParamSpecValueArray instance specifying a G_TYPE_VALUE_ARRAY
+;;; property. G_TYPE_VALUE_ARRAY is a G_TYPE_BOXED type, as such, GValue
+;;; structures for this property can be accessed with g_value_set_boxed() and
+;;; g_value_get_boxed().
 ;;; 
 ;;; See g_param_spec_internal() for details on property names.
 ;;; 
@@ -3655,7 +3721,8 @@
 ;;; 	description of the property specified
 ;;; 
 ;;; element_spec :
-;;; 	a GParamSpec describing the elements contained in arrays of this property, may be NULL
+;;; 	a GParamSpec describing the elements contained in arrays of this
+;;;     property, may be NULL
 ;;; 
 ;;; flags :
 ;;; 	flags for the property specified
@@ -3674,7 +3741,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_OVERRIDE()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_OVERRIDE(pspec)    (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_OVERRIDE))
+;;; #define G_IS_PARAM_SPEC_OVERRIDE(pspec)
+;;;         (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_OVERRIDE))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_OVERRIDE.
 ;;; 
@@ -3690,7 +3758,9 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_OVERRIDE()
 ;;; 
-;;; #define G_PARAM_SPEC_OVERRIDE(pspec)       (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_OVERRIDE, GParamSpecOverride))
+;;; #define G_PARAM_SPEC_OVERRIDE(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                       G_TYPE_PARAM_OVERRIDE,
+;;;                                       GParamSpecOverride))
 ;;; 
 ;;; Casts a GParamSpec into a GParamSpecOverride.
 ;;; 
@@ -3703,7 +3773,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_OVERRIDE
 ;;; 
-;;; #define G_TYPE_PARAM_OVERRIDE		   (g_param_spec_types[20])
+;;; #define G_TYPE_PARAM_OVERRIDE (g_param_spec_types[20])
 ;;; 
 ;;; The GType of GParamSpecOverride.
 ;;; 
@@ -3716,7 +3786,13 @@
 ;;; struct GParamSpecOverride {
 ;;; };
 ;;; 
-;;; This is a type of GParamSpec type that simply redirects operations to another paramspec. All operations other than getting or setting the value are redirected, including accessing the nick and blurb, validating a value, and so forth. See g_param_spec_get_redirect_target() for retrieving the overidden property. GParamSpecOverride is used in implementing g_object_class_override_property(), and will not be directly useful unless you are implementing a new base type similar to GObject.
+;;; This is a type of GParamSpec type that simply redirects operations to
+;;; another paramspec. All operations other than getting or setting the value
+;;; are redirected, including accessing the nick and blurb, validating a value,
+;;; and so forth. See g_param_spec_get_redirect_target() for retrieving the
+;;; overidden property. GParamSpecOverride is used in implementing
+;;; g_object_class_override_property(), and will not be directly useful unless
+;;; you are implementing a new base type similar to GObject.
 ;;; 
 ;;; Since 2.4
 ;;; ----------------------------------------------------------------------------
@@ -3724,10 +3800,12 @@
 ;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_override ()
 ;;; 
-;;; GParamSpec *        g_param_spec_override               (const gchar *name,
-;;;                                                          GParamSpec *overridden);
+;;; GParamSpec * g_param_spec_override (const gchar *name,
+;;;                                     GParamSpec *overridden);
 ;;; 
-;;; Creates a new property of type GParamSpecOverride. This is used to direct operations to another paramspec, and will not be directly useful unless you are implementing a new base type similar to GObject.
+;;; Creates a new property of type GParamSpecOverride. This is used to direct
+;;; operations to another paramspec, and will not be directly useful unless you
+;;; are implementing a new base type similar to GObject.
 ;;; 
 ;;; name :
 ;;; 	the name of the property.
@@ -3744,7 +3822,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_GTYPE()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_GTYPE(pspec)       (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_GTYPE))
+;;; #define G_IS_PARAM_SPEC_GTYPE(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                       G_TYPE_PARAM_GTYPE))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_GTYPE.
 ;;; 
@@ -3760,7 +3839,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_GTYPE()
 ;;; 
-;;; #define G_PARAM_SPEC_GTYPE(pspec)          (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_GTYPE, GParamSpecGType))
+;;; #define G_PARAM_SPEC_GTYPE(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                    G_TYPE_PARAM_GTYPE, GParamSpecGType))
 ;;; 
 ;;; Casts a GParamSpec into a GParamSpecGType.
 ;;; 
@@ -3773,7 +3853,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_GTYPE()
 ;;; 
-;;; #define G_VALUE_HOLDS_GTYPE(value)	 (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_GTYPE))
+;;; #define G_VALUE_HOLDS_GTYPE(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                     G_TYPE_GTYPE))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_GTYPE.
 ;;; 
@@ -3789,7 +3870,7 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_GTYPE
 ;;; 
-;;; #define G_TYPE_PARAM_GTYPE		   (g_param_spec_types[21])
+;;; #define G_TYPE_PARAM_GTYPE (g_param_spec_types[21])
 ;;; 
 ;;; The GType of GParamSpecGType.
 ;;; 
@@ -3904,7 +3985,8 @@
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_VARIANT()
 ;;; 
-;;; #define G_IS_PARAM_SPEC_VARIANT(pspec)      (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), G_TYPE_PARAM_VARIANT))
+;;; #define G_IS_PARAM_SPEC_VARIANT(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec),
+;;;                                         G_TYPE_PARAM_VARIANT))
 ;;; 
 ;;; Checks whether the given GParamSpec is of type G_TYPE_PARAM_VARIANT.
 ;;; 
@@ -3915,9 +3997,14 @@
 ;;; 	TRUE on success
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_PARAM_SPEC_VARIANT()
 ;;; 
-;;; #define G_PARAM_SPEC_VARIANT(pspec)         (G_TYPE_CHECK_INSTANCE_CAST ((pspec), G_TYPE_PARAM_VARIANT, GParamSpecVariant))
+;;; #define G_PARAM_SPEC_VARIANT(pspec) (G_TYPE_CHECK_INSTANCE_CAST ((pspec),
+;;;                                      G_TYPE_PARAM_VARIANT,
+;;;                                      GParamSpecVariant))
 ;;; 
 ;;; Casts a GParamSpec into a GParamSpecVariant.
 ;;; 
@@ -3925,9 +4012,13 @@
 ;;; 	a GParamSpec
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_VALUE_HOLDS_VARIANT()
 ;;; 
-;;; #define G_VALUE_HOLDS_VARIANT(value)     (G_TYPE_CHECK_VALUE_TYPE ((value), G_TYPE_VARIANT))
+;;; #define G_VALUE_HOLDS_VARIANT(value) (G_TYPE_CHECK_VALUE_TYPE ((value),
+;;;                                       G_TYPE_VARIANT))
 ;;; 
 ;;; Checks whether the given GValue can hold values of type G_TYPE_VARIANT.
 ;;; 
@@ -3938,13 +4029,19 @@
 ;;; 	TRUE on success.
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_PARAM_VARIANT
 ;;; 
-;;; #define G_TYPE_PARAM_VARIANT                (g_param_spec_types[22])
+;;; #define G_TYPE_PARAM_VARIANT (g_param_spec_types[22])
 ;;; 
 ;;; The GType of GParamSpecVariant.
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GParamSpecVariant
 ;;; 
 ;;; struct GParamSpecVariant {
@@ -3953,7 +4050,8 @@
 ;;;   GVariant     *default_value;
 ;;; };
 ;;; 
-;;; A GParamSpec derived structure that contains the meta data for GVariant properties.
+;;; A GParamSpec derived structure that contains the meta data for GVariant
+;;; properties.
 ;;; 
 ;;; GParamSpec parent_instance;
 ;;; 	private GParamSpec portion
@@ -3965,14 +4063,17 @@
 ;;; 	a GVariant, or NULL
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_param_spec_variant ()
 ;;; 
-;;; GParamSpec *        g_param_spec_variant                (const gchar *name,
-;;;                                                          const gchar *nick,
-;;;                                                          const gchar *blurb,
-;;;                                                          const GVariantType *type,
-;;;                                                          GVariant *default_value,
-;;;                                                          GParamFlags flags);
+;;; GParamSpec * g_param_spec_variant (const gchar *name,
+;;;                                    const gchar *nick,
+;;;                                    const gchar *blurb,
+;;;                                    const GVariantType *type,
+;;;                                    GVariant *default_value,
+;;;                                    GParamFlags flags);
 ;;; 
 ;;; Creates a new GParamSpecVariant instance specifying a GVariant property.
 ;;; 
@@ -3993,7 +4094,7 @@
 ;;; 	a GVariantType
 ;;; 
 ;;; default_value :
-;;; 	a GVariant of type type to use as the default value, or NULL. [allow-none]
+;;; 	a GVariant of type type to use as the default value, or NULL.
 ;;; 
 ;;; flags :
 ;;; 	flags for the property specified
@@ -4002,9 +4103,12 @@
 ;;; 	the newly created GParamSpec
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_value_get_variant ()
 ;;; 
-;;; GVariant *          g_value_get_variant                 (const GValue *value);
+;;; GVariant * g_value_get_variant (const GValue *value);
 ;;; 
 ;;; Get the contents of a variant GValue.
 ;;; 
@@ -4015,9 +4119,12 @@
 ;;; 	variant contents of value
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_variant ()
 ;;; 
-;;; GVariant *          g_value_dup_variant                 (const GValue *value);
+;;; GVariant * g_value_dup_variant (const GValue *value);
 ;;; 
 ;;; Get the contents of a variant GValue, increasing its refcount.
 ;;; 
@@ -4025,15 +4132,19 @@
 ;;; 	a valid GValue of type G_TYPE_VARIANT
 ;;; 
 ;;; Returns :
-;;; 	variant contents of value, should be unrefed using g_variant_unref() when no longer needed
+;;; 	variant contents of value, should be unrefed using g_variant_unref()
+;;;     when no longer needed
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_value_set_variant ()
 ;;; 
-;;; void                g_value_set_variant                 (GValue *value,
-;;;                                                          GVariant *variant);
+;;; void g_value_set_variant (GValue *value, GVariant *variant);
 ;;; 
-;;; Set the contents of a variant GValue to variant. If the variant is floating, it is consumed.
+;;; Set the contents of a variant GValue to variant. If the variant is floating,
+;;; it is consumed.
 ;;; 
 ;;; value :
 ;;; 	a valid GValue of type G_TYPE_VARIANT
@@ -4042,16 +4153,23 @@
 ;;; 	a GVariant, or NULL. [allow-none]
 ;;; 
 ;;; Since 2.26
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_value_take_variant ()
 ;;; 
-;;; void                g_value_take_variant                (GValue *value,
-;;;                                                          GVariant *variant);
+;;; void g_value_take_variant (GValue *value, GVariant *variant);
 ;;; 
-;;; Set the contents of a variant GValue to variant, and takes over the ownership of the caller's reference to variant; the caller doesn't have to unref it any more (i.e. the reference count of the variant is not increased).
+;;; Set the contents of a variant GValue to variant, and takes over the
+;;; ownership of the caller's reference to variant; the caller doesn't have to
+;;; unref it any more (i.e. the reference count of the variant is not
+;;; increased).
 ;;; 
-;;; If variant was floating then its floating reference is converted to a hard reference.
+;;; If variant was floating then its floating reference is converted to a hard
+;;; reference.
 ;;; 
-;;; If you want the GValue to hold its own reference to variant, use g_value_set_variant() instead.
+;;; If you want the GValue to hold its own reference to variant, use
+;;; g_value_set_variant() instead.
 ;;; 
 ;;; This is an internal function introduced mainly for C marshallers.
 ;;; 

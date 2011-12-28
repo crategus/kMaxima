@@ -303,17 +303,26 @@
 ;;; 
 ;;; size :
 ;;; 	place to store a stock icon size, or NULL. [out][allow-none][type int]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_image_get_animation ()
 ;;; 
-;;; GdkPixbufAnimation * gtk_image_get_animation            (GtkImage *image);
+;;; GdkPixbufAnimation * gtk_image_get_animation (GtkImage *image);
 ;;; 
-;;; Gets the GdkPixbufAnimation being displayed by the GtkImage. The storage type of the image must be GTK_IMAGE_EMPTY or GTK_IMAGE_ANIMATION (see gtk_image_get_storage_type()). The caller of this function does not own a reference to the returned animation.
+;;; Gets the GdkPixbufAnimation being displayed by the GtkImage. The storage
+;;; type of the image must be GTK_IMAGE_EMPTY or GTK_IMAGE_ANIMATION (see
+;;; gtk_image_get_storage_type()). The caller of this function does not own a
+;;; reference to the returned animation.
 ;;; 
 ;;; image :
 ;;; 	a GtkImage
 ;;; 
 ;;; Returns :
 ;;; 	the displayed animation, or NULL if the image is empty. [transfer none]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_image_get_icon_name ()
 ;;; 
 ;;; void                gtk_image_get_icon_name             (GtkImage *image,
@@ -367,17 +376,27 @@
 ;;; 
 ;;; Returns :
 ;;; 	image representation being used
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_image_new_from_file ()
 ;;; 
-;;; GtkWidget *         gtk_image_new_from_file             (const gchar *filename);
+;;; GtkWidget * gtk_image_new_from_file (const gchar *filename);
 ;;; 
-;;; Creates a new GtkImage displaying the file filename. If the file isn't found or can't be loaded, the resulting GtkImage will display a "broken image" icon. This function never returns NULL, it always returns a valid GtkImage widget.
+;;; Creates a new GtkImage displaying the file filename. If the file isn't
+;;; found or can't be loaded, the resulting GtkImage will display a "broken
+;;; image" icon. This function never returns NULL, it always returns a valid
+;;; GtkImage widget.
 ;;; 
 ;;; If the file contains an animation, the image will contain an animation.
 ;;; 
-;;; If you need to detect failures to load the file, use gdk_pixbuf_new_from_file() to load the file yourself, then create the GtkImage from the pixbuf. (Or for animations, use gdk_pixbuf_animation_new_from_file()).
+;;; If you need to detect failures to load the file, use
+;;; gdk_pixbuf_new_from_file() to load the file yourself, then create the
+;;; GtkImage from the pixbuf. (Or for animations,
+;;; use gdk_pixbuf_animation_new_from_file()).
 ;;; 
-;;; The storage type (gtk_image_get_storage_type()) of the returned image is not defined, it will be whatever is appropriate for displaying the file.
+;;; The storage type (gtk_image_get_storage_type()) of the returned image is
+;;; not defined, it will be whatever is appropriate for displaying the file.
 ;;; 
 ;;; filename :
 ;;; 	a filename. [type filename]
@@ -386,15 +405,28 @@
 ;;; 	a new GtkImage
 ;;; ----------------------------------------------------------------------------
 
+(defcfun ("gtk_image_new_from_file" image-new-from-file) (g-object widget)
+  (filename :string))
+
+(export 'image-new-from-file)
+
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_image_new_from_icon_set ()
 ;;; 
-;;; GtkWidget *         gtk_image_new_from_icon_set         (GtkIconSet *icon_set,
-;;;                                                          GtkIconSize size);
+;;; GtkWidget * gtk_image_new_from_icon_set (GtkIconSet *icon_set,
+;;;                                          GtkIconSize size);
 ;;; 
-;;; Creates a GtkImage displaying an icon set. Sample stock sizes are GTK_ICON_SIZE_MENU, GTK_ICON_SIZE_SMALL_TOOLBAR. Instead of using this function, usually it's better to create a GtkIconFactory, put your icon sets in the icon factory, add the icon factory to the list of default factories with gtk_icon_factory_add_default(), and then use gtk_image_new_from_stock(). This will allow themes to override the icon you ship with your application.
+;;; Creates a GtkImage displaying an icon set. Sample stock sizes are
+;;; GTK_ICON_SIZE_MENU, GTK_ICON_SIZE_SMALL_TOOLBAR. Instead of using this
+;;; function, usually it's better to create a GtkIconFactory, put your icon
+;;; sets in the icon factory, add the icon factory to the list of default
+;;; factories with gtk_icon_factory_add_default(), and then use
+;;; gtk_image_new_from_stock(). This will allow themes to override the icon you
+;;; ship with your application.
 ;;; 
-;;; The GtkImage does not assume a reference to the icon set; you still need to unref it if you own references. GtkImage will add its own reference rather than adopting yours.
+;;; The GtkImage does not assume a reference to the icon set; you still need to
+;;; unref it if you own references. GtkImage will add its own reference rather
+;;; than adopting yours.
 ;;; 
 ;;; icon_set :
 ;;; 	a GtkIconSet
