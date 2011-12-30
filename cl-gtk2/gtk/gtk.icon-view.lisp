@@ -97,7 +97,7 @@
 
 (export 'icon-view-path-selected-p)
 
-(defcfun (icon-view-selected-items "gtk_icon_view_get_selected_items") (glist (g-boxed-foreign tree-path) :free-from-foreign t)
+(defcfun (icon-view-selected-items "gtk_icon_view_get_selected_items") (g-list (g-boxed-foreign tree-path) :free-from-foreign t)
   (icon-view g-object))
 
 (export 'icon-view-selected-items)

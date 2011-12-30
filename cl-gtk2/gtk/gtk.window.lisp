@@ -1433,11 +1433,11 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (gtk-window-default-icon-list "gtk_window_get_default_icon_list")
-  (glist (g-object pixbuf)))
+  (g-list (g-object pixbuf)))
 
 (defcfun (set-default-window-icon-list "gtk_window_set_default_icon_list")
     :boolean
-  (icon-list (glist (g-object pixbuf))))
+  (icon-list (g-list (g-object pixbuf))))
 
 (defun (setf gkt-window-default-icon-list) (icon-list)
   (set-default-window-icon-list icon-list)
@@ -2709,7 +2709,8 @@
 
 (export 'gtk-window-set-geometry-hints)
 
-(defcfun (gtk-window-list-toplevels "gtk_window_list_toplevels") (glist (g-object gtk-window) :free-from-foreign t))
+(defcfun (gtk-window-list-toplevels "gtk_window_list_toplevels")
+    (g-list (g-object gtk-window) :free-from-foreign t))
 
 (export 'gtk-window-list-toplevels)
 

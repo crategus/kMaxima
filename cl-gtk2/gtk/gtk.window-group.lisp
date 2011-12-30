@@ -149,7 +149,8 @@
 ;;; Since 2.14
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (gtk-window-group-list-windows "gtk_window_group_list_windows") (glist gtk-window)
+(defcfun (gtk-window-group-list-windows "gtk_window_group_list_windows")
+    (g-list gtk-window)
   (window-group (g-object window-group)))
 
 (export 'gtk-window-group-list-windows)

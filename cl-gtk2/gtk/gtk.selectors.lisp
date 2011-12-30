@@ -68,7 +68,7 @@
 (export 'file-chooser-unselect-all)
 
 (defcfun (file-chooser-filenames #+win32 "gtk_file_chooser_get_filenames_utf8"
-                                 #-win32 "gtk_file_chooser_get_filenames") (gslist (g-string :free-from-foreign t))
+                                 #-win32 "gtk_file_chooser_get_filenames") (g-slist (g-string :free-from-foreign t))
   (file-chooser g-object))
 
 (export 'file-chooser-filenames)
@@ -85,7 +85,7 @@
 
 (export 'file-chooser-unselect-uri)
 
-(defcfun (file-chooser-uris "gtk_file_chooser_get_uris") (gslist (g-string :free-from-foreign t) :free-from-foreign t)
+(defcfun (file-chooser-uris "gtk_file_chooser_get_uris") (g-slist (g-string :free-from-foreign t) :free-from-foreign t)
   (file-chooser g-object))
 
 (export 'file-chooser-uris)
@@ -102,7 +102,7 @@
 
 (export 'file-chooser-remove-filter)
 
-(defcfun (file-chooser-filters "gtk_file_chooser_list_filters") (glist (g-string :free-from-foreign t) :free-from-foreign t)
+(defcfun (file-chooser-filters "gtk_file_chooser_list_filters") (g-list (g-string :free-from-foreign t) :free-from-foreign t)
   (chooser (g-object file-chooser)))
 
 (export 'file-chooser-filters)
@@ -130,7 +130,7 @@
 (export 'file-chooser-remove-shortcut-folder)
 
 (defcfun (file-chooser-shortcut-folders #+win32 "gtk_file_chooser_list_shortcut_folders_utf8"
-                                        #-win32 "gtk_file_chooser_list_shortcut_folders") (gslist (g-string :free-from-foreign t))
+                                        #-win32 "gtk_file_chooser_list_shortcut_folders") (g-slist (g-string :free-from-foreign t))
   (file-chooser g-object))
 
 (export 'file-chooser-shortcut-folders)
@@ -155,7 +155,7 @@
 
 (export 'file-chooser-remove-shortcut-folder-uri)
 
-(defcfun (file-chooser-shortcut-folder-uris "gtk_file_chooser_list_shortcut_folder_uris") (gslist (g-string :free-from-foreign t))
+(defcfun (file-chooser-shortcut-folder-uris "gtk_file_chooser_list_shortcut_folder_uris") (g-slist (g-string :free-from-foreign t))
   (file-chooser g-object))
 
 (export 'file-chooser-shortcut-folder-uris)

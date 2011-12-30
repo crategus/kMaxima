@@ -982,7 +982,7 @@
 
 (export 'map-container-internal-children)
 
-(defcfun (container-children "gtk_container_get_children") (glist g-object :free-from-foreign t)
+(defcfun (container-children "gtk_container_get_children") (g-list g-object :free-from-foreign t)
   (container g-object))
 
 (export 'container-children)

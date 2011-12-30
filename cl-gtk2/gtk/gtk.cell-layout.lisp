@@ -22,7 +22,7 @@
 
 (export 'cell-layout-pack-end)
 
-(defcfun (cell-layout-cells "gtk_cell_layout_get_cells") (glist g-object :free-from-foreign t)
+(defcfun (cell-layout-cells "gtk_cell_layout_get_cells") (g-list g-object :free-from-foreign t)
   (cell-layout g-object))
 
 (export 'cell-layout-cells)

@@ -30,7 +30,7 @@
 
 (export 'tree-view-get-column)
 
-(defcfun (tree-view-columns "gtk_tree_view_get_columns") (glist g-object)
+(defcfun (tree-view-columns "gtk_tree_view_get_columns") (g-list g-object)
   (tree-view g-object))
 
 (export 'tree-view-columns)

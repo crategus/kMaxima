@@ -1454,7 +1454,7 @@
                          :int "gtk_tree_view_column_get_sort_column_id"
                          "gtk_tree_view_column_set_sort_column_id")
                         (:cffi cell-renderers tree-view-column-cell-renderers
-                         (glist g-object :free-from-foreign t)
+                         (g-list g-object :free-from-foreign t)
                          "gtk_tree_view_column_get_cell_renderers" nil)))
 
 (define-g-object-class "GtkWidget" widget
@@ -1570,7 +1570,7 @@
                          "gtk_cell_view_get_displayed_row"
                          "gtk_cell_view_set_displayed_row")
                         (:cffi cell-renderers cell-view-cell-renderers
-                         (glist (g-object cell-renderer) :free-from-foreign t)
+                         (g-list (g-object cell-renderer) :free-from-foreign t)
                          "gtk_cell_view_get_cell_renderers" nil)))
 
 (define-g-object-class "GtkContainer" container
@@ -1691,7 +1691,7 @@
                         ("AtkImplementorIface" "GtkActivatable" "GtkBuildable")
                         :type-initializer "gtk_radio_button_get_type")
                        ((:cffi group radio-button-group
-                         (gslist g-object :free-from-foreign nil
+                         (g-slist g-object :free-from-foreign nil
                           :free-to-foreign nil)
                          "gtk_radio_button_get_group" "gtk_radio_button_set_group")))
 
@@ -3340,7 +3340,7 @@
                        (:superclass g-object :export t :interfaces nil
                         :type-initializer "gtk_window_group_get_type")
                        ((:cffi windows window-group-windows
-                         (glist (g-object gtk-window))
+                         (g-list (g-object gtk-window))
                          "gtk_window_group_list_windows" nil)))
 
 (define-g-object-class "GtkToggleAction" toggle-action

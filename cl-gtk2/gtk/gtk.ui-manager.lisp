@@ -13,7 +13,7 @@
 
 (export 'ui-manager-remove-action-group)
 
-(defcfun (ui-manager-action-groups "gtk_ui_manager_get_action_groups") (glist g-object :free-from-foreign nil)
+(defcfun (ui-manager-action-groups "gtk_ui_manager_get_action_groups") (g-list g-object :free-from-foreign nil)
   (ui-manager g-object))
 
 (export 'ui-manager-action-groups)
@@ -24,7 +24,7 @@
 
 (export 'ui-manager-widget)
 
-(defcfun (ui-manager-toplevels "gtk_ui_manager_get_toplevels") (gslist g-object :free-from-foreign t)
+(defcfun (ui-manager-toplevels "gtk_ui_manager_get_toplevels") (g-slist g-object :free-from-foreign t)
   (ui-manager g-object)
   (types ui-manager-item-type))
 
@@ -39,7 +39,7 @@
 (defcfun gtk-ui-manager-add-ui-from-string :uint
   (ui-manager g-object)
   (buffer :string)
-  (length gssize)
+  (length g-ssize)
   (error :pointer))
 
 (defun ui-manager-add-ui-from-string (ui-manager string)
@@ -92,7 +92,7 @@
 
 (export 'action-group-action)
 
-(defcfun (action-group-actions "gtk_action_group_list_actions") (glist g-object :free-from-foreign t)
+(defcfun (action-group-actions "gtk_action_group_list_actions") (g-list g-object :free-from-foreign t)
   (action-group g-object))
 
 (export 'action-group-actions)
@@ -185,7 +185,7 @@
 
 (export 'action-disconnect-proxy)
 
-(defcfun (action-proxies "gtk_action_get_proxies") (gslist g-object :free-from-foreign nil)
+(defcfun (action-proxies "gtk_action_get_proxies") (g-slist g-object :free-from-foreign nil)
   (action g-object))
 
 (export 'action-proxies)
@@ -222,7 +222,7 @@
 
 (export 'action-unblock-activate-from)
 
-(defcfun (radio-action-get-group "gtk_radio_action_get_group") (gslist (g-object radio-action) :free-from-foreign nil)
+(defcfun (radio-action-get-group "gtk_radio_action_get_group") (g-slist (g-object radio-action) :free-from-foreign nil)
   (action (g-object radio-action)))
 
 (export 'radio-action-get-group)

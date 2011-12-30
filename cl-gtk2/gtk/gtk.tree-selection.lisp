@@ -55,7 +55,8 @@
 
 (export 'map-tree-selection-rows)
 
-(defcfun gtk-tree-selection-get-selected-rows (glist (g-boxed-foreign tree-path) :free-from-foreign t)
+(defcfun gtk-tree-selection-get-selected-rows
+    (g-list (g-boxed-foreign tree-path) :free-from-foreign t)
   (selection g-object)
   (model :pointer))
 

@@ -4685,7 +4685,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcfun (widget-mnemonic-labels "gtk_widget_list_mnemonic_labels")
-         (glist (g-object widget) :free-from-foreign t)
+         (g-list (g-object widget) :free-from-foreign t)
   (widget (g-object widget)))
 
 (export 'widget-mnemonic-labels)

@@ -26,9 +26,9 @@
 (define-boxed-opaque-accessor text-iter text-iter-visible-line-offset :reader "gtk_text_iter_get_visible_line_offset" :writer "gtk_text_iter_set_visible_line_offset" :type :int)
 (define-boxed-opaque-accessor text-iter text-iter-char :reader "gtk_text_iter_get_char" :type unichar)
 (define-boxed-opaque-accessor text-iter text-iter-pixbuf :reader "gtk_text_iter_get_pixbuf" :type (g-object pixbuf))
-(define-boxed-opaque-accessor text-iter text-iter-marks :reader "gtk_text_iter_get_marks" :type (gslist (g-object text-mark) :free-from-foreign t))
+(define-boxed-opaque-accessor text-iter text-iter-marks :reader "gtk_text_iter_get_marks" :type (g-slist (g-object text-mark) :free-from-foreign t))
 (define-boxed-opaque-accessor text-iter text-iter-child-anchor :reader "gtk_text_iter_get_child_anchor" :type (g-object text-child-anchor))
-(define-boxed-opaque-accessor text-iter text-iter-tags :reader "gtk_text_iter_get_tags" :type (gslist (g-object text-tag) :free-from-foreign t))
+(define-boxed-opaque-accessor text-iter text-iter-tags :reader "gtk_text_iter_get_tags" :type (g-slist (g-object text-tag) :free-from-foreign t))
 (define-boxed-opaque-accessor text-iter text-iter-chars-in-line :reader "gtk_text_iter_get_chars_in_line" :type :int)
 (define-boxed-opaque-accessor text-iter text-iter-language :reader "gtk_text_iter_get_language" :type :pointer)
 (define-boxed-opaque-accessor text-iter text-iter-is-end :reader "gtk_text_iter_is_end" :type :boolean)
@@ -103,7 +103,8 @@
 
 (export 'text-iter-visible-text)
 
-(defcfun (text-iter-toggled-tags "gtk_text_iter_get_toggled_tags") (gslist (g-object text-tag))
+(defcfun (text-iter-toggled-tags "gtk_text_iter_get_toggled_tags")
+    (g-slist (g-object text-tag))
   (iter (g-boxed-foreign text-iter))
   (toggled-on :boolean))
 
@@ -759,7 +760,7 @@
   (format gdk-atom-as-string)
   (iter (g-boxed-foreign text-iter))
   (data :pointer)
-  (length gsize)
+  (length g-size)
   (error :pointer))
 
 (defun text-buffer-deserialize (register-buffer content-buffer format iter data)
@@ -819,7 +820,7 @@
      (content-buffer (g-object text-buffer))
      (iter (g-boxed-foreign text-iter))
      (data :pointer)
-     (length gsize)
+     (length g-size)
      (create-tags :boolean)
      (user-data :pointer)
      (error :pointer))
@@ -863,13 +864,13 @@
      (content-buffer (g-object text-buffer))
      (start-iter (g-boxed-foreign text-iter))
      (end-iter (g-boxed-foreign text-iter))
-     (length (:pointer gsize))
+     (length (:pointer g-size))
      (user-data :pointer))
   (let ((fn (stable-pointer-value user-data)))
     (restart-case
         (let* ((bytes (funcall fn register-buffer content-buffer start-iter end-iter))
                (bytes-ptr (g-malloc (length bytes))))
-          (setf (mem-ref length 'gsize) (length bytes))
+          (setf (mem-ref length 'g-size) (length bytes))
           (iter (for i from 0 below (length bytes))
                 (setf (mem-aref bytes-ptr :uint8 i) (aref bytes i)))
           bytes-ptr)
@@ -902,12 +903,12 @@
   (format gdk-atom-as-string)
   (start (g-boxed-foreign text-iter))
   (end (g-boxed-foreign text-iter))
-  (length (:pointer gsize)))
+  (length (:pointer g-size)))
 
 (defun text-buffer-serialize (register-buffer content-buffer format start end)
-  (with-foreign-object (length 'gsize)
+  (with-foreign-object (length 'g-size)
     (let ((bytes (gtk-text-buffer-serialize register-buffer content-buffer format start end length)))
-      (iter (for i from 0 to (mem-ref length 'gsize))
+      (iter (for i from 0 to (mem-ref length 'g-size))
             (for byte = (mem-aref bytes :uint8 i))
             (collect byte result-type vector)
             (finally (g-free bytes))))))
@@ -1195,7 +1196,8 @@
 
 (export 'text-view-add-child-at-anchor)
 
-(defcfun (text-child-anchor-widgets "gtk_text_child_anchor_get_widgets") (glist (g-object widget) :free-from-foreign t)
+(defcfun (text-child-anchor-widgets "gtk_text_child_anchor_get_widgets")
+    (g-list (g-object widget) :free-from-foreign t)
   (anchor (g-object text-child-anchor)))
 
 (export 'text-child-anchor-widgets)

@@ -67,7 +67,7 @@
 
 ; TODO: gtk_menu_get_attach_to_widget
 
-(defcfun (menu-attached-to-widget "gtk_menu_get_for_attach_widget") (glist (g-object menu) :free-from-foreign nil)
+(defcfun (menu-attached-to-widget "gtk_menu_get_for_attach_widget") (g-list (g-object menu) :free-from-foreign nil)
   (width (g-object widget)))
 
 (export 'menu-attached-to-widget)
@@ -196,5 +196,5 @@
 (export 'tool-item-rebuild-menu)
 
 (defcfun (radio-tool-button-get-group "gtk_radio_tool_button_get_group")
-    (gslist (g-object radio-tool-button) :free-from-foreign nil)
+    (g-slist (g-object radio-tool-button) :free-from-foreign nil)
   (button (g-object radio-tool-button)))
