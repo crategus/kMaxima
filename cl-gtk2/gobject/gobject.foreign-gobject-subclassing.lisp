@@ -35,34 +35,151 @@
       (1- (ash 1 (* 8 (foreign-type-size type))))))
 
 (defun property->param-spec (property)
-  (destructuring-bind (property-name property-type accessor property-get-fn property-set-fn) property
+  (destructuring-bind (property-name
+                       property-type
+                       accessor
+                       property-get-fn
+                       property-set-fn)
+      property
     (declare (ignore accessor))
     (let ((property-g-type (gtype property-type))
           (flags (append (when property-get-fn (list :readable))
                          (when property-set-fn (list :writable)))))
       (ev-case (g-type-fundamental property-g-type)
-        ((gtype +g-type-invalid+) (error "GValue is of invalid type ~A (~A)" property-g-type (gtype-name property-g-type)))
+        ((gtype +g-type-invalid+)
+         (error "GValue is of invalid type ~A (~A)"
+                property-g-type (gtype-name property-g-type)))
         ((gtype +g-type-void+) nil)
-        ((gtype +g-type-char+) (g-param-spec-char property-name property-name property-name (minimum-foreign-integer :char) (maximum-foreign-integer :char) 0 flags))
-        ((gtype +g-type-uchar+) (g-param-spec-uchar property-name property-name property-name (minimum-foreign-integer :uchar nil) (maximum-foreign-integer :uchar nil) 0 flags))
-        ((gtype +g-type-boolean+) (g-param-spec-boolean property-name property-name property-name nil flags))
-        ((gtype +g-type-int+) (g-param-spec-int property-name property-name property-name (minimum-foreign-integer :int) (maximum-foreign-integer :int) 0 flags))
-        ((gtype +g-type-uint+) (g-param-spec-uint property-name property-name property-name (minimum-foreign-integer :uint nil) (maximum-foreign-integer :uint nil) 0 flags))
-        ((gtype +g-type-long+) (g-param-spec-long property-name property-name property-name (minimum-foreign-integer :long) (maximum-foreign-integer :long) 0 flags))
-        ((gtype +g-type-ulong+) (g-param-spec-ulong property-name property-name property-name (minimum-foreign-integer :ulong nil) (maximum-foreign-integer :ulong nil) 0 flags))
-        ((gtype +g-type-int64+) (g-param-spec-int64 property-name property-name property-name (minimum-foreign-integer :int64) (maximum-foreign-integer :int64) 0 flags))
-        ((gtype +g-type-uint64+) (g-param-spec-uint64 property-name property-name property-name (minimum-foreign-integer :uint64 nil) (maximum-foreign-integer :uint64 t) 0 flags))
-        ((gtype +g-type-enum+) (g-param-spec-enum property-name property-name property-name property-g-type (enum-item-value (first (get-enum-items property-g-type))) flags))
-        ((gtype +g-type-flags+) (g-param-spec-enum property-name property-name property-name property-g-type (flags-item-value (first (get-flags-items property-g-type))) flags))
-        ((gtype +g-type-float+) (g-param-spec-float property-name property-name property-name most-negative-single-float most-positive-single-float 0.0 flags))
-        ((gtype +g-type-double+) (g-param-spec-double property-name property-name property-name most-negative-double-float most-positive-double-float 0.0d0 flags))
-        ((gtype +g-type-string+) (g-param-spec-string property-name property-name property-name "" flags))
-        ((gtype +g-type-pointer+) (g-param-spec-pointer property-name property-name property-name flags))
-        ((gtype +g-type-boxed+) (g-param-spec-boxed property-name property-name property-name property-g-type flags))
-                                        ;(+g-type-param+ (parse-g-value-param gvalue))
-        ((gtype +g-type-object+) (g-param-spec-object property-name property-name property-name property-g-type flags))
-                                        ;(+g-type-interface+ )
-        (t (error "Unknown type: ~A (~A)" property-g-type (gtype-name property-g-type)))))))
+        ((gtype +g-type-char+)
+         (g-param-spec-char property-name
+                            property-name
+                            property-name
+                            (minimum-foreign-integer :char)
+                            (maximum-foreign-integer :char)
+                            0
+                            flags))
+        ((gtype +g-type-uchar+)
+         (g-param-spec-uchar property-name
+                             property-name
+                             property-name
+                             (minimum-foreign-integer :uchar nil)
+                             (maximum-foreign-integer :uchar nil)
+                             0
+                             flags))
+        ((gtype +g-type-boolean+)
+         (g-param-spec-boolean property-name
+                               property-name
+                               property-name
+                               nil
+                               flags))
+        ((gtype +g-type-int+)
+         (g-param-spec-int property-name
+                           property-name
+                           property-name
+                           (minimum-foreign-integer :int)
+                           (maximum-foreign-integer :int)
+                           0
+                           flags))
+        ((gtype +g-type-uint+)
+         (g-param-spec-uint property-name
+                            property-name
+                            property-name
+                            (minimum-foreign-integer :uint nil)
+                            (maximum-foreign-integer :uint nil)
+                            0
+                            flags))
+        ((gtype +g-type-long+)
+         (g-param-spec-long property-name
+                            property-name
+                            property-name
+                            (minimum-foreign-integer :long)
+                            (maximum-foreign-integer :long)
+                            0
+                            flags))
+        ((gtype +g-type-ulong+)
+         (g-param-spec-ulong property-name
+                             property-name
+                             property-name
+                             (minimum-foreign-integer :ulong nil)
+                             (maximum-foreign-integer :ulong nil)
+                             0
+                             flags))
+        ((gtype +g-type-int64+)
+         (g-param-spec-int64 property-name
+                             property-name
+                             property-name
+                             (minimum-foreign-integer :int64)
+                             (maximum-foreign-integer :int64)
+                             0
+                             flags))
+        ((gtype +g-type-uint64+)
+         (g-param-spec-uint64 property-name
+                              property-name
+                              property-name
+                              (minimum-foreign-integer :uint64 nil)
+                              (maximum-foreign-integer :uint64 t)
+                              0
+                              flags))
+        ((gtype +g-type-enum+)
+         (g-param-spec-enum property-name
+                            property-name
+                            property-name
+                            property-g-type
+                            (enum-item-value
+                              (first (get-enum-items property-g-type)))
+                            flags))
+        ((gtype +g-type-flags+)
+         (g-param-spec-enum property-name
+                            property-name
+                            property-name
+                            property-g-type
+                            (flags-item-value
+                              (first (get-flags-items property-g-type)))
+                            flags))
+        ((gtype +g-type-float+)
+         (g-param-spec-float property-name
+                             property-name
+                             property-name
+                             most-negative-single-float
+                             most-positive-single-float
+                             0.0
+                             flags))
+        ((gtype +g-type-double+)
+         (g-param-spec-double property-name
+                              property-name
+                              property-name
+                              most-negative-double-float
+                              most-positive-double-float
+                              0.0d0
+                              flags))
+        ((gtype +g-type-string+)
+         (g-param-spec-string property-name
+                              property-name
+                              property-name
+                              ""
+                              flags))
+        ((gtype +g-type-pointer+)
+         (g-param-spec-pointer property-name
+                               property-name
+                               property-name
+                               flags))
+        ((gtype +g-type-boxed+)
+         (g-param-spec-boxed property-name
+                             property-name
+                             property-name
+                             property-g-type
+                             flags))
+;       (+g-type-param+ (parse-g-value-param gvalue))
+        ((gtype +g-type-object+)
+         (g-param-spec-object property-name
+                              property-name
+                              property-name
+                              property-g-type
+                              flags))
+;       (+g-type-interface+ )
+        (t
+         (error "Unknown type: ~A (~A)"
+                property-g-type (gtype-name property-g-type)))))))
 
 (defun install-properties (class)
   (let* ((name (gtype-name (foreign-slot-value class 'g-type-class :type)))

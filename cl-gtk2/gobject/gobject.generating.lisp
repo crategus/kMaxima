@@ -1,14 +1,12 @@
 (in-package :gobject)
 
-(defvar *lisp-name-package* nil
-  "For internal use (used by class definitions generator).
-  Specifies the package in which symbols are interned.")
+
 (defvar *strip-prefix* "")
 (defvar *lisp-name-exceptions* nil)
 (defvar *generation-exclusions* nil)
 (defvar *known-interfaces* (make-hash-table :test 'equal))
 (defvar *additional-properties* nil)
-(defvar *generated-types* nil)
+
 
 (defun name->supplied-p (name)
   (make-symbol (format nil "~A-SUPPLIED-P" (symbol-name name))))
@@ -375,55 +373,7 @@
      (equal (g-type-fundamental (gtype type)) fund-type))
    types))
 
-(defmacro define-g-enum (g-name name (&key (export t) type-initializer) &body values)
-  "Defines a GEnum type for enumeration. Generates corresponding CFFI definition.
 
-Example:
-@begin{pre}
-\(define-g-enum \"GdkGrabStatus\" grab-status () :success :already-grabbed :invalid-time :not-viewable :frozen)
-\(define-g-enum \"GdkExtensionMode\" gdk-extension-mode (:export t :type-initializer \"gdk_extension_mode_get_type\")
-  (:none 0) (:all 1) (:cursor 2))
-@end{pre}
-@arg[g-name]{a string. Specifies the GEnum name}
-@arg[name]{a symbol. Names the enumeration type.}
-@arg[export]{a boolean. If true, @code{name} will be exported.}
-@arg[type-initializer]{a @code{NIL} or a string or a function designator.
-
-If non-@code{NIL}, specifies the function that initializes the type: string specifies a C function that returns the GType value and function designator specifies the Lisp function.}
-@arg[values]{values for enum. Each value is a keyword or a list @code{(keyword integer-value)}. @code{keyword} corresponds to Lisp value of enumeration, and @code{integer-value} is an C integer for enumeration item. If @code{integer-value} is not specified, it is generated automatically (see CFFI manual)}"
-  `(progn
-     (defcenum ,name ,@values)
-     (register-enum-type ,g-name ',name)
-     ,@(when export
-             (list `(export ',name (find-package ,(package-name (symbol-package name))))))
-     ,@(when type-initializer
-             (list `(at-init () ,(type-initializer-call type-initializer))))))
-
-(defun enum-value->definition (enum-value)
-  (let ((value-name (intern (lispify-name (enum-item-nick enum-value))
-                            (find-package :keyword)))
-        (numeric-value (enum-item-value enum-value)))
-    `(,value-name ,numeric-value)))
-
-(defun get-g-enum-definition (type &optional lisp-name-package)
-  (when (and (stringp type) (null (gtype type)))
-    (let ((type-init-name (probable-type-init-name type)))
-      (when (foreign-symbol-pointer type-init-name)
-        (foreign-funcall-pointer (foreign-symbol-pointer type-init-name) () :int))))
-  (when *generated-types*
-    (setf (gethash (gtype-name (gtype type)) *generated-types*) t))
-  (let* ((*lisp-name-package* (or lisp-name-package *lisp-name-package* *package*))
-         (g-type (gtype type))
-         (g-name (gtype-name g-type))
-         (name (g-name->name g-name))
-         (items (get-enum-items g-type))
-         (probable-type-initializer (probable-type-init-name g-name)))
-    `(define-g-enum ,g-name ,name
-         (:export t
-                  ,@(when (foreign-symbol-pointer probable-type-initializer)
-                          (list :type-initializer
-                                probable-type-initializer)))
-       ,@(mapcar #'enum-value->definition items))))
 
 (defmacro define-g-flags (g-name name (&key (export t) type-initializer) &body values)
   "Defines a GFlags type for enumeration that can combine its values. Generates corresponding CFFI definition. Values of this type are lists of keywords that are combined.

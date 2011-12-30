@@ -1033,7 +1033,7 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
-;;; g_signal_emitv ()
+;;; g-signal-emitv (instance-and-params signal-id detail return-value)
 ;;; 
 ;;; void g_signal_emitv (const GValue *instance_and_params,
 ;;;                      guint signal_id,
@@ -1045,22 +1045,22 @@
 ;;; Note that g_signal_emitv() doesn't change return_value if no handlers are
 ;;; connected, in contrast to g_signal_emit() and g_signal_emit_valist().
 ;;; 
-;;; instance_and_params :
+;;; instance-and-params :
 ;;; 	argument list for the signal emission. The first element in the array
 ;;;     is a GValue for the instance the signal is being emitted on. The rest
 ;;;     are any arguments to be passed to the signal. [array]
 ;;; 
-;;; signal_id :
+;;; signal-id :
 ;;; 	the signal id
 ;;; 
 ;;; detail :
 ;;; 	the detail
 ;;; 
-;;; return_value :
+;;; return-value :
 ;;; 	Location to store the return value of the signal emission.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun ("g-signal-emitv" g-signal-emitv) :void
+(defcfun ("g_signal_emitv" g-signal-emitv) :void
   (instance-and-params (:pointer g-value))
   (signal-id :uint)
   (detail g-quark)

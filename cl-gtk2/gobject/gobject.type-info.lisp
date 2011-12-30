@@ -1,10 +1,16 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gobject.type-info.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; The documentation has been copied from the GObject 2.30.2 Reference Manual
+;;; See http://www.gtk.org
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; The documentation has been copied from the GObject 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
@@ -287,7 +293,7 @@
 
 ;;; ----------------------------------------------------------------------------
 
-(defctype g-type gsize)
+(defctype g-type g-size)
 
 (defstruct gtype name %id)
 
@@ -431,8 +437,11 @@
 ;;; Checks if type is derived (or in object-oriented terminology: inherited)
 ;;; from another type (this holds true for all non-fundamental types).
 ;;;
-;;; type    : A GType value.
-;;; Returns : TRUE on success.
+;;; type :
+;;;     A GType value.
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -442,8 +451,11 @@
 ;;;
 ;;; Checks if type is a fundamental type.
 ;;;
-;;; type    : A GType value.
-;;; Returns : TRUE on success.
+;;; type :
+;;;     A GType value.
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -460,9 +472,12 @@
 ;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun ("g_type_check_is_value_type" g-type-is-value-type) g-type-designator
+(defcfun ("g_type_check_is_value_type" g-type-check-is-value-type) :boolean
   (type g-type-designator))
 
+(defun g-type-is-value-type (type)
+  (g-type-check-is-value-type type))
+  
 (export 'g-type-is-value-type)
 
 ;;; ----------------------------------------------------------------------------
@@ -1167,23 +1182,31 @@
 ;;;
 ;;; This macro should only be used in type implementations.
 ;;;
-;;; value   : a GValue
-;;; Returns : TRUE on success.
+;;; value :
+;;;     a GValue
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_TYPE_CHECK_VALUE_TYPE()
 ;;;
-;;; #define G_TYPE_CHECK_VALUE_TYPE(value, g_type)
-;;;         (_G_TYPE_CVH ((value), (g_type)))
+;;; #define G_TYPE_CHECK_VALUE_TYPE(value, g_type) (_G_TYPE_CVH ((value),
+;;;                                                 (g_type)))
 ;;;
 ;;; Checks if value has been initialized to hold values of type g_type.
 ;;;
 ;;; This macro should only be used in type implementations.
 ;;;
-;;; value   : a GValue
-;;; g_type  : The type to be checked.
-;;; Returns : TRUE on success.
+;;; value :
+;;;     a GValue
+;;;
+;;; g_type :
+;;;     The type to be checked.
+;;;
+;;; Returns :
+;;;     TRUE on success.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -1600,7 +1623,7 @@
 
 (defcfun ("g_type_class_add_private" g-type-class-add-private) :void
   (class (:pointer g-type-class))
-  (private-size gsize))
+  (private-size g-size))
     
 (export 'g-type-class-add-private)
 

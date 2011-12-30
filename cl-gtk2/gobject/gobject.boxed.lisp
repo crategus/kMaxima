@@ -650,13 +650,13 @@
 (defmethod parse-g-value-for-type (gvalue-ptr (type-numeric (eql (gtype +g-type-boxed+))) parse-kind)
   (declare (ignore parse-kind))
   (if (g-type= (g-value-type gvalue-ptr) (g-strv-get-type))
-      (convert-from-foreign (g-value-get-boxed gvalue-ptr) '(glib:gstrv :free-from-foreign nil))
+      (convert-from-foreign (g-value-get-boxed gvalue-ptr) '(glib:g-strv :free-from-foreign nil))
       (let ((boxed-type (get-g-boxed-foreign-info-for-gtype (g-value-type gvalue-ptr))))
         (boxed-parse-g-value gvalue-ptr boxed-type))))
 
 (defmethod set-gvalue-for-type (gvalue-ptr (type-numeric (eql (gtype +g-type-boxed+))) value)
   (if (g-type= (g-value-type gvalue-ptr) (g-strv-get-type))
-      (g-value-set-boxed gvalue-ptr (convert-to-foreign value '(glib:gstrv :free-from-foreign nil)))
+      (g-value-set-boxed gvalue-ptr (convert-to-foreign value '(glib:g-strv :free-from-foreign nil)))
       (let ((boxed-type (get-g-boxed-foreign-info-for-gtype (g-value-type gvalue-ptr))))
         (boxed-set-g-value gvalue-ptr boxed-type value))))
 
@@ -1066,12 +1066,3 @@
 ;;; 
 ;;; Since 2.30
 ;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
-;;; GStrv
-;;; 
-;;; typedef gchar** GStrv;
-;;; 
-;;; A C representable type name for G_TYPE_STRV.
-;;; ----------------------------------------------------------------------------
-

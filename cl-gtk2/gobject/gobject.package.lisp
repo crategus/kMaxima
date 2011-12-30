@@ -72,6 +72,7 @@
            #:*lisp-name-package*
            #:define-g-flags
            #:fixed-array
+           #:g-boxed-foreign
            #:g-boxed-inline
            #:g-boxed-ptr
            #:define-g-interface
@@ -171,20 +172,3 @@
            #:get-g-type-definition)
   (:documentation
    "CL-GTK2-GOBJECT is a binding to GObject type system."))
-
-(in-package :gobject)
-
-(defvar *gobject-debug* nil)
-
-(defvar *debug-gc* nil)
-(defvar *debug-subclass* nil)
-
-(defvar *debug-stream* t)
-
-(defmacro log-for (categories control-string &rest args)
-  (let ((vars (iter (for sym in (if (listp categories) categories (list categories)))
-                    (collect (intern (format nil "*DEBUG-~A*" (symbol-name sym)) (find-package :gobject))))))
-    `(progn
-       (when (or ,@vars)
-         (format *debug-stream* ,control-string ,@args))
-       nil)))

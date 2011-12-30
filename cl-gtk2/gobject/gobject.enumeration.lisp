@@ -25,15 +25,13 @@
 ;;; ----------------------------------------------------------------------------
 ;;;
 ;;; Enumeration and Flag Types
-;;; 
-;;; Enumeration and flags types
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; struct              g-enum-value
-;;; struct              g-flags-value
-;;; struct              g-enum-class
-;;; struct              g-flags-class
+;;; struct  g-enum-value
+;;; struct  g-enum-class
+;;; struct  g-flags-value
+;;; struct  g-flags-class
 ;;;
 ;;; #define             G_ENUM_CLASS_TYPE                   (class)
 ;;; #define             G_ENUM_CLASS_TYPE_NAME              (class)
@@ -46,26 +44,25 @@
 ;;; #define             G_FLAGS_CLASS_TYPE                  (class)
 ;;; #define             G_FLAGS_CLASS_TYPE_NAME             (class)
 ;;;
-;;; struct              GFlagsValue;
 ;;; GEnumValue *        g_enum_get_value                    (GEnumClass *enum_class,
 ;;;                                                          gint value);
 ;;; GEnumValue *        g_enum_get_value_by_name            (GEnumClass *enum_class,
 ;;;                                                          const gchar *name);
 ;;; GEnumValue *        g_enum_get_value_by_nick            (GEnumClass *enum_class,
 ;;;                                                          const gchar *nick);
+;;; GType               g_enum_register_static              (const gchar *name,
+;;;                                                          const GEnumValue *const_static_values);
+;;; void                g_enum_complete_type_info           (GType g_enum_type,
+;;;                                                          GTypeInfo *info,
+;;;                                                          const GEnumValue *const_values);
 ;;; GFlagsValue *       g_flags_get_first_value             (GFlagsClass *flags_class,
 ;;;                                                          guint value);
 ;;; GFlagsValue *       g_flags_get_value_by_name           (GFlagsClass *flags_class,
 ;;;                                                          const gchar *name);
 ;;; GFlagsValue *       g_flags_get_value_by_nick           (GFlagsClass *flags_class,
 ;;;                                                          const gchar *nick);
-;;; GType               g_enum_register_static              (const gchar *name,
-;;;                                                          const GEnumValue *const_static_values);
 ;;; GType               g_flags_register_static             (const gchar *name,
 ;;;                                                          const GFlagsValue *const_static_values);
-;;; void                g_enum_complete_type_info           (GType g_enum_type,
-;;;                                                          GTypeInfo *info,
-;;;                                                          const GEnumValue *const_values);
 ;;; void                g_flags_complete_type_info          (GType g_flags_type,
 ;;;                                                          GTypeInfo *info,
 ;;;                                                          const GFlagsValue *const_values);
@@ -87,6 +84,96 @@
 ;;; ----------------------------------------------------------------------------
 
 (in-package :gobject)
+
+;;; ----------------------------------------------------------------------------
+
+;; Enums
+
+(defvar *registered-enum-types* (make-hash-table :test 'equal))
+
+(defun register-enum-type (name type)
+  (setf (gethash name *registered-enum-types*) type))
+
+(defun registered-enum-type (name)
+  (gethash name *registered-enum-types*))
+
+;; Defines a GEnum type for enumeration. Generates corresponding CFFI
+;; definition.
+;;
+;; Example:
+;;
+;; (define-g-enum "GdkGrabStatus" grab-status ()
+;;   :success
+;;   :already-grabbed
+;;   :invalid-time
+;;   :not-viewable
+;;   :frozen)
+;;
+;; (define-g-enum "GdkExtensionMode" gdk-extension-mode
+;;    (:export t
+;;     :type-initializer "gdk_extension_mode_get_type")
+;;    (:none 0)
+;;    (:all 1)
+;;    (:cursor 2))
+;;
+;; g-name :
+;;     a string. Specifies the GEnum name
+;;
+;; name :
+;;     a symbol. Names the enumeration type.
+;;
+;; export :
+;;     a boolean. If true, @code{name} will be exported.
+;;
+;; type-initializer :
+;;     a NIL or a string or a function designator. If non-NIL, specifies the
+;;     function that initializes the type: string specifies a C function that
+;;     returns the GType value and function designator specifies the Lisp
+;;     function.
+;;
+;; values :
+;;     values for enum. Each value is a keyword or a list
+;;     (keyword integer-value). keyword corresponds to Lisp value of
+;;     enumeration, and integer-value is an C integer for enumeration item.
+;;     If integer-value is not specified, it is generated automatically
+;;    (see CFFI manual)
+
+(defmacro define-g-enum (g-name name (&key (export t) type-initializer)
+                                      &body values)
+  `(progn
+     (defcenum ,name ,@values)
+     (register-enum-type ,g-name ',name)
+     ,@(when export
+             (list `(export ',name
+                            (find-package ,(package-name (symbol-package name))))))
+     ,@(when type-initializer
+             (list `(at-init () ,(type-initializer-call type-initializer))))))
+
+(defun enum-value->definition (enum-value)
+  (let ((value-name (intern (lispify-name (enum-item-nick enum-value))
+                            (find-package :keyword)))
+        (numeric-value (enum-item-value enum-value)))
+    `(,value-name ,numeric-value)))
+
+(defun get-g-enum-definition (type &optional lisp-name-package)
+  (when (and (stringp type) (null (gtype type)))
+    (let ((type-init-name (probable-type-init-name type)))
+      (when (foreign-symbol-pointer type-init-name)
+        (foreign-funcall-pointer (foreign-symbol-pointer type-init-name) () :int))))
+  (when *generated-types*
+    (setf (gethash (gtype-name (gtype type)) *generated-types*) t))
+  (let* ((*lisp-name-package* (or lisp-name-package *lisp-name-package* *package*))
+         (g-type (gtype type))
+         (g-name (gtype-name g-type))
+         (name (g-name->name g-name))
+         (items (get-enum-items g-type))
+         (probable-type-initializer (probable-type-init-name g-name)))
+    `(define-g-enum ,g-name ,name
+         (:export t
+                  ,@(when (foreign-symbol-pointer probable-type-initializer)
+                          (list :type-initializer
+                                probable-type-initializer)))
+       ,@(mapcar #'enum-value->definition items))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GEnumValue
@@ -111,32 +198,6 @@
 
 (defcstruct g-enum-value
   (:value :int)
-  (:name (:string :free-from-foreign nil :free-to-foreign nil))
-  (:nick (:string :free-from-foreign nil :free-to-foreign nil)))
-
-;;; ----------------------------------------------------------------------------
-;;; struct GFlagsValue
-;;; 
-;;; struct GFlagsValue {
-;;;   guint	 value;
-;;;   const gchar *value_name;
-;;;   const gchar *value_nick;
-;;; };
-;;; 
-;;; A structure which contains a single flags value, its name, and its nickname.
-;;; 
-;;; guint value;
-;;; 	the flags value
-;;; 
-;;; const gchar *value_name;
-;;; 	the name of the value
-;;; 
-;;; const gchar *value_nick;
-;;; 	the nickname of the value
-;;; ----------------------------------------------------------------------------
-
-(defcstruct g-flags-value
-  (:value :uint)
   (:name (:string :free-from-foreign nil :free-to-foreign nil))
   (:nick (:string :free-from-foreign nil :free-to-foreign nil)))
 
@@ -177,6 +238,81 @@
   (:maximum :int)
   (:n-values :uint)
   (:values (:pointer g-enum-value)))
+
+;; "A structure describing a single enumeration item.
+;;
+;; See accessor functions:
+;;    enum-item-name
+;;    enum-item-value
+;;    enum-item-nick
+
+(defstruct enum-item
+  name
+  value
+  nick)
+
+;; Gets the list of enum items that belong to GEnum type type
+;;
+;; type :
+;;     a string or an integer specifying GEnum type
+;; return :
+;;     a list of enum-item objects
+
+(defun get-enum-items (type)
+  (assert (g-type-is-a type +g-type-enum+))
+  (let ((g-class (g-type-class-ref type)))
+    (unwind-protect
+         (loop
+            with n = (foreign-slot-value g-class 'g-enum-class :n-values)
+            with values = (foreign-slot-value g-class 'g-enum-class :values)
+            for i from 0 below n
+            for enum-value = (mem-aref values 'g-enum-value i)
+            collect (make-enum-item
+                     :name (foreign-slot-value enum-value 'g-enum-value
+                                               :name)
+                     :value (foreign-slot-value enum-value 'g-enum-value
+                                                :value)
+                     :nick (foreign-slot-value enum-value 'g-enum-value
+                                               :nick)))
+      (g-type-class-unref g-class))))
+
+;;; ----------------------------------------------------------------------------
+
+;; Flags
+
+(defvar *registered-flags-types* (make-hash-table :test 'equal))
+
+(defun register-flags-type (name type)
+  (setf (gethash name *registered-flags-types*) type))
+
+(defun registered-flags-type (name)
+  (gethash name *registered-flags-types*))
+
+;;; ----------------------------------------------------------------------------
+;;; struct GFlagsValue
+;;; 
+;;; struct GFlagsValue {
+;;;   guint	 value;
+;;;   const gchar *value_name;
+;;;   const gchar *value_nick;
+;;; };
+;;; 
+;;; A structure which contains a single flags value, its name, and its nickname.
+;;; 
+;;; guint value;
+;;; 	the flags value
+;;; 
+;;; const gchar *value_name;
+;;; 	the name of the value
+;;; 
+;;; const gchar *value_nick;
+;;; 	the nickname of the value
+;;; ----------------------------------------------------------------------------
+
+(defcstruct g-flags-value
+  (:value :uint)
+  (:name (:string :free-from-foreign nil :free-to-foreign nil))
+  (:nick (:string :free-from-foreign nil :free-to-foreign nil)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GFlagsClass
@@ -364,6 +500,22 @@
 ;;;     enumeration
 ;;; ----------------------------------------------------------------------------
 
+(defun parse-g-value-enum (gvalue)
+  (let* ((g-type (g-value-type gvalue))
+         (type-name (gtype-name g-type))
+         (enum-type (registered-enum-type type-name)))
+    (unless enum-type
+      (error "Enum ~A is not registered" type-name))
+    (convert-from-foreign (g-value-get-enum gvalue) enum-type)))
+
+(defun set-gvalue-enum (gvalue value)
+  (let* ((g-type (g-value-type gvalue))
+         (type-name (gtype-name g-type))
+         (enum-type (registered-enum-type type-name)))
+    (unless enum-type
+      (error "Enum ~A is not registered" type-name))
+    (g-value-set-enum gvalue (convert-to-foreign value enum-type))))
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_enum_get_value_by_name ()
 ;;; 
@@ -403,6 +555,72 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
+;;; g-enum-register-static (name static-values)
+;;; 
+;;; GType g_enum_register_static (const gchar *name,
+;;;                               const GEnumValue *const_static_values);
+;;; 
+;;; Registers a new static enumeration type with the name name.
+;;; 
+;;; It is normally more convenient to let glib-mkenums generate a
+;;; my_enum_get_type() function from a usual C enumeration definition than to
+;;; write one yourself using g_enum_register_static().
+;;; 
+;;; name :
+;;; 	A nul-terminated string used as the name of the new type.
+;;; 
+;;; static-values :
+;;; 	An array of GEnumValue structs for the possible enumeration values.
+;;;     The array is terminated by a struct with all members being 0. GObject
+;;;     keeps a reference to the data, so it cannot be stack-allocated.
+;;; 
+;;; Returns :
+;;; 	The new type identifier.
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("g_enum_register_static" g-enum-register-static) g-type-designator
+  (name :string)
+  (static-values (:pointer g-enum-value)))
+
+(export 'g-enum-register-static)
+
+;;; ----------------------------------------------------------------------------
+;;; g_enum_complete_type_info ()
+;;; 
+;;; void g_enum_complete_type_info (GType g_enum_type,
+;;;                                 GTypeInfo *info,
+;;;                                 const GEnumValue *const_values);
+;;; 
+;;; This function is meant to be called from the complete_type_info() function
+;;; of a GTypePlugin implementation, as in the following example:
+;;; 
+;;;  1 static void
+;;;  2 my_enum_complete_type_info (GTypePlugin     *plugin,
+;;;  3                             GType            g_type,
+;;;  4                             GTypeInfo       *info,
+;;;  5                             GTypeValueTable *value_table)
+;;;  6 {
+;;;  7   static const GEnumValue values[] = {
+;;;  8     { MY_ENUM_FOO, "MY_ENUM_FOO", "foo" },
+;;;  9     { MY_ENUM_BAR, "MY_ENUM_BAR", "bar" },
+;;; 10     { 0, NULL, NULL }
+;;; 11   };
+;;; 12 
+;;; 13   g_enum_complete_type_info (type, info, values);
+;;; 14 }
+;;; 
+;;; g_enum_type :
+;;; 	the type identifier of the type being completed
+;;; 
+;;; info :
+;;; 	the GTypeInfo struct to be filled in
+;;; 
+;;; const_values :
+;;; 	An array of GEnumValue structs for the possible enumeration values.
+;;;     The array is terminated by a struct with all members being 0.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; g_flags_get_first_value ()
 ;;; 
 ;;; GFlagsValue * g_flags_get_first_value (GFlagsClass *flags_class,
@@ -419,6 +637,22 @@
 ;;; Returns :
 ;;; 	the first GFlagsValue which is set in value, or NULL if none is set
 ;;; ----------------------------------------------------------------------------
+
+(defun parse-g-value-flags (gvalue)
+  (let* ((g-type (g-value-type gvalue))
+         (type-name (gtype-name g-type))
+         (flags-type (registered-flags-type type-name)))
+    (unless flags-type
+      (error "Flags ~A is not registered" type-name))
+    (convert-from-foreign (g-value-get-flags gvalue) flags-type)))
+
+(defun set-gvalue-flags (gvalue value)
+  (let* ((g-type (g-value-type gvalue))
+         (type-name (gtype-name g-type))
+         (flags-type (registered-flags-type type-name)))
+    (unless flags-type
+      (error "Flags ~A is not registered" type-name))
+    (g-value-set-flags gvalue (convert-to-foreign value flags-type))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_flags_get_value_by_name ()
@@ -459,34 +693,6 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
-;;; g_enum_register_static ()
-;;; 
-;;; GType g_enum_register_static (const gchar *name,
-;;;                               const GEnumValue *const_static_values);
-;;; 
-;;; Registers a new static enumeration type with the name name.
-;;; 
-;;; It is normally more convenient to let glib-mkenums generate a
-;;; my_enum_get_type() function from a usual C enumeration definition than to
-;;; write one yourself using g_enum_register_static().
-;;; 
-;;; name :
-;;; 	A nul-terminated string used as the name of the new type.
-;;; 
-;;; const_static_values :
-;;; 	An array of GEnumValue structs for the possible enumeration values.
-;;;     The array is terminated by a struct with all members being 0. GObject
-;;;     keeps a reference to the data, so it cannot be stack-allocated.
-;;; 
-;;; Returns :
-;;; 	The new type identifier.
-;;; ----------------------------------------------------------------------------
-
-(defcfun g-enum-register-static g-type-designator
-  (name :string)
-  (static-values (:pointer g-enum-value)))
-
-;;; ----------------------------------------------------------------------------
 ;;; g_flags_register_static ()
 ;;; 
 ;;; GType g_flags_register_static (const gchar *name,
@@ -501,7 +707,7 @@
 ;;; name :
 ;;; 	A nul-terminated string used as the name of the new type.
 ;;; 
-;;; const_static_values :
+;;; static-values :
 ;;; 	An array of GFlagsValue structs for the possible flags values. The
 ;;;     array is terminated by a struct with all members being 0. GObject keeps
 ;;;     a reference to the data, so it cannot be stack-allocated.
@@ -510,45 +716,11 @@
 ;;; 	The new type identifier.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-flags-register-static g-type-designator
+(defcfun ("g_flags_register_static" g-flags-register-static) g-type-designator
   (name :string)
   (static-values (:pointer g-flags-value)))
 
-;;; ----------------------------------------------------------------------------
-;;; g_enum_complete_type_info ()
-;;; 
-;;; void g_enum_complete_type_info (GType g_enum_type,
-;;;                                 GTypeInfo *info,
-;;;                                 const GEnumValue *const_values);
-;;; 
-;;; This function is meant to be called from the complete_type_info() function
-;;; of a GTypePlugin implementation, as in the following example:
-;;; 
-;;;  1 static void
-;;;  2 my_enum_complete_type_info (GTypePlugin     *plugin,
-;;;  3                             GType            g_type,
-;;;  4                             GTypeInfo       *info,
-;;;  5                             GTypeValueTable *value_table)
-;;;  6 {
-;;;  7   static const GEnumValue values[] = {
-;;;  8     { MY_ENUM_FOO, "MY_ENUM_FOO", "foo" },
-;;;  9     { MY_ENUM_BAR, "MY_ENUM_BAR", "bar" },
-;;; 10     { 0, NULL, NULL }
-;;; 11   };
-;;; 12 
-;;; 13   g_enum_complete_type_info (type, info, values);
-;;; 14 }
-;;; 
-;;; g_enum_type :
-;;; 	the type identifier of the type being completed
-;;; 
-;;; info :
-;;; 	the GTypeInfo struct to be filled in
-;;; 
-;;; const_values :
-;;; 	An array of GEnumValue structs for the possible enumeration values.
-;;;     The array is terminated by a struct with all members being 0.
-;;; ----------------------------------------------------------------------------
+(export 'g-flags-register-static)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_flags_complete_type_info ()

@@ -30,8 +30,6 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; #include <glib-object.h>
-;;; 
 ;;; #define             G_IS_PARAM_SPEC_BOOLEAN             (pspec)
 ;;; #define             G_PARAM_SPEC_BOOLEAN                (pspec)
 ;;; #define             G_VALUE_HOLDS_BOOLEAN               (value)
@@ -1030,9 +1028,11 @@
 ;;; 	integer value to be set
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-value-set-int :void
-  (g-value (:pointer g-value))
-  (new-value :int))
+(defcfun ("g_value_set_int" g-value-set-int) :void
+  (value (:pointer g-value))
+  (v_int :int))
+
+(export 'g-value-set-int)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_get_int ()
@@ -1048,8 +1048,10 @@
 ;;; 	integer contents of value
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-value-get-int :int
-  (g-value (:pointer g-value)))
+(defcfun ("g_value_get_int" g-value-get-int) :int
+  (value (:pointer g-value)))
+
+(export 'g-value-get-int)
 
 ;;; ----------------------------------------------------------------------------
 ;;; G_IS_PARAM_SPEC_UINT()
@@ -2706,9 +2708,11 @@
 ;;; 	caller-owned string to be duplicated for the GValue. [allow-none]
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-value-set-string :void
-  (g-value (:pointer g-value))
-  (new-value :string))
+(defcfun ("g_value_set_string" g-value-set-string) :void
+  (value (:pointer g-value))
+  (v_string :string))
+
+(export 'g-value-set-string)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_set_static_string ()
@@ -2774,8 +2778,11 @@
 ;;; 	string content of value
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-value-get-string (:string :free-from-foreign nil)
-  (g-value (:pointer g-value)))
+(defcfun ("g_value_get_string" g-value-get-string)
+    (:string :free-from-foreign nil)
+  (value (:pointer g-value)))
+
+(export 'g-value-get-string)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_value_dup_string ()
