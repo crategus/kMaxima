@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.quark.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -63,19 +67,6 @@
 
 (in-package :glib)
 
-(define-foreign-type quark-type ()
-  ()
-  (:actual-type quark-value-type)
-  (:simple-parser g-quark))
-
-(defmethod translate-to-foreign (value (type quark-type))
-  (g-quark-from-string value))
-
-(defmethod translate-from-foreign (value (type quark-type))
-  (g-quark-to-string value))
-
-(export 'g-quark)
-
 ;;; ----------------------------------------------------------------------------
 ;;; GQuark
 ;;; 
@@ -85,7 +76,20 @@
 ;;; string. A GQuark value of zero is associated to NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defctype quark-value-type :uint32)
+(defctype %g-quark :uint32)
+
+(define-foreign-type g-quark-type ()
+  ()
+  (:actual-type %g-quark)
+  (:simple-parser g-quark))
+
+(defmethod translate-to-foreign (value (type g-quark-type))
+  (g-quark-from-string value))
+
+(defmethod translate-from-foreign (value (type g-quark-type))
+  (g-quark-to-string value))
+
+(export 'g-quark)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_quark_from_string ()
@@ -103,8 +107,10 @@
 ;;; 	the GQuark identifying the string, or 0 if string is NULL.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-quark-from-string quark-value-type
+(defcfun ("g_quark_from_string" g-quark-from-string) %g-quark
   (string :string))
+
+(export 'g-quark-from-string)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_quark_from_static_string ()
@@ -144,8 +150,10 @@
 ;;; 	the string associated with the GQuark.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-quark-to-string :string
-  (quark quark-value-type))
+(defcfun ("g_quark_to_string" g-quark-to-string) :string
+  (quark %g-quark))
+
+(export 'g-quark-to-string)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_quark_try_string ()
@@ -159,7 +167,7 @@
 ;;; g_quark_from_string() or g_quark_from_static_string().
 ;;; 
 ;;; string :
-;;; 	a string. [allow-none]
+;;; 	a string.
 ;;; 
 ;;; Returns :
 ;;; 	the GQuark associated with the string, or 0 if string is NULL or there

@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.utils.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -219,8 +223,10 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-get-environ "g_get_environ") gstrv)
+#+gtk-2.28
+(defcfun (g-get-environ "g_get_environ") g-strv)
 
+#+gtk-2.28
 (export 'g-get-environ)
 
 ;;; ----------------------------------------------------------------------------
@@ -320,7 +326,7 @@
 ;;; Since 2.8
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-listenv "g_listenv") gstrv)
+(defcfun (g-listenv "g_listenv") g-strv)
 
 (export 'g-listenv)
 
@@ -462,8 +468,9 @@
 ;;; Since 2.28
 ;;; ----------------------------------------------------------------------------
 
+#+gtk-2.28
 (defcfun (g-get-user-runtime-dir "g_get_user_runtime_dir") :string)
-
+#+gtk-2.28
 (export 'g-get-user-runtime-dir)
 
 ;;; ----------------------------------------------------------------------------
@@ -602,7 +609,7 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-get-system-data-dirs "g_get_system_data_dirs") gstrv)
+(defcfun (g-get-system-data-dirs "g_get_system_data_dirs") g-strv)
 
 (export 'g-get-system-data-dirs)
 
@@ -632,7 +639,7 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-get-system-config-dirs "g_get_system_config_dirs") gstrv)
+(defcfun (g-get-system-config-dirs "g_get_system_config_dirs") g-strv)
 
 (export 'g-get-system-config-dirs)
 

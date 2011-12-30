@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.threads.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -262,6 +266,8 @@
 (defcenum g-thread-error
   :g-thread-error-again)
 
+(export 'g-thread-error)
+
 ;;; ----------------------------------------------------------------------------
 ;;; GCond
 ;;; 
@@ -272,7 +278,7 @@
 ;;; If other threads change the state of this condition they signal the GCond,
 ;;; and that causes the waiting threads to be woken up.
 ;;; 
-;;; Example 8.  Using GCond to block a thread until a condition is satisfied
+;;; Example 8. Using GCond to block a thread until a condition is satisfied
 ;;; 
 ;;;  1 GCond* data_cond = NULL; /* Must be initialized somewhere */
 ;;;  2 GMutex* data_mutex = NULL; /* Must be initialized somewhere */
@@ -324,6 +330,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcstruct g-cond)
+
+(export 'g-cond)
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GThreadFunctions
@@ -485,8 +493,10 @@
 ;;;     points to the thread system to be used.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-thread-init "g_thread_init") :void
+(defcfun ("g_thread_init" g-thread-init) :void
   (vtable :pointer))
+
+(export 'g-thread-init)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_supported ()
@@ -505,6 +515,10 @@
 ;;; 	TRUE, if the thread system is initialized.
 ;;; ----------------------------------------------------------------------------
 
+(defcfun ("g_thread_supported" g-thread-supported) :boolean)
+  
+(export 'g-thread-supported)
+
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_get_initialized ()
 ;;; 
@@ -518,7 +532,9 @@
 ;;; Since 2.20
 ;;; ----------------------------------------------------------------------------
 
-(defcfun g-thread-get-initialized :boolean)
+(defcfun ("g_thread_get_initialized" g-thread-get-initialized) :boolean)
+
+(export 'g-thread-get-initialized)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GThreadFunc ()
@@ -575,6 +591,8 @@
   :g-thread-priority-hight
   :g-thread-priority-urgent)
 
+(export 'g-thread-priority)
+
 ;;; ----------------------------------------------------------------------------
 ;;; struct GThread
 ;;; 
@@ -592,6 +610,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcstruct g-thread)
+
+(export 'g-thread)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_create ()
@@ -708,7 +728,9 @@
 ;;; 	the current thread.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-thread-self "g_thread_self" :library glib) (:pointer g-thread))
+(defcfun ("g_thread_self" g-thread-self) (:pointer g-thread))
+
+(export 'g-thread-self)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_join ()
@@ -729,8 +751,10 @@
 ;;; 	the return value of the thread.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-thread-join "g_thread_join" :library glib) :pointer
+(defcfun ("g_thread_join" g-thread-join) :pointer
   (thread (:pointer g-thread)))
+
+(export 'g-thread-join)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_set_priority ()
@@ -754,9 +778,11 @@
 ;;; 	a new priority for thread.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (g-thread-set-priority "g_thread_set_priority" :library glib) :void
+(defcfun ("g_thread_set_priority" g-thread-set-priority) :void
   (thread (:pointer g-thread))
   (priority g-thread-priority))
+
+(export 'g-thread-priority)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_yield ()
@@ -912,6 +938,8 @@
 ;;; ----------------------------------------------------------------------------
 
 (defcstruct g-mutex)
+
+(export 'g-mutex)
 
 ;;; ---------------------------------------------------------------------------- 
 ;;; g_mutex_new ()

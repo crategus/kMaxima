@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.version.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -30,18 +34,18 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;;   *glib-major-version*
-;;;   *glib-minor-version*
-;;;   *glib-micro-version*
-;;;   *glib-binary-age*
-;;;   *glib-interface-age*
+;;;    *glib-major-version*
+;;;    *glib-minor-version*
+;;;    *glib-micro-version*
+;;;    *glib-binary-age*
+;;;    *glib-interface-age*
 ;;;
-;;;   glib-check-version (required_major, required_minor, required_micro)
+;;;    glib-check-version (required-major required-minor required-micro)
 ;;;                                         
-;;; #define             GLIB_MAJOR_VERSION 
-;;; #define             GLIB_MINOR_VERSION 
-;;; #define             GLIB_MICRO_VERSION 
-;;; #define             GLIB_CHECK_VERSION (major, minor, micro)
+;;; #define GLIB_MAJOR_VERSION 
+;;; #define GLIB_MINOR_VERSION 
+;;; #define GLIB_MICRO_VERSION 
+;;; #define GLIB_CHECK_VERSION (major, minor, micro)
 ;;; 
 ;;; Description
 ;;; 
@@ -53,7 +57,7 @@
 (in-package :glib)
 
 ;;; ----------------------------------------------------------------------------
-;;; glib_major_version
+;;; *glib-major-version*
 ;;; 
 ;;; extern const guint glib_major_version;
 ;;; ----------------------------------------------------------------------------
@@ -63,7 +67,7 @@
 (export '*glib-major-version*)
 
 ;;; ---------------------------------------------------------------------------- 
-;;; glib_minor_version
+;;; *glib-minor-version*
 ;;; 
 ;;; extern const guint glib_minor_version;
 ;;; ----------------------------------------------------------------------------
@@ -73,7 +77,7 @@
 (export '*glib-minor-version*)
 
 ;;; ----------------------------------------------------------------------------
-;;; glib_micro_version
+;;; *glib-micro-version*
 ;;; 
 ;;; extern const guint glib_micro_version;
 ;;; ----------------------------------------------------------------------------
@@ -83,7 +87,7 @@
 (export '*glib-micro-version*)
 
 ;;; ----------------------------------------------------------------------------
-;;; glib_binary_age
+;;; *glib-binary-age*
 ;;; 
 ;;; extern const guint glib_binary_age;
 ;;; ----------------------------------------------------------------------------
@@ -93,7 +97,7 @@
 (export '*glib-binary-age*)
 
 ;;; ---------------------------------------------------------------------------- 
-;;; glib_interface_age
+;;; *glib-interface-age*
 ;;; 
 ;;; extern const guint glib_interface_age;
 ;;; ----------------------------------------------------------------------------
@@ -103,7 +107,7 @@
 (export '*glib-interface-age*)
 
 ;;; ----------------------------------------------------------------------------
-;;; glib_check_version ()
+;;; glib-check-version (required-major required-minor required-micro)
 ;;; 
 ;;; const gchar * glib_check_version (guint required_major,
 ;;;                                   guint required_minor,
@@ -121,13 +125,13 @@
 ;;; must be binary compatible with the version
 ;;; required_major.required_minor.required_micro (same major version.)
 ;;; 
-;;; required_major :
+;;; required-major :
 ;;;     the required major version.
 ;;; 
-;;; required_minor :
+;;; required-minor :
 ;;;     the required minor version.
 ;;; 
-;;; required_micro :
+;;; required-micro :
 ;;; 	the required micro version.
 ;;; 
 ;;; Returns :
@@ -138,7 +142,7 @@
 ;;; Since 2.6
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (glib-check-version "glib_check_version") :string
+(defcfun ("glib_check_version" glib-check-version ) :string
   (required-major :uint)
   (required-minor :uint)
   (required-micro :uint))

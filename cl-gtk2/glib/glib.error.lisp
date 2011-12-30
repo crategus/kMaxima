@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.error.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -30,7 +34,7 @@
 ;;; 	
 ;;; Synopsis
 ;;; 
-;;; struct   gerror
+;;; struct  g-error
 ;;;
 ;;; GError * g_error_new                (GQuark domain,
 ;;;                                      gint code,
@@ -71,11 +75,11 @@
 ;;; Description
 ;;; 
 ;;; GLib provides a standard method of reporting errors from a called function
-;;; to the calling code. (This is the same problem solved by exceptions in other
-;;; languages.) It's important to understand that this method is both a data
-;;; type (the GError object) and a set of rules. If you use GError incorrectly,
-;;; then your code will not properly interoperate with other code that uses
-;;; GError, and users of your API will probably get confused.
+;;; to the calling code. (This is the same problem solved by exceptions in
+;;; other languages.) It's important to understand that this method is both a
+;;; data type (the GError object) and a set of rules. If you use GError
+;;; incorrectly, then your code will not properly interoperate with other code
+;;; that uses GError, and users of your API will probably get confused.
 ;;; 
 ;;; First and foremost: GError should only be used to report recoverable runtime
 ;;; errors, never to report programming errors. If the programmer has screwed
@@ -140,7 +144,7 @@
 ;;; details as possible. Several functions are provided to deal with an error
 ;;; received from a called function: g_error_matches() returns TRUE if the
 ;;; error matches a given domain and code, g_propagate_error() copies an error
-;;;  into an error location (so the calling function will receive it), and
+;;; into an error location (so the calling function will receive it), and
 ;;; g_clear_error() clears an error location by freeing the error and resetting
 ;;; the location to NULL. To display an error to the user, simply display
 ;;; error->message, perhaps along with additional context known only to the
@@ -352,7 +356,7 @@
 (in-package :glib)
 
 ;;; ----------------------------------------------------------------------------
-;;; struct GError
+;;; struct g-error
 ;;; 
 ;;; struct GError {
 ;;;   GQuark       domain;
@@ -372,12 +376,12 @@
 ;;; 	human-readable informative error message
 ;;; ----------------------------------------------------------------------------
 
-(defcstruct gerror
+(defcstruct g-error
   (:domain g-quark)
   (:code :int)
   (:message (:string :free-from-foreign nil)))
 
-(export 'gerror)
+(export 'g-error)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_error_new ()

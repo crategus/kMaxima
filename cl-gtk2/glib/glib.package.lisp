@@ -1,13 +1,14 @@
 ;;; ----------------------------------------------------------------------------
-;;; glib.package.lisp
+;;; cl-gtk2-glib.asd
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
+;;; ----------------------------------------------------------------------------
 ;;;
-;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
-;;; See http://www.gtk.org.
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by

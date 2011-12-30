@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; glib.lisp.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GLib 2.30.2 Reference Manual
 ;;; See http://www.gtk.org.
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -103,19 +107,19 @@
                      (g-error-condition-code e)
                      (g-error-condition-message e)))))
 
-(defun mayber-raise-g-error-condition (err)
+(defun maybe-raise-g-error-condition (err)
   (unless (null-pointer-p err)
     (error 'g-error-condition
-           :domain (foreign-slot-value err 'gerror :domain)
-           :code (foreign-slot-value err 'gerror :code)
-           :message (foreign-slot-value err 'gerror :message))))
+           :domain (foreign-slot-value err 'g-error :domain)
+           :code (foreign-slot-value err 'g-error :code)
+           :message (foreign-slot-value err 'g-error :message))))
 
 (defmacro with-g-error ((err) &body body)
   `(with-foreign-object (,err :pointer)
      (setf (mem-ref ,err :pointer) (null-pointer))
      (unwind-protect
           (progn ,@body)
-       (mayber-raise-g-error-condition (mem-ref ,err :pointer))
+       (maybe-raise-g-error-condition (mem-ref ,err :pointer))
        (g-clear-error ,err))))
 
 (defmacro with-catching-to-g-error ((err) &body body)
