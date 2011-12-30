@@ -6,7 +6,7 @@
   (is-source :boolean)
   (source-window (g-object gdk-window))
   (dest-window (g-object gdk-window))
-  (targets (glib:glist gdk-atom-as-string :free-from-foreign nil))
+  (targets (glib:g-list gdk-atom-as-string :free-from-foreign nil))
   (actions gdk-drag-action)
   (suggested-action gdk-drag-action)
   (action gdk-drag-action)
@@ -98,7 +98,7 @@
 
 (defcfun gdk-drag-begin (g-object gdk-drag-context :already-referenced)
   (window (g-object gdk-window))
-  (targets (glib:glist gdk-atom-as-string)))
+  (targets (glib:g-list gdk-atom-as-string)))
 
 (export 'gdk-drag-begin)
 

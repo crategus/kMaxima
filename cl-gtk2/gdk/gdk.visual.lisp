@@ -64,7 +64,7 @@
 (def-visual-accessor blue-shift)
 (def-visual-accessor blue-prec)
 
-(defcfun (list-visuals "gdk_list_visuals") (glib:glist (g-object visual) :free-from-foreign t))
+(defcfun (list-visuals "gdk_list_visuals") (glib:g-list (g-object visual) :free-from-foreign t))
 
 (export 'list-visuals)
 

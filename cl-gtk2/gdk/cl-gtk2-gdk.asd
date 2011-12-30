@@ -5,11 +5,20 @@
   :license "LLGPL"
   :serial t
   :components ((:file "gdk.package")
-               (:file "gdk.version")
-               (:file "gdk.threads")
+               (:file "gdk.init")
+               
+               (:file "gdk.version")      ; Move to gtk?
+               (:file "gdk.threads")      ; Functions for using GDK with threads
+               
                (:file "gdk.objects")
                (:file "gdk.functions")
-               (:file "gdk.general")
+               
+               (:file "gdk.event-structures") ; Data structures for events
+               (:file "gdk.events")           ; Functions for handling events               
+               (:file "gdk.general")          ; Library initialization
+               
+               (:file "gdk.windows")
+               
                (:file "gdk.manager")
                (:file "gdk.display")
                (:file "gdk.screen")
@@ -23,11 +32,11 @@
                (:file "gdk.colors")
                (:file "gdk.visual")
                (:file "gdk.cursor")
-               (:file "gdk.windows")
-               (:file "gdk.events")
+               
                (:file "gdk.key-values")
                (:file "gdk.selections")
                (:file "gdk.drag-and-drop")
                (:file "gdk.input-devices")
-               (:file "gdk.pango"))
+               (:file "gdk.pango")
+               )
   :depends-on (:cl-gtk2-glib :cffi :cl-gtk2-pango))

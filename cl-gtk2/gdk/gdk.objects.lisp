@@ -1,7 +1,5 @@
 (in-package :gdk)
 
-(define-g-enum "GdkGrabStatus" grab-status () :success :already-grabbed :invalid-time :not-viewable :frozen)
-
 (defcenum crossing-mode :normal :grab :ungrab :gtk-grab :gtk-ungrab :state-changed)
 (export 'crossing-mode)
 
@@ -219,21 +217,7 @@
 
 ;gdk_display_get_screen
 
-(define-g-enum "GdkEventType" event-type ()
-  (:nothing -1) (:delete 0)
-  (:destroy 1) (:expose 2) (:motion-notify 3)
-  (:button-press 4) (:2button-press 5) (:3button-press 6)
-  (:button-release 7) (:key-press 8) (:key-release 9)
-  (:enter-notify 10) (:leave-notify 11) (:focus-change 12)
-  (:configure 13) (:map 14) (:unmap 15) (:property-notify 16)
-  (:selection-clear 17) (:selection-request 18)
-  (:selection-notify 19) (:proximity-in 20)
-  (:proximity-out 21) (:drag-enter 22) (:drag-leave 23)
-  (:drag-motion 24) (:drag-status 25) (:drop-start 26)
-  (:drop-finished 27) (:client-event 28)
-  (:visibility-notify 29) (:no-expose 30) (:scroll 31)
-  (:window-state 32) (:setting 33) (:owner-change 34)
-  (:grab-broken 35) (:damage 36)) 
+
 
 (define-g-enum "GdkExtensionMode" extension-mode (:export t :type-initializer "gdk_extension_mode_get_type")
   (:none 0) (:all 1) (:cursor 2))
@@ -279,20 +263,7 @@
   (:new-owner 0)
   (:destroy 1) (:close 2))
 
-(define-g-flags "GdkEventMask" event-mask ()
-  (:exposure-mask 2)
-  (:pointer-motion-mask 4) (:pointer-motion-hint-mask 8)
-  (:button-motion-mask 16) (:button1-motion-mask 32)
-  (:button2-motion-mask 64) (:button3-motion-mask 128)
-  (:button-press-mask 256) (:button-release-mask 512)
-  (:key-press-mask 1024) (:key-release-mask 2048)
-  (:enter-notify-mask 4096) (:leave-notify-mask 8192)
-  (:focus-change-mask 16384) (:structure-mask 32768)
-  (:property-change-mask 65536)
-  (:visibility-notify-mask 131072)
-  (:proximity-in-mask 262144) (:proximity-out-mask 524288)
-  (:substructure-mask 1048576) (:scroll-mask 2097152)
-  (:all-events-mask 4194302))
+
 
 (define-g-enum "GdkFontType" font-type () :font :fontset)
 
@@ -632,7 +603,7 @@
            nil "gdk_window_set_title")
     (:cffi background gdk-window-background (g-boxed-foreign color)
            nil "gdk_window_set_background")
-    (:cffi icon-list gdk-window-icon-list (glib:glist (g-object pixbuf))
+    (:cffi icon-list gdk-window-icon-list (glib:g-list (g-object pixbuf))
            nil "gdk_window_set_icon_list")
     (:cffi modal-hint gdk-window-modal-hint :boolean
            nil "gdk_window_set_modal_hint")
@@ -648,7 +619,7 @@
            "gdk_window_get_parent" nil)
     (:cffi toplevel gdk-window-get-toplevel (g-object gdk-window)
            "gdk_window_get_toplevel" nil)
-    (:cffi children gdk-window-children (glib:glist (g-object gdk-window) :free-from-foreign nil)
+    (:cffi children gdk-window-children (glib:g-list (g-object gdk-window) :free-from-foreign nil)
            "gdk_window_peek_children" nil)
     (:cffi events gdk-window-events event-mask
            "gdk_window_get_events" "gdk_window_set_events")
@@ -711,132 +682,6 @@
 
 (export (boxed-related-symbols 'rectangle))
 
-(define-g-boxed-variant-cstruct event "GdkEvent"
-  (type event-type)
-  (window (g-object gdk-window))
-  (send-event (:boolean :int8))
-  (:variant type
-            ((:key-press :key-release) event-key
-             (time :uint32)
-             (state modifier-type)
-             (keyval :uint)
-             (length :int)
-             (string (:string :free-from-foreign nil
-                              :free-to-foreign nil))
-             (hardware-keycode :uint16)
-             (group :uint8)
-             (is-modifier :uint))
-            ((:button-press
-              :2button-press
-              :3button-press
-              :button-release) event-button
-             (time :uint32)
-             (x :double)
-             (y :double)
-             (axes (fixed-array :double 2))
-             (state :uint)
-             (button :uint)
-             (device (g-object device))
-             (x-root :double)
-             (y-root :double))
-            ((:scroll) event-scroll
-             (time :uint32)
-             (x :double)
-             (y :double)
-             (state modifier-type)
-             (direction scroll-direction)
-             (device (g-object device))
-             (x-root :double)
-             (y-root :double))
-            ((:motion-notify) event-motion
-             (time :uint32)
-             (x :double)
-             (y :double)
-             (axes (fixed-array :double 2))
-             (state modifier-type)
-             (is-hint :int16)
-             (device (g-object gdk-device))
-             (x-root :double)
-             (y-root :double))
-            ((:expose) event-expose
-             (area rectangle :inline t)
-             (region :pointer)
-             (count :int))
-            ((:visibility-notify) event-visibility
-             (state visibility-state))
-            ((:enter-notify :leave-notify) event-crossing
-             (sub-window (g-object gdk-window))
-             (time :uint32)
-             (x :double)
-             (y :double)
-             (x-root :double)
-             (y-root :double)
-             (mode crossing-mode)
-             (detail notify-type)
-             (focus :boolean)
-             (state :uint))
-            ((:focus-change) event-focus
-             (in :int16))
-            ((:configure) event-configure
-             (x :int)
-             (y :int)
-             (width :int)
-             (height :int))
-            ((:property-notify) event-property
-             (atom gdk-atom)
-             (time :uint32)
-             (state property-state))
-            ((:selection-clear
-              :selection-notify
-              :selection-request) event-selection
-             (selection gdk-atom)
-             (target gdk-atom)
-             (property gdk-atom)
-             (time :uint32)
-             (requestor native-window))
-            ((:drag-enter
-              :drag-leave
-              :drag-motion
-              :drag-status
-              :drop-start
-              :drop-finished) event-dnd
-             (drag-context (g-object drag-context))
-             (time :uint32)
-             (x-root :short)
-             (y-root :short))
-            ((:proximity-in
-              :proximity-out) event-proximity
-             (time :uint32)
-             (device (g-object gdk-device)))
-            ((:client-event) event-client
-             (message-time gdk-atom)
-             (data-format :ushort)
-             (:variant data-format
-                       (8 event-client-8
-                          (data :uchar :count 20))
-                       (16 event-client-16
-                           (data :ushort :count 10))
-                       (32 event-client-32
-                           (data :ulong :count 5))))
-            ((:no-expose) event-no-expose)
-            ((:window-state) event-window-state
-             (changed-mask window-state)
-             (new-window-state window-state))
-            ((:setting) event-setting
-             (action setting-action)
-             (name (:string :free-from-foreign nil :free-to-foreign nil)))
-            ((:owner-change) event-owner-change
-             (owner native-window)
-             (reason owner-change)
-             (selection gdk-atom)
-             (time :uint32)
-             (selection-time :uint32))
-            ((:grab-broken) event-grab-broken
-             (keyboard :boolean)
-             (implicit :boolean)
-             (grab-window (g-object gdk-window)))))
-
-(export (boxed-related-symbols 'event))
 
 (define-g-object-class "GdkDragContext" drag-context (:type-initializer "gdk_drag_context_get_type")
   ((:cffi protocol drag-context-protocol gdk-drag-protocol
@@ -847,7 +692,7 @@
           %gdk-drag-context-get-source-window nil)
    (:cffi dest-window drag-context-dest-window (g-object gdk-window)
           %gdk-drag-context-get-dest-window nil)
-   (:cffi targets drag-context-targets (glib:glist gdk-atom-as-string :free-from-foreign nil)
+   (:cffi targets drag-context-targets (glib:g-list gdk-atom-as-string :free-from-foreign nil)
           %gdk-drag-context-get-targets nil)
    (:cffi actions drag-context-actions gdk-drag-action
           %gdk-drag-context-get-actions nil)
@@ -885,7 +730,7 @@
           "gdk_display_get_n_screens" nil)
    (:cffi default-screen display-default-screen (g-object screen)
           "gdk_display_get_default_screen" nil)
-   (:cffi devices display-devices (glib:glist g-object :free-from-foreign nil)
+   (:cffi devices display-devices (glib:g-list g-object :free-from-foreign nil)
           "gdk_display_list_devices" nil)
    (:cffi supports-cursor-color display-supports-cursor-color :boolean
           "gdk_display_supports_cursor_color" nil)
@@ -910,7 +755,7 @@
 
 (define-g-object-class "GdkDisplayManager" display-manager (:type-initializer "gdk_display_manager_get_type")
   ((default-display display-manager-default-display "default-display" "GdkDisplay" t t)
-   (:cffi displays display-manager-displays (glib:gslist (g-object display) :free-from-foreign t)
+   (:cffi displays display-manager-displays (glib:g-slist (g-object display) :free-from-foreign t)
           "gdk_display_manager_list_displays" nil)))
 
 (define-g-object-class "GdkVisual" visual (:type-initializer "gdk_visual_get_type")
@@ -972,9 +817,9 @@
           "gdk_screen_get_width_mm" nil)
    (:cffi height-mm screen-height-mm :int
           "gdk_screen_get_height_mm" nil)
-   (:cffi visuals screen-visuals (glib:glist (g-object visual) :free-from-foreign t)
+   (:cffi visuals screen-visuals (glib:g-list (g-object visual) :free-from-foreign t)
           "gdk_screen_list_visuals" nil)
-   (:cffi toplevel-windows screen-toplevel-windows (glib:glist (g-object gdk-window) :free-from-foreign t)
+   (:cffi toplevel-windows screen-toplevel-windows (glib:g-list (g-object gdk-window) :free-from-foreign t)
           "gdk_screen_get_toplevel_windows" nil)
    (:cffi display-name screen-display-name (glib:g-string :free-from-foreign t)
           "gdk_screen_make_display_name" nil)
@@ -982,7 +827,7 @@
           "gdk_screen_get_n_monitors" nil)
    (:cffi active-window screen-active-window (g-object gdk-window)
           "gdk_screen_get_active_window" nil)
-   (:cffi window-stack screen-window-stack (glib:glist (g-object gdk-window) :free-from-foreign t)
+   (:cffi window-stack screen-window-stack (glib:g-list (g-object gdk-window) :free-from-foreign t)
           "gdk_screen_get_window_stack" nil)))
 
 (define-g-object-class "GdkGC" graphics-context (:type-initializer "gdk_gc_get_type")
@@ -1036,24 +881,7 @@
   (group :int :initform 0)
   (level :int :initform 0))
 
-(define-g-boxed-cstruct gdk-window-attr nil
-  (title (:string :free-from-foreign nil) :initform nil)
-  (event-mask event-mask :initform nil)
-  (x :int :initform 0)
-  (y :int :initform 0)
-  (width :int :initform 0)
-  (height :int :initform 0)
-  (window-class gdk-window-class :initform :input-output)
-  (visual (g-object visual) :initform nil)
-  (colormap (g-object colormap) :initform nil)
-  (window-type gdk-window-type :initform :toplevel)
-  (cursor (g-object cursor) :initform nil)
-  (wmclass-name (:string :free-from-foreign nil) :initform nil)
-  (wmclass-class (:string :free-from-foreign nil) :initform nil)
-  (override-redirect :boolean :initform nil)
-  (type-hint gdk-window-type-hint :initform :normal))
 
-(export (boxed-related-symbols 'gdk-window-attr))
 
 (define-g-object-class "GdkDevice" gdk-device
   (:superclass g-object :export t :interfaces

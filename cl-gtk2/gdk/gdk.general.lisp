@@ -24,7 +24,9 @@
 ;;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ;;; ----------------------------------------------------------------------------
 ;;;
-;;; General — Library initialization and miscellaneous functions
+;;; General
+;;;
+;;; Library initialization and miscellaneous functions
 ;;; 
 ;;; SYNOPSIS
 ;;; 
@@ -50,13 +52,14 @@
 ;;; gint          gdk_screen_width_mm (void)
 ;;; gint          gdk_screen_height_mm (void)
 ;;;
+;;; enum          GdkGrabStatus
+;;;
 ;;; GdkGrabStatus gdk_pointer_grab (GdkWindow *window,
 ;;;                                 gboolean owner_events,
 ;;;                                 GdkEventMask event_mask,
 ;;;                                 GdkWindow *confine_to,
 ;;;                                 GdkCursor *cursor,
 ;;;                                 guint32 time_)
-;;; enum          GdkGrabStatus
 ;;; void          gdk_pointer_ungrab (guint32 time_)
 ;;; gboolean      gdk_pointer_is_grabbed (void)
 ;;; void          gdk_set_double_click_time (guint msec)
@@ -68,11 +71,11 @@
 ;;;
 ;;; void          gdk_beep (void)
 ;;;
-;;; gboolean      gdk_get_use_xshm (void)
-;;; void          gdk_set_use_xshm (gboolean use_xshm)
+;;; gboolean      gdk_get_use_xshm (void)              *deprecated*
+;;; void          gdk_set_use_xshm (gboolean use_xshm) *deprecated*
 ;;;
-;;; void          gdk_error_trap_push (void)
-;;; gint          gdk_error_trap_pop (void)
+;;;         gdk-error-trap-push ()
+;;;         gdk-error-trap-pop ()
 ;;;
 ;;; #define       GDK_WINDOWING_X11
 ;;; #define       GDK_WINDOWING_WIN32
@@ -422,6 +425,44 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
+;;; enum GdkGrabStatus
+;;;
+;;; typedef enum
+;;; {
+;;;   GDK_GRAB_SUCCESS         = 0,
+;;;   GDK_GRAB_ALREADY_GRABBED = 1,
+;;;   GDK_GRAB_INVALID_TIME    = 2,
+;;;   GDK_GRAB_NOT_VIEWABLE    = 3,
+;;;   GDK_GRAB_FROZEN          = 4
+;;; } GdkGrabStatus;
+;;;
+;;; Returned by gdk_pointer_grab() and gdk_keyboard_grab() to indicate success
+;;; or the reason for the failure of the grab attempt.
+;;;
+;;; GDK_GRAB_SUCCESS
+;;;	the resource was successfully grabbed.
+;;;
+;;; GDK_GRAB_ALREADY_GRABBED
+;;;	the resource is actively grabbed by another client.
+;;;
+;;; GDK_GRAB_INVALID_TIME
+;;;	the resource was grabbed more recently than the specified time.
+;;;
+;;; GDK_GRAB_NOT_VIEWABLE
+;;;	the grab window or the confine_to window are not viewable.
+;;;
+;;; GDK_GRAB_FROZEN
+;;;	the resource is frozen by an active grab of another client.
+;;; ----------------------------------------------------------------------------
+
+(define-g-enum "GdkGrabStatus" grab-status ()
+  :success
+  :already-grabbed
+  :invalid-time
+  :not-viewable
+  :frozen)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_pointer_grab ()
 ;;;
 ;;; GdkGrabStatus gdk_pointer_grab (GdkWindow *window,
@@ -455,20 +496,20 @@
 ;;; window :
 ;;;	the GdkWindow which will own the grab (the grab window).
 ;;;
-;;; owner_events :
+;;; owner-events :
 ;;;	if FALSE then all pointer events are reported with respect to window
-;;;     and are only reported if selected by event_mask. If TRUE then pointer
+;;;     and are only reported if selected by event-mask. If TRUE then pointer
 ;;;     events for this application are reported as normal, but pointer events
 ;;;     outside this application are reported with respect to window and only
 ;;;     if selected by event_mask. In either mode, unreported events are
 ;;;     discarded.
 ;;;
-;;; event_mask :
+;;; event-mask :
 ;;;	specifies the event mask, which is used in accordance with
-;;;     owner_events. Note that only pointer events (i.e. button and motion
+;;;     owner-events. Note that only pointer events (i.e. button and motion
 ;;;     events) may be selected.
 ;;;
-;;; confine_to :
+;;; confine-to :
 ;;;	If non-NULL, the pointer will be confined to this window during the
 ;;;     grab. If the pointer is outside confine_to, it will automatically be
 ;;;     moved to the closest edge of confine_to and enter and leave events will
@@ -479,7 +520,7 @@
 ;;;     the normal cursors are used for window and its descendants, and the
 ;;;     cursor for window is used for all other windows.
 ;;;
-;;; time_ :
+;;; time :
 ;;;	the timestamp of the event which led to this pointer grab. This usually
 ;;;     comes from a GdkEventButton struct, though GDK_CURRENT_TIME can be used
 ;;;     if the time isn't known.
@@ -488,7 +529,7 @@
 ;;;	GDK_GRAB_SUCCESS if the grab was successful.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (pointer-grab "gdk_pointer_grab") grab-status
+(defcfun ("gdk_pointer_grab" gdk-pointer-grab) grab-status
   (window (g-object gdk-window))
   (owner-events :boolean)
   (event-mask event-mask)
@@ -496,38 +537,7 @@
   (cursor (g-boxed-foreign cursor))
   (time :uint32))
 
-(export 'pointer-grab)
-
-;;; ----------------------------------------------------------------------------
-;;; enum GdkGrabStatus
-;;;
-;;; typedef enum
-;;; {
-;;;   GDK_GRAB_SUCCESS         = 0,
-;;;   GDK_GRAB_ALREADY_GRABBED = 1,
-;;;   GDK_GRAB_INVALID_TIME    = 2,
-;;;   GDK_GRAB_NOT_VIEWABLE    = 3,
-;;;   GDK_GRAB_FROZEN          = 4
-;;; } GdkGrabStatus;
-;;;
-;;; Returned by gdk_pointer_grab() and gdk_keyboard_grab() to indicate success
-;;; or the reason for the failure of the grab attempt.
-;;;
-;;; GDK_GRAB_SUCCESS
-;;;	the resource was successfully grabbed.
-;;;
-;;; GDK_GRAB_ALREADY_GRABBED
-;;;	the resource is actively grabbed by another client.
-;;;
-;;; GDK_GRAB_INVALID_TIME
-;;;	the resource was grabbed more recently than the specified time.
-;;;
-;;; GDK_GRAB_NOT_VIEWABLE
-;;;	the grab window or the confine_to window are not viewable.
-;;;
-;;; GDK_GRAB_FROZEN
-;;;	the resource is frozen by an active grab of another client.
-;;; ----------------------------------------------------------------------------
+(export 'gdk-pointer-grab)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_pointer_ungrab ()
@@ -537,14 +547,15 @@
 ;;; Ungrabs the pointer on the default display, if it is grabbed by this
 ;;; application.
 ;;;
-;;; time_ : a timestamp from a GdkEvent, or GDK_CURRENT_TIME if no timestamp is
-;;;         available.
+;;; time :
+;;;     a timestamp from a GdkEvent, or GDK_CURRENT_TIME if no timestamp is
+;;;     available.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (pointer-ungrab "gdk_pointer_ungrab") :void
+(defcfun ("gdk_pointer_ungrab" gdk-pointer-ungrab) :void
   (time :uint32))
 
-(export 'pointer-ungrab)
+(export 'gdk-pointer-ungrab)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_pointer_is_grabbed ()
@@ -554,15 +565,16 @@
 ;;; Returns TRUE if the pointer on the default display is currently grabbed by
 ;;; this application.
 ;;;
-;;; Note that this does not take the inmplicit pointer grab on button presses
+;;; Note that this does not take the implicit pointer grab on button presses
 ;;; into account.
 ;;;
-;;; Returns : TRUE if the pointer is currently grabbed by this application.*
+;;; Returns :
+;;;     TRUE if the pointer is currently grabbed by this application.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (pointer-grabbed-p "gdk_pointer_is_grabbed") :boolean)
+(defcfun ("gdk_pointer_is_grabbed" gdk-pointer-is-grabbed) :boolean)
 
-(export 'pointer-grabbed-p)
+(export 'gdk-pointer-is-grabbed)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_set_double_click_time ()
@@ -574,7 +586,8 @@
 ;;; See also gdk_display_set_double_click_distance(). Applications should not
 ;;; set this, it is a global user-configured setting.
 ;;;
-;;; msec : double click time in milliseconds (thousandths of a second)
+;;; msec :
+;;;     double click time in milliseconds (thousandths of a second)
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -595,26 +608,27 @@
 ;;; window :
 ;;;	the GdkWindow which will own the grab (the grab window).
 ;;;
-;;; owner_events :
+;;; owner-events :
 ;;;	if FALSE then all keyboard events are reported with respect to window.
 ;;;     If TRUE then keyboard events for this application are reported as
 ;;;     normal, but keyboard events outside this application are reported with
 ;;;     respect to window. Both key press and key release events are always
 ;;;     reported, independant of the event mask set by the application.
 ;;;
-;;; time_ :
+;;; time :
 ;;;	a timestamp from a GdkEvent, or GDK_CURRENT_TIME if no timestamp is
 ;;;     available.
 ;;;
-;;; Returns : GDK_GRAB_SUCCESS if the grab was successful.
+;;; Returns :
+;;;     GDK_GRAB_SUCCESS if the grab was successful.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (keyboard-grab "gdk_keyboard_grab") grab-status
+(defcfun ("gdk_keyboard_grab" gdk-keyboard-grab) grab-status
   (window (g-object gdk-window))
   (owner-events :boolean)
   (time :uint32))
 
-(export 'keyboard-grab)
+(export 'gdk-keyboard-grab)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_keyboard_ungrab ()
@@ -624,14 +638,15 @@
 ;;; Ungrabs the keyboard on the default display, if it is grabbed by this
 ;;; application.
 ;;;
-;;; time_ : a timestamp from a GdkEvent, or GDK_CURRENT_TIME if no timestamp is
-;;;         available.
+;;; time :
+;;;     a timestamp from a GdkEvent, or GDK_CURRENT_TIME if no timestamp is
+;;;     available.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (keyboard-ungrab "gdk_keyboard_ungrab") :void
+(defcfun ("gdk_keyboard_ungrab" gdk-keyboard-ungrab) :void
   (time :uint32))
 
-(export 'keyboard-ungrab)
+(export 'gdk-keyboard-ungrab)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_beep ()
@@ -641,46 +656,9 @@
 ;;; Emits a short beep on the default display.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gdk-beep :void)
+(defcfun ("gdk_beep" gdk-beep) :void)
 
 (export 'gdk-beep)
-
-;;; ----------------------------------------------------------------------------
-;;; gdk_get_use_xshm ()
-;;;
-;;; gboolean gdk_get_use_xshm (void)
-;;;
-;;; Warning
-;;;
-;;; gdk_get_use_xshm is deprecated and should not be used in newly-written code.
-;;;
-;;; Returns TRUE if GDK will attempt to use the MIT-SHM shared memory extension.
-;;;
-;;; The shared memory extension is used for GdkImage, and consequently for
-;;; GdkRGB. It enables much faster drawing by communicating with the X server
-;;; through SYSV shared memory calls. However, it can only be used if the X
-;;; client and server are on the same machine and the server supports it.
-;;;
-;;; Returns : TRUE if use of the MIT shared memory extension will be attempted.
-;;; ----------------------------------------------------------------------------
-
-;;; ----------------------------------------------------------------------------
-;;; gdk_set_use_xshm ()
-;;;
-;;; void gdk_set_use_xshm (gboolean use_xshm)
-;;;
-;;; Warning
-;;;
-;;; gdk_set_use_xshm is deprecated and should not be used in newly-written code.
-;;;
-;;; Sets whether the use of the MIT shared memory extension should be attempted.
-;;; This function is mainly for internal use. It is only safe for an application
-;;; to set this to FALSE, since if it is set to TRUE and the server does not
-;;; support the extension it may cause warning messages to be output.
-;;;
-;;; use_xshm : TRUE if use of the MIT shared memory extension should be
-;;;            attempted.
-;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_error_trap_push ()
@@ -703,7 +681,7 @@
 ;;; 8   }
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gdk-error-trap-push :void)
+(defcfun ("gdk_error_trap_push" gdk-error-trap-push) :void)
 
 (export 'gdk-error-trap-push)
 
@@ -714,10 +692,11 @@
 ;;;
 ;;; Removes the X error trap installed with gdk_error_trap_push().
 ;;;
-;;; Returns : the X error code, or 0 if no error occurred.
+;;; Returns :
+;;;     the X error code, or 0 if no error occurred.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gdk-error-trap-pop :int)
+(defcfun ("gdK_error_trap_pop" gdk-error-trap-pop) :int)
 
 (export 'gdk-error-trap-pop)
 
@@ -736,3 +715,5 @@
 ;;;
 ;;; This macro is defined if GDK is configured to use the Win32 backend.
 ;;; ----------------------------------------------------------------------------
+
+;;; --- End of file gdk.general.lisp -------------------------------------------

@@ -58,7 +58,7 @@
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A (~A, ~A)" (gdk-device-name object) (gdk-device-source object) (gdk-device-mode object))))
 
-(defcfun gdk-devices-list (glib:glist (g-object gdk-device) :free-from-foreign nil))
+(defcfun gdk-devices-list (glib:g-list (g-object gdk-device) :free-from-foreign nil))
 
 (export 'gdk-devices-list)
 
