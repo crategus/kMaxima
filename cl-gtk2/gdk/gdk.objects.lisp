@@ -217,8 +217,6 @@
 
 ;gdk_display_get_screen
 
-
-
 (define-g-enum "GdkExtensionMode" extension-mode (:export t :type-initializer "gdk_extension_mode_get_type")
   (:none 0) (:all 1) (:cursor 2))
 
@@ -262,8 +260,6 @@
 (define-g-enum "GdkOwnerChange" owner-change ()
   (:new-owner 0)
   (:destroy 1) (:close 2))
-
-
 
 (define-g-enum "GdkFontType" font-type () :font :fontset)
 
@@ -362,7 +358,8 @@
   (:maximize 16)
   (:close 32))
 
-(define-g-enum "GdkCursorType" cursor-type (:export t :type-initializer "gdk_cursor_type_get_type")
+(define-g-enum "GdkCursorType" cursor-type
+  (:export t :type-initializer "gdk_cursor_type_get_type")
   (:x-cursor 0) (:arrow 2) (:based-arrow-down 4)
   (:based-arrow-up 6) (:boat 8) (:bogosity 10)
   (:bottom-left-corner 12) (:bottom-right-corner 14)
@@ -481,9 +478,12 @@
 
 (export (boxed-related-symbols 'geometry))
 
-(glib:at-init () (foreign-funcall-pointer (foreign-symbol-pointer "gdk_cursor_get_type") () :int))
+(glib:at-init ()
+  (foreign-funcall-pointer (foreign-symbol-pointer "gdk_cursor_get_type")
+                           () :int))
 
-(define-g-boxed-opaque cursor "GdkCursor" :alloc (error "GdkCursor can not be created from Lisp side"))
+(define-g-boxed-opaque cursor "GdkCursor" :alloc
+  (error "GdkCursor can not be created from Lisp side"))
 
 (export (boxed-related-symbols 'cursor))
 
@@ -550,21 +550,7 @@
 
 (export (boxed-related-symbols 'color))
 
-(define-g-object-class "GdkDrawable" drawable (:type-initializer "gdk_drawable_get_type")
-  ((:cffi display drawable-display (g-object display)
-          "gdk_drawable_get_display" nil)
-   (:cffi screen drawable-screen (g-object screen)
-          "gdk_drawable_get_screen" nil)
-   (:cffi visual drawable-visual (g-object visual)
-          "gdk_drawable_get_visual" nil)
-   (:cffi colormap drawable-colormap (g-object colormap)
-          "gdk_drawable_get_colormap" "gdk_drawable_set_colormap")
-   (:cffi depth drawable-depth :int
-          "gdk_drawable_get_depth" nil)
-   (:cffi clip-region drawable-clip-region (g-boxed-foreign region :return)
-          "gdk_drawable_get_clip_region" nil)
-   (:cffi visible-region drawable-visible-region (g-boxed-foreign region :return)
-          "gdk_drawable_get_visible_region" nil)))
+
 
 (define-g-object-class "GdkWindow" gdk-window (:superclass drawable)
    (#+gtk-2.18
@@ -713,8 +699,9 @@
      (rowstride pixbuf-rowstride "rowstride" "gint" t nil)
      (pixels pixbuf-pixels "pixels" "gpointer" t nil)))
 
-(define-g-object-class "GdkPixbufAnimation" pixbuf-animation (:type-initializer "gdk_pixbuf_animation_get_type")
-    nil) 
+(define-g-object-class "GdkPixbufAnimation" pixbuf-animation
+  (:type-initializer "gdk_pixbuf_animation_get_type")
+    nil)
 
 (define-g-object-class "GdkImage" gdk-image
   (:superclass g-object :export t :interfaces
@@ -723,7 +710,8 @@
   ((:cffi colormap gdk-image-colormap (g-object gdk-colormap)
           "gdk_image_get_colormap" "gdk_image_set_colormap")))
 
-(define-g-object-class "GdkDisplay" display (:type-initializer "gdk_display_get_type")
+(define-g-object-class "GdkDisplay" display
+  (:type-initializer "gdk_display_get_type")
   ((:cffi name display-name (glib:g-string :free-from-foreign nil)
           "gdk_display_get_name" nil)
    (:cffi n-screens display-n-screens :int
@@ -740,9 +728,11 @@
           "gdk_display_get_default_cursor_size" nil)
    (:cffi default-group display-default-group (g-object gdk-window)
           "gdk_display_get_default_group" nil)
-   (:cffi supports-selection-notification display-supports-selection-notification :boolean
+   (:cffi supports-selection-notification
+          display-supports-selection-notification :boolean
           "gdk_display_supports_selection_notification" nil)
-   (:cffi supports-clipboard-persistence display-supports-clipboard-persistence :boolean
+   (:cffi supports-clipboard-persistence
+          display-supports-clipboard-persistence :boolean
           "gdk_display_supports_clipboard_persistence" nil)
    (:cffi supports-shapes display-supports-shapes :boolean
           "gdk_display_supports_shapes" nil)
@@ -753,12 +743,8 @@
    (:cffi core-pointer display-core-pointer g-object
           "gdk_display_get_core_pointer" nil)))
 
-(define-g-object-class "GdkDisplayManager" display-manager (:type-initializer "gdk_display_manager_get_type")
-  ((default-display display-manager-default-display "default-display" "GdkDisplay" t t)
-   (:cffi displays display-manager-displays (glib:g-slist (g-object display) :free-from-foreign t)
-          "gdk_display_manager_list_displays" nil)))
-
-(define-g-object-class "GdkVisual" visual (:type-initializer "gdk_visual_get_type")
+(define-g-object-class "GdkVisual" visual
+  (:type-initializer "gdk_visual_get_type")
   ((:cffi screen visual-screen (g-object screen) "gdk_visual_get_screen" nil)
    (:cffi visual-type visual-visual-type visual-type gdk-visual-get-visual-type nil)
    (:cffi depth visual-depth :int gdk-visual-get-depth nil)
@@ -784,7 +770,8 @@
    (:cffi screen colormap-screen (g-object screen)
           "gdk_colormap_get_screen" nil)))
 
-(define-g-object-class "GdkScreen" screen (:type-initializer "gdk_screen_get_type")
+(define-g-object-class "GdkScreen" screen
+  (:type-initializer "gdk_screen_get_type")
   ((font-options screen-font-options "font-options" "gpointer" t t)
    (resolution screen-resolution "resolution" "gdouble" t t)
    (:cffi default-colormap screen-default-colormap (g-object colormap)
@@ -864,7 +851,7 @@
    (:cffi colormap graphics-context-colormap (g-object colormap)
           "gdk_gc_get_colormap" "gdk_gc_set_colormap")))
 
-(define-g-object-class "GdkPixmap" pixmap (:superclass drawable :type-initializer "gdk_pixmap_get_type") ())
+
 
 (define-g-object-class "GdkKeymap" keymap
   (:superclass g-object :export t :interfaces

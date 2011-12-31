@@ -26,12 +26,12 @@
 ;;;
 ;;; GdkDisplay
 ;;;
-;;; GdkDisplay — Controls the keyboard/mouse pointer grabs and a set of
-;;;              GdkScreens
+;;; Controls the keyboard/mouse pointer grabs and a set of GdkScreens
 ;;;	
 ;;; Synopsis
 ;;;
 ;;;                    GdkDisplay;
+;;;
 ;;; GdkDisplay *        gdk_display_open                    (const gchar *display_name);
 ;;; GdkDisplay *        gdk_display_get_default             (void);
 ;;; const gchar *       gdk_display_get_name                (GdkDisplay *display);
@@ -119,9 +119,14 @@
 ;;; The ::closed signal is emitted when the connection to the windowing system
 ;;; for display is closed.
 ;;;
-;;; display   : the object on which the signal is emitted
-;;; is_error  : TRUE if the display was closed due to an error
-;;; user_data : user data set when the signal handler was connected.
+;;; display :
+;;;     the object on which the signal is emitted
+;;;
+;;; is_error :
+;;;     TRUE if the display was closed due to an error
+;;;
+;;; user_data :
+;;;     user data set when the signal handler was connected.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------

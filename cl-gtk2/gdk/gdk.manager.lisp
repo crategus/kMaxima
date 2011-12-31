@@ -1,13 +1,17 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gdk.manager.lisp
 ;;;
-;;; Copyright (C) 2011 Dr. Dieter Kaiser
+;;; Copyright (C) 2009, 2011 Kalyanov Dmitry
+;;; Copyright (C) 2011, 2012 Dr. Dieter Kaiser
 ;;;
-;;; This file contains code from a fork of cl-gtk2 from
-;;; http://common-lisp.net/project/cl-gtk2/
+;;; This file contains code from a fork of cl-gtk2.
+;;; See http://common-lisp.net/project/cl-gtk2/
 ;;;
 ;;; The documentation has been copied from the GDK 2 Reference Manual
-;;; See http://www.gtk.org.
+;;; See http://www.gtk.org
+;;; ----------------------------------------------------------------------------
+;;;
+;;; License
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -26,7 +30,7 @@
 ;;;
 ;;; GdkDisplayManager
 ;;;
-;;; GdkDisplayManager — Maintains a list of all open GdkDisplays
+;;; Maintains a list of all open GdkDisplays
 ;;;	
 ;;; Synopsis
 ;;;
@@ -59,7 +63,7 @@
 ;;;
 ;;; The "default-display" property
 ;;;
-;;;  "default-display"          GdkDisplay*           : Read / Write
+;;;  "default-display" GdkDisplay* : Read / Write
 ;;;
 ;;; The default display for GDK.
 ;;; ----------------------------------------------------------------------------
@@ -74,12 +78,19 @@
 ;;;
 ;;; The ::display_opened signal is emitted when a display is opened.
 ;;;
-;;; display_manager : the object on which the signal is emitted
-;;; display         : the opened display
-;;; user_data       : user data set when the signal handler was connected.
+;;; display_manager :
+;;;     the object on which the signal is emitted
+;;;
+;;; display :
+;;;     the opened display
+;;;
+;;; user_data :
+;;;     user data set when the signal handler was connected.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
+
+(in-package :gdk)
 
 ;;; ----------------------------------------------------------------------------
 ;;; GdkDisplayManager
@@ -91,7 +102,13 @@
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
-(in-package :gdk)
+(define-g-object-class "GdkDisplayManager" display-manager
+  (:type-initializer "gdk_display_manager_get_type")
+  ((default-display display-manager-default-display
+                    "default-display" "GdkDisplay" t t)
+   (:cffi displays display-manager-displays
+          (glib:g-slist (g-object display) :free-from-foreign t)
+          "gdk_display_manager_list_displays" nil)))
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_display_manager_get ()
@@ -100,17 +117,17 @@
 ;;;
 ;;; Gets the singleton GdkDisplayManager object.
 ;;;
-;;; Returns : The global GdkDisplayManager singleton; gdk_parse_pargs(),
-;;;           gdk_init(), or gdk_init_check() must have been called first.
-;;;           [transfer none]
+;;; Returns :
+;;;     The global GdkDisplayManager singleton; gdk_parse_pargs(), gdk_init(),
+;;;     or gdk_init_check() must have been called first.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (display-manager-get "gdk_display_manager_get")
-         (g-object display-manager))
+(defcfun ("gdk_display_manager_get" gdk-display-manager-get)
+    (g-object display-manager))
 
-(export 'display-manager-get)
+(export 'gdk-display-manager-get)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_display_manager_get_default_display ()
@@ -120,9 +137,11 @@
 ;;;
 ;;; Gets the default GdkDisplay.
 ;;;
-;;; display_manager : a GdkDisplayManager
-;;; Returns         : a GdkDisplay, or NULL if there is no default display.
-;;;                   [transfer none]
+;;; display_manager :
+;;;     a GdkDisplayManager
+;;;
+;;; Returns :
+;;;     a GdkDisplay, or NULL if there is no default display.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
@@ -138,8 +157,11 @@
 ;;;
 ;;; Sets display as the default display.
 ;;;
-;;; display_manager : a GdkDisplayManager
-;;; display         : a GdkDisplay
+;;; display_manager :
+;;;     a GdkDisplayManager
+;;;
+;;; display :
+;;;     a GdkDisplay
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
@@ -154,10 +176,12 @@
 ;;;
 ;;; List all currently open displays.
 ;;;
-;;; display_manager : a GdkDisplayManager
-;;; Returns         : a newly allocated GSList of GdkDisplay objects. Free this
-;;;                   list with g_slist_free() when you are done with it.
-;;;                   [transfer container][element-type GdkDisplay]
+;;; display_manager :
+;;;     a GdkDisplayManager
+;;;
+;;; Returns :
+;;;     a newly allocated GSList of GdkDisplay objects. Free this list with
+;;;     g_slist_free() when you are done with it.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
@@ -171,11 +195,16 @@
 ;;;
 ;;; Returns the core pointer device for the given display
 ;;;
-;;; display : a GdkDisplay
-;;; Returns : the core pointer device; this is owned by the display and should
-;;;           not be freed.
+;;; display :
+;;;     a GdkDisplay
+;;;
+;;; Returns :
+;;;     the core pointer device; this is owned by the display and should
+;;;     not be freed.
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
 ;;; *** NOT IMPLEMENTED ***
+
+;;; --- End of file gdk.manager.lisp -------------------------------------------

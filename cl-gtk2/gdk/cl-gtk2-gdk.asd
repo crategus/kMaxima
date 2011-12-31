@@ -17,6 +17,7 @@
                (:file "gdk.events")           ; Functions for handling events               
                (:file "gdk.general")          ; Library initialization
                
+               (:file "gdk.drawable")         ;  Drawing Primitives
                (:file "gdk.windows")
                
                (:file "gdk.manager")
@@ -24,7 +25,7 @@
                (:file "gdk.screen")
                (:file "gdk.region")
                (:file "gdk.gc")
-               (:file "gdk.drawing-primitives")
+
                (:file "gdk.bitmaps")
                (:file "gdk.rgb")
                (:file "gdk.images")
