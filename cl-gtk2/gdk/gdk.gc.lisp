@@ -22,12 +22,14 @@
 
 (export (boxed-related-symbols 'gc-values))
 
-(defcfun (graphics-context-new "gdk_gc_new") (g-object graphics-context :already-referenced)
+(defcfun (graphics-context-new "gdk_gc_new")
+    (g-object graphics-context :already-referenced)
   (drawable (g-object drawable)))
 
 (export 'graphics-context-new)
 
-(defcfun (graphics-context-new-with-values "gdk_gc_new_with_values") (g-object graphics-context :already-referenced)
+(defcfun (graphics-context-new-with-values "gdk_gc_new_with_values")
+    (g-object graphics-context :already-referenced)
   (drawable (g-object drawable))
   (values (g-boxed-foreign gc-values))
   (values-mask gc-values-mask))
@@ -66,7 +68,8 @@
 
 (export 'graphics-context-set-clip-origin)
 
-(defcfun (graphics-context-set-line-attributes "gdk_gc_set_line_attributes") :void
+(defcfun (graphics-context-set-line-attributes "gdk_gc_set_line_attributes")
+    :void
   (graphics-context (g-object graphics-context))
   (line-width :int)
   (line-style line-style)

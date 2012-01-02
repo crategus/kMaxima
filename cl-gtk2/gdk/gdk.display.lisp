@@ -450,19 +450,21 @@
 ;;; Gets the next GdkEvent to be processed for display, fetching events from
 ;;; the windowing system if necessary.
 ;;;
-;;; display : a GdkDisplay
-;;; Returns : the next GdkEvent to be processed, or NULL if no events are
-;;;           pending. The returned GdkEvent should be freed with
-;;;           gdk_event_free().
+;;; display :
+;;;     a GdkDisplay
+;;;
+;;; Returns :
+;;;     the next GdkEvent to be processed, or NULL if no events are pending.
+;;;     The returned GdkEvent should be freed with gdk_event_free().
 ;;;
 ;;; Since 2.2
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (display-get-event "gdk_display_get_event")
-         (g-boxed-foreign event :return)
+(defcfun ("gdk_display_get_event" gdk-display-get-event)
+    (g-boxed-foreign event :return)
   (display (g-object display)))
 
-(export 'display-get-event)
+(export 'gdk-display-get-event)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gdk_display_peek_event ()

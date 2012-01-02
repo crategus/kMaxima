@@ -650,7 +650,7 @@
 
 (defcfun (event-send-client-message "gdk_event_send_client_message") :boolean
   (event (g-boxed-foreign event))
-  (window-id native-window))
+  (window-id gdk-native-window))
 
 (export 'event-send-client-message)
 
@@ -688,7 +688,7 @@
     :boolean
   (display (g-object display))
   (event (g-boxed-foreign event))
-  (winid native-window))
+  (winid gdk-native-window))
 
 (export 'gdk-event-send-client-message-for-display)
 

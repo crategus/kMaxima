@@ -1,4 +1,5 @@
 (in-package :gtk)
+
 (define-g-enum "GtkTextDirection"
     text-direction
     (:export t :type-initializer "gtk_text_direction_get_type")
@@ -340,11 +341,7 @@
   (:grab-broken 4)
   (:error 5))
 
-(define-g-enum "GtkWidgetHelpType"
-    widget-help-type
-    (:export t :type-initializer "gtk_widget_help_type_get_type")
-  (:tooltip 0)
-  (:whats-this 1))
+
 
 (define-g-enum "GtkPackType"
     pack-type
@@ -2915,13 +2912,6 @@
                         :type-initializer "gtk_tooltip_get_type")
                        nil)
 
-(define-g-object-class "GtkAccelGroup" accel-group
-                       (:superclass g-object :export t :interfaces nil
-                        :type-initializer "gtk_accel_group_get_type")
-                       ((is-locked accel-group-is-locked "is-locked" "gboolean"
-                         t nil)
-                        (modifier-mask accel-group-modifier-mask
-                         "modifier-mask" "GdkModifierType" t nil)))
 
 (define-g-object-class "GtkAccelMap" accel-map
                        (:superclass g-object :export t :interfaces nil

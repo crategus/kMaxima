@@ -68,7 +68,7 @@
                                       (setf (cairo-w-draw-fn cw)
                                             (cairo-fn-fn (tree-model-item cb-list iter)))))))
         (setf (combo-box-active-iter combo) (tree-model-iter-first cb-list))
-        (widget-show w)))))
+        (gtk-widget-show w)))))
 
 (defun draw-clock-face (w h)
   "Draw a clock face"

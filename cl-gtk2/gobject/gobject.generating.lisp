@@ -1,21 +1,28 @@
 (in-package :gobject)
 
-
 (defvar *strip-prefix* "")
 (defvar *lisp-name-exceptions* nil)
 (defvar *generation-exclusions* nil)
 (defvar *known-interfaces* (make-hash-table :test 'equal))
 (defvar *additional-properties* nil)
 
-
 (defun name->supplied-p (name)
   (make-symbol (format nil "~A-SUPPLIED-P" (symbol-name name))))
 
-(defstruct property name accessor-name readable writable)
+(defstruct property
+  name
+  accessor-name
+  readable
+  writable)
 
-(defstruct (gobject-property (:include property)) gname type)
+(defstruct (gobject-property (:include property))
+  gname
+  type)
 
-(defstruct (cffi-property (:include property)) type reader writer)
+(defstruct (cffi-property (:include property))
+  type
+  reader
+  writer)
 
 (defmethod make-load-form ((object gobject-property) &optional env)
   (declare (ignore env))
@@ -57,8 +64,10 @@
 
 (defun parse-property (spec)
   (cond
-    ((eq (first spec) :cffi) (parse-cffi-property (rest spec)))
-    (t (parse-gobject-property spec))))
+    ((eq (first spec) :cffi)
+     (parse-cffi-property (rest spec)))
+    (t
+     (parse-gobject-property spec))))
 
 (defun property->method-arg (property)
   (when (or (gobject-property-p property)
@@ -126,7 +135,10 @@
             (list (property->writer class property)))
           (when export
             (list `(export ',(property-accessor-name property)
-                           (find-package ,(package-name (symbol-package (property-accessor-name property)))))))))
+                           (find-package
+                             ,(package-name
+                                (symbol-package
+                                  (property-accessor-name property)))))))))
 
 (defun interface->lisp-class-name (interface)
   (etypecase interface
@@ -140,19 +152,28 @@
                  (foreign-funcall-pointer
                   (foreign-symbol-pointer ,type-initializer) ()
                   g-type)
-                 (warn "Type initializer '~A' is not available" ,type-initializer)))
+                 (warn "Type initializer '~A' is not available"
+                       ,type-initializer)))
     (symbol `(funcall ',type-initializer))))
 
 (defun meta-property->slot (class-name property)
   `(,(property-name property)
-     :allocation ,(if (gobject-property-p property) :gobject-property :gobject-fn)
-     :g-property-type ,(if (gobject-property-p property) (gobject-property-type property) (cffi-property-type property))
-     :accessor ,(intern (format nil "~A-~A" (symbol-name class-name) (property-name property)) (symbol-package class-name))
+     :allocation ,(if (gobject-property-p property)
+                      :gobject-property
+                      :gobject-fn)
+     :g-property-type ,(if (gobject-property-p property)
+                           (gobject-property-type property)
+                           (cffi-property-type property))
+     :accessor ,(intern (format nil "~A-~A"
+                                (symbol-name class-name)
+                                (property-name property))
+                        (symbol-package class-name))
      ,@(when (if (gobject-property-p property)
                  t
                  (not (null (cffi-property-writer property))))
              `(:initarg
-               ,(intern (string-upcase (property-name property)) (find-package :keyword))))
+               ,(intern (string-upcase (property-name property))
+                        (find-package :keyword))))
      ,@(if (gobject-property-p property)
            `(:g-property-name ,(gobject-property-gname property))
            `(:g-getter ,(cffi-property-reader property)
@@ -178,7 +199,8 @@
        ,@(when type-initializer
            (list `(:g-type-initializer . ,type-initializer))))
      ,@(when export
-         (cons `(export ',name (find-package ,(package-name (symbol-package name))))
+         (cons `(export ',name
+                        (find-package ,(package-name (symbol-package name))))
                (mapcar (lambda (property)
                          `(export ',(intern (format nil "~A-~A"
                                                     (symbol-name name)
@@ -207,7 +229,9 @@
        (setf (gethash ,g-type-name *known-interfaces*) ',name))))
 
 (defun starts-with (name prefix)
-  (and prefix (> (length name) (length prefix)) (string= (subseq name 0 (length prefix)) prefix)))
+  (and prefix
+       (> (length name) (length prefix))
+       (string= (subseq name 0 (length prefix)) prefix)))
 
 (defun strip-start (name prefix)
   (if (starts-with name prefix)
@@ -227,7 +251,8 @@
 
 (defun property->property-definition (class-name property)
   (let ((name (g-name->name (g-class-property-definition-name property)))
-        (accessor-name (accessor-name class-name (g-class-property-definition-name property)))
+        (accessor-name (accessor-name class-name
+                                      (g-class-property-definition-name property)))
         (g-name (g-class-property-definition-name property))
         (type (gtype-name (g-class-property-definition-type property)))
         (readable (g-class-property-definition-readable property))
@@ -254,7 +279,8 @@
   (format stream "#~A" (slot-value o 'condition)))
 
 (defun get-g-class-definition (type &optional lisp-name-package)
-  (when (and (stringp type) (null (ignore-errors (gtype type))))
+  (when (and (stringp type)
+             (null (ignore-errors (gtype type))))
     (let ((type-init-name (probable-type-init-name type)))
       (when (foreign-symbol-pointer type-init-name)
         (foreign-funcall-pointer (foreign-symbol-pointer type-init-name) () :int))))
@@ -396,9 +422,9 @@ If non-@code{NIL}, specifies the function that initializes the type: string spec
      (defbitfield ,name ,@values)
      (register-flags-type ,g-name ',name)
      ,@(when export
-             (list `(export ',name (find-package ,(package-name (symbol-package name))))))
+         (list `(export ',name (find-package ,(package-name (symbol-package name))))))
      ,@(when type-initializer
-             (list `(at-init () ,(type-initializer-call type-initializer))))))
+         (list `(at-init () ,(type-initializer-call type-initializer))))))
 
 (defun flags-value->definition (flags-value)
   (let ((value-name (intern (lispify-name (flags-item-nick flags-value))
@@ -435,13 +461,19 @@ If non-@code{NIL}, specifies the function that initializes the type: string spec
 (defun get-g-type-definition (type &optional lisp-name-package)
   (maybe-call-type-init type)
   (cond
-    ((g-type-is-a type (gtype +g-type-enum+)) (get-g-enum-definition type lisp-name-package))
-    ((g-type-is-a type (gtype +g-type-flags+)) (get-g-flags-definition type lisp-name-package))
-    ((g-type-is-a type (gtype +g-type-interface+)) (get-g-interface-definition type lisp-name-package))
-    ((g-type-is-a type (gtype +g-type-object+)) (get-g-class-definition type lisp-name-package))
-    (t (error "Do not know how to automatically generate type definition for ~A type ~A"
-              (gtype-name (g-type-fundamental type))
-              (or (ignore-errors (gtype-name (gtype type))) type)))))
+    ((g-type-is-a type (gtype +g-type-enum+))
+     (get-g-enum-definition type lisp-name-package))
+    ((g-type-is-a type (gtype +g-type-flags+))
+     (get-g-flags-definition type lisp-name-package))
+    ((g-type-is-a type (gtype +g-type-interface+))
+     (get-g-interface-definition type lisp-name-package))
+    ((g-type-is-a type (gtype +g-type-object+))
+     (get-g-class-definition type lisp-name-package))
+    (t
+     (error "Do not know how to automatically generate type definition for ~A type ~A"
+            (gtype-name (g-type-fundamental type))
+            (or (ignore-errors (gtype-name (gtype type)))
+                type)))))
 
 (defun generate-types-hierarchy-to-file (file root-type &key include-referenced prefix package exceptions prologue interfaces enums flags objects exclusions additional-properties)
   (if (not (streamp file))

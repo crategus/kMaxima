@@ -33,17 +33,19 @@
 ;;; Onscreen display areas in the target window system
 ;;; 	
 ;;; Synopsis
-;;; 
-;;; struct              GdkWindow;
+;;;
 ;;; enum                GdkWindowType;
 ;;; enum                GdkWindowClass;
-;;; enum                GdkWindowHints;
-;;; struct              GdkGeometry;
+;;; enum                GdkWindowHints; 
+;;; struct              GdkWindow;
+;;;
 ;;; enum                GdkGravity;
 ;;; enum                GdkWindowEdge;
 ;;; enum                GdkWindowTypeHint;
-;;; struct              GdkWindowAttr;
+;;; struct              GdkGeometry;
+;;;
 ;;; enum                GdkWindowAttributesType;
+;;; struct              GdkWindowAttr;
 ;;;
 ;;; GdkWindow *         gdk_window_new                      (GdkWindow *parent,
 ;;;                                                          GdkWindowAttr *attributes,
@@ -320,7 +322,7 @@
 ;;; GdkWindow *         gdk_window_get_effective_parent     (GdkWindow *window);
 ;;; GdkWindow *         gdk_window_get_toplevel             (GdkWindow *window);
 ;;; GdkWindow *         gdk_window_get_effective_toplevel   (GdkWindow *window);
-;;; GList *	            gdk_window_get_children             (GdkWindow *window);
+;;; GList *	        gdk_window_get_children             (GdkWindow *window);
 ;;; GList *             gdk_window_peek_children            (GdkWindow *window);
 ;;; GdkEventMask        gdk_window_get_events               (GdkWindow *window);
 ;;; void                gdk_window_set_events               (GdkWindow *window,
@@ -403,235 +405,119 @@
 ;;; 
 ;;; Example 7. Composited windows
 ;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 14
-;;; 15
-;;; 16
-;;; 17
-;;; 18
-;;; 19
-;;; 20
-;;; 21
-;;; 22
-;;; 23
-;;; 24
-;;; 25
-;;; 26
-;;; 27
-;;; 28
-;;; 29
-;;; 30
-;;; 31
-;;; 32
-;;; 33
-;;; 34
-;;; 35
-;;; 36
-;;; 37
-;;; 38
-;;; 39
-;;; 40
-;;; 41
-;;; 42
-;;; 43
-;;; 44
-;;; 45
-;;; 46
-;;; 47
-;;; 48
-;;; 49
-;;; 50
-;;; 51
-;;; 52
-;;; 53
-;;; 54
-;;; 55
-;;; 56
-;;; 57
-;;; 58
-;;; 59
-;;; 60
-;;; 61
-;;; 62
-;;; 63
-;;; 64
-;;; 65
-;;; 66
-;;; 67
-;;; 68
-;;; 69
-;;; 70
-;;; 71
-;;; 72
-;;; 73
-;;; 74
-;;; 75
-;;; 76
-;;; 77
-;;; 78
-;;; 79
-;;; 80
-;;; 81
-;;; 82
-;;; 83
-;;; 84
-;;; 85
-;;; 86
-;;; 87
-;;; 88
-;;; 89
-;;; 90
-;;; 91
-;;; 92
-;;; 93
-;;; 94
-;;; 95
-;;; 96
-;;; 97
-;;; 98
-;;; 99
-;;; 100
-;;; 101
-;;; 102
-;;; 103
-;;; 104
-;;; 105
-;;; 106
-;;; 107
-;;; 108
-;;; 109
-;;; 110
-;;; 111
-;;; 112
-;;; 113
-;;; 
-;;; 	
-;;; 
-;;; #include <gtk/gtk.h>
-;;; /* The expose event handler for the event box.
-;;;  *
-;;;  * This function simply draws a transparency onto a widget on the area
-;;;  * for which it receives expose events.  This is intended to give the
-;;;  * event box a "transparent" background.
-;;;  *
-;;;  * In order for this to work properly, the widget must have an RGBA
-;;;  * colourmap.  The widget should also be set as app-paintable since it
-;;;  * doesn't make sense for GTK+ to draw a background if we are drawing it
-;;;  * (and because GTK+ might actually replace our transparency with its
-;;;  * default background colour).
-;;;  */
-;;; static gboolean
-;;; transparent_expose (GtkWidget      *widget,
-;;;                     GdkEventExpose *event)
-;;; {
-;;;   cairo_t *cr;
-;;;   cr = gdk_cairo_create (widget->window);
-;;;   cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
-;;;   gdk_cairo_region (cr, event->region);
-;;;   cairo_fill (cr);
-;;;   cairo_destroy (cr);
-;;;   return FALSE;
-;;; }
-;;; /* The expose event handler for the window.
-;;;  *
-;;;  * This function performs the actual compositing of the event box onto
-;;;  * the already-existing background of the window at 50% normal opacity.
-;;;  *
-;;;  * In this case we do not want app-paintable to be set on the widget
-;;;  * since we want it to draw its own (red) background. Because of this,
-;;;  * however, we must ensure that we use g_signal_connect_after so that
-;;;  * this handler is called after the red has been drawn. If it was
-;;;  * called before then GTK would just blindly paint over our work.
-;;;  *
-;;;  * Note: if the child window has children, then you need a cairo 1.6
-;;;  * feature to make this work correctly.
-;;;  */
-;;; static gboolean
-;;; window_expose_event (GtkWidget      *widget,
-;;;                      GdkEventExpose *event)
-;;; {
-;;;   GdkRegion *region;
-;;;   GtkWidget *child;
-;;;   cairo_t *cr;
-;;;   /* get our child (in this case, the event box) */
-;;;   child = gtk_bin_get_child (GTK_BIN (widget));
-;;;   /* create a cairo context to draw to the window */
-;;;   cr = gdk_cairo_create (widget->window);
-;;;   /* the source data is the (composited) event box */
-;;;   gdk_cairo_set_source_pixmap (cr, child->window,
-;;;                                child->allocation.x,
-;;;                                child->allocation.y);
-;;;   /* draw no more than our expose event intersects our child */
-;;;   region = gdk_region_rectangle (&child->allocation);
-;;;   gdk_region_intersect (region, event->region);
-;;;   gdk_cairo_region (cr, region);
-;;;   cairo_clip (cr);
-;;;   /* composite, with a 50% opacity */
-;;;   cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-;;;   cairo_paint_with_alpha (cr, 0.5);
-;;;   /* we're done */
-;;;   cairo_destroy (cr);
-;;;   return FALSE;
-;;; }
-;;; int
-;;; main (int argc, char **argv)
-;;; {
-;;;   GtkWidget *window, *event, *button;
-;;;   GdkScreen *screen;
-;;;   GdkColormap *rgba;
-;;;   GdkColor red;
-;;;   gtk_init (&argc, &argv);
-;;;   /* Make the widgets */
-;;;   button = gtk_button_new_with_label ("A Button");
-;;;   event = gtk_event_box_new ();
-;;;   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-;;;   /* Put a red background on the window */
-;;;   gdk_color_parse ("red", &red);
-;;;   gtk_widget_modify_bg (window, GTK_STATE_NORMAL, &red);
-;;;   /* Set the colourmap for the event box.
-;;;    * Must be done before the event box is realised.
-;;;    */
-;;;   screen = gtk_widget_get_screen (event);
-;;;   rgba = gdk_screen_get_rgba_colormap (screen);
-;;;   gtk_widget_set_colormap (event, rgba);
-;;;   /* Set our event box to have a fully-transparent background
-;;;    * drawn on it. Currently there is no way to simply tell GTK+
-;;;    * that "transparency" is the background colour for a widget.
-;;;    */
-;;;   gtk_widget_set_app_paintable (GTK_WIDGET (event), TRUE);
-;;;   g_signal_connect (event, "expose-event",
-;;;                     G_CALLBACK (transparent_expose), NULL);
-;;;   /* Put them inside one another */
-;;;   gtk_container_set_border_width (GTK_CONTAINER (window), 10);
-;;;   gtk_container_add (GTK_CONTAINER (window), event);
-;;;   gtk_container_add (GTK_CONTAINER (event), button);
-;;;   /* Realise and show everything */
-;;;   gtk_widget_show_all (window);
-;;;   /* Set the event box GdkWindow to be composited.
-;;;    * Obviously must be performed after event box is realised.
-;;;    */
-;;;   gdk_window_set_composited (event->window, TRUE);
-;;;   /* Set up the compositing handler.
-;;;    * Note that we do _after_ so that the normal (red) background is drawn
-;;;    * by gtk before our compositing occurs.
-;;;    */
-;;;   g_signal_connect_after (window, "expose-event",
-;;;                           G_CALLBACK (window_expose_event), NULL);
-;;;   gtk_main ();
-;;;   return 0;
-;;; }
+;;;  1 #include <gtk/gtk.h>
+;;;  2 /* The expose event handler for the event box.
+;;;  3  *
+;;;  4  * This function simply draws a transparency onto a widget on the area
+;;;  5  * for which it receives expose events.  This is intended to give the
+;;;  6  * event box a "transparent" background.
+;;;  7  *
+;;;  8  * In order for this to work properly, the widget must have an RGBA
+;;;  9  * colourmap.  The widget should also be set as app-paintable since it
+;;; 10  * doesn't make sense for GTK+ to draw a background if we are drawing it
+;;; 11  * (and because GTK+ might actually replace our transparency with its
+;;; 12  * default background colour).
+;;; 13  */
+;;; 14 static gboolean
+;;; 15 transparent_expose (GtkWidget      *widget,
+;;; 16                     GdkEventExpose *event)
+;;; 17 {
+;;; 18   cairo_t *cr;
+;;; 19   cr = gdk_cairo_create (widget->window);
+;;; 20   cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
+;;; 21   gdk_cairo_region (cr, event->region);
+;;; 22   cairo_fill (cr);
+;;; 23   cairo_destroy (cr);
+;;; 24   return FALSE;
+;;; 25 }
+;;; 26 /* The expose event handler for the window.
+;;; 27  *
+;;; 28  * This function performs the actual compositing of the event box onto
+;;; 29  * the already-existing background of the window at 50% normal opacity.
+;;; 30  *
+;;; 31  * In this case we do not want app-paintable to be set on the widget
+;;; 32  * since we want it to draw its own (red) background. Because of this,
+;;; 33  * however, we must ensure that we use g_signal_connect_after so that
+;;; 34  * this handler is called after the red has been drawn. If it was
+;;; 35  * called before then GTK would just blindly paint over our work.
+;;; 36  *
+;;; 37  * Note: if the child window has children, then you need a cairo 1.6
+;;; 38  * feature to make this work correctly.
+;;; 39  */
+;;; 40 static gboolean
+;;; 41 window_expose_event (GtkWidget      *widget,
+;;; 42                     GdkEventExpose *event)
+;;; 43 {
+;;; 44   GdkRegion *region;
+;;; 45   GtkWidget *child;
+;;; 46   cairo_t *cr;
+;;; 47   /* get our child (in this case, the event box) */
+;;; 48   child = gtk_bin_get_child (GTK_BIN (widget));
+;;; 49   /* create a cairo context to draw to the window */
+;;; 50   cr = gdk_cairo_create (widget->window);
+;;; 51   /* the source data is the (composited) event box */
+;;; 52   gdk_cairo_set_source_pixmap (cr, child->window,
+;;; 53                                child->allocation.x,
+;;; 54                                child->allocation.y);
+;;; 55   /* draw no more than our expose event intersects our child */
+;;; 56   region = gdk_region_rectangle (&child->allocation);
+;;; 57   gdk_region_intersect (region, event->region);
+;;; 58   gdk_cairo_region (cr, region);
+;;; 59   cairo_clip (cr);
+;;; 60   /* composite, with a 50% opacity */
+;;; 61   cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+;;; 62   cairo_paint_with_alpha (cr, 0.5);
+;;; 63   /* we're done */
+;;; 64   cairo_destroy (cr);
+;;; 65   return FALSE;
+;;; 66 }
+;;; 67 int
+;;; 68 main (int argc, char **argv)
+;;; 69 {
+;;; 70   GtkWidget *window, *event, *button;
+;;; 71   GdkScreen *screen;
+;;; 72   GdkColormap *rgba;
+;;; 73   GdkColor red;
+;;; 74   gtk_init (&argc, &argv);
+;;; 75   /* Make the widgets */
+;;; 76   button = gtk_button_new_with_label ("A Button");
+;;; 77   event = gtk_event_box_new ();
+;;; 78   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+;;; 79   /* Put a red background on the window */
+;;; 80   gdk_color_parse ("red", &red);
+;;; 81   gtk_widget_modify_bg (window, GTK_STATE_NORMAL, &red);
+;;; 82   /* Set the colourmap for the event box.
+;;; 83    * Must be done before the event box is realised.
+;;; 84    */
+;;; 85   screen = gtk_widget_get_screen (event);
+;;; 86   rgba = gdk_screen_get_rgba_colormap (screen);
+;;; 87   gtk_widget_set_colormap (event, rgba);
+;;; 88   /* Set our event box to have a fully-transparent background
+;;; 89    * drawn on it. Currently there is no way to simply tell GTK+
+;;; 90    * that "transparency" is the background colour for a widget.
+;;; 91    */
+;;; 92   gtk_widget_set_app_paintable (GTK_WIDGET (event), TRUE);
+;;; 93   g_signal_connect (event, "expose-event",
+;;; 94                     G_CALLBACK (transparent_expose), NULL);
+;;; 95   /* Put them inside one another */
+;;; 96   gtk_container_set_border_width (GTK_CONTAINER (window), 10);
+;;; 97   gtk_container_add (GTK_CONTAINER (window), event);
+;;; 98   gtk_container_add (GTK_CONTAINER (event), button);
+;;; 99   /* Realise and show everything */
+;;; 100   gtk_widget_show_all (window);
+;;; 101   /* Set the event box GdkWindow to be composited.
+;;; 102    * Obviously must be performed after event box is realised.
+;;; 103    */
+;;; 104   gdk_window_set_composited (event->window, TRUE);
+;;; 105   /* Set up the compositing handler.
+;;; 106    * Note that we do _after_ so that the normal (red) background is drawn
+;;; 107    * by gtk before our compositing occurs.
+;;; 108    */
+;;; 109   g_signal_connect_after (window, "expose-event",
+;;; 110                           G_CALLBACK (window_expose_event), NULL);
+;;; 111   gtk_main ();
+;;; 112   return 0;
+;;; 113 }
 ;;; 
 ;;; In the example Example 7, “Composited windows”, a button is placed inside
 ;;; of an event box inside of a window. The event box is set as composited and
@@ -677,6 +563,79 @@
 ;;; types.
 ;;; ----------------------------------------------------------------------------
 
+(define-g-object-class "GdkWindow" gdk-window (:superclass drawable)
+   (#+gtk-2.18
+    (cursor gdk-window-cursor "cursor"
+            "GdkCursor" t t)
+    #-gtk-2.18
+    (:cffi cursor gdk-window-cursor (g-boxed-foreign cursor :return)
+           "gdk_window_get_cursor" "gdk_window_set_cursor")
+    (:cffi window-type gdk-window-window-type gdk-window-type
+           "gdk_window_get_window_type" nil)
+    (:cffi is-destroyed gdk-window-is-destroyed :boolean
+           "gdk_window_is_destroyed" nil)
+    (:cffi is-visible gdk-window-is-visible :boolean
+           "gdk_window_is_visible" nil)
+    (:cffi is-viewable gdk-window-is-viewable :boolean
+           "gdk_window_is_viewable" nil)
+    (:cffi state gdk-window-state gdk-window-state 
+           "gdk_window_get_state" nil)
+    (:cffi keep-above gdk-window-keep-above :boolean 
+           nil "gdk_window_set_keep_above")
+    (:cffi keep-below gdk-window-keep-below :boolean 
+           nil "gdk_window_set_keep_below" )
+    (:cffi opacity gdk-window-opacity :double
+           nil "gdk_window_set_opacity")
+    (:cffi composited gdk-window-composited :boolean 
+           nil "gdk_window_set_composited")
+    (:cffi user-data gdk-window-user-data :pointer
+           "gdk_window_get_user_data" "gdk_window_set_user_data")
+    (:cffi override-redirect gdk-window-override-redirect :boolean
+           nil "gdk_window_set_override_redirect")
+    (:cffi accept-focus gdk-window-accept-focus :boolean
+           nil "gdk_window_set_accept_focus")
+    (:cffi focus-on-map gdk-window-focus-on-map :boolean
+           nil "gdk_window_set_focus_on_map")
+    (:cffi title gdk-window-title :string
+           nil "gdk_window_set_title")
+    (:cffi background gdk-window-background (g-boxed-foreign color)
+           nil "gdk_window_set_background")
+    (:cffi icon-list gdk-window-icon-list (glib:g-list (g-object pixbuf))
+           nil "gdk_window_set_icon_list")
+    (:cffi modal-hint gdk-window-modal-hint :boolean
+           nil "gdk_window_set_modal_hint")
+    (:cffi type-hint gdk-window-type-hint gdk-window-type-hint
+           "gdk_window_get_type_hint" "gdk_window_set_type_hint")
+    (:cffi skip-taskbar-hint gdk-window-skip-taskbar-hint :boolean
+           nil "gdk_window_set_skip_taskbar_hint")
+    (:cffi skip-pager-hint gdk-window-skip-pager-hint :boolean
+           nil "gdk_window_set_skip_pager_hint")
+    (:cffi urgency-hint gdk-window-urgency-hint :boolean
+           nil "gdk_window_set_urgency_hint")
+    (:cffi parent gdk-window-parent (g-object gdk-window)
+           "gdk_window_get_parent" nil)
+    (:cffi toplevel gdk-window-get-toplevel (g-object gdk-window)
+           "gdk_window_get_toplevel" nil)
+    (:cffi children gdk-window-children
+           (glib:g-list (g-object gdk-window) :free-from-foreign nil)
+           "gdk_window_peek_children" nil)
+    (:cffi events gdk-window-events event-mask
+           "gdk_window_get_events" "gdk_window_set_events")
+    (:cffi icon-name gdk-window-icon-name :string
+           nil "gdk_window_set_icon_name")
+    (:cffi transient-for gdk-window-transient-for (g-object gdk-window)
+           nil "gdk_window_set_transient_for")
+    (:cffi role gdk-window-role :string
+           nil "gdk_window_set_role")
+    (:cffi startup-id gdk-window-startup-id :string
+           nil "gdk_window_set_startup_id")
+    (:cffi group gdk-window-group (g-object gdk-window)
+           "gdk_window_get_group" "gdk_window_set_group")
+    (:cffi decorations gdk-window-decorations gdk-w-m-decoration
+           gdk-window-get-decorations "gdk_window_set_decorations")
+    (:cffi functions gdk-window-functions gdk-w-m-function
+           nil "gdk_window_set_functions")))
+
 ;;; ----------------------------------------------------------------------------
 ;;; enum GdkWindowType
 ;;; 
@@ -717,6 +676,16 @@
 ;;;     Since 2.18
 ;;; ----------------------------------------------------------------------------
 
+(define-g-enum "GdkWindowType" gdk-window-type
+  (:export t :type-initializer "gdk_window_type_get_type")
+  (:root 0)
+  (:toplevel 1)
+  (:child 2)
+  (:dialog 3)
+  (:temp 4)
+  (:foreign 5)
+  (:offscreen 6))
+
 ;;; ----------------------------------------------------------------------------
 ;;; enum GdkWindowClass
 ;;; 
@@ -737,6 +706,11 @@
 ;;; 	window for events only
 ;;; ----------------------------------------------------------------------------
 
+(define-g-enum "GdkWindowClass" gdk-window-class
+  (:export t :type-initializer "gdk_window_class_get_type")
+  (:input-output 0)
+  (:input-only 1))
+
 ;;; ----------------------------------------------------------------------------
 ;;; enum GdkWindowHints
 ;;; 
@@ -753,7 +727,14 @@
 ;;;   GDK_HINT_USER_SIZE   = 1 << 8
 ;;; } GdkWindowHints;
 ;;; 
-;;; Used to indicate which fields of a GdkGeometry struct should be paid attention to. Also, the presence/absence of GDK_HINT_POS, GDK_HINT_USER_POS, and GDK_HINT_USER_SIZE is significant, though they don't directly refer to GdkGeometry fields. GDK_HINT_USER_POS will be set automatically by GtkWindow if you call gtk_window_move(). GDK_HINT_USER_POS and GDK_HINT_USER_SIZE should be set if the user specified a size/position using a --geometry command-line argument; gtk_window_parse_geometry() automatically sets these flags.
+;;; Used to indicate which fields of a GdkGeometry struct should be paid
+;;; attention to. Also, the presence/absence of GDK_HINT_POS, GDK_HINT_USER_POS,
+;;; and GDK_HINT_USER_SIZE is significant, though they don't directly refer to
+;;; GdkGeometry fields. GDK_HINT_USER_POS will be set automatically by GtkWindow
+;;; if you call gtk_window_move(). GDK_HINT_USER_POS and GDK_HINT_USER_SIZE
+;;; should be set if the user specified a size/position using a --geometry
+;;; command-line argument; gtk_window_parse_geometry() automatically sets these
+;;; flags.
 ;;; 
 ;;; GDK_HINT_POS
 ;;; 	indicates that the program has positioned the window
@@ -781,94 +762,21 @@
 ;;; 
 ;;; GDK_HINT_USER_SIZE
 ;;; 	indicates that the window's size was explicitly set by the user
-;;; struct GdkGeometry
-;;; 
-;;; struct GdkGeometry {
-;;;   gint min_width;
-;;;   gint min_height;
-;;;   gint max_width;
-;;;   gint max_height;
-;;;   gint base_width;
-;;;   gint base_height;
-;;;   gint width_inc;
-;;;   gint height_inc;
-;;;   gdouble min_aspect;
-;;;   gdouble max_aspect;
-;;;   GdkGravity win_gravity;
-;;; };
-;;; 
-;;; The GdkGeometry struct gives the window manager information about a window's geometry constraints. Normally you would set these on the GTK+ level using gtk_window_set_geometry_hints(). GtkWindow then sets the hints on the GdkWindow it creates.
-;;; 
-;;; gdk_window_set_geometry_hints() expects the hints to be fully valid already and simply passes them to the window manager; in contrast, gtk_window_set_geometry_hints() performs some interpretation. For example, GtkWindow will apply the hints to the geometry widget instead of the toplevel window, if you set a geometry widget. Also, the min_width/min_height/max_width/max_height fields may be set to -1, and GtkWindow will substitute the size request of the window or geometry widget. If the minimum size hint is not provided, GtkWindow will use its requisition as the minimum size. If the minimum size is provided and a geometry widget is set, GtkWindow will take the minimum size as the minimum size of the geometry widget rather than the entire window. The base size is treated similarly.
-;;; 
-;;; The canonical use-case for gtk_window_set_geometry_hints() is to get a terminal widget to resize properly. Here, the terminal text area should be the geometry widget; GtkWindow will then automatically set the base size to the size of other widgets in the terminal window, such as the menubar and scrollbar. Then, the width_inc and height_inc fields should be set to the size of one character in the terminal. Finally, the base size should be set to the size of one character. The net effect is that the minimum size of the terminal will have a 1x1 character terminal area, and only terminal sizes on the "character grid" will be allowed.
-;;; 
-;;; Here's an example of how the terminal example would be implemented, assuming a terminal area widget called "terminal" and a toplevel window "toplevel":
-;;; 
-;;; 1
-;;; 2
-;;; 3
-;;; 4
-;;; 5
-;;; 6
-;;; 7
-;;; 8
-;;; 9
-;;; 10
-;;; 11
-;;; 12
-;;; 13
-;;; 
-;;; 	
-;;; 
-;;; GdkGeometry hints;
-;;; hints.base_width = terminal->char_width;
-;;;         hints.base_height = terminal->char_height;
-;;;         hints.min_width = terminal->char_width;
-;;;         hints.min_height = terminal->char_height;
-;;;         hints.width_inc = terminal->char_width;
-;;;         hints.height_inc = terminal->char_height;
-;;; gtk_window_set_geometry_hints (GTK_WINDOW (toplevel),
-;;;                    GTK_WIDGET (terminal),
-;;;                        &hints,
-;;;                    GDK_HINT_RESIZE_INC |
-;;;                                        GDK_HINT_MIN_SIZE |
-;;;                                        GDK_HINT_BASE_SIZE);
-;;; 
-;;; The other useful fields are the min_aspect and max_aspect fields; these contain a width/height ratio as a floating point number. If a geometry widget is set, the aspect applies to the geometry widget rather than the entire window. The most common use of these hints is probably to set min_aspect and max_aspect to the same value, thus forcing the window to keep a constant aspect ratio.
-;;; 
-;;; gint min_width;
-;;; 	minimum width of window (or -1 to use requisition, with GtkWindow only)
-;;; 
-;;; gint min_height;
-;;; 	minimum height of window (or -1 to use requisition, with GtkWindow only)
-;;; 
-;;; gint max_width;
-;;; 	maximum width of window (or -1 to use requisition, with GtkWindow only)
-;;; 
-;;; gint max_height;
-;;; 	maximum height of window (or -1 to use requisition, with GtkWindow only)
-;;; 
-;;; gint base_width;
-;;; 	allowed window widths are base_width + width_inc * N where N is any integer (-1 allowed with GtkWindow)
-;;; 
-;;; gint base_height;
-;;; 	allowed window widths are base_height + height_inc * N where N is any integer (-1 allowed with GtkWindow)
-;;; 
-;;; gint width_inc;
-;;; 	width resize increment
-;;; 
-;;; gint height_inc;
-;;; 	height resize increment
-;;; 
-;;; gdouble min_aspect;
-;;; 	minimum width/height ratio
-;;; 
-;;; gdouble max_aspect;
-;;; 	maximum width/height ratio
-;;; 
-;;; GdkGravity win_gravity;
-;;; 	window gravity, see gtk_window_set_gravity()
+;;; ----------------------------------------------------------------------------
+
+(define-g-flags "GdkWindowHints" gdk-window-hints
+  (:export t :type-initializer "gdk_window_hints_get_type")
+  (:pos 1)
+  (:min-size 2)
+  (:max-size 4)
+  (:base-size 8)
+  (:aspect 16)
+  (:resize-inc 32)
+  (:win-gravity 64)
+  (:user-pos 128)
+  (:user-size 256))
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GdkGravity
 ;;; 
 ;;; typedef enum
@@ -885,7 +793,10 @@
 ;;;   GDK_GRAVITY_STATIC
 ;;; } GdkGravity;
 ;;; 
-;;; Defines the reference point of a window and the meaning of coordinates passed to gtk_window_move(). See gtk_window_move() and the "implementation notes" section of the Extended Window Manager Hints specification for more details.
+;;; Defines the reference point of a window and the meaning of coordinates
+;;; passed to gtk_window_move(). See gtk_window_move() and the "implementation
+;;; notes" section of the Extended Window Manager Hints specification for more
+;;; details.
 ;;; 
 ;;; GDK_GRAVITY_NORTH_WEST
 ;;; 	the reference point is at the top left corner.
@@ -915,7 +826,23 @@
 ;;; 	the reference point is at the lower right corner.
 ;;; 
 ;;; GDK_GRAVITY_STATIC
-;;; 	the reference point is at the top left corner of the window itself, ignoring window manager decorations.
+;;; 	the reference point is at the top left corner of the window itself,
+;;;     ignoring window manager decorations.
+;;; ----------------------------------------------------------------------------
+
+(define-g-enum "GdkGravity" gravity ()
+  (:north-west 1)
+  :north
+  :north-east
+  :west
+  :center
+  :east
+  :south-west
+  :south
+  :south-east
+  :static)
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GdkWindowEdge
 ;;; 
 ;;; typedef enum
@@ -955,6 +882,20 @@
 ;;; 
 ;;; GDK_WINDOW_EDGE_SOUTH_EAST
 ;;; 	the lower right corner.
+;;; ----------------------------------------------------------------------------
+
+(define-g-enum "GdkWindowEdge" gdk-window-edge
+  (:export t :type-initializer "gdk_window_edge_get_type")
+  (:north-west 0)
+  (:north 1)
+  (:north-east 2)
+  (:west 3)
+  (:east 4)
+  (:south-west 5)
+  (:south 6)
+  (:south-east 7))
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GdkWindowTypeHint
 ;;; 
 ;;; typedef enum
@@ -967,7 +908,7 @@
 ;;;   GDK_WINDOW_TYPE_HINT_UTILITY,
 ;;;   GDK_WINDOW_TYPE_HINT_DOCK,
 ;;;   GDK_WINDOW_TYPE_HINT_DESKTOP,
-;;;   GDK_WINDOW_TYPE_HINT_DROPDOWN_MENU, /* A drop down menu (from a menubar) */
+;;;   GDK_WINDOW_TYPE_HINT_DROPDOWN_MENU, /* A drop down menu (from a menubar)*/
 ;;;   GDK_WINDOW_TYPE_HINT_POPUP_MENU, /* A popup menu (from right-click) */
 ;;;   GDK_WINDOW_TYPE_HINT_TOOLTIP,
 ;;;   GDK_WINDOW_TYPE_HINT_NOTIFICATION,
@@ -975,9 +916,12 @@
 ;;;   GDK_WINDOW_TYPE_HINT_DND
 ;;; } GdkWindowTypeHint;
 ;;; 
-;;; These are hints for the window manager that indicate what type of function the window has. The window manager can use this when determining decoration and behaviour of the window. The hint must be set before mapping the window.
+;;; These are hints for the window manager that indicate what type of function
+;;; the window has. The window manager can use this when determining decoration
+;;; and behaviour of the window. The hint must be set before mapping the window.
 ;;; 
-;;; See the Extended Window Manager Hints specification for more details about window types.
+;;; See the Extended Window Manager Hints specification for more details about
+;;; window types.
 ;;; 
 ;;; GDK_WINDOW_TYPE_HINT_NORMAL
 ;;; 	Normal toplevel window.
@@ -986,7 +930,8 @@
 ;;; 	Dialog window.
 ;;; 
 ;;; GDK_WINDOW_TYPE_HINT_MENU
-;;; 	Window used to implement a menu; GTK+ uses this hint only for torn-off menus, see GtkTearoffMenuItem.
+;;; 	Window used to implement a menu; GTK+ uses this hint only for torn-off
+;;;     menus, see GtkTearoffMenuItem.
 ;;; 
 ;;; GDK_WINDOW_TYPE_HINT_TOOLBAR
 ;;; 	Window used to implement toolbars.
@@ -1021,6 +966,206 @@
 ;;; GDK_WINDOW_TYPE_HINT_DND
 ;;; 	A window that is used to implement a DND cursor.
 ;;; ----------------------------------------------------------------------------
+
+(define-g-enum "GdkWindowTypeHint" gdk-window-type-hint
+  (:export t :type-initializer "gdk_window_type_hint_get_type")
+  (:normal 0)
+  (:dialog 1)
+  (:menu 2)
+  (:toolbar 3)
+  (:splashscreen 4)
+  (:utility 5)
+  (:dock 6)
+  (:desktop 7)
+  (:dropdown-menu 8)
+  (:popup-menu 9)
+  (:tooltip 10)
+  (:notification 11)
+  (:combo 12)
+  (:dnd 13))
+
+;;; ----------------------------------------------------------------------------
+;;; struct GdkGeometry
+;;; 
+;;; struct GdkGeometry {
+;;;   gint min_width;
+;;;   gint min_height;
+;;;   gint max_width;
+;;;   gint max_height;
+;;;   gint base_width;
+;;;   gint base_height;
+;;;   gint width_inc;
+;;;   gint height_inc;
+;;;   gdouble min_aspect;
+;;;   gdouble max_aspect;
+;;;   GdkGravity win_gravity;
+;;; };
+;;; 
+;;; The GdkGeometry struct gives the window manager information about a window's
+;;; geometry constraints. Normally you would set these on the GTK+ level using
+;;; gtk_window_set_geometry_hints(). GtkWindow then sets the hints on the
+;;; GdkWindow it creates.
+;;; 
+;;; gdk_window_set_geometry_hints() expects the hints to be fully valid already
+;;; and simply passes them to the window manager; in contrast,
+;;; gtk_window_set_geometry_hints() performs some interpretation. For example,
+;;; GtkWindow will apply the hints to the geometry widget instead of the
+;;; toplevel window, if you set a geometry widget. Also, the
+;;; min_width/min_height/max_width/max_height fields may be set to -1, and
+;;; GtkWindow will substitute the size request of the window or geometry widget.
+;;; If the minimum size hint is not provided, GtkWindow will use its requisition
+;;; as the minimum size. If the minimum size is provided and a geometry widget
+;;; is set, GtkWindow will take the minimum size as the minimum size of the
+;;; geometry widget rather than the entire window. The base size is treated
+;;; similarly.
+;;; 
+;;; The canonical use-case for gtk_window_set_geometry_hints() is to get a
+;;; terminal widget to resize properly. Here, the terminal text area should be
+;;; the geometry widget; GtkWindow will then automatically set the base size to
+;;; the size of other widgets in the terminal window, such as the menubar and
+;;; scrollbar. Then, the width_inc and height_inc fields should be set to the
+;;; size of one character in the terminal. Finally, the base size should be set
+;;; to the size of one character. The net effect is that the minimum size of
+;;; the terminal will have a 1x1 character terminal area, and only terminal
+;;; sizes on the "character grid" will be allowed.
+;;; 
+;;; Here's an example of how the terminal example would be implemented, assuming
+;;; a terminal area widget called "terminal" and a toplevel window "toplevel":
+;;; 
+;;;  1 GdkGeometry hints;
+;;;  2 hints.base_width = terminal->char_width;
+;;;  3         hints.base_height = terminal->char_height;
+;;;  4         hints.min_width = terminal->char_width;
+;;;  5         hints.min_height = terminal->char_height;
+;;;  6         hints.width_inc = terminal->char_width;
+;;;  7         hints.height_inc = terminal->char_height;
+;;;  8 gtk_window_set_geometry_hints (GTK_WINDOW (toplevel),
+;;;  9                    GTK_WIDGET (terminal),
+;;; 10                        &hints,
+;;; 11                    GDK_HINT_RESIZE_INC |
+;;; 12                                        GDK_HINT_MIN_SIZE |
+;;; 13                                        GDK_HINT_BASE_SIZE);
+;;; 
+;;; The other useful fields are the min_aspect and max_aspect fields; these
+;;; contain a width/height ratio as a floating point number. If a geometry
+;;; widget is set, the aspect applies to the geometry widget rather than the
+;;; entire window. The most common use of these hints is probably to set
+;;; min_aspect and max_aspect to the same value, thus forcing the window to
+;;; keep a constant aspect ratio.
+;;; 
+;;; gint min_width;
+;;; 	minimum width of window (or -1 to use requisition, with GtkWindow only)
+;;; 
+;;; gint min_height;
+;;; 	minimum height of window (or -1 to use requisition, with GtkWindow only)
+;;; 
+;;; gint max_width;
+;;; 	maximum width of window (or -1 to use requisition, with GtkWindow only)
+;;; 
+;;; gint max_height;
+;;; 	maximum height of window (or -1 to use requisition, with GtkWindow only)
+;;; 
+;;; gint base_width;
+;;; 	allowed window widths are base_width + width_inc * N where N is any
+;;;     integer (-1 allowed with GtkWindow)
+;;; 
+;;; gint base_height;
+;;; 	allowed window widths are base_height + height_inc * N where N is any
+;;;     integer (-1 allowed with GtkWindow)
+;;; 
+;;; gint width_inc;
+;;; 	width resize increment
+;;; 
+;;; gint height_inc;
+;;; 	height resize increment
+;;; 
+;;; gdouble min_aspect;
+;;; 	minimum width/height ratio
+;;; 
+;;; gdouble max_aspect;
+;;; 	maximum width/height ratio
+;;; 
+;;; GdkGravity win_gravity;
+;;; 	window gravity, see gtk_window_set_gravity()
+;;; ----------------------------------------------------------------------------
+
+(define-g-boxed-cstruct geometry nil
+  (min-width :int :initform 0)
+  (min-height :int :initform 0)
+  (max-width :int :initform 0)
+  (max-height :int :initform 0)
+  (base-width :int :initform 0)
+  (base-height :int :initform 0)
+  (width-increment :int :initform 0)
+  (height-increment :int :initform 0)
+  (min-aspect :double :initform 0.0d0)
+  (max-aspect :double :initform 0.0d0)
+  (gravity gravity :initform :north-west))
+
+(export (boxed-related-symbols 'geometry))
+
+;;; ----------------------------------------------------------------------------
+;;; enum GdkWindowAttributesType
+;;; 
+;;; typedef enum
+;;; {
+;;;   GDK_WA_TITLE     = 1 << 1,
+;;;   GDK_WA_X	       = 1 << 2,
+;;;   GDK_WA_Y	       = 1 << 3,
+;;;   GDK_WA_CURSOR    = 1 << 4,
+;;;   GDK_WA_COLORMAP  = 1 << 5,
+;;;   GDK_WA_VISUAL    = 1 << 6,
+;;;   GDK_WA_WMCLASS   = 1 << 7,
+;;;   GDK_WA_NOREDIR   = 1 << 8,
+;;;   GDK_WA_TYPE_HINT = 1 << 9
+;;; } GdkWindowAttributesType;
+;;; 
+;;; Used to indicate which fields in the GdkWindowAttr struct should be honored.
+;;; For example, if you filled in the "cursor" and "x" fields of GdkWindowAttr,
+;;; pass "GDK_WA_X | GDK_WA_CURSOR" to gdk_window_new(). Fields in GdkWindowAttr
+;;; not covered by a bit in this enum are required; for example, the
+;;; width/height, wclass, and window_type fields are required, they have no
+;;; corresponding flag in GdkWindowAttributesType.
+;;; 
+;;; GDK_WA_TITLE
+;;; 	Honor the title field
+;;; 
+;;; GDK_WA_X
+;;; 	Honor the X coordinate field
+;;; 
+;;; GDK_WA_Y
+;;; 	Honor the Y coordinate field
+;;; 
+;;; GDK_WA_CURSOR
+;;; 	Honor the cursor field
+;;; 
+;;; GDK_WA_COLORMAP
+;;; 	Honor the colormap field
+;;; 
+;;; GDK_WA_VISUAL
+;;; 	Honor the visual field
+;;; 
+;;; GDK_WA_WMCLASS
+;;; 	Honor the wmclass_class and wmclass_name fields
+;;; 
+;;; GDK_WA_NOREDIR
+;;; 	Honor the override_redirect field
+;;; 
+;;; GDK_WA_TYPE_HINT
+;;; 	Honor the type_hint field
+;;; ----------------------------------------------------------------------------
+
+(define-g-flags "GdkWindowAttributesType" gdk-window-attributes-type
+  (:export t :type-initializer "gdk_window_attributes_type_get_type")
+  (:title 2)
+  (:x 4)
+  (:y 8)
+  (:cursor 16)
+  (:colormap 32)
+  (:visual 64)
+  (:wmclass 128)
+  (:noredir 256)
+  (:type-hint 512))
 
 ;;; ----------------------------------------------------------------------------
 ;;; struct GdkWindowAttr
@@ -1063,7 +1208,8 @@
 ;;; 	height of window
 ;;; 
 ;;; GdkWindowClass wclass;
-;;; 	GDK_INPUT_OUTPUT (normal window) or GDK_INPUT_ONLY (invisible window that receives events)
+;;; 	GDK_INPUT_OUTPUT (normal window) or GDK_INPUT_ONLY (invisible window
+;;;     that receives events)
 ;;; 
 ;;; GdkVisual *visual;
 ;;; 	GdkVisual for window
@@ -1110,81 +1256,65 @@
 (export (boxed-related-symbols 'gdk-window-attr))
 
 ;;; ----------------------------------------------------------------------------
-;;; enum GdkWindowAttributesType
-;;; 
-;;; typedef enum
-;;; {
-;;;   GDK_WA_TITLE	   = 1 << 1,
-;;;   GDK_WA_X	   = 1 << 2,
-;;;   GDK_WA_Y	   = 1 << 3,
-;;;   GDK_WA_CURSOR	   = 1 << 4,
-;;;   GDK_WA_COLORMAP  = 1 << 5,
-;;;   GDK_WA_VISUAL	   = 1 << 6,
-;;;   GDK_WA_WMCLASS   = 1 << 7,
-;;;   GDK_WA_NOREDIR   = 1 << 8,
-;;;   GDK_WA_TYPE_HINT = 1 << 9
-;;; } GdkWindowAttributesType;
-;;; 
-;;; Used to indicate which fields in the GdkWindowAttr struct should be honored. For example, if you filled in the "cursor" and "x" fields of GdkWindowAttr, pass "GDK_WA_X | GDK_WA_CURSOR" to gdk_window_new(). Fields in GdkWindowAttr not covered by a bit in this enum are required; for example, the width/height, wclass, and window_type fields are required, they have no corresponding flag in GdkWindowAttributesType.
-;;; 
-;;; GDK_WA_TITLE
-;;; 	Honor the title field
-;;; 
-;;; GDK_WA_X
-;;; 	Honor the X coordinate field
-;;; 
-;;; GDK_WA_Y
-;;; 	Honor the Y coordinate field
-;;; 
-;;; GDK_WA_CURSOR
-;;; 	Honor the cursor field
-;;; 
-;;; GDK_WA_COLORMAP
-;;; 	Honor the colormap field
-;;; 
-;;; GDK_WA_VISUAL
-;;; 	Honor the visual field
-;;; 
-;;; GDK_WA_WMCLASS
-;;; 	Honor the wmclass_class and wmclass_name fields
-;;; 
-;;; GDK_WA_NOREDIR
-;;; 	Honor the override_redirect field
-;;; 
-;;; GDK_WA_TYPE_HINT
-;;; 	Honor the type_hint field
 ;;; gdk_window_new ()
 ;;; 
-;;; GdkWindow *         gdk_window_new                      (GdkWindow *parent,
-;;;                                                          GdkWindowAttr *attributes,
-;;;                                                          gint attributes_mask);
+;;; GdkWindow * gdk_window_new (GdkWindow *parent,
+;;;                             GdkWindowAttr *attributes,
+;;;                             gint attributes_mask);
 ;;; 
-;;; Creates a new GdkWindow using the attributes from attributes. See GdkWindowAttr and GdkWindowAttributesType for more details. Note: to use this on displays other than the default display, parent must be specified.
+;;; Creates a new GdkWindow using the attributes from attributes. See
+;;; GdkWindowAttr and GdkWindowAttributesType for more details. Note: to use
+;;; this on displays other than the default display, parent must be specified.
 ;;; 
 ;;; parent :
-;;; 	a GdkWindow, or NULL to create the window as a child of the default root window for the default display. [allow-none]
+;;; 	a GdkWindow, or NULL to create the window as a child of the default
+;;;     root window for the default display.
 ;;; 
 ;;; attributes :
 ;;; 	attributes of the new window
 ;;; 
-;;; attributes_mask :
+;;; attributes-mask :
 ;;; 	mask indicating which fields in attributes are valid
 ;;; 
 ;;; Returns :
-;;; 	the new GdkWindow. [transfer none]
+;;; 	the new GdkWindow.
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_new" gdk-window-new)
+    (g-object gdk-window :already-referenced)
+  (parent (g-object gdk-window))
+  (attributes (g-boxed-foreign gdk-window-attr))
+  (attributes-mask gdk-window-attributes-type))
+
+(export 'gdk-window-new)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_destroy ()
 ;;; 
-;;; void                gdk_window_destroy                  (GdkWindow *window);
+;;; void gdk_window_destroy (GdkWindow *window);
 ;;; 
-;;; Destroys the window system resources associated with window and decrements window's reference count. The window system resources for all children of window are also destroyed, but the children's reference counts are not decremented.
+;;; Destroys the window system resources associated with window and decrements
+;;; window's reference count. The window system resources for all children of
+;;; window are also destroyed, but the children's reference counts are not
+;;; decremented.
 ;;; 
-;;; Note that a window will not be destroyed automatically when its reference count reaches zero. You must call this function yourself before that happens.
+;;; Note that a window will not be destroyed automatically when its reference
+;;; count reaches zero. You must call this function yourself before that
+;;; happens.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_destroy" gdk-window-destroy) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-destroy)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_ref
 ;;; 
-;;; #define gdk_window_ref                 g_object_ref
+;;; #define gdk_window_ref g_object_ref
 ;;; 
 ;;; Warning
 ;;; 
@@ -1194,18 +1324,24 @@
 ;;; 
 ;;; Returns :
 ;;; 	the window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_unref
 ;;; 
-;;; #define gdk_window_unref               g_object_unref
+;;; #define gdk_window_unref g_object_unref
 ;;; 
 ;;; Warning
 ;;; 
 ;;; gdk_window_unref is deprecated and should not be used in newly-written code.
 ;;; 
 ;;; Deprecated equivalent of g_object_unref()
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_display ()
 ;;; 
-;;; GdkDisplay *        gdk_window_get_display              (GdkWindow *window);
+;;; GdkDisplay * gdk_window_get_display (GdkWindow *window);
 ;;; 
 ;;; Gets the GdkDisplay associated with a GdkWindow.
 ;;; 
@@ -1216,9 +1352,12 @@
 ;;; 	the GdkDisplay associated with window
 ;;; 
 ;;; Since 2.24
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_screen ()
 ;;; 
-;;; GdkScreen *         gdk_window_get_screen               (GdkWindow *window);
+;;; GdkScreen * gdk_window_get_screen (GdkWindow *window);
 ;;; 
 ;;; Gets the GdkScreen associated with a GdkWindow.
 ;;; 
@@ -1227,9 +1366,12 @@
 ;;; 
 ;;; Returns :
 ;;; 	the GdkScreen associated with window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_visual ()
 ;;; 
-;;; GdkVisual *         gdk_window_get_visual               (GdkWindow *window);
+;;; GdkVisual * gdk_window_get_visual (GdkWindow *window);
 ;;; 
 ;;; Gets the GdkVisual describing the pixel format of window.
 ;;; 
@@ -1240,13 +1382,18 @@
 ;;; 	a GdkVisual
 ;;; 
 ;;; Since 2.24
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_width ()
 ;;; 
-;;; int                 gdk_window_get_width                (GdkWindow *window);
+;;; int gdk_window_get_width (GdkWindow *window);
 ;;; 
 ;;; Returns the width of the given window.
 ;;; 
-;;; On the X11 platform the returned size is the size reported in the most-recently-processed configure event, rather than the current size on the X server.
+;;; On the X11 platform the returned size is the size reported in the
+;;; most-recently-processed configure event, rather than the current size on
+;;; the X server.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1255,13 +1402,18 @@
 ;;; 	The width of window
 ;;; 
 ;;; Since 2.24
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_height ()
 ;;; 
-;;; int                 gdk_window_get_height               (GdkWindow *window);
+;;; int gdk_window_get_height (GdkWindow *window);
 ;;; 
 ;;; Returns the height of the given window.
 ;;; 
-;;; On the X11 platform the returned size is the size reported in the most-recently-processed configure event, rather than the current size on the X server.
+;;; On the X11 platform the returned size is the size reported in the
+;;; most-recently-processed configure event, rather than the current size on
+;;; the X server.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1270,9 +1422,12 @@
 ;;; 	The height of window
 ;;; 
 ;;; Since 2.24
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_window_type ()
 ;;; 
-;;; GdkWindowType       gdk_window_get_window_type          (GdkWindow *window);
+;;; GdkWindowType gdk_window_get_window_type (GdkWindow *window);
 ;;; 
 ;;; Gets the type of the window. See GdkWindowType.
 ;;; 
@@ -1281,56 +1436,111 @@
 ;;; 
 ;;; Returns :
 ;;; 	type of window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_at_pointer ()
 ;;; 
-;;; GdkWindow *         gdk_window_at_pointer               (gint *win_x,
-;;;                                                          gint *win_y);
+;;; GdkWindow * gdk_window_at_pointer (gint *win_x, gint *win_y);
 ;;; 
-;;; Obtains the window underneath the mouse pointer, returning the location of that window in win_x, win_y. Returns NULL if the window under the mouse pointer is not known to GDK (if the window belongs to another application and a GdkWindow hasn't been created for it with gdk_window_foreign_new())
+;;; Obtains the window underneath the mouse pointer, returning the location of
+;;; that window in win_x, win_y. Returns NULL if the window under the mouse
+;;; pointer is not known to GDK (if the window belongs to another application
+;;; and a GdkWindow hasn't been created for it with gdk_window_foreign_new())
 ;;; 
-;;; NOTE: For multihead-aware widgets or applications use gdk_display_get_window_at_pointer() instead.
+;;; NOTE: For multihead-aware widgets or applications use
+;;; gdk_display_get_window_at_pointer() instead.
 ;;; 
-;;; win_x :
-;;; 	return location for origin of the window under the pointer. [out][allow-none]
+;;; win-x :
+;;; 	return location for origin of the window under the pointer.
 ;;; 
-;;; win_y :
-;;; 	return location for origin of the window under the pointer. [out][allow-none]
+;;; win-y :
+;;; 	return location for origin of the window under the pointer.
 ;;; 
 ;;; Returns :
-;;; 	window under the mouse pointer. [transfer none]
+;;; 	window under the mouse pointer.
+;;; ----------------------------------------------------------------------------
+
+(defcfun (%gdk-window-at-pointer "gdk_window_at_pointer") (g-object gdk-window)
+  (win-x (:pointer :int))
+  (win-y (:pointer :int)))
+
+(defun gdk-window-at-pointer ()
+  (with-foreign-objects ((x :int) (y :int))
+    (let ((window (%gdk-window-at-pointer x y)))
+      (if window
+          (values window (mem-ref x :int) (mem-ref y :int))
+          (values nil nil nil)))))
+
+(export 'gdk-window-at-pointer)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_show ()
 ;;; 
-;;; void                gdk_window_show                     (GdkWindow *window);
+;;; void gdk_window_show (GdkWindow *window);
 ;;; 
-;;; Like gdk_window_show_unraised(), but also raises the window to the top of the window stack (moves the window to the front of the Z-order).
+;;; Like gdk_window_show_unraised(), but also raises the window to the top of
+;;; the window stack (moves the window to the front of the Z-order).
 ;;; 
-;;; This function maps a window so it's visible onscreen. Its opposite is gdk_window_hide().
+;;; This function maps a window so it's visible onscreen. Its opposite is
+;;; gdk_window_hide().
 ;;; 
-;;; When implementing a GtkWidget, you should call this function on the widget's GdkWindow as part of the "map" method.
+;;; When implementing a GtkWidget, you should call this function on the widget's
+;;; GdkWindow as part of the "map" method.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_show" gdk-window-show) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-show)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_show_unraised ()
 ;;; 
-;;; void                gdk_window_show_unraised            (GdkWindow *window);
+;;; void gdk_window_show_unraised (GdkWindow *window);
 ;;; 
-;;; Shows a GdkWindow onscreen, but does not modify its stacking order. In contrast, gdk_window_show() will raise the window to the top of the window stack.
+;;; Shows a GdkWindow onscreen, but does not modify its stacking order. In
+;;; contrast, gdk_window_show() will raise the window to the top of the window
+;;; stack.
 ;;; 
-;;; On the X11 platform, in Xlib terms, this function calls XMapWindow() (it also updates some internal GDK state, which means that you can't really use XMapWindow() directly on a GDK window).
+;;; On the X11 platform, in Xlib terms, this function calls XMapWindow() (it
+;;; also updates some internal GDK state, which means that you can't really use
+;;; XMapWindow() directly on a GDK window).
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_show_unraised" gdk-window-show-unraised) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-show-unraised)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_hide ()
 ;;; 
-;;; void                gdk_window_hide                     (GdkWindow *window);
+;;; void gdk_window_hide (GdkWindow *window);
 ;;; 
-;;; For toplevel windows, withdraws them, so they will no longer be known to the window manager; for all windows, unmaps them, so they won't be displayed. Normally done automatically as part of gtk_widget_hide().
+;;; For toplevel windows, withdraws them, so they will no longer be known to
+;;; the window manager; for all windows, unmaps them, so they won't be
+;;; displayed. Normally done automatically as part of gtk_widget_hide().
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_hide" gdk-window-hide) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-hide)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_is_destroyed ()
 ;;; 
-;;; gboolean            gdk_window_is_destroyed             (GdkWindow *window);
+;;; gboolean gdk_window_is_destroyed (GdkWindow *window);
 ;;; 
 ;;; Check to see if a window is destroyed..
 ;;; 
@@ -1341,31 +1551,43 @@
 ;;; 	TRUE if the window is destroyed
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_is_visible ()
 ;;; 
-;;; gboolean            gdk_window_is_visible               (GdkWindow *window);
+;;; gboolean gdk_window_is_visible (GdkWindow *window);
 ;;; 
-;;; Checks whether the window has been mapped (with gdk_window_show() or gdk_window_show_unraised()).
+;;; Checks whether the window has been mapped (with gdk_window_show() or
+;;; gdk_window_show_unraised()).
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if the window is mapped
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_is_viewable ()
 ;;; 
-;;; gboolean            gdk_window_is_viewable              (GdkWindow *window);
+;;; gboolean gdk_window_is_viewable (GdkWindow *window);
 ;;; 
-;;; Check if the window and all ancestors of the window are mapped. (This is not necessarily "viewable" in the X sense, since we only check as far as we have GDK window parents, not to the root window.)
+;;; Check if the window and all ancestors of the window are mapped. (This is
+;;; not necessarily "viewable" in the X sense, since we only check as far as we
+;;; have GDK window parents, not to the root window.)
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if the window is viewable
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_is_shaped ()
 ;;; 
-;;; gboolean            gdk_window_is_shaped                (GdkWindow *window);
+;;; gboolean gdk_window_is_shaped (GdkWindow *window);
 ;;; 
 ;;; Determines whether or not the window is shaped.
 ;;; 
@@ -1376,9 +1598,12 @@
 ;;; 	TRUE if window is shaped
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_is_input_only ()
 ;;; 
-;;; gboolean            gdk_window_is_input_only            (GdkWindow *window);
+;;; gboolean gdk_window_is_input_only (GdkWindow *window);
 ;;; 
 ;;; Determines whether or not the window is an input only window.
 ;;; 
@@ -1389,119 +1614,269 @@
 ;;; 	TRUE if window is input only
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_state ()
 ;;; 
-;;; GdkWindowState      gdk_window_get_state                (GdkWindow *window);
+;;; GdkWindowState gdk_window_get_state (GdkWindow *window);
 ;;; 
-;;; Gets the bitwise OR of the currently active window state flags, from the GdkWindowState enumeration.
+;;; Gets the bitwise OR of the currently active window state flags, from the
+;;; GdkWindowState enumeration.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
 ;;; 
 ;;; Returns :
 ;;; 	window state bitfield
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_withdraw ()
 ;;; 
-;;; void                gdk_window_withdraw                 (GdkWindow *window);
+;;; void gdk_window_withdraw (GdkWindow *window);
 ;;; 
-;;; Withdraws a window (unmaps it and asks the window manager to forget about it). This function is not really useful as gdk_window_hide() automatically withdraws toplevel windows before hiding them.
+;;; Withdraws a window (unmaps it and asks the window manager to forget about
+;;; it). This function is not really useful as gdk_window_hide() automatically
+;;; withdraws toplevel windows before hiding them.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_withdraw" gdk-window-withdraw) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-withdraw)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_iconify ()
 ;;; 
-;;; void                gdk_window_iconify                  (GdkWindow *window);
+;;; void gdk_window_iconify (GdkWindow *window);
 ;;; 
-;;; Asks to iconify (minimize) window. The window manager may choose to ignore the request, but normally will honor it. Using gtk_window_iconify() is preferred, if you have a GtkWindow widget.
+;;; Asks to iconify (minimize) window. The window manager may choose to ignore
+;;; the request, but normally will honor it. Using gtk_window_iconify() is
+;;; preferred, if you have a GtkWindow widget.
 ;;; 
 ;;; This function only makes sense when window is a toplevel window.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_iconify" gdk-window-iconify) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-iconify)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_deiconify ()
 ;;; 
-;;; void                gdk_window_deiconify                (GdkWindow *window);
+;;; void gdk_window_deiconify (GdkWindow *window);
 ;;; 
-;;; Attempt to deiconify (unminimize) window. On X11 the window manager may choose to ignore the request to deiconify. When using GTK+, use gtk_window_deiconify() instead of the GdkWindow variant. Or better yet, you probably want to use gtk_window_present(), which raises the window, focuses it, unminimizes it, and puts it on the current desktop.
+;;; Attempt to deiconify (unminimize) window. On X11 the window manager may
+;;; choose to ignore the request to deiconify. When using GTK+, use
+;;; gtk_window_deiconify() instead of the GdkWindow variant. Or better yet, you
+;;; probably want to use gtk_window_present(), which raises the window, focuses
+;;; it, unminimizes it, and puts it on the current desktop.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_deiconify" gdk-window-deiconify) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-deiconify)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_stick ()
 ;;; 
-;;; void                gdk_window_stick                    (GdkWindow *window);
+;;; void gdk_window_stick (GdkWindow *window);
 ;;; 
-;;; "Pins" a window such that it's on all workspaces and does not scroll with viewports, for window managers that have scrollable viewports. (When using GtkWindow, gtk_window_stick() may be more useful.)
+;;; "Pins" a window such that it's on all workspaces and does not scroll with
+;;; viewports, for window managers that have scrollable viewports. (When using
+;;; GtkWindow, gtk_window_stick() may be more useful.)
 ;;; 
-;;; On the X11 platform, this function depends on window manager support, so may have no effect with many window managers. However, GDK will do the best it can to convince the window manager to stick the window. For window managers that don't support this operation, there's nothing you can do to force it to happen.
+;;; On the X11 platform, this function depends on window manager support, so
+;;; may have no effect with many window managers. However, GDK will do the best
+;;; it can to convince the window manager to stick the window. For window
+;;; managers that don't support this operation, there's nothing you can do to
+;;; force it to happen.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_stick" gdk-window-stick) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-stick)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_unstick ()
 ;;; 
-;;; void                gdk_window_unstick                  (GdkWindow *window);
+;;; void gdk_window_unstick (GdkWindow *window);
 ;;; 
-;;; Reverse operation for gdk_window_stick(); see gdk_window_stick(), and gtk_window_unstick().
+;;; Reverse operation for gdk_window_stick(); see gdk_window_stick(), and
+;;; gtk_window_unstick().
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_unstick" gdk-window-unstick) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-unstick)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_maximize ()
 ;;; 
-;;; void                gdk_window_maximize                 (GdkWindow *window);
+;;; void gdk_window_maximize (GdkWindow *window);
 ;;; 
-;;; Maximizes the window. If the window was already maximized, then this function does nothing.
+;;; Maximizes the window. If the window was already maximized, then this
+;;; function does nothing.
 ;;; 
-;;; On X11, asks the window manager to maximize window, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "maximized"; so you can't rely on the maximization actually happening. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to maximize window, if the window manager
+;;; supports this operation. Not all window managers support this, and some
+;;; deliberately ignore it or don't have a concept of "maximized"; so you can't
+;;; rely on the maximization actually happening. But it will happen with most
+;;; standard window managers, and GDK makes a best effort to get it to happen.
 ;;; 
 ;;; On Windows, reliably maximizes the window.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_maximize" gdk-window-maximize) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-maximize)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_unmaximize ()
 ;;; 
-;;; void                gdk_window_unmaximize               (GdkWindow *window);
+;;; void gdk_window_unmaximize (GdkWindow *window);
 ;;; 
-;;; Unmaximizes the window. If the window wasn't maximized, then this function does nothing.
+;;; Unmaximizes the window. If the window wasn't maximized, then this function
+;;; does nothing.
 ;;; 
-;;; On X11, asks the window manager to unmaximize window, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "maximized"; so you can't rely on the unmaximization actually happening. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to unmaximize window, if the window manager
+;;; supports this operation. Not all window managers support this, and some
+;;; deliberately ignore it or don't have a concept of "maximized"; so you can't
+;;; rely on the unmaximization actually happening. But it will happen with most
+;;; standard window managers, and GDK makes a best effort to get it to happen.
 ;;; 
 ;;; On Windows, reliably unmaximizes the window.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_unmaximize" gdk-window-unmaximize) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-unmaximize)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_fullscreen ()
 ;;; 
-;;; void                gdk_window_fullscreen               (GdkWindow *window);
+;;; void gdk_window_fullscreen (GdkWindow *window);
 ;;; 
-;;; Moves the window into fullscreen mode. This means the window covers the entire screen and is above any panels or task bars.
+;;; Moves the window into fullscreen mode. This means the window covers the
+;;; entire screen and is above any panels or task bars.
 ;;; 
 ;;; If the window was already fullscreen, then this function does nothing.
 ;;; 
-;;; On X11, asks the window manager to put window in a fullscreen state, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "fullscreen"; so you can't rely on the fullscreenification actually happening. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to put window in a fullscreen state, if
+;;; the window manager supports this operation. Not all window managers support
+;;; this, and some deliberately ignore it or don't have a concept of
+;;; "fullscreen"; so you can't rely on the fullscreenification actually
+;;; happening. But it will happen with most standard window managers, and GDK
+;;; makes a best effort to get it to happen.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
 ;;; 
 ;;; Since 2.2
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window-fullscreen" gdk-window-fullscreen) :void
+  (window (g-object gdk-window)))
+
+(export 'gdk-window-fullscreen)
+
+
+
+
+
+(defcfun gdk-window-resize :void
+  (window (g-object gdk-window))
+  (width :int)
+  (height :int))
+
+(export 'gdk-window-resize)
+
+(defcfun gdk-window-move-resize :void
+  (window (g-object gdk-window))
+  (x :int)
+  (y :int)
+  (width :int)
+  (height :int))
+
+(export 'gdk-window-move-resize)
+
+(defcfun gdk-window-scroll :void
+  (window (g-object gdk-window))
+  (dx :int)
+  (dy :int))
+
+(export 'gdk-window-scroll)
+
+(defcfun gdk-window-move-region :void
+  (window (g-object gdk-window))
+  (region (g-boxed-foreign region))
+  (dx :int)
+  (dy :int))
+
+(export 'gdk-window-move-region)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_unfullscreen ()
 ;;; 
-;;; void                gdk_window_unfullscreen             (GdkWindow *window);
+;;; void gdk_window_unfullscreen (GdkWindow *window);
 ;;; 
-;;; Moves the window out of fullscreen mode. If the window was not fullscreen, does nothing.
+;;; Moves the window out of fullscreen mode. If the window was not fullscreen,
+;;; does nothing.
 ;;; 
-;;; On X11, asks the window manager to move window out of the fullscreen state, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "fullscreen"; so you can't rely on the unfullscreenification actually happening. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to move window out of the fullscreen state,
+;;; if the window manager supports this operation. Not all window managers
+;;; support this, and some deliberately ignore it or don't have a concept of
+;;; "fullscreen"; so you can't rely on the unfullscreenification actually
+;;; happening. But it will happen with most standard window managers, and GDK
+;;; makes a best effort to get it to happen.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
 ;;; 
 ;;; Since 2.2
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_keep_above ()
 ;;; 
-;;; void                gdk_window_set_keep_above           (GdkWindow *window,
-;;;                                                          gboolean setting);
+;;; void gdk_window_set_keep_above (GdkWindow *window, gboolean setting);
 ;;; 
-;;; Set if window must be kept above other windows. If the window was already above, then this function does nothing.
+;;; Set if window must be kept above other windows. If the window was already
+;;; above, then this function does nothing.
 ;;; 
-;;; On X11, asks the window manager to keep window above, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "keep above"; so you can't rely on the window being kept above. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to keep window above, if the window manager
+;;; supports this operation. Not all window managers support this, and some
+;;; deliberately ignore it or don't have a concept of "keep above"; so you
+;;; can't rely on the window being kept above. But it will happen with most
+;;; standard window managers, and GDK makes a best effort to get it to happen.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
@@ -1510,14 +1885,21 @@
 ;;; 	whether to keep window above other windows
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_keep_below ()
 ;;; 
-;;; void                gdk_window_set_keep_below           (GdkWindow *window,
-;;;                                                          gboolean setting);
+;;; void gdk_window_set_keep_below (GdkWindow *window, gboolean setting);
 ;;; 
-;;; Set if window must be kept below other windows. If the window was already below, then this function does nothing.
+;;; Set if window must be kept below other windows. If the window was already
+;;; below, then this function does nothing.
 ;;; 
-;;; On X11, asks the window manager to keep window below, if the window manager supports this operation. Not all window managers support this, and some deliberately ignore it or don't have a concept of "keep below"; so you can't rely on the window being kept below. But it will happen with most standard window managers, and GDK makes a best effort to get it to happen.
+;;; On X11, asks the window manager to keep window below, if the window manager
+;;; supports this operation. Not all window managers support this, and some
+;;; deliberately ignore it or don't have a concept of "keep below"; so you can't
+;;; rely on the window being kept below. But it will happen with most standard
+;;; window managers, and GDK makes a best effort to get it to happen.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
@@ -1526,16 +1908,21 @@
 ;;; 	whether to keep window below other windows
 ;;; 
 ;;; Since 2.4
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_opacity ()
 ;;; 
-;;; void                gdk_window_set_opacity              (GdkWindow *window,
-;;;                                                          gdouble opacity);
+;;; void gdk_window_set_opacity (GdkWindow *window, gdouble opacity);
 ;;; 
-;;; Request the windowing system to make window partially transparent, with opacity 0 being fully transparent and 1 fully opaque. (Values of the opacity parameter are clamped to the [0,1] range.)
+;;; Request the windowing system to make window partially transparent, with
+;;; opacity 0 being fully transparent and 1 fully opaque. (Values of the opacity
+;;; parameter are clamped to the [0,1] range.)
 ;;; 
 ;;; On X11, this works only on X screens with a compositing manager running.
 ;;; 
-;;; For setting up per-pixel alpha, see gdk_screen_get_rgba_colormap(). For making non-toplevel windows translucent, see gdk_window_set_composited().
+;;; For setting up per-pixel alpha, see gdk_screen_get_rgba_colormap(). For
+;;; making non-toplevel windows translucent, see gdk_window_set_composited().
 ;;; 
 ;;; window :
 ;;; 	a top-level GdkWindow
@@ -1544,18 +1931,31 @@
 ;;; 	opacity
 ;;; 
 ;;; Since 2.12
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_composited ()
 ;;; 
-;;; void                gdk_window_set_composited           (GdkWindow *window,
-;;;                                                          gboolean composited);
+;;; void gdk_window_set_composited (GdkWindow *window, gboolean composited);
 ;;; 
-;;; Sets a GdkWindow as composited, or unsets it. Composited windows do not automatically have their contents drawn to the screen. Drawing is redirected to an offscreen buffer and an expose event is emitted on the parent of the composited window. It is the responsibility of the parent's expose handler to manually merge the off-screen content onto the screen in whatever way it sees fit. See Example 7, “Composited windows” for an example.
+;;; Sets a GdkWindow as composited, or unsets it. Composited windows do not
+;;; automatically have their contents drawn to the screen. Drawing is redirected
+;;; to an offscreen buffer and an expose event is emitted on the parent of the
+;;; composited window. It is the responsibility of the parent's expose handler
+;;; to manually merge the off-screen content onto the screen in whatever way it
+;;; sees fit. See Example 7, “Composited windows” for an example.
 ;;; 
-;;; It only makes sense for child windows to be composited; see gdk_window_set_opacity() if you need translucent toplevel windows.
+;;; It only makes sense for child windows to be composited; see
+;;; gdk_window_set_opacity() if you need translucent toplevel windows.
 ;;; 
-;;; An additional effect of this call is that the area of this window is no longer clipped from regions marked for invalidation on its parent. Draws done on the parent window are also no longer clipped by the child.
+;;; An additional effect of this call is that the area of this window is no
+;;; longer clipped from regions marked for invalidation on its parent. Draws
+;;; done on the parent window are also no longer clipped by the child.
 ;;; 
-;;; This call is only supported on some systems (currently, only X11 with new enough Xcomposite and Xdamage extensions). You must call gdk_display_supports_composite() to check if setting a window as composited is supported before attempting to do so.
+;;; This call is only supported on some systems (currently, only X11 with new
+;;; enough Xcomposite and Xdamage extensions). You must call
+;;; gdk_display_supports_composite() to check if setting a window as composited
+;;; is supported before attempting to do so.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1564,9 +1964,12 @@
 ;;; 	TRUE to set the window as composited
 ;;; 
 ;;; Since 2.12
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_composited ()
 ;;; 
-;;; gboolean            gdk_window_get_composited           (GdkWindow *window);
+;;; gboolean gdk_window_get_composited (GdkWindow *window);
 ;;; 
 ;;; Determines whether window is composited.
 ;;; 
@@ -1579,15 +1982,20 @@
 ;;; 	TRUE if the window is composited.
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_move ()
 ;;; 
-;;; void                gdk_window_move                     (GdkWindow *window,
-;;;                                                          gint x,
-;;;                                                          gint y);
+;;; void gdk_window_move (GdkWindow *window, gint x, gint y);
 ;;; 
-;;; Repositions a window relative to its parent window. For toplevel windows, window managers may ignore or modify the move; you should probably use gtk_window_move() on a GtkWindow widget anyway, instead of using GDK functions. For child windows, the move will reliably succeed.
+;;; Repositions a window relative to its parent window. For toplevel windows,
+;;; window managers may ignore or modify the move; you should probably use
+;;; gtk_window_move() on a GtkWindow widget anyway, instead of using GDK
+;;; functions. For child windows, the move will reliably succeed.
 ;;; 
-;;; If you're also planning to resize the window, use gdk_window_move_resize() to both move and resize simultaneously, for a nicer visual effect.
+;;; If you're also planning to resize the window, use gdk_window_move_resize()
+;;; to both move and resize simultaneously, for a nicer visual effect.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1597,17 +2005,28 @@
 ;;; 
 ;;; y :
 ;;; 	Y coordinate relative to window's parent
+;;; ----------------------------------------------------------------------------
+
+(defcfun ("gdk_window_move" gdk-window-move) :void
+  (window (g-object gdk-window))
+  (x :int)
+  (y :int))
+
+(export 'gdk-window-move)
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_resize ()
 ;;; 
-;;; void                gdk_window_resize                   (GdkWindow *window,
-;;;                                                          gint width,
-;;;                                                          gint height);
+;;; void gdk_window_resize (GdkWindow *window, gint width, gint height);
 ;;; 
-;;; Resizes window; for toplevel windows, asks the window manager to resize the window. The window manager may not allow the resize. When using GTK+, use gtk_window_resize() instead of this low-level GDK function.
+;;; Resizes window; for toplevel windows, asks the window manager to resize the
+;;; window. The window manager may not allow the resize. When using GTK+, use
+;;; gtk_window_resize() instead of this low-level GDK function.
 ;;; 
 ;;; Windows may not be resized below 1x1.
 ;;; 
-;;; If you're also planning to move the window, use gdk_window_move_resize() to both move and resize simultaneously, for a nicer visual effect.
+;;; If you're also planning to move the window, use gdk_window_move_resize() to
+;;; both move and resize simultaneously, for a nicer visual effect.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1617,15 +2036,21 @@
 ;;; 
 ;;; height :
 ;;; 	new height of the window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_move_resize ()
 ;;; 
-;;; void                gdk_window_move_resize              (GdkWindow *window,
-;;;                                                          gint x,
-;;;                                                          gint y,
-;;;                                                          gint width,
-;;;                                                          gint height);
+;;; void gdk_window_move_resize (GdkWindow *window,
+;;;                              gint x,
+;;;                              gint y,
+;;;                              gint width,
+;;;                              gint height);
 ;;; 
-;;; Equivalent to calling gdk_window_move() and gdk_window_resize(), except that both operations are performed at once, avoiding strange visual effects. (i.e. the user may be able to see the window first move, then resize, if you don't use gdk_window_move_resize().)
+;;; Equivalent to calling gdk_window_move() and gdk_window_resize(), except
+;;; that both operations are performed at once, avoiding strange visual effects.
+;;; (i.e. the user may be able to see the window first move, then resize, if you
+;;; don't use gdk_window_move_resize().)
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1641,13 +2066,16 @@
 ;;; 
 ;;; height :
 ;;; 	new height
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_scroll ()
 ;;; 
-;;; void                gdk_window_scroll                   (GdkWindow *window,
-;;;                                                          gint dx,
-;;;                                                          gint dy);
+;;; void gdk_window_scroll (GdkWindow *window, gint dx, gint dy);
 ;;; 
-;;; Scroll the contents of its window, both pixels and children, by the given amount. Portions of the window that the scroll operation brings in from offscreen areas are invalidated.
+;;; Scroll the contents of its window, both pixels and children, by the given
+;;; amount. Portions of the window that the scroll operation brings in from
+;;; offscreen areas are invalidated.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1657,14 +2085,19 @@
 ;;; 
 ;;; dy :
 ;;; 	Amount to scroll in the Y direction
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_move_region ()
 ;;; 
-;;; void                gdk_window_move_region              (GdkWindow *window,
-;;;                                                          const GdkRegion *region,
-;;;                                                          gint dx,
-;;;                                                          gint dy);
+;;; void gdk_window_move_region (GdkWindow *window,
+;;;                              const GdkRegion *region,
+;;;                              gint dx,
+;;;                              gint dy);
 ;;; 
-;;; Move the part of window indicated by region by dy pixels in the Y direction and dx pixels in the X direction. The portions of region that not covered by the new position of region are invalidated.
+;;; Move the part of window indicated by region by dy pixels in the Y direction
+;;; and dx pixels in the X direction. The portions of region that not covered by
+;;; the new position of region are invalidated.
 ;;; 
 ;;; Child windows are not moved.
 ;;; 
@@ -1681,25 +2114,41 @@
 ;;; 	Amount to move in the Y direction
 ;;; 
 ;;; Since 2.8
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_flush ()
 ;;; 
-;;; void                gdk_window_flush                    (GdkWindow *window);
+;;; void gdk_window_flush (GdkWindow *window);
 ;;; 
-;;; Flush all outstanding cached operations on a window, leaving the window in a state which reflects all that has been drawn before.
+;;; Flush all outstanding cached operations on a window, leaving the window in
+;;; a state which reflects all that has been drawn before.
 ;;; 
-;;; Gdk uses multiple kinds of caching to get better performance and nicer drawing. For instance, during exposes all paints to a window using double buffered rendering are keep on a pixmap until the last window has been exposed. It also delays window moves/scrolls until as long as possible until next update to avoid tearing when moving windows.
+;;; Gdk uses multiple kinds of caching to get better performance and nicer
+;;; drawing. For instance, during exposes all paints to a window using double
+;;; buffered rendering are keep on a pixmap until the last window has been
+;;; exposed. It also delays window moves/scrolls until as long as possible until
+;;; next update to avoid tearing when moving windows.
 ;;; 
-;;; Normally this should be completely invisible to applications, as we automatically flush the windows when required, but this might be needed if you for instance mix direct native drawing with gdk drawing. For Gtk widgets that don't use double buffering this will be called automatically before sending the expose event.
+;;; Normally this should be completely invisible to applications, as we
+;;; automatically flush the windows when required, but this might be needed if
+;;; you for instance mix direct native drawing with gdk drawing. For Gtk widgets
+;;; that don't use double buffering this will be called automatically before
+;;; sending the expose event.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_has_native ()
 ;;; 
-;;; gboolean            gdk_window_has_native               (GdkWindow *window);
+;;; gboolean gdk_window_has_native (GdkWindow *window);
 ;;; 
-;;; Checks whether the window has a native window or not. Note that you can use gdk_window_ensure_native() if a native window is needed.
+;;; Checks whether the window has a native window or not. Note that you can
+;;; use gdk_window_ensure_native() if a native window is needed.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
@@ -1708,11 +2157,15 @@
 ;;; 	TRUE if the window has a native window, FALSE otherwise.
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_ensure_native ()
 ;;; 
-;;; gboolean            gdk_window_ensure_native            (GdkWindow *window);
+;;; gboolean gdk_window_ensure_native (GdkWindow *window);
 ;;; 
-;;; Tries to ensure that there is a window-system native window for this GdkWindow. This may fail in some situations, returning FALSE.
+;;; Tries to ensure that there is a window-system native window for this
+;;; GdkWindow. This may fail in some situations, returning FALSE.
 ;;; 
 ;;; Offscreen window and children of them can never have native windows.
 ;;; 
@@ -1725,6 +2178,9 @@
 ;;; 	TRUE if the window has a native window, FALSE otherwise
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_reparent ()
 ;;; 
 ;;; void                gdk_window_reparent                 (GdkWindow *window,
@@ -1745,6 +2201,9 @@
 ;;; 
 ;;; y :
 ;;; 	Y location inside the new parent
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_clear ()
 ;;; 
 ;;; void                gdk_window_clear                    (GdkWindow *window);
@@ -1753,6 +2212,9 @@
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_clear_area ()
 ;;; 
 ;;; void                gdk_window_clear_area               (GdkWindow *window,
@@ -1777,6 +2239,9 @@
 ;;; 
 ;;; height :
 ;;; 	height of rectangle to clear
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_clear_area_e ()
 ;;; 
 ;;; void                gdk_window_clear_area_e             (GdkWindow *window,
@@ -1803,6 +2268,9 @@
 ;;; 
 ;;; height :
 ;;; 	height of rectangle to clear
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_copy_area()
 ;;; 
 ;;; #define             gdk_window_copy_area(drawable,gc,x,y,source_drawable,source_x,source_y,width,height)
@@ -1839,6 +2307,9 @@
 ;;; 
 ;;; height :
 ;;; 	height of rectangle to draw, or -1 for entire src height
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_raise ()
 ;;; 
 ;;; void                gdk_window_raise                    (GdkWindow *window);
@@ -1849,6 +2320,9 @@
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_lower ()
 ;;; 
 ;;; void                gdk_window_lower                    (GdkWindow *window);
@@ -1861,6 +2335,9 @@
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_restack ()
 ;;; 
 ;;; void                gdk_window_restack                  (GdkWindow *window,
@@ -1883,36 +2360,49 @@
 ;;; 	a boolean
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_focus ()
 ;;; 
-;;; void                gdk_window_focus                    (GdkWindow *window,
-;;;                                                          guint32 timestamp);
+;;; void gdk_window_focus (GdkWindow *window, guint32 timestamp);
 ;;; 
-;;; Sets keyboard focus to window. In most cases, gtk_window_present() should be used on a GtkWindow, rather than calling this function.
+;;; Sets keyboard focus to window. In most cases, gtk_window_present() should
+;;; be used on a GtkWindow, rather than calling this function.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow
 ;;; 
 ;;; timestamp :
 ;;; 	timestamp of the event triggering the window focus
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_register_dnd ()
 ;;; 
-;;; void                gdk_window_register_dnd             (GdkWindow *window);
+;;; void gdk_window_register_dnd (GdkWindow *window);
 ;;; 
 ;;; Registers a window as a potential drop destination.
 ;;; 
 ;;; window :
 ;;; 	a GdkWindow.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_begin_resize_drag ()
 ;;; 
-;;; void                gdk_window_begin_resize_drag        (GdkWindow *window,
-;;;                                                          GdkWindowEdge edge,
-;;;                                                          gint button,
-;;;                                                          gint root_x,
-;;;                                                          gint root_y,
-;;;                                                          guint32 timestamp);
+;;; void gdk_window_begin_resize_drag (GdkWindow *window,
+;;;                                    GdkWindowEdge edge,
+;;;                                    gint button,
+;;;                                    gint root_x,
+;;;                                    gint root_y,
+;;;                                    guint32 timestamp);
 ;;; 
-;;; Begins a window resize operation (for a toplevel window). You might use this function to implement a "window resize grip," for example; in fact GtkStatusbar uses it. The function works best with window managers that support the Extended Window Manager Hints, but has a fallback implementation for other window managers.
+;;; Begins a window resize operation (for a toplevel window). You might use
+;;; this function to implement a "window resize grip," for example; in fact
+;;; GtkStatusbar uses it. The function works best with window managers that
+;;; support the Extended Window Manager Hints, but has a fallback implementation
+;;; for other window managers.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
@@ -1931,15 +2421,21 @@
 ;;; 
 ;;; timestamp :
 ;;; 	timestamp of mouse click that began the drag (use gdk_event_get_time())
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_begin_move_drag ()
 ;;; 
-;;; void                gdk_window_begin_move_drag          (GdkWindow *window,
-;;;                                                          gint button,
-;;;                                                          gint root_x,
-;;;                                                          gint root_y,
-;;;                                                          guint32 timestamp);
+;;; void gdk_window_begin_move_drag (GdkWindow *window,
+;;;                                  gint button,
+;;;                                  gint root_x,
+;;;                                  gint root_y,
+;;;                                  guint32 timestamp);
 ;;; 
-;;; Begins a window move operation (for a toplevel window). You might use this function to implement a "window move grip," for example. The function works best with window managers that support the Extended Window Manager Hints, but has a fallback implementation for other window managers.
+;;; Begins a window move operation (for a toplevel window). You might use this
+;;; function to implement a "window move grip," for example. The function works
+;;; best with window managers that support the Extended Window Manager Hints,
+;;; but has a fallback implementation for other window managers.
 ;;; 
 ;;; window :
 ;;; 	a toplevel GdkWindow
@@ -1955,6 +2451,9 @@
 ;;; 
 ;;; timestamp :
 ;;; 	timestamp of mouse click that began the drag
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_constrain_size ()
 ;;; 
 ;;; void                gdk_window_constrain_size           (GdkGeometry *geometry,
@@ -2522,22 +3021,29 @@
 ;;; 
 ;;; Returns :
 ;;; 	TRUE if the server supports static gravity
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_hints ()
 ;;; 
-;;; void                gdk_window_set_hints                (GdkWindow *window,
-;;;                                                          gint x,
-;;;                                                          gint y,
-;;;                                                          gint min_width,
-;;;                                                          gint min_height,
-;;;                                                          gint max_width,
-;;;                                                          gint max_height,
-;;;                                                          gint flags);
+;;; void gdk_window_set_hints (GdkWindow *window,
+;;;                            gint x,
+;;;                            gint y,
+;;;                            gint min_width,
+;;;                            gint min_height,
+;;;                            gint max_width,
+;;;                            gint max_height,
+;;;                            gint flags);
 ;;; 
 ;;; Warning
 ;;; 
-;;; gdk_window_set_hints is deprecated and should not be used in newly-written code.
+;;; gdk_window_set_hints is deprecated and should not be used in newly-written
+;;; code.
 ;;; 
-;;; This function is broken and useless and you should ignore it. If using GTK+, use functions such as gtk_window_resize(), gtk_window_set_size_request(), gtk_window_move(), gtk_window_parse_geometry(), and gtk_window_set_geometry_hints(), depending on what you're trying to do.
+;;; This function is broken and useless and you should ignore it. If using GTK+,
+;;; use functions such as gtk_window_resize(), gtk_window_set_size_request(),
+;;; gtk_window_move(), gtk_window_parse_geometry(), and
+;;; gtk_window_set_geometry_hints(), depending on what you're trying to do.
 ;;; 
 ;;; If using GDK directly, use gdk_window_set_geometry_hints().
 ;;; 
@@ -2564,6 +3070,9 @@
 ;;; 
 ;;; flags :
 ;;; 	logical OR of GDK_HINT_POS, GDK_HINT_MIN_SIZE, and/or GDK_HINT_MAX_SIZE
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_title ()
 ;;; 
 ;;; void                gdk_window_set_title                (GdkWindow *window,
@@ -2576,6 +3085,9 @@
 ;;; 
 ;;; title :
 ;;; 	title of window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_background ()
 ;;; 
 ;;; void                gdk_window_set_background           (GdkWindow *window,
@@ -2592,6 +3104,9 @@
 ;;; 
 ;;; color :
 ;;; 	an allocated GdkColor
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_back_pixmap ()
 ;;; 
 ;;; void                gdk_window_set_back_pixmap          (GdkWindow *window,
@@ -2614,6 +3129,9 @@
 ;;; 
 ;;; parent_relative :
 ;;; 	whether the tiling origin is at the origin of window's parent
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_background_pattern ()
 ;;; 
 ;;; cairo_pattern_t *   gdk_window_get_background_pattern   (GdkWindow *window);
@@ -2627,11 +3145,17 @@
 ;;; 	The pattern to use for the background or NULL to use the parent's background. [transfer none]
 ;;; 
 ;;; Since 2.22
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GDK_PARENT_RELATIVE
 ;;; 
 ;;; #define GDK_PARENT_RELATIVE  1L
 ;;; 
 ;;; A special value for GdkPixmap* variables, indicating that the background pixmap for a window should be inherited from the parent window.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_cursor ()
 ;;; 
 ;;; void                gdk_window_set_cursor               (GdkWindow *window,
@@ -2644,6 +3168,9 @@
 ;;; 
 ;;; cursor :
 ;;; 	a cursor. [allow-none]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_cursor ()
 ;;; 
 ;;; GdkCursor *         gdk_window_get_cursor               (GdkWindow *window);
@@ -2657,6 +3184,9 @@
 ;;; 	a GdkCursor, or NULL. The returned object is owned by the GdkWindow and should not be unreferenced directly. Use gdk_window_set_cursor() to unset the cursor of the window. [transfer none]
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_colormap
 ;;; 
 ;;; #define gdk_window_set_colormap        gdk_drawable_set_colormap
@@ -2666,6 +3196,9 @@
 ;;; gdk_window_set_colormap is deprecated and should not be used in newly-written code.
 ;;; 
 ;;; Deprecated equivalent to gdk_drawable_set_colormap()
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_user_data ()
 ;;; 
 ;;; void                gdk_window_get_user_data            (GdkWindow *window,
@@ -2678,6 +3211,9 @@
 ;;; 
 ;;; data :
 ;;; 	return location for user data. [out]
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_get_geometry ()
 ;;; 
 ;;; void                gdk_window_get_geometry             (GdkWindow *window,
@@ -2694,6 +3230,7 @@
 ;;; On the X11 platform, the geometry is obtained from the X server, so reflects the latest position of window; this may be out-of-sync with the position of window delivered in the most-recently-processed GdkEventConfigure. gdk_window_get_position() in contrast gets the position from the most recent configure event.
 ;;; 
 ;;; Note
+;;;
 ;;; If window is not a toplevel, it is much better to call gdk_window_get_position() and gdk_drawable_get_size() instead, because it avoids the roundtrip to the X server and because gdk_drawable_get_size() supports the full 32-bit coordinate space, whereas gdk_window_get_geometry() is restricted to the 16-bit coordinates of X11.
 ;;; 
 ;;; window :
@@ -2713,6 +3250,9 @@
 ;;; 
 ;;; depth :
 ;;; 	return location for bit depth of window
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gdk_window_set_geometry_hints ()
 ;;; 
 ;;; void                gdk_window_set_geometry_hints       (GdkWindow *window,
@@ -3754,143 +4294,9 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(defcfun gdk-window-new (g-object gdk-window :already-referenced)
-  (parent (g-object gdk-window))
-  (attributes (g-boxed-foreign gdk-window-attr))
-  (attributes-mask gdk-window-attributes-type))
-
-(export 'gdk-window-new)
-
-(defcfun gdk-window-destroy :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-destroy)
-
-(defcfun (%gdk-window-at-pointer "gdk_window_at_pointer") (g-object gdk-window)
-  (win-x (:pointer :int))
-  (win-y (:pointer :int)))
-
-(defun gdk-window-at-pointer ()
-  (with-foreign-objects ((x :int) (y :int))
-    (let ((window (%gdk-window-at-pointer x y)))
-      (if window
-          (values window (mem-ref x :int) (mem-ref y :int))
-          (values nil nil nil)))))
-
-(export 'get-window-at-pointe)
-
-(defcfun gdk-window-show :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-show)
-
-(defcfun gdk-window-show-unraised :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-show-unraised)
-
-(defcfun gdk-window-hide :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-hide)
-
-(defcfun gdk-window-withdraw :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-withdraw)
-
-(defcfun gdk-window-iconify :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-iconify)
-
-(defcfun gdk-window-deiconify :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-deiconify)
-
-(defcfun gdk-window-stick :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-stick)
-
-(defcfun gdk-window-unstick :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-unstick)
-
-(defcfun gdk-window-maximize :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-maximize)
-
-(defcfun gdk-window-unmaximize :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-unmaximize)
-
-(defcfun gdk-window-fullscreen :void
-  (window (g-object gdk-window)))
-
-(export 'gdk-window-unfullscreen)
-
-(defcfun gdk-window-move :void
-  (window (g-object gdk-window))
-  (x :int)
-  (y :int))
-
-(export 'gdk-window-move)
-
-(defcfun gdk-window-resize :void
-  (window (g-object gdk-window))
-  (width :int)
-  (height :int))
-
-(export 'gdk-window-resize)
-
-(defcfun gdk-window-move-resize :void
-  (window (g-object gdk-window))
-  (x :int)
-  (y :int)
-  (width :int)
-  (height :int))
-
-(export 'gdk-window-move-resize)
-
-(defcfun gdk-window-scroll :void
-  (window (g-object gdk-window))
-  (dx :int)
-  (dy :int))
-
-(export 'gdk-window-scroll)
-
-(defcfun gdk-window-move-region :void
-  (window (g-object gdk-window))
-  (region (g-boxed-foreign region))
-  (dx :int)
-  (dy :int))
-
-(export 'gdk-window-move-region)
 
 #+gtk-2.18
 (progn

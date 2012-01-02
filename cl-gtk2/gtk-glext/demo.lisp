@@ -56,7 +56,7 @@
                                                 (declare (ignore w e))
                                                 (g-source-remove source-id)
                                                 nil)))
-      (widget-show window :all t))))
+      (gtk-widget-show window :all t))))
 
 (defvar *d* 0)
 (defvar *y* 0)
@@ -93,7 +93,7 @@
                                                 (declare (ignore w e))
                                                 (g-source-remove timer-id)
                                                 nil)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun planet-draw (w e)
   (declare (ignore w e))
@@ -288,4 +288,4 @@
     (within-main-loop
       (setf *standard-output* output)
       (let ((w (make-instance 'opengl-window)))
-        (widget-show w)))))
+        (gtk-widget-show w)))))

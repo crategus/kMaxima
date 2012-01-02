@@ -1650,7 +1650,7 @@
 ;;; 	height of rectangle to draw, or -1 for entire src height
 ;;; ----------------------------------------------------------------------------
 
-(defcfun ("gdk_draw_drawable" gdk-drawable-get-image) :void
+(defcfun ("gdk_draw_drawable" gdk-draw-drawable) :void
   (drawable (g-object drawable))
   (gc (g-object graphics-context))
   (src (g-object drawable))

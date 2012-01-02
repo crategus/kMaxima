@@ -78,7 +78,7 @@
 (export 'gdk-selection-property-get)
 
 (defcfun gdk-selection-send-notify :void
-  (requestor native-window)
+  (requestor gdk-native-window)
   (selection gdk-atom-as-string)
   (target gdk-atom-as-string)
   (property gdk-atom-as-string)
@@ -88,7 +88,7 @@
 
 (defcfun gdk-selection-send-notify-for-display :void
   (display (g-object display))
-  (requestor native-window)
+  (requestor gdk-native-window)
   (selection gdk-atom-as-string)
   (target gdk-atom-as-string)
   (property gdk-atom-as-string)

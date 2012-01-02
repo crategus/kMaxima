@@ -98,16 +98,6 @@
 
 (export 'adjustment-clamp-page)
 
-(define-g-boxed-cstruct requisition "GtkRequisition"
-  (width :int :initform 0)
-  (height :int :initform 0))
 
-(export (boxed-related-symbols 'requisition))
 
-(define-g-boxed-cstruct allocation "GtkAllocation"
-  (x :int :initform 0)
-  (y :int :initform 0)
-  (width :int :initform 0)
-  (height :int :initform 0))
 
-(export (boxed-related-symbols 'allocation))

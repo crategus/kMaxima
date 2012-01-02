@@ -220,11 +220,7 @@
 (define-g-enum "GdkExtensionMode" extension-mode (:export t :type-initializer "gdk_extension_mode_get_type")
   (:none 0) (:all 1) (:cursor 2))
 
-(define-g-enum "GdkWindowTypeHint" gdk-window-type-hint (:export t :type-initializer "gdk_window_type_hint_get_type")
-  (:normal 0) (:dialog 1) (:menu 2) (:toolbar 3)
-  (:splashscreen 4) (:utility 5) (:dock 6) (:desktop 7)
-  (:dropdown-menu 8) (:popup-menu 9) (:tooltip 10)
-  (:notification 11) (:combo 12) (:dnd 13))
+
 
 (define-g-flags "GdkModifierType" modifier-type ()
   (:shift-mask 1) (:lock-mask 2) (:control-mask 4)
@@ -237,98 +233,33 @@
   (:release-mask 1073741824)
   (:modifier-mask 1543512063))
 
-(define-g-enum "GdkScrollDirection" scroll-direction ()
-  (:up 0) (:down 1)
-  (:left 2) (:right 3))
 
-(define-g-enum "GdkVisibilityState" visibility-state ()
-  (:unobscured 0)
-  (:partial 1) (:fully-obscured 2))
 
-(define-g-enum "GdkPropertyState" property-state ()
-  :new-value :delete)
+
+
+
 
 (define-g-flags "GdkWindowState" window-state ()
   (:withdrawn 1)
   (:iconified 2) (:maximized 4) (:sticky 8) (:fullscreen 16)
   (:above 32) (:below 64))
 
-(define-g-enum "GdkSettingAction" setting-action ()
-  (:new 0) (:changed 1)
-  (:deleted 2))
 
-(define-g-enum "GdkOwnerChange" owner-change ()
-  (:new-owner 0)
-  (:destroy 1) (:close 2))
+
 
 (define-g-enum "GdkFontType" font-type () :font :fontset)
 
-(define-g-enum "GdkGravity" gravity ()
-  (:north-west 1)
-  :north
-  :north-east
-  :west
-  :center
-  :east
-  :south-west
-  :south
-  :south-east
-  :static)
 
-(define-g-enum "GdkWindowType"
-    gdk-window-type
-    (:export t :type-initializer "gdk_window_type_get_type")
-  (:root 0)
-  (:toplevel 1)
-  (:child 2)
-  (:dialog 3)
-  (:temp 4)
-  (:foreign 5)
-  (:offscreen 6))
 
-(define-g-enum "GdkWindowClass"
-    gdk-window-class
-    (:export t :type-initializer "gdk_window_class_get_type")
-  (:input-output 0)
-  (:input-only 1))
 
-(define-g-flags "GdkWindowHints"
-    gdk-window-hints
-    (:export t :type-initializer "gdk_window_hints_get_type")
-  (:pos 1)
-  (:min-size 2)
-  (:max-size 4)
-  (:base-size 8)
-  (:aspect 16)
-  (:resize-inc 32)
-  (:win-gravity 64)
-  (:user-pos 128)
-  (:user-size 256))
 
-(define-g-enum "GdkWindowEdge"
-    gdk-window-edge
-    (:export t :type-initializer "gdk_window_edge_get_type")
-  (:north-west 0)
-  (:north 1)
-  (:north-east 2)
-  (:west 3)
-  (:east 4)
-  (:south-west 5)
-  (:south 6)
-  (:south-east 7))
 
-(define-g-flags "GdkWindowAttributesType"
-    gdk-window-attributes-type
-    (:export t :type-initializer "gdk_window_attributes_type_get_type")
-  (:title 2)
-  (:x 4)
-  (:y 8)
-  (:cursor 16)
-  (:colormap 32)
-  (:visual 64)
-  (:wmclass 128)
-  (:noredir 256)
-  (:type-hint 512))
+
+
+
+
+
+
 
 (define-g-enum "GdkFilterReturn"
     gdk-filter-return
@@ -463,20 +394,7 @@
 
 (export 'cursor-type)
 
-(define-g-boxed-cstruct geometry nil
-  (min-width :int :initform 0)
-  (min-height :int :initform 0)
-  (max-width :int :initform 0)
-  (max-height :int :initform 0)
-  (base-width :int :initform 0)
-  (base-height :int :initform 0)
-  (width-increment :int :initform 0)
-  (height-increment :int :initform 0)
-  (min-aspect :double :initform 0.0d0)
-  (max-aspect :double :initform 0.0d0)
-  (gravity gravity :initform :north-west))
 
-(export (boxed-related-symbols 'geometry))
 
 (glib:at-init ()
   (foreign-funcall-pointer (foreign-symbol-pointer "gdk_cursor_get_type")
@@ -552,84 +470,10 @@
 
 
 
-(define-g-object-class "GdkWindow" gdk-window (:superclass drawable)
-   (#+gtk-2.18
-    (cursor gdk-window-cursor "cursor"
-            "GdkCursor" t t)
-    #-gtk-2.18
-    (:cffi cursor gdk-window-cursor (g-boxed-foreign cursor :return)
-           "gdk_window_get_cursor" "gdk_window_set_cursor")
-    (:cffi window-type gdk-window-window-type gdk-window-type
-           "gdk_window_get_window_type" nil)
-    (:cffi is-destroyed gdk-window-is-destroyed :boolean
-           "gdk_window_is_destroyed" nil)
-    (:cffi is-visible gdk-window-is-visible :boolean
-           "gdk_window_is_visible" nil)
-    (:cffi is-viewable gdk-window-is-viewable :boolean
-           "gdk_window_is_viewable" nil)
-    (:cffi state gdk-window-state gdk-window-state 
-           "gdk_window_get_state" nil)
-    (:cffi keep-above gdk-window-keep-above :boolean 
-           nil "gdk_window_set_keep_above")
-    (:cffi keep-below gdk-window-keep-below :boolean 
-           nil "gdk_window_set_keep_below" )
-    (:cffi opacity gdk-window-opacity :double
-           nil "gdk_window_set_opacity")
-    (:cffi composited gdk-window-composited :boolean 
-           nil "gdk_window_set_composited")
-    (:cffi user-data gdk-window-user-data :pointer
-           "gdk_window_get_user_data" "gdk_window_set_user_data")
-    (:cffi override-redirect gdk-window-override-redirect :boolean
-           nil "gdk_window_set_override_redirect")
-    (:cffi accept-focus gdk-window-accept-focus :boolean
-           nil "gdk_window_set_accept_focus")
-    (:cffi focus-on-map gdk-window-focus-on-map :boolean
-           nil "gdk_window_set_focus_on_map")
-    (:cffi title gdk-window-title :string
-           nil "gdk_window_set_title")
-    (:cffi background gdk-window-background (g-boxed-foreign color)
-           nil "gdk_window_set_background")
-    (:cffi icon-list gdk-window-icon-list (glib:g-list (g-object pixbuf))
-           nil "gdk_window_set_icon_list")
-    (:cffi modal-hint gdk-window-modal-hint :boolean
-           nil "gdk_window_set_modal_hint")
-    (:cffi type-hint gdk-window-type-hint gdk-window-type-hint
-           "gdk_window_get_type_hint" "gdk_window_set_type_hint")
-    (:cffi skip-taskbar-hint gdk-window-skip-taskbar-hint :boolean
-           nil "gdk_window_set_skip_taskbar_hint")
-    (:cffi skip-pager-hint gdk-window-skip-pager-hint :boolean
-           nil "gdk_window_set_skip_pager_hint")
-    (:cffi urgency-hint gdk-window-urgency-hint :boolean
-           nil "gdk_window_set_urgency_hint")
-    (:cffi parent gdk-window-parent (g-object gdk-window)
-           "gdk_window_get_parent" nil)
-    (:cffi toplevel gdk-window-get-toplevel (g-object gdk-window)
-           "gdk_window_get_toplevel" nil)
-    (:cffi children gdk-window-children (glib:g-list (g-object gdk-window) :free-from-foreign nil)
-           "gdk_window_peek_children" nil)
-    (:cffi events gdk-window-events event-mask
-           "gdk_window_get_events" "gdk_window_set_events")
-    (:cffi icon-name gdk-window-icon-name :string
-           nil "gdk_window_set_icon_name")
-    (:cffi transient-for gdk-window-transient-for (g-object gdk-window)
-           nil "gdk_window_set_transient_for")
-    (:cffi role gdk-window-role :string
-           nil "gdk_window_set_role")
-    (:cffi startup-id gdk-window-startup-id :string
-           nil "gdk_window_set_startup_id")
-    (:cffi group gdk-window-group (g-object gdk-window)
-           "gdk_window_get_group" "gdk_window_set_group")
-    (:cffi decorations gdk-window-decorations gdk-w-m-decoration
-           gdk-window-get-decorations "gdk_window_set_decorations")
-    (:cffi functions gdk-window-functions gdk-w-m-function
-           nil "gdk_window_set_functions")))
 
 
-;;;FIXME: Check correct type
-#+ windows
-(defctype native-window :pointer)
-#- windows
-(defctype native-window :uint32)
+
+
 
 (define-foreign-type fixed-array ()
   ((element-type :reader fixed-array-element-type :initarg :element-type :initform (error "Element type must be specified"))

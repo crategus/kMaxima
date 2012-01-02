@@ -52,7 +52,7 @@
            (bar (make-instance 'progress-bar :text name)))
       (container-add window box)
       (box-pack-start box bar :expand nil)
-      (widget-show window)
+      (gtk-widget-show window)
       (make-progress-window :parent nil :name name :count count :bar bar :window window :box box :time-started (get-internal-real-time) :current 0))))
 
 (defun progress-display-root (progress)
@@ -67,7 +67,7 @@
         (let* ((root (progress-display-root parent))
                (bar (make-instance 'progress-bar :text name)))
           (box-pack-start (progress-window-box root) bar :expand nil)
-          (widget-show bar)
+          (gtk-widget-show bar)
           (make-progress-display :parent parent :name name :count count :bar bar :time-started (get-internal-real-time) :current 0)))
       (create-progress-window name count)))
 

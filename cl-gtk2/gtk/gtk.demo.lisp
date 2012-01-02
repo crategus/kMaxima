@@ -201,7 +201,7 @@
                       (lambda (w)
                         (declare (ignore w))
                         (leave-gtk-main)))
-      (widget-show w))))
+      (gtk-widget-show w))))
 
 (defun test ()
   "A simple test of 'on-expose' event"
@@ -237,7 +237,7 @@
                       (lambda (widget event)
                         (declare (ignore widget event))
                         (widget-queue-draw area)))
-      (widget-show window))))
+      (gtk-widget-show window))))
   
 (defun test-entry ()
   "Testing GtkTextEntry"
@@ -279,7 +279,7 @@
       (connect-signal button-insert "clicked" (lambda (button)
                                                 (declare (ignore button))
                                                 (editable-insert-text entry "hello" 2)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun table-packing ()
   "Simple test of packing widgets into GtkTable"
@@ -295,7 +295,7 @@
       (table-attach table button-q 0 2 1 2)
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
       (connect-signal button-q "clicked" (lambda (b) (declare (ignore b)) (object-destroy window)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-pixbuf ()
   "(not completed)"
@@ -311,7 +311,7 @@
       (container-add eventbox vbox-1)
       (box-pack-start vbox-1 (make-instance 'label :text "This is the eventbox"))
       (box-pack-start vbox-1 (make-instance 'label :text "The green ball is the bg"))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-image ()
   "Using GtkImage with stock icon"
@@ -320,7 +320,7 @@
            (image (make-instance 'image :icon-name "applications-development" :icon-size 6)))
       (container-add window image)
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-progress-bar ()
   "Testing progress-bar"
@@ -342,7 +342,7 @@
                                              (declare (ignore w))
                                              (setf (progress-bar-fraction p-bar)
                                                    (coerce (read-from-string (entry-text entry)) 'real))))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-statusbar ()
   "Test of GtkStatusbar"
@@ -381,7 +381,7 @@
       (box-pack-start h-box button-pop :expand nil)
       (box-pack-start v-box label)
       (box-pack-start v-box statusbar :expand nil)
-      (widget-show window)
+      (gtk-widget-show window)
       (setf (status-icon-screen icon) (gtk-window-screen window)))))
 
 (defun test-scale-button ()
@@ -391,7 +391,7 @@
            (button (make-instance 'scale-button :icons (list "media-seek-backward" "media-seek-forward" "media-playback-stop" "media-playback-start") :adjustment (make-instance 'adjustment :lower -40 :upper 50 :value 20))))
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
       (container-add window button)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-text-view ()
   "Test of GtkTextView"
@@ -432,7 +432,7 @@
                                                 (let* ((iter (text-buffer-get-iter-at-mark buffer (text-buffer-get-mark buffer "insert")))
                                                        (anchor (text-buffer-insert-child-anchor buffer iter))
                                                        (button (make-instance 'button :label "A button!")))
-                                                  (widget-show button)
+                                                  (gtk-widget-show button)
                                                   (text-view-add-child-at-anchor v button anchor))))
       (let ((tag (make-instance 'text-tag :name "bold" :weight 700)))
         (text-tag-table-add (text-buffer-tag-table buffer) tag)
@@ -449,7 +449,7 @@
       (box-pack-start box button-insert :expand nil)
       (box-pack-start box bold-btn :expand nil)
       (box-pack-start box scrolled)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun demo-code-editor ()
   "(unfinished)"
@@ -461,7 +461,7 @@
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
       (container-add window scrolled)
       (container-add scrolled view)
-      (widget-show window)
+      (gtk-widget-show window)
       (connect-signal buffer "insert-text" (lambda (buffer location text len)
                                              (let* ((buffer buffer)
                                                     (location location))
@@ -522,7 +522,7 @@
         (tree-view-append-column tv column)
         (print (tree-view-column-tree-view column))
         (print (tree-view-column-cell-renderers column)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-combo-box ()
   "Testing GtkComboBox"
@@ -566,7 +566,7 @@
       (let ((renderer (make-instance 'cell-renderer-text :text "A number")))
         (cell-layout-pack-start combo-box renderer :expand nil)
         (cell-layout-add-attribute combo-box renderer "text" 1))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-ui-manager ()
   "Testing GtkUIManager"
@@ -604,7 +604,7 @@
       (let ((widget (ui-manager-widget ui-manager "/toolbar1")))
         (when widget
           (container-add window widget)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-color-button ()
   "Test of GtkColorButton"
@@ -616,7 +616,7 @@
                                            (declare (ignore b))
                                            (show-message (format nil "Chose color ~A" (color-button-color button)))))
       (container-add window button)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-color-selection ()
   "Test of GtkColorSelection"
@@ -626,7 +626,7 @@
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
       (connect-signal selection "color-changed" (lambda (s) (declare (ignore s)) (unless (color-selection-adjusting-p selection) (format t "color: ~A~%" (color-selection-current-color selection)))))
       (container-add window selection)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-file-chooser ()
   "Test of GtkFileChooser"
@@ -648,7 +648,7 @@
       (container-add window v-box)
       (box-pack-start v-box button)
       (box-pack-start v-box b)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-font-chooser ()
   "GtkFontChooser"
@@ -660,7 +660,7 @@
       (connect-signal button "font-set" (lambda (b) (declare (ignore b)) (format t "Chose font ~A~%" (font-button-font-name button))))
       (container-add window v-box)
       (box-pack-start v-box button)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-notebook ()
   "Test GtkNotebook"
@@ -684,11 +684,11 @@
             (for tab-hbox = (make-instance 'h-box))
             (box-pack-start tab-hbox tab-label)
             (box-pack-start tab-hbox tab-button)
-            (widget-show tab-hbox)
+            (gtk-widget-show tab-hbox)
             (notebook-add-page notebook page tab-hbox))
       (container-add window expander)
       (container-add expander notebook)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun calendar-detail (calendar year month day)
   (declare (ignore calendar year month))
@@ -706,7 +706,7 @@
                                                                                        (calendar-month calendar)
                                                                                        (calendar-day calendar))))
       (container-add window calendar)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-box-child-property ()
   "Test of child-property usage"
@@ -718,7 +718,7 @@
       (connect-signal button "toggled" (lambda (b) (declare (ignore b)) (setf (box-child-expand box button) (toggle-button-active button))))
       (container-add window box)
       (box-pack-start box button)
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defun test-builder ()
   "Test of GtkBuilder"
@@ -751,7 +751,7 @@
                                                                          (object-destroy d)))))))
       (connect-signal (builder-get-object builder "window1") "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
       (statusbar-push (builder-get-object builder "statusbar1") "times" "0 times")
-      (widget-show (builder-get-object builder "window1")))))
+      (gtk-widget-show (builder-get-object builder "window1")))))
 
 (defun read-text-file (file-name)
   (with-output-to-string (str)
@@ -858,7 +858,7 @@
                                                   ("eval" ,#'cb-eval)))
         (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
         (connect-signal (text-view-buffer text-view) "changed" (lambda (b) (declare (ignore b)) (setf modified-p t) (set-properties)))
-        (widget-show window)))))
+        (gtk-widget-show window)))))
 
 (defun demo-class-browser ()
   "Show slots of a given class"
@@ -909,7 +909,7 @@
                        (display-class-slots class)))))
           (connect-signal search-button "clicked" #'on-search-clicked))
         (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-        (widget-show window)))))
+        (gtk-widget-show window)))))
 
 (defun make-tree-from-sexp (l)
   (setf l (if (listp l) l (list l)))
@@ -970,7 +970,7 @@
         (print (tree-view-column-tree-view column))
         (print (tree-view-column-cell-renderers column)))
       (connect-signal window "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show window))))
+      (gtk-widget-show window))))
 
 (defclass custom-window (gtk-window)
   ((label :initform (make-instance 'label :label "A label text") :reader custom-window-label)
@@ -1002,7 +1002,7 @@
   (within-main-loop
     (let ((w (make-instance 'custom-window)))
       (connect-signal w "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show w))))
+      (gtk-widget-show w))))
 
 (defun test-assistant ()
   "Simple test of GtkAssistant wizard"
@@ -1032,7 +1032,7 @@
                                                (setf (assistant-child-complete d p-1)
                                                      (plusp (length (entry-text entry))))))
         (let ((w (make-instance 'label :label "A label in action area")))
-          (widget-show w)
+          (gtk-widget-show w)
           (assistant-add-action-widget d w))
         (connect-signal d "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
         (connect-signal d "cancel" (lambda (assistant)
@@ -1047,7 +1047,7 @@
                                       (declare (ignore assistant page-widget))
                                       (format output "Assistant ~A has ~A pages and is on ~Ath page~%"
                                               d (assistant-n-pages d) (assistant-current-page d))))
-        (widget-show d)))))
+        (gtk-widget-show d)))))
 
 (defun test-entry-completion ()
   "Not working example of GtkEntryCompletion"
@@ -1067,7 +1067,7 @@
         (setf (entry-completion-text-column completion) 0)
         (container-add w e))
       (connect-signal w "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show w))))
+      (gtk-widget-show w))))
 
 (defun test-ui-markup ()
   (within-main-loop
@@ -1104,7 +1104,7 @@
                           (declare (ignore b))
                           (text-buffer-insert (text-view-buffer tv)
                                               (entry-text entry))))
-        (widget-show w)))))
+        (gtk-widget-show w)))))
 
 (defun test-list-store ()
   "Demonstrates usage of list store"
@@ -1149,7 +1149,7 @@
                             (dialog-run dialog)
                             (object-destroy dialog)))))
       (connect-signal w "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show w))))
+      (gtk-widget-show w))))
 
 (defun test-tree-store ()
   "Demonstrates usage of tree store"
@@ -1198,7 +1198,7 @@
                             (dialog-run dialog)
                             (object-destroy dialog)))))
       (connect-signal w "destroy" (lambda (w) (declare (ignore w)) (leave-gtk-main)))
-      (widget-show w))))
+      (gtk-widget-show w))))
 
 (defun test-gdk-expose (gdk-window)
   (let* ((gc (graphics-context-new gdk-window)))
@@ -1250,5 +1250,5 @@
                       (lambda (widget event)
                         (declare (ignore widget event))
                         (widget-queue-draw window)))
-      (widget-show window)
+      (gtk-widget-show window)
       (push :pointer-motion-mask (gdk-window-events (widget-window window))))))

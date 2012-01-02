@@ -30,12 +30,14 @@
 ;;; 
 ;;; Synopsis
 ;;; 
+;;; struct  requisition
+;;; type    allocation
+;;;
 ;;;                     GtkWidget;
 ;;; struct              GtkWidgetClass;
 ;;; void                (*GtkCallback)                      (GtkWidget *widget,
 ;;;                                                          gpointer data);
-;;; struct              GtkRequisition;
-;;; typedef             GtkAllocation;
+;;;
 ;;;
 ;;;                     GtkSelectionData;
 ;;; struct              GtkWidgetAuxInfo;
@@ -685,20 +687,25 @@
 ;;; GtkWidgetClass.get_preferred_height() it will do:
 ;;; 
 ;;; static void
-;;; foo_widget_get_preferred_height (GtkWidget *widget, gint *min_height, gint *nat_height)
+;;; foo_widget_get_preferred_height (GtkWidget *widget, gint *min_height, gint
+;;;                                  *nat_height)
 ;;; {
 ;;;    if (i_am_in_height_for_width_mode)
 ;;;      {
 ;;;        gint min_width;
 ;;; 
-;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_width (widget, &min_width, NULL);
-;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_height_for_width (widget, min_width,
-;;;                                                                      min_height, nat_height);
+;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_width (widget,
+;;;                                                            &min_width,
+;;;                                                            NULL);
+;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_height_for_width
+;;;                                 (widget, min_width, min_height, nat_height);
 ;;;      }
 ;;;    else
 ;;;      {
-;;;         ... some widgets do both. For instance, if a GtkLabel is rotated to 90 degrees
-;;;         it will return the minimum and natural height for the rotated label here.
+;;;         ... some widgets do both. For instance, if a GtkLabel is rotated to
+;;;             90 degrees
+;;;         it will return the minimum and natural height for the rotated label
+;;;         here.
 ;;;      }
 ;;; }
 ;;; 
@@ -706,18 +713,21 @@
 ;;; return the minimum and natural width:
 ;;; 
 ;;; static void
-;;; foo_widget_get_preferred_width_for_height (GtkWidget *widget, gint for_height,
+;;; foo_widget_get_preferred_width_for_height (GtkWidget *widget,
+;;;                                            gint for_height,
 ;;;                                            gint *min_width, gint *nat_width)
 ;;; {
 ;;;    if (i_am_in_height_for_width_mode)
 ;;;      {
-;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_width (widget, min_width, nat_width);
+;;;        GTK_WIDGET_GET_CLASS (widget)->get_preferred_width (widget,
+;;;                                                            min_width,
+;;;                                                            nat_width);
 ;;;      }
 ;;;    else
 ;;;      {
-;;;         ... again if a widget is sometimes operating in width-for-height mode
-;;;         (like a rotated GtkLabel) it can go ahead and do its real width for
-;;;         height calculation here.
+;;;         ... again if a widget is sometimes operating in width-for-height
+;;;         mode (like a rotated GtkLabel) it can go ahead and do its real
+;;;         width for height calculation here.
 ;;;      }
 ;;; }
 ;;; 
@@ -810,16 +820,7 @@
 
 ; TODO: GtkWidget
 
-(define-g-boxed-cstruct selection-data "GtkSelectionData"
-  (selection gdk-atom-as-string :initform nil)
-  (target gdk-atom-as-string :initform nil)
-  (type gdk-atom-as-string :initform nil)
-  (format :int :initform 0)
-  (data :pointer :initform (null-pointer))
-  (length :int :initform 0)
-  (display (g-object display) :initform nil))
 
-(export (boxed-related-symbols 'selection-data))
 
 (defun widget-flags (widget)
   (convert-from-foreign (gtk-object-flags-as-integer widget) 'widget-flags))
@@ -831,62 +832,13 @@
 
 (export 'widget-flags)
 
-(defcstruct %gtk-widget
-  (:object %gtk-object)
-  (:private-flags :uint16)
-  (:state :uint8)
-  (:saved-state :uint8)
-  (:name (:pointer :char))
-  (:style :pointer)
-  (:requisition requisition-cstruct)
-  (:allocation allocation-cstruct)
-  (:window :pointer)
-  (:parent :pointer))
 
-(defun widget-state (widget)
-  (convert-from-foreign (foreign-slot-value (pointer widget) '%gtk-widget :state) 'state-type))
 
-(export 'widget-state)
-
-(defun widget-saved-state (widget)
-  (convert-from-foreign (foreign-slot-value (pointer widget) '%gtk-widget :saved-state) 'state-type))
-
-(export 'widget-saved-state)
-
-(defmacro widget-p-fn (type)
-  (let ((name (intern (format nil "WIDGET-~A-P" (symbol-name type)) (find-package :gtk))))
-    `(progn (defun ,name (widget)
-              (member ,type (widget-flags widget)))
-            (export ',name))))
-
-(widget-p-fn :toplevel)
-(widget-p-fn :no-window)
-(widget-p-fn :realized)
-(widget-p-fn :mapped)
-(widget-p-fn :visible)
-(widget-p-fn :sensitive)
-(widget-p-fn :parent-sensitive)
-(widget-p-fn :can-focus)
-(widget-p-fn :has-focus)
-(widget-p-fn :can-default)
-(widget-p-fn :has-default)
-(widget-p-fn :has-grab)
-(widget-p-fn :rc-style)
-(widget-p-fn :composite-child)
-(widget-p-fn :no-reparent)
-(widget-p-fn :app-paintable)
-(widget-p-fn :receives-default)
-(widget-p-fn :double-buffered)
-(widget-p-fn :no-show-all)
 
 
 ; TODO: gtk_widget_get_child_requisition
 ; TODO: gtk_widget_size_allocate
 ; TODO: gtk_widget_list_accel_closures
-
-
-
-
 
 
 (defcfun (widget-push-colormap "gtk_widget_push_colormap") :void
@@ -1082,10 +1034,110 @@
 (export 'widget-snapshot)
 
 ;;; ----------------------------------------------------------------------------
+;;; struct GtkRequisition
+;;; 
+;;; struct GtkRequisition {
+;;;   gint width;
+;;;   gint height;
+;;; };
+;;; 
+;;; A GtkRequisition represents the desired size of a widget. See the section
+;;; called “Height-for-width Geometry Management” for more information.
+;;; 
+;;; gint width;
+;;; 	the widget's desired width
+;;; 
+;;; gint height;
+;;; 	the widget's desired height
+;;; ----------------------------------------------------------------------------
+
+(define-g-boxed-cstruct requisition "GtkRequisition"
+  (width :int :initform 0)
+  (height :int :initform 0))
+
+(export (boxed-related-symbols 'requisition))
+
+;;; ----------------------------------------------------------------------------
+;;; GtkAllocation
+;;; 
+;;; typedef GdkRectangle GtkAllocation;
+;;; 
+;;; A GtkAllocation of a widget represents region which has been allocated to
+;;; the widget by its parent. It is a subregion of its parents allocation. See
+;;; the section called “Height-for-width Geometry Management” for more
+;;; information.
+;;; ----------------------------------------------------------------------------
+
+(define-g-boxed-cstruct allocation "GtkAllocation"
+  (x :int :initform 0)
+  (y :int :initform 0)
+  (width :int :initform 0)
+  (height :int :initform 0))
+
+(export (boxed-related-symbols 'allocation))
+
+;;; ----------------------------------------------------------------------------
 ;;; GtkWidget
 ;;; 
 ;;; typedef struct _GtkWidget GtkWidget;
-;;; 
+;;; ----------------------------------------------------------------------------
+
+(defcstruct %gtk-widget
+  (:object %gtk-object)
+  (:private-flags :uint16)
+  (:state :uint8)
+  (:saved-state :uint8)
+  (:name (:pointer :char))
+  (:style :pointer)
+  (:requisition requisition-cstruct)
+  (:allocation allocation-cstruct)
+  (:window :pointer)
+  (:parent :pointer))
+
+;;; ----------------------------------------------------------------------------
+
+(defun widget-state (widget)
+  (convert-from-foreign (foreign-slot-value (pointer widget)
+                                            '%gtk-widget :state)
+                        'state-type))
+
+(export 'widget-state)
+
+(defun widget-saved-state (widget)
+  (convert-from-foreign (foreign-slot-value (pointer widget)
+                                            '%gtk-widget :saved-state)
+                        'state-type))
+
+(export 'widget-saved-state)
+
+(defmacro widget-p-fn (type)
+  (let ((name (intern (format nil "WIDGET-~A-P" (symbol-name type))
+                      (find-package :gtk))))
+    `(progn (defun ,name (widget)
+              (member ,type (widget-flags widget)))
+            (export ',name))))
+
+(widget-p-fn :toplevel)
+(widget-p-fn :no-window)
+(widget-p-fn :realized)
+(widget-p-fn :mapped)
+(widget-p-fn :visible)
+(widget-p-fn :sensitive)
+(widget-p-fn :parent-sensitive)
+(widget-p-fn :can-focus)
+(widget-p-fn :has-focus)
+(widget-p-fn :can-default)
+(widget-p-fn :has-default)
+(widget-p-fn :has-grab)
+(widget-p-fn :rc-style)
+(widget-p-fn :composite-child)
+(widget-p-fn :no-reparent)
+(widget-p-fn :app-paintable)
+(widget-p-fn :receives-default)
+(widget-p-fn :double-buffered)
+(widget-p-fn :no-show-all)
+
+;;; ---------------------------------------------------------------------------- 
 ;;; struct GtkWidgetClass
 ;;; 
 ;;; struct GtkWidgetClass {
@@ -1545,38 +1597,26 @@
 ;;; 	Convert an initial size allocation assigned by a GtkContainer using gtk_widget_size_allocate(), into an actual size allocation to be used by the widget. adjust_size_allocation adjusts to a child widget's actual allocation from what a parent container computed for the child. The adjusted allocation must be entirely within the original allocation. In any custom implementation, chain up to the default GtkWidget implementation of this method, which applies the margin and alignment properties of GtkWidget. Chain up before performing your own adjustments so your own adjustments remove more allocation after the GtkWidget base class has already removed margin and alignment. The natural size passed in should be adjusted in the same way as the allocated size, which allows adjustments to perform alignments or other changes based on natural size.
 ;;; 
 ;;; style_updated ()
-;;; 	
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; GtkCallback ()
 ;;; 
-;;; void                (*GtkCallback)                      (GtkWidget *widget,
-;;;                                                          gpointer data);
+;;; void (*GtkCallback) (GtkWidget *widget, gpointer data);
 ;;; 
-;;; The type of the callback functions used for e.g. iterating over the children of a container, see gtk_container_foreach().
+;;; The type of the callback functions used for e.g. iterating over the
+;;; children of a container, see gtk_container_foreach().
 ;;; 
 ;;; widget :
 ;;; 	the widget to operate on
 ;;; 
 ;;; data :
 ;;; 	user-supplied data
-;;; struct GtkRequisition
-;;; 
-;;; struct GtkRequisition {
-;;;   gint width;
-;;;   gint height;
-;;; };
-;;; 
-;;; A GtkRequisition represents the desired size of a widget. See the section called “Height-for-width Geometry Management” for more information.
-;;; 
-;;; gint width;
-;;; 	the widget's desired width
-;;; 
-;;; gint height;
-;;; 	the widget's desired height
-;;; GtkAllocation
-;;; 
-;;; typedef 	GdkRectangle	   GtkAllocation;
-;;; 
-;;; A GtkAllocation of a widget represents region which has been allocated to the widget by its parent. It is a subregion of its parents allocation. See the section called “Height-for-width Geometry Management” for more information.
+;;; ----------------------------------------------------------------------------
+
+
+
+;;; ----------------------------------------------------------------------------
 ;;; GtkSelectionData
 ;;; 
 ;;; typedef struct {
@@ -1588,7 +1628,20 @@
 ;;;   gint          length;
 ;;;   GdkDisplay   *display;
 ;;; } GtkSelectionData;
-;;; 
+;;; ----------------------------------------------------------------------------
+
+(define-g-boxed-cstruct selection-data "GtkSelectionData"
+  (selection gdk-atom-as-string :initform nil)
+  (target gdk-atom-as-string :initform nil)
+  (type gdk-atom-as-string :initform nil)
+  (format :int :initform 0)
+  (data :pointer :initform (null-pointer))
+  (length :int :initform 0)
+  (display (g-object display) :initform nil))
+
+(export (boxed-related-symbols 'selection-data))
+
+;;; ----------------------------------------------------------------------------
 ;;; struct GtkWidgetAuxInfo
 ;;; 
 ;;; struct GtkWidgetAuxInfo {
@@ -1600,21 +1653,35 @@
 ;;; 
 ;;;   GtkBorder margin;
 ;;; };
-;;; 
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; enum GtkWidgetHelpType
 ;;; 
 ;;; typedef enum {
 ;;;   GTK_WIDGET_HELP_TOOLTIP,
 ;;;   GTK_WIDGET_HELP_WHATS_THIS
 ;;; } GtkWidgetHelpType;
-;;; 
+;;; ----------------------------------------------------------------------------
+
+(define-g-enum "GtkWidgetHelpType"
+    widget-help-type
+    (:export t :type-initializer "gtk_widget_help_type_get_type")
+  (:tooltip 0)
+  (:whats-this 1))
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_new ()
 ;;; 
-;;; GtkWidget *         gtk_widget_new                      (GType type,
-;;;                                                          const gchar *first_property_name,
-;;;                                                          ...);
+;;; GtkWidget *gtk_widget_new (GType type,
+;;;                            const gchar *first_property_name,
+;;;                            ...);
 ;;; 
-;;; This is a convenience function for creating a widget and setting its properties in one go. For example you might write: gtk_widget_new (GTK_TYPE_LABEL, "label", "Hello World", "xalign", 0.0, NULL) to create a left-aligned label. Equivalent to g_object_new(), but returns a widget so you don't have to cast the object yourself.
+;;; This is a convenience function for creating a widget and setting its
+;;; properties in one go. For example you might write:
+;;; gtk_widget_new (GTK_TYPE_LABEL, "label", "Hello World", "xalign", 0.0, NULL)
+;;; to create a left-aligned label. Equivalent to g_object_new(), but returns a
+;;; widget so you don't have to cast the object yourself.
 ;;; 
 ;;; type :
 ;;; 	type ID of the widget to create
@@ -1674,16 +1741,20 @@
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_destroyed ()
 ;;; 
-;;; void                gtk_widget_destroyed                (GtkWidget *widget,
-;;;                                                          GtkWidget **widget_pointer);
+;;; void gtk_widget_destroyed (GtkWidget *widget, GtkWidget **widget_pointer);
 ;;; 
-;;; This function sets *widget_pointer to NULL if widget_pointer != NULL. It's intended to be used as a callback connected to the "destroy" signal of a widget. You connect gtk_widget_destroyed() as a signal handler, and pass the address of your widget variable as user data. Then when the widget is destroyed, the variable will be set to NULL. Useful for example to avoid multiple copies of the same dialog.
+;;; This function sets *widget_pointer to NULL if widget_pointer != NULL. It's
+;;; intended to be used as a callback connected to the "destroy" signal of a
+;;; widget. You connect gtk_widget_destroyed() as a signal handler, and pass
+;;; the address of your widget variable as user data. Then when the widget is
+;;; destroyed, the variable will be set to NULL. Useful for example to avoid
+;;; multiple copies of the same dialog.
 ;;; 
 ;;; widget :
 ;;; 	a GtkWidget
 ;;; 
 ;;; widget_pointer :
-;;; 	address of a variable that contains widget. [inout][transfer none]
+;;; 	address of a variable that contains widget.
 ;;; ----------------------------------------------------------------------------
 
 ;;; ----------------------------------------------------------------------------
@@ -1699,10 +1770,10 @@
 ;;; 	a GtkWidget
 ;;; ----------------------------------------------------------------------------
 
-(defcfun (widget-unparent "gtk_widget_unparent") :void
+(defcfun ( "gtk_widget_unparent" gtk-widget-unparent) :void
   (widget g-object))
 
-(export 'widget-unparent)
+(export 'gtk-widget-unparent)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_show ()
@@ -1725,18 +1796,18 @@
 ;;; 	a GtkWidget
 ;;; ----------------------------------------------------------------------------
 
-(defcfun gtk-widget-show :void
+(defcfun ("gtk_widget_show" %gtk-widget-show) :void
   (widget g-object))
 
-(defcfun gtk-widget-show-all :void
+(defcfun ("gtk_widget_show" %gtk-widget-show-all) :void
   (widget g-object))
 
-(defun widget-show (widget &key (all t))
+(defun gtk-widget-show (widget &key (all t))
   (if all
-      (gtk-widget-show-all widget)
-      (gtk-widget-show widget)))
+      (%gtk-widget-show-all widget)
+      (%gtk-widget-show widget)))
 
-(export 'widget-show)
+(export 'gtk-widget-show)
 
 ;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_show_now ()
@@ -5452,14 +5523,21 @@
 ;;; 	TRUE if widget is a toplevel, FALSE otherwise
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_set_window ()
 ;;; 
-;;; void                gtk_widget_set_window               (GtkWidget *widget,
-;;;                                                          GdkWindow *window);
+;;; void gtk_widget_set_window (GtkWidget *widget, GdkWindow *window);
 ;;; 
-;;; Sets a widget's window. This function should only be used in a widget's "realize" implementation. The window passed is usually either new window created with gdk_window_new(), or the window of its parent widget as returned by gtk_widget_get_parent_window().
+;;; Sets a widget's window. This function should only be used in a widget's
+;;; "realize" implementation. The window passed is usually either new window
+;;; created with gdk_window_new(), or the window of its parent widget as
+;;; returned by gtk_widget_get_parent_window().
 ;;; 
-;;; Widgets must indicate whether they will create their own GdkWindow by calling gtk_widget_set_has_window(). This is usually done in the widget's init() function.
+;;; Widgets must indicate whether they will create their own GdkWindow by
+;;; calling gtk_widget_set_has_window(). This is usually done in the widget's
+;;; init() function.
 ;;; 
 ;;; Note
 ;;; 
@@ -5472,6 +5550,9 @@
 ;;; 	a GdkWindow. [transfer full]
 ;;; 
 ;;; Since 2.18
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; gtk_widget_set_receives_default ()
 ;;; 
 ;;; void                gtk_widget_set_receives_default     (GtkWidget *widget,
@@ -7895,68 +7976,87 @@
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "selection-request-event" signal
 ;;; 
-;;; gboolean            user_function                      (GtkWidget *widget,
-;;;                                                         GdkEvent  *event,
-;;;                                                         gpointer   user_data)      : Run Last
+;;; gboolean user_function (GtkWidget *widget,
+;;;                         GdkEvent  *event,
+;;;                         gpointer   user_data)      : Run Last
 ;;; 
-;;; The ::selection-request-event signal will be emitted when another client requests ownership of the selection owned by the widget's window.
+;;; The ::selection-request-event signal will be emitted when another client
+;;; requests ownership of the selection owned by the widget's window.
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal
 ;;; 
 ;;; event :
-;;; 	the GdkEventSelection which triggered this signal. [type Gdk.EventSelection]
+;;; 	the GdkEventSelection which triggered this signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Returns :
-;;; 	TRUE to stop other handlers from being invoked for the event. FALSE to propagate the event further.
+;;; 	TRUE to stop other handlers from being invoked for the event.
+;;;     FALSE to propagate the event further.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "show" signal
 ;;; 
-;;; void                user_function                      (GtkWidget *widget,
-;;;                                                         gpointer   user_data)      : Run First
+;;; void user_function (GtkWidget *widget, gpointer user_data)      : Run First
+
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "show-help" signal
 ;;; 
-;;; gboolean            user_function                      (GtkWidget        *widget,
-;;;                                                         GtkWidgetHelpType help_type,
-;;;                                                         gpointer          user_data)      : Action
+;;; gboolean user_function (GtkWidget        *widget,
+;;;                         GtkWidgetHelpType help_type,
+;;;                         gpointer          user_data)      : Action
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "size-allocate" signal
 ;;; 
-;;; void                user_function                      (GtkWidget    *widget,
-;;;                                                         GdkRectangle *allocation,
-;;;                                                         gpointer      user_data)       : Run First
+;;; void user_function (GtkWidget    *widget,
+;;;                     GdkRectangle *allocation,
+;;;                     gpointer      user_data)       : Run First
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "state-changed" signal
 ;;; 
-;;; void                user_function                      (GtkWidget   *widget,
-;;;                                                         GtkStateType state,
-;;;                                                         gpointer     user_data)      : Run First
+;;; void user_function (GtkWidget   *widget,
+;;;                     GtkStateType state,
+;;;                     gpointer     user_data)      : Run First
 ;;; 
 ;;; Warning
 ;;; 
-;;; GtkWidget::state-changed is deprecated and should not be used in newly-written code. 3.0. Use "state-flags-changed" instead.
+;;; GtkWidget::state-changed is deprecated and should not be used in
+;;; newly-written code. 3.0. Use "state-flags-changed" instead.
 ;;; 
-;;; The ::state-changed signal is emitted when the widget state changes. See gtk_widget_get_state().
+;;; The ::state-changed signal is emitted when the widget state changes. See
+;;; gtk_widget_get_state().
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
@@ -7966,13 +8066,17 @@
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "state-flags-changed" signal
 ;;; 
-;;; void                user_function                      (GtkWidget    *widget,
-;;;                                                         GtkStateFlags flags,
-;;;                                                         gpointer      user_data)      : Run First
+;;; void user_function (GtkWidget    *widget,
+;;;                     GtkStateFlags flags,
+;;;                     gpointer      user_data)      : Run First
 ;;; 
-;;; The ::state-flags-changed signal is emitted when the widget state changes, see gtk_widget_get_state_flags().
+;;; The ::state-flags-changed signal is emitted when the widget state changes,
+;;; see gtk_widget_get_state_flags().
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
@@ -7984,34 +8088,46 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 3.0
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "style-set" signal
 ;;; 
-;;; void                user_function                      (GtkWidget *widget,
-;;;                                                         GtkStyle  *previous_style,
-;;;                                                         gpointer   user_data)           : Run First
+;;; void user_function (GtkWidget *widget,
+;;;                     GtkStyle  *previous_style,
+;;;                     gpointer   user_data)           : Run First
 ;;; 
 ;;; Warning
 ;;; 
-;;; GtkWidget::style-set has been deprecated since version 3.0 and should not be used in newly-written code. Use the "style-updated" signal
+;;; GtkWidget::style-set has been deprecated since version 3.0 and should not
+;;; be used in newly-written code. Use the "style-updated" signal
 ;;; 
-;;; The ::style-set signal is emitted when a new style has been set on a widget. Note that style-modifying functions like gtk_widget_modify_base() also cause this signal to be emitted.
+;;; The ::style-set signal is emitted when a new style has been set on a widget.
+;;; Note that style-modifying functions like gtk_widget_modify_base() also
+;;; cause this signal to be emitted.
 ;;; 
-;;; Note that this signal is emitted for changes to the deprecated GtkStyle. To track changes to the GtkStyleContext associated with a widget, use the "style-updated" signal.
+;;; Note that this signal is emitted for changes to the deprecated GtkStyle. To
+;;; track changes to the GtkStyleContext associated with a widget, use the
+;;; "style-updated" signal.
 ;;; 
 ;;; widget :
 ;;; 	the object on which the signal is emitted
 ;;; 
 ;;; previous_style :
-;;; 	the previous style, or NULL if the widget just got its initial style. [allow-none]
+;;; 	the previous style, or NULL if the widget just got its initial style.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "style-updated" signal
 ;;; 
-;;; void                user_function                      (GtkWidget *widget,
-;;;                                                         gpointer   user_data)      : Run First
+;;; void user_function (GtkWidget *widget, gpointer user_data)      : Run First
 ;;; 
-;;; The ::style-updated signal is emitted when the GtkStyleContext of a widget is changed. Note that style-modifying functions like gtk_widget_override_color() also cause this signal to be emitted.
+;;; The ::style-updated signal is emitted when the GtkStyleContext of a widget
+;;; is changed. Note that style-modifying functions like
+;;; gtk_widget_override_color() also cause this signal to be emitted.
 ;;; 
 ;;; widget :
 ;;; 	the object on which the signal is emitted
@@ -8020,31 +8136,39 @@
 ;;; 	user data set when the signal handler was connected.
 ;;; 
 ;;; Since 3.0
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "unmap" signal
 ;;; 
-;;; void                user_function                      (GtkWidget *widget,
-;;;                                                         gpointer   user_data)      : Run First
+;;; void user_function (GtkWidget *widget, gpointer user_data)      : Run First
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "unmap-event" signal
 ;;; 
-;;; gboolean            user_function                      (GtkWidget *widget,
-;;;                                                         GdkEvent  *event,
-;;;                                                         gpointer   user_data)      : Run Last
+;;; gboolean user_function (GtkWidget *widget,
+;;;                         GdkEvent  *event,
+;;;                         gpointer user_data)      : Run Last
 ;;; 
-;;; The ::unmap-event signal will be emitted when the widget's window is unmapped. A window is unmapped when it becomes invisible on the screen.
+;;; The ::unmap-event signal will be emitted when the widget's window is
+;;; unmapped. A window is unmapped when it becomes invisible on the screen.
 ;;; 
-;;; To receive this signal, the GdkWindow associated to the widget needs to enable the GDK_STRUCTURE_MASK mask. GDK will enable this mask automatically for all new windows.
+;;; To receive this signal, the GdkWindow associated to the widget needs to
+;;; enable the GDK_STRUCTURE_MASK mask. GDK will enable this mask automatically
+;;; for all new windows.
 ;;; 
 ;;; widget :
 ;;; 	the object which received the signal
 ;;; 
 ;;; event :
-;;; 	the GdkEventAny which triggered this signal. [type Gdk.EventAny]
+;;; 	the GdkEventAny which triggered this signal.
 ;;; 
 ;;; user_data :
 ;;; 	user data set when the signal handler was connected.
@@ -8052,7 +8176,9 @@
 ;;; Returns :
 ;;; 	TRUE to stop other handlers from being invoked for the event. FALSE to
 ;;;     propagate the event further.
-;;;
+;;; ----------------------------------------------------------------------------
+
+;;; ----------------------------------------------------------------------------
 ;;; The "unrealize" signal
 ;;; 
 ;;; void user_function (GtkWidget *widget, gpointer user_data)      : Run Last

@@ -11,7 +11,3 @@
    type. As a side effect, ensure that the type is registered.")
 
 (at-init nil (g-closure-get-type))
-
-(defcstruct g-object-construct-param
-  (:param-spec (:pointer g-param-spec))
-  (:value (:pointer g-value)))

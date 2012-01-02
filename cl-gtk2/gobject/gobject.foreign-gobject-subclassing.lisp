@@ -2,11 +2,19 @@
 
 (defvar *registered-types* (make-hash-table :test 'equal))
 
-(defstruct object-type name class parent interfaces properties)
+(defstruct object-type
+  name
+  class
+  parent
+  interfaces
+  properties)
 
 (defun instance-init (instance class)
   (log-for :subclass "(instance-init ~A ~A)~%" instance class)
-  (log-for :subclass "Initializing instance ~A for type ~A (creating ~A)~%" instance (gtype-name (foreign-slot-value class 'g-type-class :type)) *current-creating-object*)
+  (log-for :subclass "Initializing instance ~A for type ~A (creating ~A)~%"
+           instance
+           (gtype-name (foreign-slot-value class 'g-type-class :type))
+           *current-creating-object*)
   (unless (or *current-creating-object*
               *currently-making-object-p*
               (gethash (pointer-address instance) *foreign-gobjects-strong*)

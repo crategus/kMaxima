@@ -515,9 +515,9 @@
 ;;; 	TRUE, if the thread system is initialized.
 ;;; ----------------------------------------------------------------------------
 
-(defcfun ("g_thread_supported" g-thread-supported) :boolean)
+;(defcfun ("g_thread_supported" g-thread-supported) :boolean)
   
-(export 'g-thread-supported)
+;(export 'g-thread-supported)
 
 ;;; ----------------------------------------------------------------------------
 ;;; g_thread_get_initialized ()

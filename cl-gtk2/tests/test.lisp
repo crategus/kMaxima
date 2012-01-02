@@ -29,8 +29,8 @@
                           (format t "Hello world.~%")
                           (gtk:widget-destroy window)))
       (gtk:container-add window button)
-      (gtk:widget-show button)
-      (gtk:widget-show window)
+      (gtk-widget-show button)
+      (gtk-widget-show window)
       
       (g:emit-signal window "delete-event" window window)
       

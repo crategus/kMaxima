@@ -121,8 +121,8 @@
 
 (export 'gdk-drop-finish)
 
-(defcfun gdk_drag_get_protocol native-window
-  (xid native-window)
+(defcfun gdk_drag_get_protocol gdk-native-window
+  (xid gdk-native-window)
   (protocol (:pointer gdk-drag-protocol)))
 
 (defun gdk-drag-get-protocol (xid)
@@ -132,9 +132,9 @@
 
 (export 'gdk-drag-get-protocol)
 
-(defcfun gdk_drag_get_protocol_for_display native-window
+(defcfun gdk_drag_get_protocol_for_display gdk-native-window
   (display (g-object display))
-  (xid native-window)
+  (xid gdk-native-window)
   (protocol (:pointer gdk-drag-protocol)))
 
 (defun gdk-drag-get-protocol-for-dispaly (display xid)

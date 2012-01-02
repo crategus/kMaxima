@@ -375,7 +375,8 @@ For more information, see lisp-unit.html.
           (incf total-pass-count pass-count)
           (incf total-error-count error-count)))
       (unless (null (cdr test-thunks))
-        (show-summary 'total total-test-count total-pass-count total-error-count))
+        (show-summary 'total total-test-count total-pass-count total-error-count)
+        (format t "~&------------------------------------------------------~%"))
       (values))))
 
 (defun run-test-thunk (*test-name* thunk)

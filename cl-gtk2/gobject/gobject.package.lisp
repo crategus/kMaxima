@@ -121,7 +121,6 @@
            #:g-class-property-definition-constructor
            #:g-class-property-definition-constructor-only
            #:g-class-property-definition-owner-type
-           #:parse-g-param-spec
            #:class-properties
            #:interface-properties
            #:enum-item

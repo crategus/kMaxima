@@ -5,10 +5,13 @@
 (load "lisp-unit.lisp")
 
 (load "rtest-glib.lisp")
-(load "rtest-gobject-type-info.lisp")
-
 (in-package :glib-tests)
 (run-all-tests :glib-tests)
 
+(load "rtest-gobject-type-info.lisp")
 (in-package :gobject-tests)
 (run-all-tests :gobject-tests)
+
+(load "rtest-gtk-window.lisp")
+(in-package :gtk-tests)
+(run-all-tests :gtk-tests)
